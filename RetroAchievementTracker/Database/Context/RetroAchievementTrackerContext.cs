@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RetroAchievementTracker.Database.Models;
+using Serilog;
 
-namespace RetroAchievementTracker.Database.Models
+namespace RetroAchievementTracker.Database.Context
 {
     public class RetroAchievementTrackerContext : DbContext
     {
@@ -19,8 +21,13 @@ namespace RetroAchievementTracker.Database.Models
 
         // The following configures EF to create a Sqlite database file in the
         // special "local" folder for your platform.
+        public static readonly ILoggerFactory SerilogFactory 
+            = LoggerFactory.Create(builder => { builder.AddSerilog(); });
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite($"Data Source={DbPath}");
+            => options
+            .UseSqlite($"Data Source={DbPath}")
+            .UseLoggerFactory(SerilogFactory);
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

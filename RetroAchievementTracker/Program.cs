@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
+using RetroAchievementTracker.Services;
 using Serilog;
+using RetroAchievementTracker.RetroAchievementsAPI;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
