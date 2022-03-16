@@ -28,29 +28,5 @@ namespace RetroAchievementTracker.Database.Context
             => options
             .UseSqlite($"Data Source={DbPath}")
             .UseLoggerFactory(SerilogFactory);
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.Entity<UserData>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
-
-            builder.Entity<GameConsoles>()
-                .HasIndex(u => u.ConsoleID)
-                .IsUnique();
-
-            builder.Entity<Games>()
-                .HasIndex(u => u.Id)
-                .IsUnique();
-
-            builder.Entity<CompletedGames>()
-                .HasIndex(u => u.UsernameGameID)
-                .IsUnique();
-
-            builder.Entity<Achievements>()
-                .HasIndex(u => u.Id)
-                .IsUnique();
-        }
-
     }
 }

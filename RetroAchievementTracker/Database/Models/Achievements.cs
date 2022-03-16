@@ -5,12 +5,12 @@ namespace RetroAchievementTracker.Database.Models
     public class Achievements
     {
         [Key]
-        public int Id { get; set; }
+        public string NameAndGameId { get; set; }
+        public string Username { get; set; }
         public int GameId { get; set; }
-        public int NumberAwardedCasual { get; set; }
-        public int NumberAwardedHardcore { get; set; }
-        public string AchievementTitle { get; set; }
-        public string AchievementDescription { get; set; }
-        public int PointsValue { get; set; }
+        public int NumPossibleAchievements { get; set; }
+        public int PossibleScore { get; set; }
+        public int NumAchievedHardcore { get; set; }
+        public int ScoreAchievedHardcore { get; set; }
     }
 }

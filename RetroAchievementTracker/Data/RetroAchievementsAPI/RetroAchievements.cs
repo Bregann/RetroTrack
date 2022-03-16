@@ -95,7 +95,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                         ConsoleID = game.ConsoleID,
                         Id = game.Id,
                         Title = game.Title,
-                        imageIcon = game.ImageIcon.Replace(@"/Images/", ""),
+                        ImageIcon = game.ImageIcon.Replace(@"/Images/", ""),
                         IsProcessed = false
                     });
                 }
@@ -121,6 +121,74 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             Log.Information($"[RetroAchievements] Games inserted to database");
+        }
+
+        public static async Task UpdateUnprocessedGames()
+        {
+            List<Games> unprocessedGames;
+            var gamesToUpdate = new List<Games>();
+
+            using (var context = new RetroAchievementTrackerContext())
+            {
+                unprocessedGames = context.Games.Where(x => x.IsProcessed == false).ToList();
+            }
+
+            var client = new RestClient(BaseUrl);
+
+            foreach (var game in unprocessedGames)
+            {
+                //Get the response and deserialise
+                var request = new RestRequest($"API_GetGameExtended.php?z={Username}&y={ApiKey}&i={game.Id}", Method.Get);
+                var response = await client.ExecuteAsync(request);
+
+                if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    Log.Warning($"[RetroAchievements] Error getting game data for {game.Title}");
+                    continue;
+                }
+
+                var responseDeserialized = JsonConvert.DeserializeObject<GameInfo>(response.Content);
+
+                if (responseDeserialized == null)
+                {
+                    Log.Warning($"[RetroAchievements] Error deserializing game data for {game.Title}");
+                    continue;
+                }
+
+                //Add the game into a list to process
+                gamesToUpdate.Add(new Games
+                {
+                    Id = responseDeserialized.Id,
+                    ImageIcon = responseDeserialized.ImageIcon.Replace(@"/Images/", ""),
+                    ImageIngame = responseDeserialized.ImageIngame.Replace(@"/Images/", ""),
+                    ImageBoxArt = responseDeserialized.ImageBoxArt.Replace(@"/Images/", ""),
+                    DateAdded = DateTime.Now,
+                    GameGenre = responseDeserialized.Genre,
+                    AchievementCount = responseDeserialized.AchievementCount,
+                    PlayersCasual = responseDeserialized.PlayersCasual,
+                    PlayersHardcore = responseDeserialized.PlayersHardcore,
+                    IsProcessed = true,
+                    ConsoleID = game.ConsoleID,
+                    Title = game.Title
+                });
+
+                Log.Information($"[RetroAchievements] {game.Title} added to updates list");
+                await Task.Delay(400); //delay a bit to stop hitting the api too hard
+            }
+
+            //Update all the games in the database and save it
+            using (var context = new RetroAchievementTrackerContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    context.Games.UpdateRange(gamesToUpdate);
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+
+            Log.Information("[RetroAchievements] Games database updated");
         }
     }
 }

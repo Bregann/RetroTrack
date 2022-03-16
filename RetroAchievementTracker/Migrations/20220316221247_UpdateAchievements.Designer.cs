@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RetroAchievementTracker.Database.Context;
 
@@ -10,9 +11,10 @@ using RetroAchievementTracker.Database.Context;
 namespace RetroAchievementTracker.Migrations
 {
     [DbContext(typeof(RetroAchievementTrackerContext))]
-    partial class RetroAchievementTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20220316221247_UpdateAchievements")]
+    partial class UpdateAchievements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.3");
@@ -43,6 +45,9 @@ namespace RetroAchievementTracker.Migrations
 
                     b.HasKey("NameAndGameId");
 
+                    b.HasIndex("NameAndGameId")
+                        .IsUnique();
+
                     b.ToTable("Achievements");
                 });
 
@@ -67,6 +72,9 @@ namespace RetroAchievementTracker.Migrations
 
                     b.HasKey("UsernameGameID");
 
+                    b.HasIndex("UsernameGameID")
+                        .IsUnique();
+
                     b.ToTable("CompletedGames");
                 });
 
@@ -80,6 +88,9 @@ namespace RetroAchievementTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("ConsoleID");
+
+                    b.HasIndex("ConsoleID")
+                        .IsUnique();
 
                     b.ToTable("GameConsoles");
                 });
@@ -101,15 +112,6 @@ namespace RetroAchievementTracker.Migrations
                     b.Property<string>("GameGenre")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ImageBoxArt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImageIcon")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImageIngame")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("INTEGER");
 
@@ -119,11 +121,21 @@ namespace RetroAchievementTracker.Migrations
                     b.Property<int?>("PlayersHardcore")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ReleaseDate")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("imageIcon")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
 
                     b.ToTable("Games");
                 });
@@ -138,6 +150,9 @@ namespace RetroAchievementTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Username");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("UserData");
                 });
