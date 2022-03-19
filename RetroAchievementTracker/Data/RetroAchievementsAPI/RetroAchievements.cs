@@ -53,13 +53,51 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
         }
 
-        public static async Task GetGamesFromConsoleIds()
+        public static async Task GetGamesFromConsoleIdsAndUpdateGameCounts()
         {
             List<int>? consoleIds;
             using (var context = new RetroAchievementTrackerContext())
             {
                 consoleIds = context.GameConsoles.Select(x => x.ConsoleID).ToList();
             }
+
+
+            using (var context = new RetroAchievementTrackerContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var list = new List<GameCounts>();
+
+                    foreach (var console in consoleIds)
+                    {
+                        var gameCount = context.Games.Where(x => x.ConsoleID == console && x.AchievementCount != 0).Count();
+
+                        if (gameCount != 0)
+                        {
+                            var newGameCount = new GameCounts
+                            {
+                                ConsoleId = console,
+                                GameCount = gameCount
+                            };
+
+                            await context
+                                .GameCounts
+                                .Upsert(newGameCount).
+                                On(v => v.ConsoleId)
+                                .WhenMatched((console, consoleList) => new GameCounts
+                                {
+                                    GameCount = consoleList.GameCount
+                                })
+                                .RunAsync();
+                        }
+                    }
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+
+            Log.Information($"[RetroAchievements] Game counts updated");
 
             var client = new RestClient(BaseUrl);
             var gameList = new List<Games>();
@@ -121,6 +159,43 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             Log.Information($"[RetroAchievements] Games inserted to database");
+
+            using (var context = new RetroAchievementTrackerContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var list = new List<GameCounts>();
+
+                    foreach (var console in consoleIds)
+                    {
+                        var gameCount = context.Games.Where(x => x.ConsoleID == console && x.AchievementCount != 0).Count();
+
+                        if (gameCount != 0)
+                        {
+                            var newGameCount = new GameCounts
+                            {
+                                ConsoleId = console,
+                                GameCount = gameCount
+                            };
+
+                            await context
+                                .GameCounts
+                                .Upsert(newGameCount).
+                                On(v => v.ConsoleId)
+                                .WhenMatched((console, consoleList) => new GameCounts
+                                {
+                                    GameCount = consoleList.GameCount
+                                })
+                                .RunAsync();
+                        }
+                    }
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+
+            Log.Information($"[RetroAchievements] Game counts updated");
         }
 
         public static async Task UpdateUnprocessedGames()
@@ -190,5 +265,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
             Log.Information("[RetroAchievements] Games database updated");
         }
+
+        //Check and update games with 0 achievements - weekly job
     }
 }

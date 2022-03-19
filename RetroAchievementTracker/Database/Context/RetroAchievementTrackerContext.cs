@@ -11,6 +11,7 @@ namespace RetroAchievementTracker.Database.Context
         public DbSet<GameConsoles> GameConsoles { get; set; }
         public DbSet<Games> Games { get; set; }
         public DbSet<UserData> UserData { get; set; }
+        public DbSet<GameCounts> GameCounts { get; set; }
         public string DbPath { get; }
 
         public RetroAchievementTrackerContext()
