@@ -2,6 +2,7 @@
 @using RetroAchievementTracker.Data.Enums
 
 @inject NavBarService NavBarService;
+@inject IDialogService DialogService;
 
 <MudDrawer @bind-Open="@open" Elevation="1" Width="275px">
     <MudDrawerHeader>
@@ -67,10 +68,8 @@
 <MudAppBar Fixed=true>
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
     <MudSpacer></MudSpacer>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary">login</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenLoginModal">login</MudButton>
 </MudAppBar>
-
-
 
 
 @code {
@@ -87,5 +86,24 @@
     {
         gameCounts = NavBarService.GetTotalGameCounts();
         return Task.CompletedTask;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+    }
+
+
+    private async Task OpenLoginModal()
+    {
+        var options = new DialogOptions() { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = DialogService.Show<LoginModal>("Login", options);
+        var response = await dialog.Result;
+
+        if((bool)response.Data == true)
+        {
+            
+        }
     }
 }

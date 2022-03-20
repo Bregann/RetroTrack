@@ -5,6 +5,8 @@ using RetroAchievementTracker.Services;
 using Serilog;
 using RetroAchievementTracker.RetroAchievementsAPI;
 using RetroAchievementTracker.Data.NavbarData;
+using RetroAchievementTracker.Data.Login;
+using Blazored.LocalStorage;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -18,6 +20,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddSingleton<NavBarService>();
+builder.Services.AddSingleton<LoginService>();
+builder.Services.AddBlazoredLocalStorage();
 builder.Logging.AddSerilog();
 
 var app = builder.Build();
