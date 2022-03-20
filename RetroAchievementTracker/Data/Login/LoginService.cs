@@ -154,5 +154,21 @@ namespace RetroAchievementTracker.Data.Login
                 };
             }
         }
+
+        public static bool ValidateUserLogin(string loginToken)
+        {
+            using (var context = new DatabaseContext())
+            {
+                return context.UserData.Where(x => x.LoginToken == loginToken).Count() != 0;
+            }
+        }
+
+        public static string? GetLoggedInUser(string loginToken)
+        {
+            using (var context = new DatabaseContext())
+            {
+                return context.UserData.Where(x => x.LoginToken == loginToken).Select(x => x.Username).FirstOrDefault();
+            }
+        }
     }
 }

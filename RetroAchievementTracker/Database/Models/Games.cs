@@ -18,6 +18,5 @@ namespace RetroAchievementTracker.Database.Models
         public int? PlayersCasual { get; set; }
         public int? PlayersHardcore { get; set; }
         public bool IsProcessed { get; set; }
-
     }
 }

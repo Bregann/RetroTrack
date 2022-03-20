@@ -266,6 +266,77 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             Log.Information("[RetroAchievements] Games database updated");
         }
 
-        //Check and update games with 0 achievements - weekly job
+        //todo: Check and update games with 0 achievements - weekly job
+
+        public static async Task GetUserCompletedGamesAndAddToDb(string username)
+        {
+            var client = new RestClient(BaseUrl);
+            var request = new RestRequest($"API_GetUserCompletedGames.php?z={Username}&y={ApiKey}&u={username}", Method.Get);
+
+            //Get the response and Deserialize
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning("[RetroAchievements] Error getting Completed Games Data");
+                return;
+            }
+
+            var responseDeserialized = JsonConvert.DeserializeObject<List<CompletedGamesData>>(response.Content);
+
+            if (responseDeserialized.Count == 0)
+            {
+                Log.Information($"[RetroAchievements] No completed games found for {username}");
+                return;
+            }
+
+            //Order the list so it only has hardcore first and no dupes
+            var gamesToUpdate = responseDeserialized.Where(x => x.PctWon == 1).OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
+            var gameIds = responseDeserialized.Where(x => x.PctWon == 1).OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).Select(x => x.GameId).ToList();
+
+
+            using (var context = new DatabaseContext())
+            {
+                context.CompletedGames.RemoveRange(context.CompletedGames.Where(x => x.Username == username));
+                context.SaveChanges();
+
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    //Select the game data for the in progress games
+                    var gameDataForUpdates = context.Games
+                                                .Where(x => gameIds.Contains(x.Id))
+                                                .ToList();
+
+                    foreach (var game in gamesToUpdate)
+                    {
+                        var newImprogressGames = new CompletedGames
+                        {
+                            AchievementsGained = game.AchievementsAwarded,
+                            GameID = game.GameId,
+                            GameName = game.Title,
+                            HardcoreMode = game.HardcoreMode,
+                            UsernameGameID = $"{username}-{game.GameId}",
+                            Username = username,
+                            ConsoleID = gameDataForUpdates.Where(x => x.Id == game.GameId).Select(x => x.ConsoleID).First()
+                        };
+
+                        await context
+                            .CompletedGames
+                            .Upsert(newImprogressGames).
+                            On(v => v.UsernameGameID)
+                            .WhenMatched((inprogressGame, inprogressGameList) => new CompletedGames
+                            {
+                                AchievementsGained = inprogressGame.AchievementsGained
+                            })
+                            .RunAsync();
+                    }
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+
+            Log.Information($"[RetroAchievements] In progress games updated for {username}");
+        }
     }
 }

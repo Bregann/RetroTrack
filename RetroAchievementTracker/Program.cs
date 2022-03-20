@@ -7,6 +7,7 @@ using RetroAchievementTracker.RetroAchievementsAPI;
 using RetroAchievementTracker.Data.NavbarData;
 using RetroAchievementTracker.Data.Login;
 using Blazored.LocalStorage;
+using MudBlazor;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -18,7 +19,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices( config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+});
+
 builder.Services.AddSingleton<NavBarService>();
 builder.Services.AddSingleton<LoginService>();
 builder.Services.AddBlazoredLocalStorage();

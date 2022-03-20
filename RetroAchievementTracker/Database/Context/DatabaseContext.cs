@@ -24,14 +24,8 @@ namespace RetroAchievementTracker.Database.Context
 #endif
         }
 
-        // The following configures EF to create a Sqlite database file in the
-        // special "local" folder for your platform.
-        public static readonly ILoggerFactory SerilogFactory 
-            = LoggerFactory.Create(builder => { builder.AddSerilog(); });
-
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options
-            .UseSqlite($"Data Source={DbPath}")
-            .UseLoggerFactory(SerilogFactory);
+            .UseSqlite($"Data Source={DbPath}");
     }
 }
