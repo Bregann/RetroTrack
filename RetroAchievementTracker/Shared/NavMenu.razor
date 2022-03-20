@@ -67,6 +67,7 @@
 <MudAppBar Fixed=true>
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
     <MudSpacer></MudSpacer>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary">login</MudButton>
 </MudAppBar>
 
 
@@ -75,6 +76,7 @@
 @code {
     bool open = true;
     private Dictionary<int, int> gameCounts;
+    bool loggedIn = false;
 
     void ToggleDrawer()
     {

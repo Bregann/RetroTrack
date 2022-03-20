@@ -17,7 +17,11 @@ namespace RetroAchievementTracker.Database.Context
         public DatabaseContext()
         {
             var filePath = Directory.GetCurrentDirectory();
+#if DEBUG
             DbPath = filePath + "\\Database\\retroachievements.db";
+#else
+            DbPath = filePath + "/Database/retroachievements.db";
+#endif
         }
 
         // The following configures EF to create a Sqlite database file in the
