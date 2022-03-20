@@ -4,7 +4,7 @@ using Serilog;
 
 namespace RetroAchievementTracker.Database.Context
 {
-    public class RetroAchievementTrackerContext : DbContext
+    public class DatabaseContext : DbContext
     {
         public DbSet<Achievements> Achievements { get; set; }
         public DbSet<CompletedGames> CompletedGames { get; set; }
@@ -14,7 +14,7 @@ namespace RetroAchievementTracker.Database.Context
         public DbSet<GameCounts> GameCounts { get; set; }
         public string DbPath { get; }
 
-        public RetroAchievementTrackerContext()
+        public DatabaseContext()
         {
             var filePath = Directory.GetCurrentDirectory();
             DbPath = filePath + "\\Database\\retroachievements.db";

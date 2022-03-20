@@ -31,7 +31,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             var responseDeserialized = JsonConvert.DeserializeObject<List<ConsoleIDs>>(response.Content);
 
             //Insert the data into the db
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -56,13 +56,13 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
         public static async Task GetGamesFromConsoleIdsAndUpdateGameCounts()
         {
             List<int>? consoleIds;
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 consoleIds = context.GameConsoles.Select(x => x.ConsoleID).ToList();
             }
 
 
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -142,7 +142,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 await Task.Delay(400); //delay a bit to stop hitting the api too hard
             }
 
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -160,7 +160,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
             Log.Information($"[RetroAchievements] Games inserted to database");
 
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -203,7 +203,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             List<Games> unprocessedGames;
             var gamesToUpdate = new List<Games>();
 
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 unprocessedGames = context.Games.Where(x => x.IsProcessed == false).ToList();
             }
@@ -252,7 +252,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             //Update all the games in the database and save it
-            using (var context = new RetroAchievementTrackerContext())
+            using (var context = new DatabaseContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {

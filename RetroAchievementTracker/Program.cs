@@ -4,6 +4,7 @@ using MudBlazor.Services;
 using RetroAchievementTracker.Services;
 using Serilog;
 using RetroAchievementTracker.RetroAchievementsAPI;
+using RetroAchievementTracker.Data.NavbarData;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+builder.Services.AddSingleton<NavBarService>();
 builder.Logging.AddSerilog();
 
 var app = builder.Build();

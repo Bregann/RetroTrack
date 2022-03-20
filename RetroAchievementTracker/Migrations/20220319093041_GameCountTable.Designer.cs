@@ -10,7 +10,7 @@ using RetroAchievementTracker.Database.Context;
 
 namespace RetroAchievementTracker.Migrations
 {
-    [DbContext(typeof(RetroAchievementTrackerContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20220319093041_GameCountTable")]
     partial class GameCountTable
     {

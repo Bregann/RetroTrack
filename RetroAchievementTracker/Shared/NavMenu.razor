@@ -1,57 +1,65 @@
-﻿<MudDrawer @bind-Open="@open" Elevation="1" Width="275px">
+﻿@using RetroAchievementTracker.Data.NavbarData
+@using RetroAchievementTracker.Data.Enums
+
+@inject NavBarService NavBarService;
+
+<MudDrawer @bind-Open="@open" Elevation="1" Width="275px">
     <MudDrawerHeader>
-        <MudText Typo="Typo.h6" Class="text-white" Style="color: white;">RetroAchievements Tracker</MudText>
+        <MudText Typo="Typo.h6" Class="text-white" Style="color: white; padding-bottom: 5px">RetroAchievements Tracker</MudText>
     </MudDrawerHeader>
     <MudDivider Class="my-2" />
-    <MudNavMenu Color="Color.Tertiary" Bordered="true">
-        <MudNavGroup Title="Nintendo">
-            <MudNavLink>Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Game Boy Advance<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>NES<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>SNES<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Nintendo 64<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Nintendo DS<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Pokemon Mini<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
-            <MudNavLink>Virtual Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/1000</MudText></MudNavLink>
+    <MudNavMenu Bordered="true">
+        <MudNavLink Href="/home" Style="color: #E3F2FD;">Home</MudNavLink>
+        <MudNavLink Href="/allgames" Style="color: #E3F2FD;">All Games</MudNavLink>
+        <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;">Tracked Games</MudNavLink>
+        <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;">
+            <MudNavLink Href="/gameboy" Style="color: #E3F2FD;">Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.GameBoy]</MudText></MudNavLink>
+            <MudNavLink Href="/gameboycolour" Style="color: #E3F2FD;">Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.GameBoyColour]</MudText></MudNavLink>
+            <MudNavLink Href="/gameboyadvance" Style="color: #E3F2FD;">Game Boy Advance<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.GameBoyAdvance]</MudText></MudNavLink>
+            <MudNavLink Href="/nes" Style="color: #E3F2FD;">NES<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.NES]</MudText></MudNavLink>
+            <MudNavLink Href="/snes" Style="color: #E3F2FD;">SNES<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.SNES]</MudText></MudNavLink>
+            <MudNavLink Href="/n64" Style="color: #E3F2FD;">Nintendo 64<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Nintendo64]</MudText></MudNavLink>
+            <MudNavLink Href="/ds" Style="color: #E3F2FD;">Nintendo DS<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.NintendoDS]</MudText></MudNavLink>
+            <MudNavLink Href="/pokemonmini" Style="color: #E3F2FD;">Pokemon Mini<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PokemonMini]</MudText></MudNavLink>
+            <MudNavLink Href="/virtualboy" Style="color: #E3F2FD;">Virtual Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.VirtualBoy]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Playstation">
-            <MudNavLink>PlayStation 1</MudNavLink>
-            <MudNavLink>PSP</MudNavLink>
+        <MudNavGroup Title="Playstation" Style="color: #E3F2FD;">
+            <MudNavLink Href="/ps1" Style="color: #E3F2FD;">PlayStation 1<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PlayStation]</MudText></MudNavLink>
+            <MudNavLink Href="/psp" Style="color: #E3F2FD;">PSP<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PlayStationPortable]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Atari">
-            <MudNavLink>Atari 2600</MudNavLink>
-            <MudNavLink>Atari 7800</MudNavLink>
-            <MudNavLink>Atari Jaguar</MudNavLink>
-            <MudNavLink>Atari Lynx</MudNavLink>
+        <MudNavGroup Title="Atari"  Style="color: #E3F2FD;">
+            <MudNavLink Href="/atari2600" Style="color: #E3F2FD;">Atari 2600<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Atari2600]</MudText></MudNavLink>
+            <MudNavLink Href="/atari7800" Style="color: #E3F2FD;">Atari 7800<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Atari7800]</MudText></MudNavLink>
+            <MudNavLink Href="/atarijaguar" Style="color: #E3F2FD;">Atari Jaguar<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.AtariJaguar]</MudText></MudNavLink>
+            <MudNavLink Href="/atarilynx" Style="color: #E3F2FD;">Atari Lynx<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.AtariLynx]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="NEC">
-            <MudNavLink>PC Engine</MudNavLink>
-            <MudNavLink>PC-8000</MudNavLink>
-            <MudNavLink>PC-FX</MudNavLink>
+        <MudNavGroup Title="NEC" Style="color: #E3F2FD;">
+            <MudNavLink Href="/pcengine" Style="color: #E3F2FD;">PC Engine<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PCEngine]</MudText></MudNavLink>
+            <MudNavLink Href="/pc8000" Style="color: #E3F2FD;">PC-8000<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PC80008800]</MudText></MudNavLink>
+            <MudNavLink Href="/pcfx" Style="color: #E3F2FD;">PC-FX<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.PCFX]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Sega">
-            <MudNavLink>SG-1000</MudNavLink>
-            <MudNavLink>Master System</MudNavLink>
-            <MudNavLink>Game Gear</MudNavLink>
-            <MudNavLink>Mega Drive</MudNavLink>
-            <MudNavLink>Sega CD</MudNavLink>
-            <MudNavLink>Sega 32X</MudNavLink>
-            <MudNavLink>Saturn</MudNavLink>
-            <MudNavLink>Dreamcast</MudNavLink>
+        <MudNavGroup Title="Sega" Style="color: #E3F2FD;">
+            <MudNavLink Href="/sg1000" Style="color: #E3F2FD;">SG-1000<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.SG100]</MudText></MudNavLink>
+            <MudNavLink Href="/mastersystem" Style="color: #E3F2FD;">Master System<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.MasterSystem]</MudText></MudNavLink>
+            <MudNavLink Href="/gamegear" Style="color: #E3F2FD;">Game Gear<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.GameGear]</MudText></MudNavLink>
+            <MudNavLink Href="/megadrive" Style="color: #E3F2FD;">Mega Drive<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.MegaDrive]</MudText></MudNavLink>
+            <MudNavLink Href="/segacd" Style="color: #E3F2FD;">Sega CD<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.SegaCD]</MudText></MudNavLink>
+            <MudNavLink Href="/sega32x" Style="color: #E3F2FD;">Sega 32X<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.ThirtyTwoX]</MudText></MudNavLink>
+            <MudNavLink Href="/saturn" Style="color: #E3F2FD;">Saturn<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Saturn]</MudText></MudNavLink>
+            <MudNavLink Href="/dreamcast" Style="color: #E3F2FD;">Dreamcast<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Dreamcast]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Other">
-            <MudNavLink>3DO</MudNavLink>
-            <MudNavLink>Arcade</MudNavLink>
-            <MudNavLink>Apple II</MudNavLink>
-            <MudNavLink>CoecoVision</MudNavLink>
-            <MudNavLink>Intellivision</MudNavLink>
-            <MudNavLink>Odyssesy 2</MudNavLink>
-            <MudNavLink>MSX</MudNavLink>
-            <MudNavLink>Neo Geo Pocket</MudNavLink>
-            <MudNavLink>Vectrex</MudNavLink>
-            <MudNavLink>Watara Supervision</MudNavLink>
-            <MudNavLink>WonderSwan</MudNavLink>
+        <MudNavGroup Title="Other" Style="color: #E3F2FD;">
+            <MudNavLink Href="/3do" Style="color: #E3F2FD;">3DO<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.ThreeDOInteractiveMultiplayer]</MudText></MudNavLink>
+            <MudNavLink Href="/arcade" Style="color: #E3F2FD;">Arcade<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Arcade]</MudText></MudNavLink>
+            <MudNavLink Href="/appleii" Style="color: #E3F2FD;">Apple II<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.AppleII]</MudText></MudNavLink>
+            <MudNavLink Href="/coecovision" Style="color: #E3F2FD;">CoecoVision<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.ColecoVision]</MudText></MudNavLink>
+            <MudNavLink Href="/intellivision" Style="color: #E3F2FD;">Intellivision<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Intellivision]</MudText></MudNavLink>
+            <MudNavLink Href="/odyssesy2" Style="color: #E3F2FD;">Odyssesy 2<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.MagnavoxOdyssey2]</MudText></MudNavLink>
+            <MudNavLink Href="/msx" Style="color: #E3F2FD;">MSX<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.MSX]</MudText></MudNavLink>
+            <MudNavLink Href="/neogeopocket" Style="color: #E3F2FD;">Neo Geo Pocket<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.NeoGeoPocket]</MudText></MudNavLink>
+            <MudNavLink Href="/vectrex" Style="color: #E3F2FD;">Vectrex<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.Vectrex]</MudText></MudNavLink>
+            <MudNavLink Href="/watarasupervision" Style="color: #E3F2FD;">Watara Supervision<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.WataraSupervision]</MudText></MudNavLink>
+            <MudNavLink Href="/wonderswan" Style="color: #E3F2FD;">WonderSwan<MudSpacer /><MudText Color=Color.Error Style="display: inline;">0/@gameCounts[(int)Consoles.ConsoleNames.WonderSwan]</MudText></MudNavLink>
         </MudNavGroup>
     </MudNavMenu>
 </MudDrawer>
@@ -66,9 +74,16 @@
 
 @code {
     bool open = true;
+    private Dictionary<int, int> gameCounts;
 
     void ToggleDrawer()
     {
         open = !open;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        gameCounts = NavBarService.GetTotalGameCounts();
+        return Task.CompletedTask;
     }
 }

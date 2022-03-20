@@ -11,7 +11,7 @@ using RetroAchievementTracker.Database.Models;
 
 namespace RetroAchievementTracker.Migrations
 {
-    [DbContext(typeof(RetroAchievementTrackerContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20220314194956_InitialCreate")]
     partial class InitialCreate
     {

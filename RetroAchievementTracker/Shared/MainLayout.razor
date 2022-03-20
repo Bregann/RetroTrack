@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 <PageTitle>RetroAchievementTracker</PageTitle>
-<MudThemeProvider IsDarkMode=true/>
+<MudThemeProvider Theme="CustomTheme" IsDarkMode=true/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -11,3 +11,16 @@
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code{
+    MudTheme CustomTheme = new MudTheme
+    {
+        PaletteDark = new Palette()
+        {
+            Black = "#272c34ff",
+            Background = "#121416",
+            DrawerBackground = "#202020",
+            AppbarBackground = "#202020"
+        }
+    };
+}

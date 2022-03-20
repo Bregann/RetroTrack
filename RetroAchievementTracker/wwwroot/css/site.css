@@ -1,0 +1,8 @@
+.mud-navmenu.mud-navmenu-default .mud-nav-link.active:not(.mud-nav-link-disabled) {
+    color: #29B6F6;
+    background-color: var(--mud-palette-action-default-hover);
+}
+
+.mud-navmenu.mud-navmenu-default .mud-nav-link-expand-icon.mud-transform {
+    fill: #29B6F6;
+}

@@ -1,3 +1,12 @@
 ﻿@page "/"
+@inject NavigationManager NavManager
 
 <PageTitle>Index</PageTitle>
+
+@code {
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        NavManager.NavigateTo("/home");
+        return Task.CompletedTask;
+    }
+}

@@ -1,4 +1,4 @@
-﻿namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Enums
+﻿namespace RetroAchievementTracker.Data.Enums
 {
     public class Consoles
     {

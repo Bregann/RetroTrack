@@ -9,7 +9,7 @@ using RetroAchievementTracker.Database.Context;
 
 namespace RetroAchievementTracker.Migrations
 {
-    [DbContext(typeof(RetroAchievementTrackerContext))]
+    [DbContext(typeof(DatabaseContext))]
     partial class RetroAchievementTrackerContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
