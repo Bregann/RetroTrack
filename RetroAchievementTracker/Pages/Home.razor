@@ -1,10 +1,155 @@
 ﻿@page "/home"
+@using Data.GameData
+@using DateTimeToStringWithSuffix
 
-<MudText Typo="Typo.h2" Align="Align.Center" Style="padding-top: 50px; padding-bottom: 30px; color: white;">Home</MudText>
+@inject GameDataService GameDataService;
+
+<MudText Typo="Typo.h3" Align="Align.Center" Style="padding-top: 20px; padding-bottom: 30px; color: white;">Home</MudText>
 <MudContainer MaxWidth="MaxWidth.Large" Style="overflow: hidden">
+    <MudText Typo="Typo.h4" Align="Align.Center">Games Added - @DateTime.Today.Date.ToStringWithSuffix("dd MMMM")</MudText>
+    @if(gamesToday.Count == 0)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+    }
+    else
+    {
+        <MudTable Items="gamesToday" Hover=true Striped=true Class="mt-3" Elevation=5>
+            <HeaderContent>
+                <MudTh>Game Icon</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Achievement Count</MudTh>
+                <MudTh>Genre</MudTh>
+                <MudTh>Console</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.GameIcon" Class="rounded-lg"></MudImage></MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+                <MudTd DataLabel="Genre">@context.Genre</MudTd>
+                <MudTd DataLabel="Console">@context.Console</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-1).ToStringWithSuffix("dd MMMM")</MudText>
+    @if(gamesYesterday.Count == 0)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+    }
+    else
+    {
+        <MudTable Items="gamesYesterday" Hover=true Striped=true Class="mt-3" Elevation=5>
+            <HeaderContent>
+                <MudTh>Game Icon</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Achievement Count</MudTh>
+                <MudTh>Genre</MudTh>
+                <MudTh>Console</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.GameIcon" Class="rounded-lg"></MudImage></MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+                <MudTd DataLabel="Genre">@context.Genre</MudTd>
+                <MudTd DataLabel="Console">@context.Console</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-2).ToStringWithSuffix("dd MMMM")</MudText>
+    @if(games2Days.Count == 0)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+    }
+    else
+    {
+        <MudTable Items="games2Days" Hover=true Striped=true Class="mt-3" Elevation=5>
+            <HeaderContent>
+                <MudTh>Game Icon</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Achievement Count</MudTh>
+                <MudTh>Genre</MudTh>
+                <MudTh>Console</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.GameIcon" Class="rounded-lg"></MudImage></MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+                <MudTd DataLabel="Genre">@context.Genre</MudTd>
+                <MudTd DataLabel="Console">@context.Console</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-3).ToStringWithSuffix("dd MMMM")</MudText>
+    @if(games3Days.Count == 0)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+    }
+    else
+    {
+        <MudTable Items="games3Days" Hover=true Striped=true Class="mt-3" Elevation=5>
+            <HeaderContent>
+                <MudTh>Game Icon</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Achievement Count</MudTh>
+                <MudTh>Genre</MudTh>
+                <MudTh>Console</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.GameIcon" Class="rounded-lg"></MudImage></MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+                <MudTd DataLabel="Genre">@context.Genre</MudTd>
+                <MudTd DataLabel="Console">@context.Console</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-4).ToStringWithSuffix("dd MMMM")</MudText>
+    @if(games4Days.Count == 0)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+    }
+    else
+    {
+        <MudTable Items="games4Days" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5>
+            <HeaderContent>
+                <MudTh>Game Icon</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Achievement Count</MudTh>
+                <MudTh>Genre</MudTh>
+                <MudTh>Console</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.GameIcon" Class="rounded-lg"></MudImage></MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+                <MudTd DataLabel="Genre">@context.Genre</MudTd>
+                <MudTd DataLabel="Console">@context.Console</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
 
 </MudContainer>
 
 @code {
+    //probably a better way of doing this tbf
+    private List<GameData> gamesToday = new();
+    private List<GameData> gamesYesterday = new();
+    private List<GameData> games2Days = new();
+    private List<GameData> games3Days = new();
+    private List<GameData> games4Days = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        gamesToday = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Today);
+        gamesYesterday = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-1));
+        games2Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-2));
+        games3Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-3));
+        games4Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-4));
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
 
 }

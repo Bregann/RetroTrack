@@ -30,6 +30,10 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
             var responseDeserialized = JsonConvert.DeserializeObject<List<ConsoleIDs>>(response.Content);
 
+            //Remove events and hubs
+            responseDeserialized.RemoveAll(x => x.Id == 100);
+            responseDeserialized.RemoveAll(x => x.Id == 101);
+
             //Insert the data into the db
             using (var context = new DatabaseContext())
             {
@@ -60,44 +64,6 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             {
                 consoleIds = context.GameConsoles.Select(x => x.ConsoleID).ToList();
             }
-
-
-            using (var context = new DatabaseContext())
-            {
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    var list = new List<GameCounts>();
-
-                    foreach (var console in consoleIds)
-                    {
-                        var gameCount = context.Games.Where(x => x.ConsoleID == console && x.AchievementCount != 0).Count();
-
-                        if (gameCount != 0)
-                        {
-                            var newGameCount = new GameCounts
-                            {
-                                ConsoleId = console,
-                                GameCount = gameCount
-                            };
-
-                            await context
-                                .GameCounts
-                                .Upsert(newGameCount).
-                                On(v => v.ConsoleId)
-                                .WhenMatched((console, consoleList) => new GameCounts
-                                {
-                                    GameCount = consoleList.GameCount
-                                })
-                                .RunAsync();
-                        }
-                    }
-
-                    context.SaveChanges();
-                    transaction.Commit();
-                }
-            }
-
-            Log.Information($"[RetroAchievements] Game counts updated");
 
             var client = new RestClient(BaseUrl);
             var gameList = new List<Games>();
@@ -131,6 +97,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     gameList.Add(new Games
                     {
                         ConsoleID = game.ConsoleID,
+                        ConsoleName = game.ConsoleName,
                         Id = game.Id,
                         Title = game.Title,
                         ImageIcon = game.ImageIcon.Replace(@"/Images/", ""),

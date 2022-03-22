@@ -15,5 +15,8 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
 
         [JsonProperty("ImageIcon")]
         public string ImageIcon { get; set; }
+
+        [JsonProperty("ConsoleName")]
+        public string ConsoleName { get; set; }
     }
 }

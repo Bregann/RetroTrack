@@ -6,3 +6,7 @@
 .mud-navmenu.mud-navmenu-default .mud-nav-link-expand-icon.mud-transform {
     fill: #29B6F6;
 }
+
+.mud-table {
+    background-color: #202020;
+}
