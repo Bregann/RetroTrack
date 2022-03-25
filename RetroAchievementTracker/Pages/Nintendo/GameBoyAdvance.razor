@@ -1,7 +1,19 @@
 ﻿@page "/gameboyadvance"
 
-<h3>GameBoyAdvance</h3>
+@using RetroAchievementTracker.Data.TableData
+@using RetroAchievementTracker.Data.Enums
+
+@inject TableDataService TableDataService;
+
+<MudText Typo="Typo.h3" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Gameboy Advance</MudText>
+
+<GamesTable TableData="TableData" LoggedIn=false></GamesTable>
 
 @code {
+    public List<TableData> TableData;
 
+    protected override void OnInitialized()
+    {
+        TableData = TableDataService.GetConsoleTableData((int)Consoles.ConsoleNames.GameBoyAdvance);
+    }
 }

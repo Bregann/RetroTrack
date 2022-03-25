@@ -1,0 +1,150 @@
+﻿@using RetroAchievementTracker.Data.GameDataModal
+@using RetroAchievementTracker.Data.TableData
+@using static RetroAchievementTracker.Data.Enums.Consoles
+
+@inject GameDataModalService GameDataModalService;
+@inject ISnackbar Snackbar;
+@inject IDialogService DialogService;
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudTable Items="DataInTable" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5 OnRowClick="OpenGameModal" T="TableData" Filter="new Func<TableData,bool>(FilterGames)">
+        <ToolBarContent>
+            @if(LoggedIn)
+            {
+            <MudSwitch @bind-Checked="@hideCompleted" Label="Hide Completed" />
+            <MudSwitch @bind-Checked="@hideInProgress" Label="Hide In Progress" />
+            }
+
+            <MudSpacer />
+            <MudTextField @bind-Value="@GameNameSearch" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Game Icon</MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.Title)">Title</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.AchievementCount)">Achievement Count</MudTableSortLabel></MudTh>
+            @if(LoggedIn)
+            {
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.AchievementsGained)">Achievements Gained</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.GamePercentage)">Percentage Completed</MudTableSortLabel></MudTh>
+            }
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.Genre)">Genre</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.ImageIconUrl" Class="rounded-lg"></MudImage></MudTd>
+            <MudTd DataLabel="Title">@context.Title</MudTd>
+            <MudTd DataLabel="Achievement Count">@context.AchievementCount</MudTd>
+            @if(LoggedIn)
+            {
+            <MudTd DataLabel="Achievements Gained">@context.AchievementsGained</MudTd>
+            <MudTd DataLabel="Percentage Completed">@context.GamePercentage</MudTd>
+            }
+            <MudTd DataLabel="Genre">@context.Genre</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</MudContainer>
+
+
+@code {
+    [Parameter] public bool LoggedIn { get; set; }
+    [Parameter] public List<TableData> TableData { get; set; }
+    private bool hideCompleted = true;
+    private bool hideInProgress = false;
+    private string GameNameSearch = "";
+
+    private List<TableData> DataInTable;
+
+    protected override void OnInitialized()
+    {
+        //Setup the default (hide completed is true)
+        DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+    }
+
+    private bool FilterGames(TableData data) => FilterFunc(data, GameNameSearch);
+
+    private bool FilterFunc(TableData data, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            return true;
+        }
+
+        if (data.Genre.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (data.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void ChangeCompletedGamesToggle()
+    {
+        if(hideCompleted && hideInProgress) //If they're both toggled on filter both
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
+            hideCompleted = false;
+            StateHasChanged();
+        }
+        else if(hideCompleted && !hideInProgress) //if only hide completed is toggled on
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+            hideCompleted = false;
+            StateHasChanged(); 
+        }
+        else //if neither are toggled on
+        {
+            DataInTable = TableData;
+            hideCompleted = true;
+            StateHasChanged();
+        }
+    }
+
+    public void ChangeInProgressToggle()
+    {
+        if(hideInProgress && hideCompleted) //If they're both toggled on filter both
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
+            hideInProgress = false;
+            StateHasChanged();
+        }
+        else if(hideInProgress && !hideCompleted) //if only hide in progress is toggled on
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 0).ToList();
+            hideInProgress = false;
+            StateHasChanged(); 
+        }
+        else //if neither are toggled on
+        {
+            DataInTable = TableData;
+            hideInProgress = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenGameModal(TableRowClickEventArgs<TableData> row)
+    {
+        var game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.Id);
+
+        if (game == null)
+        {
+            Snackbar.Add("Failed to get game info", Severity.Error);
+            return;
+        }
+
+        var parameters = new DialogParameters { ["GameDataModal"] = game };
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium
+        };
+
+        var dialog = DialogService.Show<GameModalLoggedOut>("Game Info", parameters, options);
+    }
+
+}

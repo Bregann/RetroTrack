@@ -27,7 +27,8 @@ namespace RetroAchievementTracker.Data.GameData
                 Console = game.ConsoleName,
                 GameIcon = $"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Images/{game.ImageIcon}",
                 Genre = game.GameGenre,
-                Title = game.Title
+                Title = game.Title,
+                GameId = game.Id
             })).ToList();
         }
     }

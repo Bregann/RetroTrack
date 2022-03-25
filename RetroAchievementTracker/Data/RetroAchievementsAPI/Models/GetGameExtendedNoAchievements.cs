@@ -2,7 +2,7 @@
 
 namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
 {
-    public class GameInfo
+    public class GameInfoNoAchievements
     {
         [JsonProperty("ID")]
         public int Id { get; set; }
@@ -36,32 +36,5 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
 
         [JsonProperty("NumDistinctPlayersHardcore")]
         public int PlayersHardcore { get; set; }
-
-        [JsonProperty("Achievements")]
-        public Dictionary<string, Achievement> Achievements { get; set; }
-    }
-
-    public partial class Achievement
-    {
-        [JsonProperty("ID")]
-        public long Id { get; set; }
-
-        [JsonProperty("NumAwarded")]
-        public long NumAwarded { get; set; }
-
-        [JsonProperty("NumAwardedHardcore")]
-        public long NumAwardedHardcore { get; set; }
-
-        [JsonProperty("Title")]
-        public string Title { get; set; }
-
-        [JsonProperty("Description")]
-        public string Description { get; set; }
-
-        [JsonProperty("Points")]
-        public long Points { get; set; }
-
-        [JsonProperty("BadgeName")]
-        public long BadgeName { get; set; }
     }
 }

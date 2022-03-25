@@ -1,8 +1,18 @@
 ﻿@page "/appleii"
+@using RetroAchievementTracker.Data.TableData
+@using RetroAchievementTracker.Data.Enums
 
+@inject TableDataService TableDataService;
 
-<h3>AppleII</h3>
+<MudText Typo="Typo.h3" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Apple II</MudText>
+
+<GamesTable TableData="TableData" LoggedIn=false></GamesTable>
 
 @code {
+    public List<TableData> TableData;
 
+    protected override void OnInitialized()
+    {
+        TableData = TableDataService.GetConsoleTableData((int)Consoles.ConsoleNames.AppleII);
+    }
 }

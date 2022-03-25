@@ -1,0 +1,71 @@
+﻿@using RetroAchievementTracker.Data.GameDataModal
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h3" Align="Align.Center" Style="color: black;">@GameDataModal.Title</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing=1>
+            <MudItem xs=6  Class="d-flex justify-center">
+                <MudImage Src="@GameDataModal.ImageBoxArt" Height=200 Legnth=200/>
+            </MudItem>
+            <MudItem xs=6  Class="d-flex justify-center">
+                <MudImage Src="@GameDataModal.ImageIngame" Height=200 Legnth=200/>
+            </MudItem>
+            <MudItem xs=3>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="color: black; font-weight: bold">Achievement Count</MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="color: black;">@GameDataModal.AchievementCount</MudText>
+            </MudItem>
+            <MudItem xs=3>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="color: black; font-weight: bold">Genre</MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="color: black;">@GameDataModal.Genre</MudText>
+            </MudItem>
+            <MudItem xs=3>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="color: black; font-weight: bold">Console</MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="color: black;">@GameDataModal.ConsoleName</MudText>
+            </MudItem>
+            <MudItem xs=3>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="color: black; font-weight: bold">Players Casual/HC</MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="color: black;">@GameDataModal.PlayersCasual / @GameDataModal.PlayersHardcore</MudText>
+            </MudItem>
+            @foreach(var achievement in GameDataModal.Achievements)
+            {
+                <MudTooltip>
+                    <ChildContent>
+                        <MudItem xs=2 Class="align-content-stretch">
+                            <MudImage Src="@achievement.Value.BadgeUrl" Class="ml-1" Height=48 Width=48/>
+                        </MudItem>
+                    </ChildContent>
+                    <TooltipContent>
+                        <MudText Style="font-weight: bold">@achievement.Value.Title</MudText>
+                        <MudText Style="word-break: break-all;">@achievement.Value.Description</MudText>
+                        <MudText>Points: @achievement.Value.Points</MudText>
+                        <MudText>Players earned (HC): @achievement.Value.NumAwarded (@achievement.Value.NumAwardedHardcore)</MudText>
+                        <MudText>Players earned (HC): @achievement.Value.NumAwarded (@achievement.Value.NumAwardedHardcore)</MudText>
+                    </TooltipContent>
+                </MudTooltip>
+            }
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">Game Page</MudButton>
+        <MudTooltip Text="Login to track games">
+            <ChildContent>
+                <MudButton Color="Color.Success" Variant="Variant.Filled" Disabled=true Class="mt-3">Track Game</MudButton>
+            </ChildContent>
+        </MudTooltip>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" Class="mt-3" OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public MudDialogInstance MudDialog { get; set; }
+    [Parameter] public GameDataModal GameDataModal { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Close(false);
+    }
+
+
+}

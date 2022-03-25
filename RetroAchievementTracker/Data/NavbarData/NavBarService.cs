@@ -24,7 +24,7 @@ namespace RetroAchievementTracker.Data.NavbarData
 
                 foreach (var console in consoleIds)
                 {
-                    dict.Add(console, context.CompletedGames.Where(x => x.Username == username && x.ConsoleID == console).Count());
+                    dict.Add(console, context.UserGameProgress.Where(x => x.Username == username && x.ConsoleID == console && x.GamePercentage == 1).Count());
                 }
 
                 return dict;

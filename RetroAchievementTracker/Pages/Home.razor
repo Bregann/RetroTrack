@@ -1,10 +1,15 @@
 ﻿@page "/home"
 @using Data.GameData
 @using DateTimeToStringWithSuffix
+@using RetroAchievementTracker.Data.GameDataModal
+@using RetroAchievementsAPI
 
 @inject GameDataService GameDataService;
+@inject GameDataModalService GameDataModalService;
+@inject ISnackbar Snackbar;
+@inject IDialogService DialogService;
 
-<MudText Typo="Typo.h3" Align="Align.Center" Style="padding-top: 20px; padding-bottom: 30px; color: white;">Home</MudText>
+<MudText Typo="Typo.h3" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Home</MudText>
 <MudContainer MaxWidth="MaxWidth.Large" Style="overflow: hidden">
     <MudText Typo="Typo.h4" Align="Align.Center">Games Added - @DateTime.Today.Date.ToStringWithSuffix("dd MMMM")</MudText>
     @if(gamesToday.Count == 0)
@@ -13,7 +18,7 @@
     }
     else
     {
-        <MudTable Items="gamesToday" Hover=true Striped=true Class="mt-3" Elevation=5>
+        <MudTable Items="gamesToday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -38,7 +43,7 @@
     }
     else
     {
-        <MudTable Items="gamesYesterday" Hover=true Striped=true Class="mt-3" Elevation=5>
+        <MudTable Items="gamesYesterday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -63,7 +68,7 @@
     }
     else
     {
-        <MudTable Items="games2Days" Hover=true Striped=true Class="mt-3" Elevation=5>
+        <MudTable Items="games2Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -88,7 +93,7 @@
     }
     else
     {
-        <MudTable Items="games3Days" Hover=true Striped=true Class="mt-3" Elevation=5>
+        <MudTable Items="games3Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -113,7 +118,7 @@
     }
     else
     {
-        <MudTable Items="games4Days" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5>
+        <MudTable Items="games4Days" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -152,4 +157,22 @@
         return Task.CompletedTask;
     }
 
+    private async Task OpenGameModal(TableRowClickEventArgs<GameData> row)
+    {
+        var game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.GameId);
+
+        if (game == null)
+        {
+            Snackbar.Add("Failed to get game info", Severity.Error);
+            return;
+        }
+
+        var parameters = new DialogParameters { ["GameDataModal"] = game };
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium
+        };
+
+        var dialog = DialogService.Show<GameModalLoggedOut>(null, parameters, options);
+    }
 }

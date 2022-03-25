@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RetroAchievementTracker.Database.Context;
 
@@ -10,9 +11,10 @@ using RetroAchievementTracker.Database.Context;
 namespace RetroAchievementTracker.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class RetroAchievementTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20220322230320_RemovedAchievementTableAndRenamedCompletedGames")]
+    partial class RemovedAchievementTableAndRenamedCompletedGames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.3");

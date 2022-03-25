@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroAchievementTracker.Database.Models
 {
-    public class CompletedGames
+    public class UserGameProgress
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string UsernameGameID { get; set; }
@@ -13,5 +13,6 @@ namespace RetroAchievementTracker.Database.Models
         public int AchievementsGained { get; set; }
         public string GameName { get; set; }
         public int HardcoreMode { get; set; }
+        public double GamePercentage { get; set; }
     }
 }

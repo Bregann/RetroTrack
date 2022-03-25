@@ -6,8 +6,7 @@ namespace RetroAchievementTracker.Database.Context
 {
     public class DatabaseContext : DbContext
     {
-        public DbSet<Achievements> Achievements { get; set; }
-        public DbSet<CompletedGames> CompletedGames { get; set; }
+        public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }
         public DbSet<Games> Games { get; set; }
         public DbSet<UserData> UserData { get; set; }

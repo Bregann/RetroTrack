@@ -14,6 +14,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
         private static readonly string Username = "";
         private static readonly string ApiKey = "";
         private static readonly string BaseUrl = "https://retroachievements.org/API/";
+
         public static async Task GetConsoleIDsAndInsertToDb()
         {
             var client = new RestClient(BaseUrl);
@@ -189,7 +190,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     continue;
                 }
 
-                var responseDeserialized = JsonConvert.DeserializeObject<GameInfo>(response.Content);
+                var responseDeserialized = JsonConvert.DeserializeObject<GameInfoNoAchievements>(response.Content);
 
                 if (responseDeserialized == null)
                 {
@@ -211,7 +212,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     PlayersHardcore = responseDeserialized.PlayersHardcore,
                     IsProcessed = true,
                     ConsoleID = game.ConsoleID,
-                    Title = game.Title
+                    Title = game.Title,
+                    ConsoleName = game.ConsoleName
                 });
 
                 Log.Information($"[RetroAchievements] {game.Title} added to updates list");
@@ -235,7 +237,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
         //todo: Check and update games with 0 achievements - weekly job
 
-        public static async Task GetUserCompletedGamesAndAddToDb(string username)
+        public static async Task GetUserGamesProgress(string username)
         {
             var client = new RestClient(BaseUrl);
             var request = new RestRequest($"API_GetUserCompletedGames.php?z={Username}&y={ApiKey}&u={username}", Method.Get);
@@ -258,13 +260,13 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             //Order the list so it only has hardcore first and no dupes
-            var gamesToUpdate = responseDeserialized.Where(x => x.PctWon == 1).OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
-            var gameIds = responseDeserialized.Where(x => x.PctWon == 1).OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).Select(x => x.GameId).ToList();
+            var gamesToUpdate = responseDeserialized.OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
+            var gameIds = responseDeserialized.OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).Select(x => x.GameId).ToList();
 
 
             using (var context = new DatabaseContext())
             {
-                context.CompletedGames.RemoveRange(context.CompletedGames.Where(x => x.Username == username));
+                context.UserGameProgress.RemoveRange(context.UserGameProgress.Where(x => x.Username == username));
                 context.SaveChanges();
 
                 using (var transaction = context.Database.BeginTransaction())
@@ -276,7 +278,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
                     foreach (var game in gamesToUpdate)
                     {
-                        var newImprogressGames = new CompletedGames
+                        var newImprogressGames = new UserGameProgress
                         {
                             AchievementsGained = game.AchievementsAwarded,
                             GameID = game.GameId,
@@ -284,16 +286,18 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                             HardcoreMode = game.HardcoreMode,
                             UsernameGameID = $"{username}-{game.GameId}",
                             Username = username,
-                            ConsoleID = gameDataForUpdates.Where(x => x.Id == game.GameId).Select(x => x.ConsoleID).First()
+                            ConsoleID = gameDataForUpdates.Where(x => x.Id == game.GameId).Select(x => x.ConsoleID).First(),
+                            GamePercentage = game.PctWon
                         };
 
                         await context
-                            .CompletedGames
+                            .UserGameProgress
                             .Upsert(newImprogressGames).
                             On(v => v.UsernameGameID)
-                            .WhenMatched((inprogressGame, inprogressGameList) => new CompletedGames
+                            .WhenMatched((inprogressGame, inprogressGameList) => new UserGameProgress
                             {
-                                AchievementsGained = inprogressGame.AchievementsGained
+                                AchievementsGained = inprogressGame.AchievementsGained,
+                                GamePercentage = inprogressGame.GamePercentage
                             })
                             .RunAsync();
                     }
@@ -304,6 +308,23 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             Log.Information($"[RetroAchievements] In progress games updated for {username}");
+        }
+
+        public static async Task<GameInfo> GetSpecificGameInfo(int gameId)
+        {
+            var client = new RestClient(BaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetGameExtended.php?z={Username}&y={ApiKey}&i={gameId}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GameInfo>(response.Content);
         }
     }
 }
