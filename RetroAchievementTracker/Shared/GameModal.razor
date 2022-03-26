@@ -39,7 +39,7 @@
                     <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: bold">Players Casual (HC)</MudText>
                     <MudText Typo="Typo.h6" Align="Align.Center">@GameDataModal.PlayersCasual (@GameDataModal.PlayersHardcore)</MudText>
                 </MudItem>
-                @foreach(var achievement in GameDataModal.Achievements)
+                @foreach(var achievement in Achievements)
                 {
                     <MudTooltip Arrow="true" Placement="Placement.Top">
                         <ChildContent>
@@ -71,9 +71,10 @@
         </MudContainer>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">Game Page</MudButton>
         @if(LoggedIn)
         {
+            <MudSwitch Label="Hide Completed" CheckedChanged="ChangeCompletedGamesToggle" T=bool Checked=hideCompleted Color=Color.Info/>
+
             @if(GameDataModal.GameTracked)
             {
                 <MudButton Color="Color.Warning" Variant="Variant.Filled" Class="mt-3" Style="color: white !important;" OnClick="RemoveTrackedGame">Untrack Game</MudButton>
@@ -91,6 +92,8 @@
             </ChildContent>
         </MudTooltip>
         }
+
+        <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">Game Page</MudButton>
         <MudButton Color="Color.Error" Variant="Variant.Filled" Class="mt-3" OnClick="Cancel">Close</MudButton>
     </DialogActions>
 </MudDialog>
@@ -99,10 +102,33 @@
     [CascadingParameter] public MudDialogInstance MudDialog { get; set; }
     [Parameter] public GameDataModal GameDataModal { get; set; }
     [Parameter] public bool LoggedIn { get; set; }
+    private bool hideCompleted;
+    private Dictionary<string, Achievement> Achievements;
+
+    protected override void OnParametersSet()
+    {
+        Achievements = GameDataModal.Achievements;
+    }
 
     private void Cancel()
     {
         MudDialog.Close(false);
+    }
+
+    private void ChangeCompletedGamesToggle(bool toggleState)
+    {
+        if(toggleState)
+        {
+            Achievements = GameDataModal.Achievements.Where(x => x.Value.DateEarned == null).ToDictionary(x => x.Key, x => x.Value);
+            hideCompleted = true;
+            StateHasChanged();
+        }
+        else
+        {
+            Achievements = GameDataModal.Achievements;
+            hideCompleted = false;
+            StateHasChanged();
+        }
     }
 
     public void AddTrackedGame()
@@ -118,4 +144,5 @@
         GameDataModal.GameTracked = false;
         StateHasChanged();
     }
+
 }
