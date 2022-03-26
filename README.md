@@ -8,4 +8,4 @@ Achievement Tracker for https://retroachievements.org/
 - Track games that you are interested in playing
 - See the latest games on the homepage
 
-This can be accessed [here](https://ra.bregan.me/home)
+The site can be accessed [here](https://ra.bregan.me/home)
