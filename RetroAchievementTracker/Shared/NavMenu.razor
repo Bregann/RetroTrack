@@ -16,12 +16,12 @@
     </MudDrawerHeader>
     <MudDivider Class="my-2" />
     <MudNavMenu Bordered="true" >
-        <MudNavLink Href="/home" Style="color: #E3F2FD;">Home</MudNavLink>
+        <MudNavLink Href="/home" Style="color: #E3F2FD;" Icon="@Icons.Filled.Home" IconColor="Color.Warning">Home</MudNavLink>
         @if(loggedIn)
         {
-        <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;">Tracked Games</MudNavLink>
+        <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.PushPin" IconColor="Color.Warning">Tracked Games</MudNavLink>
         }
-        <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;">
+        <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/gameboy" Style="color: #E3F2FD;">Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoy]/@gameCounts[(int)Consoles.ConsoleNames.GameBoy]</MudText></MudNavLink>
             <MudNavLink Href="/gameboycolour" Style="color: #E3F2FD;">Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoyColour]/@gameCounts[(int)Consoles.ConsoleNames.GameBoyColour]</MudText></MudNavLink>
             <MudNavLink Href="/gameboyadvance" Style="color: #E3F2FD;">Game Boy Advance<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoyAdvance]/@gameCounts[(int)Consoles.ConsoleNames.GameBoyAdvance]</MudText></MudNavLink>
@@ -32,22 +32,22 @@
             <MudNavLink Href="/pokemonmini" Style="color: #E3F2FD;">Pokemon Mini<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PokemonMini]/@gameCounts[(int)Consoles.ConsoleNames.PokemonMini]</MudText></MudNavLink>
             <MudNavLink Href="/virtualboy" Style="color: #E3F2FD;">Virtual Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.VirtualBoy]/@gameCounts[(int)Consoles.ConsoleNames.VirtualBoy]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Playstation" Style="color: #E3F2FD;">
+        <MudNavGroup Title="Playstation" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/ps1" Style="color: #E3F2FD;">PlayStation 1<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PlayStation]/@gameCounts[(int)Consoles.ConsoleNames.PlayStation]</MudText></MudNavLink>
             <MudNavLink Href="/psp" Style="color: #E3F2FD;">PSP<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PlayStationPortable]/@gameCounts[(int)Consoles.ConsoleNames.PlayStationPortable]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Atari"  Style="color: #E3F2FD;">
+        <MudNavGroup Title="Atari"  Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/atari2600" Style="color: #E3F2FD;">Atari 2600<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.Atari2600]/@gameCounts[(int)Consoles.ConsoleNames.Atari2600]</MudText></MudNavLink>
             <MudNavLink Href="/atari7800" Style="color: #E3F2FD;">Atari 7800<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.Atari7800]/@gameCounts[(int)Consoles.ConsoleNames.Atari7800]</MudText></MudNavLink>
             <MudNavLink Href="/atarijaguar" Style="color: #E3F2FD;">Atari Jaguar<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.AtariJaguar]/@gameCounts[(int)Consoles.ConsoleNames.AtariJaguar]</MudText></MudNavLink>
             <MudNavLink Href="/atarilynx" Style="color: #E3F2FD;">Atari Lynx<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.AtariLynx]/@gameCounts[(int)Consoles.ConsoleNames.AtariLynx]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="NEC" Style="color: #E3F2FD;">
+        <MudNavGroup Title="NEC" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games"  IconColor="Color.Warning">
             <MudNavLink Href="/pcengine" Style="color: #E3F2FD;">PC Engine<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PCEngine]/@gameCounts[(int)Consoles.ConsoleNames.PCEngine]</MudText></MudNavLink>
             <MudNavLink Href="/pc8000" Style="color: #E3F2FD;">PC-8000<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PC80008800]/@gameCounts[(int)Consoles.ConsoleNames.PC80008800]</MudText></MudNavLink>
             <MudNavLink Href="/pcfx" Style="color: #E3F2FD;">PC-FX<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PCFX]/@gameCounts[(int)Consoles.ConsoleNames.PCFX]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Sega" Style="color: #E3F2FD;">
+        <MudNavGroup Title="Sega" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/sg1000" Style="color: #E3F2FD;">SG-1000<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.SG100]/@gameCounts[(int)Consoles.ConsoleNames.SG100]</MudText></MudNavLink>
             <MudNavLink Href="/mastersystem" Style="color: #E3F2FD;">Master System<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.MasterSystem]/@gameCounts[(int)Consoles.ConsoleNames.MasterSystem]</MudText></MudNavLink>
             <MudNavLink Href="/gamegear" Style="color: #E3F2FD;">Game Gear<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameGear]/@gameCounts[(int)Consoles.ConsoleNames.GameGear]</MudText></MudNavLink>
@@ -57,7 +57,7 @@
             <MudNavLink Href="/saturn" Style="color: #E3F2FD;">Saturn<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.Saturn]/@gameCounts[(int)Consoles.ConsoleNames.Saturn]</MudText></MudNavLink>
             <MudNavLink Href="/dreamcast" Style="color: #E3F2FD;">Dreamcast<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.Dreamcast]/@gameCounts[(int)Consoles.ConsoleNames.Dreamcast]</MudText></MudNavLink>
         </MudNavGroup>
-        <MudNavGroup Title="Other" Style="color: #E3F2FD;">
+        <MudNavGroup Title="Other" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/3do" Style="color: #E3F2FD;">3DO<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.ThreeDOInteractiveMultiplayer]/@gameCounts[(int)Consoles.ConsoleNames.ThreeDOInteractiveMultiplayer]</MudText></MudNavLink>
             <MudNavLink Href="/arcade" Style="color: #E3F2FD;">Arcade<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.Arcade]/@gameCounts[(int)Consoles.ConsoleNames.Arcade]</MudText></MudNavLink>
             <MudNavLink Href="/appleii" Style="color: #E3F2FD;">Apple II<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.AppleII]/@gameCounts[(int)Consoles.ConsoleNames.AppleII]</MudText></MudNavLink>

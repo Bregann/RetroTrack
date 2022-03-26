@@ -77,7 +77,7 @@
                 LoggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
             }
 
-            TableData = TableDataService.GetConsoleTableData((int)Consoles.ConsoleNames.PlayStation, LoggedInUser);
+            TableData = TableDataService.GetConsoleTableData(ConsoleId, LoggedInUser);
             DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
             StateHasChanged();
         }
