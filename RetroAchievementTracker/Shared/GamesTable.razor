@@ -34,6 +34,7 @@
             <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.GamePercentage)" InitialDirection=SortDirection.Descending>Percentage Completed</MudTableSortLabel></MudTh>
             }
             <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.Genre)">Genre</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.PlayersCasual)">Players</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Game Icon"><MudImage Height="64" Width="64" Src="@context.ImageIconUrl" Class="rounded-lg"></MudImage></MudTd>
@@ -45,6 +46,7 @@
             <MudTd DataLabel="Percentage Completed">@context.GamePercentage.ToString("P")</MudTd>
             }
             <MudTd DataLabel="Genre">@context.Genre</MudTd>
+            <MudTd DataLabel="Players">@context.PlayersCasual.ToString("N0")</MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager />

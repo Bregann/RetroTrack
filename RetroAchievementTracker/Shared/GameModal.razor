@@ -41,7 +41,7 @@
                 </MudItem>
                 @foreach(var achievement in GameDataModal.Achievements)
                 {
-                    <MudTooltip>
+                    <MudTooltip Arrow="true" Placement="Placement.Top">
                         <ChildContent>
                             <MudItem xs=2 Class="align-content-stretch">
                                 <MudImage Src="@achievement.Value.BadgeUrl" Class="ml-1" Height=48 Width=48/>
