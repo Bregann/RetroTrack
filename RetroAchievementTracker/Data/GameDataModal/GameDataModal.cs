@@ -16,6 +16,8 @@
         public int PlayersCasual { get; set; }
         public int PlayersHardcore { get; set; }
         public Dictionary<string, Achievement> Achievements { get; set; }
+        public bool GameTracked { get; set; }
+        public string LoggedInUser { get; set; }
     }
     public class Achievement
     {

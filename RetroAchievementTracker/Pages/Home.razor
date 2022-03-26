@@ -2,19 +2,31 @@
 @using Data.GameData
 @using DateTimeToStringWithSuffix
 @using RetroAchievementTracker.Data.GameDataModal
+@using RetroAchievementTracker.Data.Login
 @using RetroAchievementsAPI
 
 @inject GameDataService GameDataService;
 @inject GameDataModalService GameDataModalService;
+@inject LoginService LoginService;
 @inject ISnackbar Snackbar;
 @inject IDialogService DialogService;
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
-<MudText Typo="Typo.h3" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Home</MudText>
+@if(LoggedIn)
+{
+    <MudText Typo="Typo.h2" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Welcome Back, @System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(LoggedInUser)</MudText>
+
+}
+else
+{
+    <MudText Typo="Typo.h3" Align="Align.Center" Class="pt-5 pb-8" Style="color: white;">Home</MudText>
+}
+
 <MudContainer MaxWidth="MaxWidth.Large" Style="overflow: hidden">
-    <MudText Typo="Typo.h4" Align="Align.Center">Games Added - @DateTime.Today.Date.ToStringWithSuffix("dd MMMM")</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center">Games Added - @DateTime.Today.Date.ToStringWithSuffix("dd MMMM")</MudText>
     @if(gamesToday.Count == 0)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center">No games added :(</MudText>
     }
     else
     {
@@ -36,10 +48,10 @@
         </MudTable>
     }
 
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-1).ToStringWithSuffix("dd MMMM")</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-1).ToStringWithSuffix("dd MMMM")</MudText>
     @if(gamesYesterday.Count == 0)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center">No games added :(</MudText>
     }
     else
     {
@@ -61,10 +73,10 @@
         </MudTable>
     }
 
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-2).ToStringWithSuffix("dd MMMM")</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-2).ToStringWithSuffix("dd MMMM")</MudText>
     @if(games2Days.Count == 0)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center">No games added :(</MudText>
     }
     else
     {
@@ -86,10 +98,10 @@
         </MudTable>
     }
 
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-3).ToStringWithSuffix("dd MMMM")</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-3).ToStringWithSuffix("dd MMMM")</MudText>
     @if(games3Days.Count == 0)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center">No games added :(</MudText>
     }
     else
     {
@@ -111,10 +123,10 @@
         </MudTable>
     }
 
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-4).ToStringWithSuffix("dd MMMM")</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mt-4">Games Added - @DateTime.Now.AddDays(-4).ToStringWithSuffix("dd MMMM")</MudText>
     @if(games4Days.Count == 0)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center">No games added :(</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center">No games added :(</MudText>
     }
     else
     {
@@ -145,6 +157,8 @@
     private List<GameData> games2Days = new();
     private List<GameData> games3Days = new();
     private List<GameData> games4Days = new();
+    private bool LoggedIn = false;
+    private string LoggedInUser;
 
     protected override Task OnInitializedAsync()
     {
@@ -157,9 +171,32 @@
         return Task.CompletedTask;
     }
 
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if(firstRender)
+        {
+            //Make sure it's a valid login and get the logged in user
+            if(LoginService.ValidateUserLogin(await LocalStorage.GetItemAsync<string>("loginToken")))
+            {
+                LoggedIn = true;
+                LoggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+                StateHasChanged();
+            }
+        }
+    }
+
     private async Task OpenGameModal(TableRowClickEventArgs<GameData> row)
     {
-        var game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.GameId);
+        GameDataModal game;
+
+        if(LoggedIn)
+        {
+            game = await GameDataModalService.GetLoggedInDataToPopulateModal(row.Item.GameId, LoggedInUser);
+        }
+        else
+        {
+            game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.GameId);
+        }
 
         if (game == null)
         {
@@ -167,12 +204,12 @@
             return;
         }
 
-        var parameters = new DialogParameters { ["GameDataModal"] = game };
+        var parameters = new DialogParameters { ["GameDataModal"] = game, ["LoggedIn"] = LoggedIn };
         var options = new DialogOptions
         {
             MaxWidth = MaxWidth.Medium
         };
 
-        var dialog = DialogService.Show<GameModal>(null, parameters, options);
+        var dialog = DialogService.Show<GameModal>("Game Info", parameters, options);
     }
 }

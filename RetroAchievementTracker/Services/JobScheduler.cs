@@ -21,6 +21,8 @@ namespace RetroAchievementTracker.Services
             var gameUpdatingTrigger = TriggerBuilder.Create().WithIdentity("gameUpdatingTrigger").WithCronSchedule("0 0 4 1/1 * ? *").Build();
             var gameUpdating = JobBuilder.Create<UpdateGamesJob>().WithIdentity("gameUpdating").Build();
 
+            //Mass update of games with 0 achievements
+
             await _scheduler.ScheduleJob(gameUpdating, gameUpdatingTrigger);
 
             Log.Information("[Job Scheduler] Job Scheduler Setup");

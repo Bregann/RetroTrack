@@ -11,6 +11,7 @@ using MudBlazor;
 using RetroAchievementTracker.Data.GameData;
 using RetroAchievementTracker.Data.GameDataModal;
 using RetroAchievementTracker.Data.TableData;
+using RetroAchievementTracker.Data.TrackedGames;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -33,6 +34,7 @@ builder.Services.AddSingleton<GameDataService>();
 builder.Services.AddSingleton<GameDataModalService>();
 builder.Services.AddSingleton<TableDataService>();
 builder.Services.AddSingleton<RetroAchievements>();
+builder.Services.AddSingleton<TrackedGamesService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddResponseCompression();
 builder.Logging.AddSerilog();

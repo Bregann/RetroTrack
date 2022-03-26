@@ -1,4 +1,5 @@
 ﻿using RetroAchievementTracker.RetroAchievementsAPI;
+using RetroAchievementTracker.Data.TrackedGames;
 
 namespace RetroAchievementTracker.Data.GameDataModal
 {
@@ -43,7 +44,7 @@ namespace RetroAchievementTracker.Data.GameDataModal
         public async Task<GameDataModal> GetLoggedInDataToPopulateModal(int gameId, string username)
         {
             var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, username);
-            
+
             var gameModal = new GameDataModal
             {
                 AchievementCount = data.AchievementCount,
@@ -59,7 +60,9 @@ namespace RetroAchievementTracker.Data.GameDataModal
                 ImageIcon = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageIcon,
                 ImageIngame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageIngame,
                 Achievements = new Dictionary<string, Achievement>(),
-                RAURL = "https://retroachievements.org/game/" + data.Id.ToString()
+                RAURL = "https://retroachievements.org/game/" + data.Id.ToString(),
+                GameTracked = TrackedGamesService.IsGameTracked(gameId, username),
+                LoggedInUser = username
             };
 
             foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))

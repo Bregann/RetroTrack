@@ -1,5 +1,8 @@
 ﻿@using RetroAchievementTracker.Data.GameDataModal
 @using DateTimeToStringWithSuffix
+@using RetroAchievementTracker.Data.TrackedGames
+
+@inject TrackedGamesService TrackedGamesService;
 
 <MudDialog>
     <TitleContent>
@@ -69,11 +72,25 @@
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">Game Page</MudButton>
+        @if(LoggedIn)
+        {
+            @if(GameDataModal.GameTracked)
+            {
+                <MudButton Color="Color.Warning" Variant="Variant.Filled" Class="mt-3" Style="color: white !important;" OnClick="RemoveTrackedGame">Untrack Game</MudButton>
+            }
+            else
+            {
+                <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-3" Style="color: white !important;" OnClick="AddTrackedGame">Track Game</MudButton>
+            }
+        }
+        else
+        {
         <MudTooltip Text="Login to track games">
             <ChildContent>
                 <MudButton Color="Color.Success" Variant="Variant.Filled" Disabled=true Class="mt-3" Style="color: white !important;">Track Game</MudButton>
             </ChildContent>
         </MudTooltip>
+        }
         <MudButton Color="Color.Error" Variant="Variant.Filled" Class="mt-3" OnClick="Cancel">Close</MudButton>
     </DialogActions>
 </MudDialog>
@@ -86,5 +103,19 @@
     private void Cancel()
     {
         MudDialog.Close(false);
+    }
+
+    public void AddTrackedGame()
+    {
+        TrackedGamesService.AddTrackedGame(GameDataModal.Id, GameDataModal.LoggedInUser);
+        GameDataModal.GameTracked = true;
+        StateHasChanged();
+    }
+
+    public void RemoveTrackedGame()
+    {
+        TrackedGamesService.DeleteTrackedGame(GameDataModal.Id, GameDataModal.LoggedInUser);
+        GameDataModal.GameTracked = false;
+        StateHasChanged();
     }
 }
