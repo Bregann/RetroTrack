@@ -33,6 +33,7 @@ namespace RetroAchievementTracker.Services
     {
         public async Task Execute(IJobExecutionContext context)
         {
+            await RetroAchievements.UpdateGameAchievementCounts();
             await RetroAchievements.GetConsoleIDsAndInsertToDb();
             await RetroAchievements.GetGamesFromConsoleIdsAndUpdateGameCounts();
             await RetroAchievements.UpdateUnprocessedGames();

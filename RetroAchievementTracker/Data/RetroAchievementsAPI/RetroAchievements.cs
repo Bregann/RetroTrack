@@ -6,6 +6,7 @@ using RetroAchievementTracker.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using RetroAchievementTracker.Database.Models;
 using System.Linq;
+using System.Text;
 
 namespace RetroAchievementTracker.RetroAchievementsAPI
 {
@@ -344,6 +345,91 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             return JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
+        }
+
+        //If they change the API - go back to original idea of GetGamesWith0AchievementsAndCheckForAchievements
+        public static async Task UpdateGameAchievementCounts()
+        {
+            var gamesList = new List<Games>();
+
+            //Get all the game IDs from the database
+            using (var context = new DatabaseContext())
+            {
+                gamesList = context.Games.ToList();
+            }
+
+            var timesToLoop = gamesList.Count / 100;
+            var gamesToUpdate = new List<Games>();
+
+            //Loop through 100 games at a time to not hit the API too hard
+            for (int i = 0; i < timesToLoop; i++)
+            {
+                var sb = new StringBuilder();
+
+                //Get 100 games from the list
+                var games = gamesList.Take(new Range(i * 100, (i * 100) + 100));
+
+                //Append each game to the stringbuilder for the API request
+                foreach (var game in games)
+                {
+                    sb.Append(game.Id + ",");
+                }
+
+                //Create the request with the data
+                var client = new RestClient(BaseUrl);
+                var request = new RestRequest($"API_GetUserProgress.php?z={Username}&y={ApiKey}&u=guinea&i={sb.Remove(sb.Length -1, 1)}", Method.Get); //Remove the final , at the end
+
+                //Get the response and Deserialize
+                var response = await client.ExecuteAsync(request);
+
+                if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    Log.Warning($"[RetroAchievements] Error getting data for batch {i}");
+                    continue;
+                }
+
+                //Deseralise the response
+                var responseDeserialized = JsonConvert.DeserializeObject<Dictionary<int, GetUserProgress>>(response.Content);
+
+                //Remove the games that don't need updating
+                foreach (var game in responseDeserialized)
+                {
+                    var gameFromDb = gamesList.Where(x => x.Id == game.Key).First();
+
+                    //Check if they have the same achievement counts
+                    if (game.Value.NumPossibleAchievements == gameFromDb.AchievementCount)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        //If there's a match then update it
+                        gameFromDb.AchievementCount = game.Value.NumPossibleAchievements;
+                        gameFromDb.IsProcessed = false; //Set not processed to queue it up on the next update
+                        gameFromDb.DateAdded = DateTime.Now;
+                        gamesToUpdate.Add(gameFromDb);
+                    }
+                }
+
+                Log.Information($"[RetroAchievements] Batch {i} ready to update");
+                await Task.Delay(400); //wait a bit so we don't keep spamming the api
+            }
+
+            Log.Information($"[RetroAchievements] {gamesToUpdate.Count} games to update");
+
+            //Update the games left
+            using (var context = new DatabaseContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    context.Games.UpdateRange(gamesToUpdate);
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+
+            Log.Information($"[RetroAchievements] {gamesToUpdate.Count} games updated");
         }
     }
 }
