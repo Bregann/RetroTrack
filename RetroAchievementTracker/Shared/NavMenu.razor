@@ -1,9 +1,11 @@
 ﻿@using RetroAchievementTracker.Data.NavbarData
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.Enums
+@using RetroAchievementsAPI
 
 @inject NavBarService NavBarService;
 @inject LoginService LoginService;
+@inject RetroAchievements RetroAchievements
 @inject IDialogService DialogService;
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject ISnackbar Snackbar;
@@ -15,8 +17,10 @@
     <MudDivider Class="my-2" />
     <MudNavMenu Bordered="true" >
         <MudNavLink Href="/home" Style="color: #E3F2FD;">Home</MudNavLink>
-        <MudNavLink Href="/allgames" Style="color: #E3F2FD;">All Games</MudNavLink>
+        @if(loggedIn)
+        {
         <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;">Tracked Games</MudNavLink>
+        }
         <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;">
             <MudNavLink Href="/gameboy" Style="color: #E3F2FD;">Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoy]/@gameCounts[(int)Consoles.ConsoleNames.GameBoy]</MudText></MudNavLink>
             <MudNavLink Href="/gameboycolour" Style="color: #E3F2FD;">Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoyColour]/@gameCounts[(int)Consoles.ConsoleNames.GameBoyColour]</MudText></MudNavLink>
@@ -114,9 +118,11 @@
                 loggedIn = false;
             }
 
-            if(loggedIn)
+            if(loggedIn) //If they match and they're logged in then update the data
             {
                 var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+                await RetroAchievements.GetUserGamesProgress(loggedInUser);
+                Snackbar.Add("Games Updated!", Severity.Info);
                 gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
                 StateHasChanged();
             }
@@ -130,10 +136,13 @@
         var dialog = DialogService.Show<LoginModal>("Login", options);
         var response = await dialog.Result;
 
+        //If they've logged in successfully update the games
         if((bool)response.Data == true)
         {
             loggedIn = true;
             var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+            await RetroAchievements.GetUserGamesProgress(loggedInUser);
+            Snackbar.Add("Games Updated!", Severity.Info);
             gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
             StateHasChanged();
         }

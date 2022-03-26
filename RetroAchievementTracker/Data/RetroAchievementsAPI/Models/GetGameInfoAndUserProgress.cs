@@ -5,19 +5,19 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
     public class GetGameInfoAndUserProgress
     {
         [JsonProperty("ID")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("Title")]
         public string Title { get; set; }
 
         [JsonProperty("ConsoleID")]
-        public long ConsoleId { get; set; }
+        public int ConsoleId { get; set; }
 
         [JsonProperty("ForumTopicID")]
-        public long ForumTopicId { get; set; }
+        public int ForumTopicId { get; set; }
 
         [JsonProperty("Flags")]
-        public long Flags { get; set; }
+        public int Flags { get; set; }
 
         [JsonProperty("ImageIcon")]
         public string ImageIcon { get; set; }
@@ -53,19 +53,19 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
         public string RichPresencePatch { get; set; }
 
         [JsonProperty("NumAchievements")]
-        public long NumAchievements { get; set; }
+        public int AchievementCount { get; set; }
 
         [JsonProperty("NumDistinctPlayersCasual")]
-        public long NumDistinctPlayersCasual { get; set; }
+        public int PlayersCasual { get; set; }
 
         [JsonProperty("NumDistinctPlayersHardcore")]
-        public long NumDistinctPlayersHardcore { get; set; }
+        public int PlayersHardcore { get; set; }
 
         [JsonProperty("Achievements")]
         public Dictionary<string, UserAchievement> Achievements { get; set; }
 
         [JsonProperty("NumAwardedToUser")]
-        public long NumAwardedToUser { get; set; }
+        public int NumAwardedToUser { get; set; }
 
         [JsonProperty("UserCompletion")]
         public string UserCompletion { get; set; }
@@ -77,13 +77,13 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
     public class UserAchievement
     {
         [JsonProperty("ID")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("NumAwarded")]
-        public long NumAwarded { get; set; }
+        public int NumAwarded { get; set; }
 
         [JsonProperty("NumAwardedHardcore")]
-        public long NumAwardedHardcore { get; set; }
+        public int NumAwardedHardcore { get; set; }
 
         [JsonProperty("Title")]
         public string Title { get; set; }
@@ -92,7 +92,7 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
         public string Description { get; set; }
 
         [JsonProperty("Points")]
-        public long Points { get; set; }
+        public int Points { get; set; }
 
         [JsonProperty("DateModified")]
         public DateTimeOffset DateModified { get; set; }
@@ -101,10 +101,10 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
         public DateTimeOffset DateCreated { get; set; }
 
         [JsonProperty("BadgeName")]
-        public long BadgeName { get; set; }
+        public int BadgeName { get; set; }
 
         [JsonProperty("DisplayOrder")]
-        public long DisplayOrder { get; set; }
+        public int DisplayOrder { get; set; }
 
         [JsonProperty("DateEarned", NullValueHandling = NullValueHandling.Ignore)]
         public DateTimeOffset? DateEarned { get; set; }

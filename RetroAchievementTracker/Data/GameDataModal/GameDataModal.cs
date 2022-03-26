@@ -11,6 +11,8 @@
         public string ImageBoxArt { get; set; }
         public string Genre { get; set; }
         public int AchievementCount { get; set; }
+        public int AchievementsUnlocked { get; set; }
+        public string PercentageCompleted { get; set; }
         public int PlayersCasual { get; set; }
         public int PlayersHardcore { get; set; }
         public Dictionary<string, Achievement> Achievements { get; set; }
@@ -23,5 +25,7 @@
         public string Description { get; set; }
         public long Points { get; set; }
         public string BadgeUrl { get; set; }
+        public DateTimeOffset? DateEarned { get; set; }
+        public DateTimeOffset? DateEarnedHardcore { get; set; }
     }
 }

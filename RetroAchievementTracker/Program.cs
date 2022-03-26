@@ -32,6 +32,7 @@ builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<GameDataService>();
 builder.Services.AddSingleton<GameDataModalService>();
 builder.Services.AddSingleton<TableDataService>();
+builder.Services.AddSingleton<RetroAchievements>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddResponseCompression();
 builder.Logging.AddSerilog();

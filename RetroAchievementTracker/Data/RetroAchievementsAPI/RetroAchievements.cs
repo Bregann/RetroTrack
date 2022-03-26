@@ -239,6 +239,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
         public static async Task GetUserGamesProgress(string username)
         {
+            //todo: add in a last updated - if its been more than 5 minutes then update
+
             var client = new RestClient(BaseUrl);
             var request = new RestRequest($"API_GetUserCompletedGames.php?z={Username}&y={ApiKey}&u={username}", Method.Get);
 
@@ -325,6 +327,23 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             return JsonConvert.DeserializeObject<GameInfo>(response.Content);
+        }
+
+        public static async Task<GetGameInfoAndUserProgress> GetSpecificGameInfoAndUserProgress(int gameId, string username)
+        {
+            var client = new RestClient(BaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={Username}&y={ApiKey}&g={gameId}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
         }
     }
 }

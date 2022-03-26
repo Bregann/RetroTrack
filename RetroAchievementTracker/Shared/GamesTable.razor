@@ -1,18 +1,24 @@
 ﻿@using RetroAchievementTracker.Data.GameDataModal
+@using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.TableData
-@using static RetroAchievementTracker.Data.Enums.Consoles
+@using RetroAchievementTracker.Data.Enums
 
 @inject GameDataModalService GameDataModalService;
 @inject ISnackbar Snackbar;
 @inject IDialogService DialogService;
+@inject LoginService LoginService;
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject TableDataService TableDataService;
 
+@if(DataInTable != null)
+{
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudTable Items="DataInTable" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5 OnRowClick="OpenGameModal" T="TableData" Filter="new Func<TableData,bool>(FilterGames)">
         <ToolBarContent>
             @if(LoggedIn)
             {
-            <MudSwitch @bind-Checked="@hideCompleted" Label="Hide Completed" />
-            <MudSwitch @bind-Checked="@hideInProgress" Label="Hide In Progress" />
+            <MudSwitch Label="Hide Completed" CheckedChanged="ChangeCompletedGamesToggle" T=bool Checked=hideCompleted Color=Color.Info/>
+            <MudSwitch Label="Hide In Progress" CheckedChanged="ChangeInProgressToggle" T=bool Color=Color.Info/>
             }
 
             <MudSpacer />
@@ -21,11 +27,11 @@
         <HeaderContent>
             <MudTh>Game Icon</MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.Title)">Title</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.AchievementCount)">Achievement Count</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.AchievementCount)" >Achievement Count</MudTableSortLabel></MudTh>
             @if(LoggedIn)
             {
             <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.AchievementsGained)">Achievements Gained</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.GamePercentage)">Percentage Completed</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.GamePercentage)" InitialDirection=SortDirection.Descending>Percentage Completed</MudTableSortLabel></MudTh>
             }
             <MudTh><MudTableSortLabel SortBy="new Func<TableData, object>(x=>x.Genre)">Genre</MudTableSortLabel></MudTh>
         </HeaderContent>
@@ -36,7 +42,7 @@
             @if(LoggedIn)
             {
             <MudTd DataLabel="Achievements Gained">@context.AchievementsGained</MudTd>
-            <MudTd DataLabel="Percentage Completed">@context.GamePercentage</MudTd>
+            <MudTd DataLabel="Percentage Completed">@context.GamePercentage.ToString("P")</MudTd>
             }
             <MudTd DataLabel="Genre">@context.Genre</MudTd>
         </RowTemplate>
@@ -45,38 +51,53 @@
         </PagerContent>
     </MudTable>
 </MudContainer>
+}
+
 
 
 @code {
-    [Parameter] public bool LoggedIn { get; set; }
-    [Parameter] public List<TableData> TableData { get; set; }
+    [Parameter] public int ConsoleId{ get; set; }
+    private List<TableData> TableData;
     private bool hideCompleted = true;
     private bool hideInProgress = false;
     private string GameNameSearch = "";
+    private bool LoggedIn;
+    private string LoggedInUser;
 
-    private List<TableData> DataInTable;
+    private List<TableData> DataInTable = null;
 
-    protected override void OnInitialized()
+    protected override async void OnAfterRender(bool firstRender)
     {
-        //Setup the default (hide completed is true)
-        DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+        if(firstRender)
+        {
+            //Make sure it's a valid login and get the logged in user
+            if(LoginService.ValidateUserLogin(await LocalStorage.GetItemAsync<string>("loginToken")))
+            {
+                LoggedIn = true;
+                LoggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+            }
+
+            TableData = TableDataService.GetConsoleTableData((int)Consoles.ConsoleNames.PlayStation, LoggedInUser);
+            DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+            StateHasChanged();
+        }
     }
 
     private bool FilterGames(TableData data) => FilterFunc(data, GameNameSearch);
 
     private bool FilterFunc(TableData data, string searchString)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
+        if(string.IsNullOrWhiteSpace(searchString))
         {
             return true;
         }
 
-        if (data.Genre.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if(data.Genre.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        if (data.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if(data.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -84,53 +105,88 @@
         return false;
     }
 
-    public void ChangeCompletedGamesToggle()
+    public void ChangeCompletedGamesToggle(bool toggledStatus)
     {
-        if(hideCompleted && hideInProgress) //If they're both toggled on filter both
-        {
-            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
-            hideCompleted = false;
-            StateHasChanged();
-        }
-        else if(hideCompleted && !hideInProgress) //if only hide completed is toggled on
-        {
-            DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
-            hideCompleted = false;
-            StateHasChanged(); 
-        }
-        else //if neither are toggled on
+        if(!toggledStatus && !hideInProgress) //If they're both toggled off clear the filter
         {
             DataInTable = TableData;
-            hideCompleted = true;
+            hideCompleted = toggledStatus;
             StateHasChanged();
+            return;
+        }
+
+        if(!toggledStatus && hideInProgress) //If it was toggled off and the hide in progress is still toggled on then clear the games competed filter
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage == 0 || x.GamePercentage == 1).ToList();
+            hideCompleted = toggledStatus;
+            StateHasChanged();
+            return;
+        }
+
+        if(toggledStatus  && !hideInProgress) //If toggled on and hide in progress is toggled off then only filter out completed
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+            hideCompleted = toggledStatus;
+            StateHasChanged();
+            return;
+        }
+
+        if(toggledStatus && hideInProgress) //If they're both toggled on then apply both the filters
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
+            hideCompleted = toggledStatus;
+            StateHasChanged();
+            return;
         }
     }
 
-    public void ChangeInProgressToggle()
+    public void ChangeInProgressToggle(bool toggledStatus)
     {
-        if(hideInProgress && hideCompleted) //If they're both toggled on filter both
-        {
-            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
-            hideInProgress = false;
-            StateHasChanged();
-        }
-        else if(hideInProgress && !hideCompleted) //if only hide in progress is toggled on
-        {
-            DataInTable = TableData.Where(x => x.GamePercentage != 0).ToList();
-            hideInProgress = false;
-            StateHasChanged(); 
-        }
-        else //if neither are toggled on
+        if(!toggledStatus && !hideCompleted) //If they're both toggled off clear the filter
         {
             DataInTable = TableData;
-            hideInProgress = true;
+            hideInProgress = toggledStatus;
             StateHasChanged();
+            return;
+        }
+
+        if(!toggledStatus && hideCompleted) //If it was toggled off and the hide completed is still toggled on then clear the games in progress filter
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1).ToList();
+            hideInProgress = toggledStatus;
+            StateHasChanged();
+            return;
+        }
+
+        if(toggledStatus  && !hideCompleted) //If toggled on and completed is toggled off then only filter out in progress
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage == 0 || x.GamePercentage == 1).ToList();
+            hideInProgress = toggledStatus;
+            StateHasChanged();
+            return;
+        }
+
+        if(toggledStatus && hideCompleted) //If they're both toggled on then apply both the filters
+        {
+            DataInTable = TableData.Where(x => x.GamePercentage != 1 && x.GamePercentage == 0).ToList();
+            hideInProgress = toggledStatus;
+            StateHasChanged();
+            return;
         }
     }
 
     private async Task OpenGameModal(TableRowClickEventArgs<TableData> row)
     {
-        var game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.Id);
+        GameDataModal game;
+
+        if(LoggedIn)
+        {
+            game = await GameDataModalService.GetLoggedInDataToPopulateModal(row.Item.Id, LoggedInUser);
+        }
+        else
+        {
+            game = await GameDataModalService.GetGameDataToPopulateModal(row.Item.Id);
+        }
 
         if (game == null)
         {
@@ -138,13 +194,13 @@
             return;
         }
 
-        var parameters = new DialogParameters { ["GameDataModal"] = game };
+        var parameters = new DialogParameters { ["GameDataModal"] = game, ["LoggedIn"] = LoggedIn };
         var options = new DialogOptions
         {
             MaxWidth = MaxWidth.Medium
         };
 
-        var dialog = DialogService.Show<GameModalLoggedOut>("Game Info", parameters, options);
+        var dialog = DialogService.Show<GameModal>("Game Info", parameters, options);
     }
 
 }
