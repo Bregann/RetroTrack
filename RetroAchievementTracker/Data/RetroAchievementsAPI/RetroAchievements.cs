@@ -236,12 +236,9 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             Log.Information("[RetroAchievements] Games database updated");
         }
 
-        //todo: Check and update games with 0 achievements - weekly job
-
         public static async Task GetUserGamesProgress(string username)
         {
             //todo: add in a last updated - if its been more than 5 minutes then update
-
             var client = new RestClient(BaseUrl);
             var request = new RestRequest($"API_GetUserCompletedGames.php?z={Username}&y={ApiKey}&u={username}", Method.Get);
 
@@ -274,11 +271,6 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    //Select the game data for the in progress games
-                    var gameDataForUpdates = context.Games
-                                                .Where(x => gameIds.Contains(x.Id))
-                                                .ToList();
-
                     foreach (var game in gamesToUpdate)
                     {
                         var newImprogressGames = new UserGameProgress
@@ -289,7 +281,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                             HardcoreMode = game.HardcoreMode,
                             UsernameGameID = $"{username}-{game.GameId}",
                             Username = username,
-                            ConsoleID = gameDataForUpdates.Where(x => x.Id == game.GameId).Select(x => x.ConsoleID).First(),
+                            ConsoleID = game.ConsoleId,
                             GamePercentage = game.PctWon
                         };
 
@@ -430,6 +422,23 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             Log.Information($"[RetroAchievements] {gamesToUpdate.Count} games updated");
+        }
+
+        public static async Task<GetUserSummary> GetUserProfileData(string username)
+        {
+            var client = new RestClient(BaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetUserSummary.php?z={Username}&y={ApiKey}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting profile data for {username}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
     }
 }

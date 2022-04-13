@@ -1,6 +1,7 @@
 ﻿@using RetroAchievementTracker.Data.NavbarData
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.Enums
+@using RetroAchievementTracker.Data.RetroAchievementsAPI.Models
 @using RetroAchievementsAPI
 
 @inject NavBarService NavBarService;
@@ -10,17 +11,28 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject ISnackbar Snackbar;
 
-<MudDrawer @bind-Open="@open" Elevation="1" Width="275px" PreserveOpenState=false>
+<MudDrawer @bind-Open="@open" Elevation="1" Width="290px" PreserveOpenState=false Style="overflow-x: hidden">
     <MudDrawerHeader>
         <MudText Typo="Typo.h6" Class="text-white" Style="color: white;">RetroAchievements Tracker</MudText>
     </MudDrawerHeader>
     <MudDivider Class="my-2" />
-    <MudNavMenu Bordered="true" >
-        <MudNavLink Href="/home" Style="color: #E3F2FD;" Icon="@Icons.Filled.Home" IconColor="Color.Warning">Home</MudNavLink>
+    <MudNavMenu Bordered="true" Style=" z-index: 1">
+        
         @if(loggedIn)
         {
+        <MudGrid Spacing=1 Class="ml-4">
+            <MudItem xs=4>
+                <MudImage Src="@userSummary.UserPic" Height=100 Width=100 />
+            </MudItem>
+            <MudItem xs=8 Class="mt-3">
+                <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">@loggedInUser</MudText>
+                <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">Points: @userSummary.TotalPoints.ToString("N0")</MudText>
+                <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">Rank: @userSummary.Rank.ToString("N0")/@userSummary.TotalRanked.ToString("N0")</MudText>
+            </MudItem>
+        </MudGrid>
         <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.PushPin" IconColor="Color.Warning">Tracked Games</MudNavLink>
         }
+        <MudNavLink Href="/home" Style="color: #E3F2FD;" Icon="@Icons.Filled.Home" IconColor="Color.Warning">Home</MudNavLink>
         <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/gameboy" Style="color: #E3F2FD;">Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoy]/@gameCounts[(int)Consoles.ConsoleNames.GameBoy]</MudText></MudNavLink>
             <MudNavLink Href="/gameboycolour" Style="color: #E3F2FD;">Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoyColour]/@gameCounts[(int)Consoles.ConsoleNames.GameBoyColour]</MudText></MudNavLink>
@@ -74,6 +86,8 @@
     </MudNavMenu>
 </MudDrawer>
 
+
+
 <MudAppBar Fixed=true>
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
     <MudSpacer></MudSpacer>
@@ -93,7 +107,8 @@
     private Dictionary<int, int> gameCounts;
     private Dictionary<int, int> gameCompletedCounts;
     public bool loggedIn = false;
-
+    public GetUserSummary userSummary = null;
+    public string loggedInUser;
     void ToggleDrawer()
     {
         open = !open;
@@ -121,10 +136,12 @@
 
             if(loggedIn) //If they match and they're logged in then update the data
             {
-                var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+                loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
                 await RetroAchievements.GetUserGamesProgress(loggedInUser);
                 Snackbar.Add("Games Updated!", Severity.Info);
                 gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
+                userSummary = await RetroAchievements.GetUserProfileData(loggedInUser);
+                userSummary.UserPic = "https://retroachievements.org" + userSummary.UserPic;
                 StateHasChanged();
             }
         }

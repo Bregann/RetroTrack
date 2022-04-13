@@ -199,7 +199,8 @@
         var parameters = new DialogParameters { ["GameDataModal"] = game, ["LoggedIn"] = LoggedIn };
         var options = new DialogOptions
         {
-            MaxWidth = MaxWidth.Medium
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
         };
 
         var dialog = DialogService.Show<GameModal>("Game Info", parameters, options);
