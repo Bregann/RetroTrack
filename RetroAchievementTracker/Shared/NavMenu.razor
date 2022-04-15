@@ -2,6 +2,7 @@
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.Enums
 @using RetroAchievementTracker.Data.RetroAchievementsAPI.Models
+@using RetroAchievementTracker.Shared.Dialogs
 @using RetroAchievementsAPI
 
 @inject NavBarService NavBarService;
@@ -93,6 +94,7 @@
     <MudSpacer></MudSpacer>
     @if(!loggedIn)
     {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegistrationModal" Class="mr-2">Register</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenLoginModal">Login</MudButton>
     }
     else
@@ -151,7 +153,7 @@
     {
         var options = new DialogOptions() { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
 
-        var dialog = DialogService.Show<LoginModal>("Login", options);
+        var dialog = DialogService.Show<LoginDialog>("Login", options);
         var response = await dialog.Result;
 
         //If they've logged in successfully update the games
@@ -162,6 +164,29 @@
             await RetroAchievements.GetUserGamesProgress(loggedInUser);
             Snackbar.Add("Games Updated!", Severity.Info);
             gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
+            userSummary = await RetroAchievements.GetUserProfileData(loggedInUser);
+            userSummary.UserPic = "https://retroachievements.org" + userSummary.UserPic;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenRegistrationModal()
+    {
+        var options = new DialogOptions() { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+        var dialog = DialogService.Show<RegisterAccountDialog>("Registration", options);
+        var response = await dialog.Result;
+
+        //If they've logged in successfully update the games
+        if((bool)response.Data == true)
+        {
+            loggedIn = true;
+            var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+            await RetroAchievements.GetUserGamesProgress(loggedInUser);
+            Snackbar.Add("Games Updated!", Severity.Info);
+            gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
+            userSummary = await RetroAchievements.GetUserProfileData(loggedInUser);
+            userSummary.UserPic = "https://retroachievements.org" + userSummary.UserPic;
             StateHasChanged();
         }
     }

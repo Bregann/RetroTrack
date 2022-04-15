@@ -2,6 +2,7 @@
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.TableData
 @using RetroAchievementTracker.Data.Enums
+@using RetroAchievementTracker.Shared.Dialogs
 
 @inject GameDataModalService GameDataModalService;
 @inject ISnackbar Snackbar;
@@ -203,7 +204,7 @@
             FullWidth = true
         };
 
-        var dialog = DialogService.Show<GameModal>("Game Info", parameters, options);
+        var dialog = DialogService.Show<GameDialog>("Game Info", parameters, options);
     }
 
 }

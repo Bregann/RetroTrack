@@ -6,9 +6,10 @@ namespace RetroAchievementTracker.Data.Login
 {
     public class LoginService
     {
-        public static async Task<LoginData> LogUserIn(string username, string apiKey)
+        public static async Task<LoginData> RegisterNewUser(string username, string apiKey, string password)
         {
             int userCount;
+
             //Check if they already exist
             using (var context = new DatabaseContext())
             {
@@ -46,11 +47,12 @@ namespace RetroAchievementTracker.Data.Login
                     };
                 }
 
-                //Hash the api key
+                //Hash the api key and password
                 var hashedApiKey = BCrypt.Net.BCrypt.HashPassword(apiKey);
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 //Create a login token
-                var loginToken = $"D{DateTime.Now.Ticks/73}G{Guid.NewGuid()}";
+                var loginToken = $"D{DateTime.Now.Ticks / 73}G{Guid.NewGuid()}";
 
                 //As it didn't error we insert the data into the table
                 using (var context = new DatabaseContext())
@@ -59,7 +61,8 @@ namespace RetroAchievementTracker.Data.Login
                     {
                         HashedApiKey = hashedApiKey,
                         Username = username,
-                        LoginToken = loginToken
+                        LoginToken = loginToken,
+                        HashedPassword = hashedPassword
                     });
 
                     context.SaveChanges();
@@ -73,84 +76,136 @@ namespace RetroAchievementTracker.Data.Login
             }
             else
             {
-                //Validate if it's the correct API key in the database
-                string apiKeyFromDb;
-                using (var context = new DatabaseContext())
+                return new LoginData
                 {
-                    apiKeyFromDb = context.UserData.Single(x => x.Username == username).HashedApiKey;
-                }
+                    Reason = "User already registered",
+                    Succesful = false
+                };
+            }
+        }
 
-                //Verify if its the same, if so then return with the data
-                var isMatch = BCrypt.Net.BCrypt.Verify(apiKey, apiKeyFromDb);
+        public static async Task<LoginData> ResetPassword(string username, string apiKey, string password)
+        {
+            int userCount;
 
-                if (isMatch == true)
+            //Checkif the user exists
+            using (var context = new DatabaseContext())
+            {
+                userCount = context.UserData.Where(x => x.Username == username).Count();
+            }
+
+            if (userCount == 0)
+            {
+                return new LoginData
                 {
-                    //Create a login token
-                    var loginTokenMatch = $"D{DateTime.Now.Ticks / 73}G{Guid.NewGuid()}";
+                    Reason = "User doesn't exist",
+                    Succesful = false
+                };
+            }
 
-                    //Update the DB
-                    using (var context = new DatabaseContext())
-                    {
-                        var userDataToUpdate = context.UserData.Single(x => x.Username == username);
-                        userDataToUpdate.LoginToken = loginTokenMatch;
+            //Do a request to validate their api key
+            var client = new RestClient("https://retroachievements.org/API/");
+            var request = new RestRequest($"API_GetConsoleIDs.php?z={username}&y={apiKey}", Method.Get);
 
-                        context.SaveChanges();
-                    }
+            //Get the response and Deserialize
+            var response = await client.ExecuteAsync(request);
+
+            //Make sure it hasn't errored
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error valding API key for user {username}");
+
+                return new LoginData
+                {
+                    Succesful = false,
+                    Reason = "There has been a error connecting to RetroAchievements. Please try again later"
+                };
+            }
+
+            //Now to finally check if it was valid request or not
+            if (response.Content == "Invalid API Key")
+            {
+                return new LoginData
+                {
+                    Succesful = false,
+                    Reason = "Invalid Username/API Key"
+                };
+            }
+
+            //Hash the api key and password
+            var hashedApiKey = BCrypt.Net.BCrypt.HashPassword(apiKey);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            //Update it all in the database
+            using (var context = new DatabaseContext())
+            {
+                var userToUpdate = context.UserData.Where(x => x.Username == username).FirstOrDefault();
+                userToUpdate.HashedPassword = hashedPassword;
+                userToUpdate.HashedApiKey = hashedApiKey;
+
+                context.UserData.Update(userToUpdate);
+                context.SaveChanges();
+            }
+
+            return new LoginData
+            {
+                Succesful = true,
+                Reason = "Password reset! You may login now"
+            };
+        }
+
+        public static LoginData LogUserIn(string username, string password)
+        {
+            //Validate if it's the correct password in the database
+            string passwordFromDb;
+
+            using (var context = new DatabaseContext())
+            {
+                var userData = context.UserData.Where(x => x.Username == username).FirstOrDefault();
+
+                if (userData == null)
+                {
                     return new LoginData
                     {
-                        LoginToken = loginTokenMatch,
-                        Succesful = true
+                        Reason = "Incorrect username/password",
+                        Succesful = false
                     };
                 }
-
-                //There is a chance that the api key may have changed so verify this before actually returning invalid
-                var client = new RestClient("https://retroachievements.org/API/");
-                var request = new RestRequest($"API_GetConsoleIDs.php?z={username}&y={apiKey}", Method.Get);
-
-                //Get the response and Deserialize
-                var response = await client.ExecuteAsync(request);
-
-                //Make sure it hasn't errored
-                if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+                else
                 {
-                    Log.Warning($"[RetroAchievements] Error valding API key for user {username}");
-
-                    return new LoginData
-                    {
-                        Succesful = false,
-                        Reason = "There has been a error connecting to RetroAchievements. Please try again later"
-                    };
+                    passwordFromDb = context.UserData.Single(x => x.Username == username).HashedPassword;
                 }
+            }
 
-                //Now to finally check if it was valid request or not
-                if (response.Content == "Invalid API Key")
-                {
-                    return new LoginData
-                    {
-                        Succesful = false,
-                        Reason = "Invalid Username/API Key"
-                    };
-                }
+            //Verify if its the same, if so then return with the data
+            var isMatch = BCrypt.Net.BCrypt.Verify(password, passwordFromDb);
 
-                //As it's valid we need to rehash it and update the database
+            if (isMatch == true)
+            {
+                //Create a login token
+                var loginTokenMatch = $"D{DateTime.Now.Ticks / 73}G{Guid.NewGuid()}";
 
-                //Hash the api key and generate a token
-                var hashedApiKey = BCrypt.Net.BCrypt.HashPassword(apiKey);
-                var loginTokenUpdate = $"D{DateTime.Now.Ticks / 73}G{Guid.NewGuid()}";
-
+                //Update the DB
                 using (var context = new DatabaseContext())
                 {
                     var userDataToUpdate = context.UserData.Single(x => x.Username == username);
-                    userDataToUpdate.HashedApiKey = hashedApiKey;
-                    userDataToUpdate.LoginToken = loginTokenUpdate;
+                    userDataToUpdate.LoginToken = loginTokenMatch;
 
                     context.SaveChanges();
                 }
 
                 return new LoginData
                 {
-                    LoginToken = loginTokenUpdate,
+                    LoginToken = loginTokenMatch,
                     Succesful = true
+                };
+            }
+            else
+            {
+                return new LoginData
+                {
+                    Reason = "Incorrect username/password",
+                    Succesful = false
                 };
             }
         }

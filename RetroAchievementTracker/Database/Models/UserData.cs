@@ -7,6 +7,7 @@ namespace RetroAchievementTracker.Database.Models
         [Key]
         public string Username { get; set; }
         public string HashedApiKey { get; set; }
+        public string HashedPassword { get; set; }
         public string LoginToken { get; set; }
     }
 }

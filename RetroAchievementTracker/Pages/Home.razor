@@ -3,6 +3,7 @@
 @using DateTimeToStringWithSuffix
 @using RetroAchievementTracker.Data.GameDataModal
 @using RetroAchievementTracker.Data.Login
+@using RetroAchievementTracker.Shared.Dialogs
 @using RetroAchievementsAPI
 
 @inject GameDataService GameDataService;
@@ -210,6 +211,6 @@ else
             MaxWidth = MaxWidth.Medium
         };
 
-        var dialog = DialogService.Show<GameModal>("Game Info", parameters, options);
+        var dialog = DialogService.Show<GameDialog>("Game Info", parameters, options);
     }
 }

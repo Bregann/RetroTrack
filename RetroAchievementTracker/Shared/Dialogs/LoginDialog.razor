@@ -1,0 +1,80 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Data.Login;
+
+@inject LoginService LoginService;
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject ISnackbar Snackbar;
+@inject IDialogService DialogService;
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+<DataAnnotationsValidator/>
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h5" Style="font-weight: bold">
+                <MudIcon Icon="@Icons.Filled.Login" Size="Size.Medium" Class="mr-1 mb-n1"></MudIcon>
+                Login</MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudText>You can find your RetroAchievements API key at <MudLink Href="https://retroachievements.org/controlpanel.php" Target="_blank">https://retroachievements.org/controlpanel.php</MudLink></MudText>
+            <MudTextField @bind-Value="model.Username" For="@(() => model.Username)" Label="Username" Required=true></MudTextField>
+            <MudTextField @bind-Value="model.Password" For="@(() => model.Password)" Label="Password" Required=true></MudTextField>
+            @if(succesful == false)
+            {
+                <MudAlert Severity="Severity.Error">@reason</MudAlert>
+            }
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Success" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3">Login</MudButton>
+            <MudButton Color="Color.Error" Variant="Variant.Filled" Class="mt-3" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Default" Variant="Variant.Filled" Class="mt-3" OnClick="OpenResetPasswordForm">Reset Password</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+@code {
+    LoginForm model = new LoginForm();
+    bool? succesful = null;
+    public string reason;
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public async void OnValidSubmit()
+    {
+        var response = LoginService.LogUserIn(model.Username.ToLower(), model.Password);
+
+        if(response.Succesful == false)
+        {
+            succesful = false;
+            reason = response.Reason;
+            StateHasChanged();
+        }
+        else
+        {
+            await LocalStorage.SetItemAsync("loginToken", response.LoginToken);
+            Snackbar.Add("Succesfully logged in!", Severity.Success);
+            MudDialog.Close(true);
+        }
+    }
+
+    private void OpenResetPasswordForm()
+    {
+        var options = new DialogOptions() { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+        var dialog = DialogService.Show<PasswordResetDialog>("Password Reset", options);
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close(false);
+    }
+
+    public class LoginForm
+    {
+        [Required]
+        [StringLength(100)]
+        public string Username { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string Password{ get; set; }
+    }
+}
