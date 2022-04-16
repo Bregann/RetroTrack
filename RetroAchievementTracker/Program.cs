@@ -1,17 +1,15 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using MudBlazor.Services;
-using RetroAchievementTracker.Services;
-using Serilog;
-using RetroAchievementTracker.RetroAchievementsAPI;
-using RetroAchievementTracker.Data.NavbarData;
-using RetroAchievementTracker.Data.Login;
 using Blazored.LocalStorage;
 using MudBlazor;
+using MudBlazor.Services;
 using RetroAchievementTracker.Data.GameData;
 using RetroAchievementTracker.Data.GameDataModal;
+using RetroAchievementTracker.Data.Login;
+using RetroAchievementTracker.Data.NavbarData;
 using RetroAchievementTracker.Data.TableData;
 using RetroAchievementTracker.Data.TrackedGames;
+using RetroAchievementTracker.RetroAchievementsAPI;
+using RetroAchievementTracker.Services;
+using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -23,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddMudServices( config =>
+builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
 });

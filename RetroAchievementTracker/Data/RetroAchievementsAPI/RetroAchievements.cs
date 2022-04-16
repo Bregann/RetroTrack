@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RestSharp;
 using RetroAchievementTracker.Data.RetroAchievementsAPI.Models;
-using Serilog;
 using RetroAchievementTracker.Database.Context;
-using Microsoft.EntityFrameworkCore;
 using RetroAchievementTracker.Database.Models;
-using System.Linq;
+using Serilog;
 using System.Text;
 
 namespace RetroAchievementTracker.RetroAchievementsAPI
@@ -369,7 +368,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
 
                 //Create the request with the data
                 var client = new RestClient(BaseUrl);
-                var request = new RestRequest($"API_GetUserProgress.php?z={Username}&y={ApiKey}&u=guinea&i={sb.Remove(sb.Length -1, 1)}", Method.Get); //Remove the final , at the end
+                var request = new RestRequest($"API_GetUserProgress.php?z={Username}&y={ApiKey}&u=guinea&i={sb.Remove(sb.Length - 1, 1)}", Method.Get); //Remove the final , at the end
 
                 //Get the response and Deserialize
                 var response = await client.ExecuteAsync(request);
@@ -438,7 +437,14 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
+            var userSummary = JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
+
+            using (var context = new DatabaseContext())
+            {
+                userSummary.GamesCompleted = context.UserGameProgress.Where(x => x.GamePercentage == 1 && x.Username == username).ToList().Count;
+            }
+
+            return userSummary;
         }
     }
 }

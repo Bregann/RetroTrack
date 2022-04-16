@@ -1,5 +1,5 @@
-﻿using RetroAchievementTracker.RetroAchievementsAPI;
-using RetroAchievementTracker.Data.TrackedGames;
+﻿using RetroAchievementTracker.Data.TrackedGames;
+using RetroAchievementTracker.RetroAchievementsAPI;
 
 namespace RetroAchievementTracker.Data.GameDataModal
 {

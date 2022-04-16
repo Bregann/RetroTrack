@@ -18,5 +18,7 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
 
         [JsonProperty("UserPic")]
         public string UserPic { get; set; }
+
+        public int GamesCompleted { get; set; } //not from the API but from db
     }
 }

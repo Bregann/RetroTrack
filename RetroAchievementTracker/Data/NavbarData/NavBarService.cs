@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RetroAchievementTracker.Database.Context;
-using RetroAchievementTracker.Database.Models;
-using System.Linq;
+﻿using RetroAchievementTracker.Database.Context;
 
 namespace RetroAchievementTracker.Data.NavbarData
 {
@@ -11,7 +8,7 @@ namespace RetroAchievementTracker.Data.NavbarData
         {
             using (var context = new DatabaseContext())
             {
-                return context.GameCounts.ToDictionary( x => x.ConsoleId, x => x.GameCount );
+                return context.GameCounts.ToDictionary(x => x.ConsoleId, x => x.GameCount);
             }
         }
 

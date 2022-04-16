@@ -29,9 +29,11 @@
                 <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">@loggedInUser</MudText>
                 <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">Points: @userSummary.TotalPoints.ToString("N0")</MudText>
                 <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">Rank: @userSummary.Rank.ToString("N0")/@userSummary.TotalRanked.ToString("N0")</MudText>
+                <MudText Align="Align.Left" Class="ml-4" Style="color: white; font-weight:bold">100% Count: @userSummary.GamesCompleted.ToString("N0")</MudText>
             </MudItem>
         </MudGrid>
         <MudNavLink Href="/trackedgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.PushPin" IconColor="Color.Warning">Tracked Games</MudNavLink>
+        <MudNavLink Href="/inprogressgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.Percent" IconColor="Color.Warning">In Progress Games</MudNavLink>
         }
         <MudNavLink Href="/home" Style="color: #E3F2FD;" Icon="@Icons.Filled.Home" IconColor="Color.Warning">Home</MudNavLink>
         <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
@@ -160,7 +162,7 @@
         if((bool)response.Data == true)
         {
             loggedIn = true;
-            var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+            loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
             await RetroAchievements.GetUserGamesProgress(loggedInUser);
             Snackbar.Add("Games Updated!", Severity.Info);
             gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);
@@ -181,7 +183,7 @@
         if((bool)response.Data == true)
         {
             loggedIn = true;
-            var loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+            loggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
             await RetroAchievements.GetUserGamesProgress(loggedInUser);
             Snackbar.Add("Games Updated!", Severity.Info);
             gameCompletedCounts = NavBarService.GetCompletedGamesForUser(loggedInUser);

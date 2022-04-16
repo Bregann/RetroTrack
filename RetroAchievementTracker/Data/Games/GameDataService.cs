@@ -1,6 +1,5 @@
 ﻿using RetroAchievementTracker.Database.Context;
 using RetroAchievementTracker.Database.Models;
-using System.Linq;
 
 namespace RetroAchievementTracker.Data.GameData
 {
@@ -13,10 +12,10 @@ namespace RetroAchievementTracker.Data.GameData
             //Get all the games from the specificed day and are processed (so it has all the data required)
             using (var context = new DatabaseContext())
             {
-                gameList = context.Games.Where(x => x.DateAdded.Value.Day == dt.Day && 
-                                                x.DateAdded.Value.Month == dt.Month && 
-                                                x.DateAdded.Value.Year == dt.Year && 
-                                                x.AchievementCount != 0 && 
+                gameList = context.Games.Where(x => x.DateAdded.Value.Day == dt.Day &&
+                                                x.DateAdded.Value.Month == dt.Month &&
+                                                x.DateAdded.Value.Year == dt.Year &&
+                                                x.AchievementCount != 0 &&
                                                 x.IsProcessed == true).ToList();
             }
 

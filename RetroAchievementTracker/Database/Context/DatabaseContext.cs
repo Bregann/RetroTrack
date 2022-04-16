@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroAchievementTracker.Database.Models;
-using Serilog;
 
 namespace RetroAchievementTracker.Database.Context
 {
