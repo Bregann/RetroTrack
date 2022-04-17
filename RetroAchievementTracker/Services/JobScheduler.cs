@@ -64,7 +64,7 @@ namespace RetroAchievementTracker.Services
             }
 
             //Create a new copy
-            var backupFileName = $"retroachievements-{DateTime.Now.Date}-{DateTime.Now.TimeOfDay}.db";
+            var backupFileName = $"retroachievements-{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}-{DateTime.Now.Hour}.db";
 
             File.Copy(Path.Combine(filePath, "retroachievements.db"), Path.Combine(filePath, backupFileName));
             Log.Information($"[Database Backup] Database backup succeeded. File {backupFileName} created");
