@@ -32,7 +32,7 @@ namespace RetroAchievementTracker.Data.Login
 
                     return new LoginData
                     {
-                        Succesful = false,
+                        Successful = false,
                         Reason = "There has been a error connecting to RetroAchievements. Please try again later"
                     };
                 }
@@ -42,7 +42,7 @@ namespace RetroAchievementTracker.Data.Login
                 {
                     return new LoginData
                     {
-                        Succesful = false,
+                        Successful = false,
                         Reason = "Invalid Username/API Key"
                     };
                 }
@@ -71,7 +71,7 @@ namespace RetroAchievementTracker.Data.Login
                 return new LoginData
                 {
                     LoginToken = loginToken,
-                    Succesful = true
+                    Successful = true
                 };
             }
             else
@@ -79,7 +79,7 @@ namespace RetroAchievementTracker.Data.Login
                 return new LoginData
                 {
                     Reason = "User already registered",
-                    Succesful = false
+                    Successful = false
                 };
             }
         }
@@ -99,7 +99,7 @@ namespace RetroAchievementTracker.Data.Login
                 return new LoginData
                 {
                     Reason = "User doesn't exist",
-                    Succesful = false
+                    Successful = false
                 };
             }
 
@@ -117,7 +117,7 @@ namespace RetroAchievementTracker.Data.Login
 
                 return new LoginData
                 {
-                    Succesful = false,
+                    Successful = false,
                     Reason = "There has been a error connecting to RetroAchievements. Please try again later"
                 };
             }
@@ -127,7 +127,7 @@ namespace RetroAchievementTracker.Data.Login
             {
                 return new LoginData
                 {
-                    Succesful = false,
+                    Successful = false,
                     Reason = "Invalid Username/API Key"
                 };
             }
@@ -149,7 +149,7 @@ namespace RetroAchievementTracker.Data.Login
 
             return new LoginData
             {
-                Succesful = true,
+                Successful = true,
                 Reason = "Password reset! You may login now"
             };
         }
@@ -168,7 +168,7 @@ namespace RetroAchievementTracker.Data.Login
                     return new LoginData
                     {
                         Reason = "Incorrect username/password",
-                        Succesful = false
+                        Successful = false
                     };
                 }
                 else
@@ -197,7 +197,7 @@ namespace RetroAchievementTracker.Data.Login
                 return new LoginData
                 {
                     LoginToken = loginTokenMatch,
-                    Succesful = true
+                    Successful = true
                 };
             }
             else
@@ -205,7 +205,7 @@ namespace RetroAchievementTracker.Data.Login
                 return new LoginData
                 {
                     Reason = "Incorrect username/password",
-                    Succesful = false
+                    Successful = false
                 };
             }
         }

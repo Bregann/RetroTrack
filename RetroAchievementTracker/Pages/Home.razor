@@ -1,4 +1,5 @@
-﻿@page "/home"
+﻿@page "/"
+@page "/home"
 @using Data.GameData
 @using DateTimeToStringWithSuffix
 @using RetroAchievementTracker.Data.GameDataModal
@@ -159,15 +160,13 @@ else
     private List<GameData> games3Days = new();
     private List<GameData> games4Days = new();
     private bool LoggedIn = false;
+    private bool Last3DaysRendered = false;
     private string LoggedInUser;
 
     protected override Task OnInitializedAsync()
     {
         gamesToday = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Today);
         gamesYesterday = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-1));
-        games2Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-2));
-        games3Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-3));
-        games4Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-4));
         StateHasChanged();
         return Task.CompletedTask;
     }
@@ -183,6 +182,15 @@ else
                 LoggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
                 StateHasChanged();
             }
+        }
+
+        if(!Last3DaysRendered)
+        {
+            games2Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-2));
+            games3Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-3));
+            games4Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-4));
+            Last3DaysRendered = true;
+            StateHasChanged();
         }
     }
 

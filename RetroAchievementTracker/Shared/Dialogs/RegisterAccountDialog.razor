@@ -18,7 +18,7 @@
             <MudTextField @bind-Value="model.RAUsername" For="@(() => model.RAUsername)" Label="RA Username" Required=true></MudTextField>
             <MudTextField @bind-Value="model.RAAPIKey" For="@(() => model.RAAPIKey)" Label="RA API Key" Required=true></MudTextField>
             <MudTextField @bind-Value="model.Password" For="@(() => model.Password)" Label="Password" Required=true InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePassword" AdornmentAriaLabel="Show Password"></MudTextField>
-            @if(succesful == false)
+            @if(successful == false)
             {
                 <MudAlert Severity="Severity.Error">@reason</MudAlert>
             }
@@ -31,7 +31,7 @@
 </EditForm>
 @code {
     RegisterForm model = new RegisterForm();
-    bool? succesful = null;
+    bool? successful = null;
     public string reason;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
     bool isShow;
@@ -43,16 +43,16 @@
     {
         var response = await LoginService.RegisterNewUser(model.RAUsername.ToLower(), model.RAAPIKey, model.Password);
 
-        if(response.Succesful == false)
+        if(response.Successful == false)
         {
-            succesful = false;
+            successful = false;
             reason = response.Reason;
             StateHasChanged();
         }
         else
         {
             await LocalStorage.SetItemAsync("loginToken", response.LoginToken);
-            Snackbar.Add("Succesfully logged in!", Severity.Success);
+            Snackbar.Add("Successfully logged in!", Severity.Success);
             MudDialog.Close(true);
         }
     }
