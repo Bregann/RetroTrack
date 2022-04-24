@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RetroAchievementTracker.Database.Context;
 
 #nullable disable
@@ -10,21 +11,25 @@ using RetroAchievementTracker.Database.Context;
 namespace RetroAchievementTracker.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class RetroAchievementTrackerContextModelSnapshot : ModelSnapshot
+    partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.3");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.GameConsoles", b =>
                 {
                     b.Property<int>("ConsoleID")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConsoleName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("ConsoleID");
 
@@ -34,10 +39,10 @@ namespace RetroAchievementTracker.Migrations
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.GameCounts", b =>
                 {
                     b.Property<int>("ConsoleId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("GameCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("ConsoleId");
 
@@ -47,45 +52,45 @@ namespace RetroAchievementTracker.Migrations
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.Games", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("AchievementCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ConsoleID")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConsoleName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DateAdded")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("GameGenre")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageBoxArt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageIcon")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageIngame")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsProcessed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("PlayersCasual")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("PlayersHardcore")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -95,14 +100,14 @@ namespace RetroAchievementTracker.Migrations
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.TrackedGames", b =>
                 {
                     b.Property<string>("UsernameGameID")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int>("GameID")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UsernameGameID");
 
@@ -112,19 +117,19 @@ namespace RetroAchievementTracker.Migrations
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.UserData", b =>
                 {
                     b.Property<string>("Username")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("HashedApiKey")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("HashedPassword")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginToken")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Username");
 
@@ -134,30 +139,30 @@ namespace RetroAchievementTracker.Migrations
             modelBuilder.Entity("RetroAchievementTracker.Database.Models.UserGameProgress", b =>
                 {
                     b.Property<string>("UsernameGameID")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int>("AchievementsGained")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ConsoleID")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("GameID")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("GameName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("GamePercentage")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("HardcoreMode")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UsernameGameID");
 

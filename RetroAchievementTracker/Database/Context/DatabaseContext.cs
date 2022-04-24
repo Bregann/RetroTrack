@@ -13,18 +13,12 @@ namespace RetroAchievementTracker.Database.Context
         public DbSet<TrackedGames> TrackedGames { get; set; }
         public string DbPath { get; }
 
-        public DatabaseContext()
-        {
-            var filePath = Directory.GetCurrentDirectory();
 #if DEBUG
-            DbPath = filePath + "\\Database\\retroachievements.db";
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder.UseNpgsql("Host=localhost;Database=retroachievements;Username=ra;Password=yourpassword");
 #else
-            DbPath = filePath + "/Database/retroachievements.db";
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder.UseNpgsql("Host=localhost;Database=retroachievements;Username=ra;Password=yourpassword");
 #endif
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options
-            .UseSqlite($"Data Source={DbPath}");
     }
 }
