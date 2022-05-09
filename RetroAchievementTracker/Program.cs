@@ -1,6 +1,8 @@
+using Blazor.Analytics;
 using Blazored.LocalStorage;
 using MudBlazor;
 using MudBlazor.Services;
+using RetroAchievementTracker;
 using RetroAchievementTracker.Data.GameData;
 using RetroAchievementTracker.Data.GameDataModal;
 using RetroAchievementTracker.Data.Login;
@@ -13,6 +15,8 @@ using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 await JobScheduler.SetupQuartz();
 
@@ -35,6 +39,7 @@ builder.Services.AddSingleton<RetroAchievements>();
 builder.Services.AddSingleton<TrackedGamesService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddResponseCompression();
+builder.Services.AddGoogleAnalytics("G-MDNWQR4K45");
 builder.Logging.AddSerilog();
 
 var app = builder.Build();
@@ -58,5 +63,10 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapGet("/sitemap.xml", () => File.ReadAllText("sitemap.xml"));
+});
 
 app.Run();

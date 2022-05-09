@@ -1,5 +1,4 @@
-﻿@page "/"
-@page "/home"
+﻿@page "/home"
 @using Data.GameData
 @using DateTimeToStringWithSuffix
 @using RetroAchievementTracker.Data.GameDataModal
@@ -197,6 +196,18 @@ else
     private async Task OpenGameModal(TableRowClickEventArgs<GameData> row)
     {
         GameDataModal game;
+
+        //check login status before opening
+        if(LoginService.ValidateUserLogin(await LocalStorage.GetItemAsync<string>("loginToken")))
+        {
+            LoggedIn = true;
+            LoggedInUser = LoginService.GetLoggedInUser(await LocalStorage.GetItemAsync<string>("loginToken"));
+        }
+        else
+        {
+            LoggedIn = false;
+            LoggedInUser = "";
+        }
 
         if(LoggedIn)
         {

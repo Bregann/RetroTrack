@@ -4,6 +4,7 @@ using RestSharp;
 using RetroAchievementTracker.Data.RetroAchievementsAPI.Models;
 using RetroAchievementTracker.Database.Context;
 using RetroAchievementTracker.Database.Models;
+using RetroAchievementTracker.Services;
 using Serilog;
 using System.Text;
 
@@ -177,6 +178,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             var client = new RestClient(BaseUrl);
+            var gamesWith0Achievements = new Dictionary<string, string>();
+
 
             foreach (var game in unprocessedGames)
             {
@@ -216,6 +219,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     ConsoleName = game.ConsoleName
                 });
 
+                gamesWith0Achievements.Add(game.Title, game.ConsoleName);
+
                 Log.Information($"[RetroAchievements] {game.Title} added to updates list");
                 await Task.Delay(400); //delay a bit to stop hitting the api too hard
             }
@@ -233,6 +238,11 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             Log.Information("[RetroAchievements] Games database updated");
+
+            if (gamesWith0Achievements.Count != 0)
+            {
+                await SendGridService.Send0AchievementGamesEmail(gamesWith0Achievements);
+            }
         }
 
         public static async Task GetUserGamesProgress(string username)
@@ -272,6 +282,13 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 {
                     foreach (var game in gamesToUpdate)
                     {
+                        //weird bug with some games - says null max achievements/percentage so prevent crashing with the deralised object as nullable
+                        double pct = 0;
+                        if (game.PctWon != null)
+                        {
+                            pct = (double)game.PctWon;
+                        }
+
                         var newImprogressGames = new UserGameProgress
                         {
                             AchievementsGained = game.AchievementsAwarded,
@@ -281,7 +298,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                             UsernameGameID = $"{username}-{game.GameId}",
                             Username = username,
                             ConsoleID = game.ConsoleId,
-                            GamePercentage = game.PctWon
+                            GamePercentage = pct
                         };
 
                         await context
@@ -399,6 +416,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                         gameFromDb.IsProcessed = false; //Set not processed to queue it up on the next update
                         gameFromDb.DateAdded = DateTime.Now;
                         gamesToUpdate.Add(gameFromDb);
+
+                        Log.Information($"[RetroAchievements] Game {gameFromDb.Title} ready to update. New achievement count - {game.Value.NumPossibleAchievements}");
                     }
                 }
 

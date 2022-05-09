@@ -73,7 +73,9 @@
             PC6000 = 67,
             SegaPico = 68,
             MegaDuck = 69,
-            Zeebo = 70
+            Zeebo = 70,
+            Arduboy = 71,
+            WASM4 = 72
         }
     }
 }

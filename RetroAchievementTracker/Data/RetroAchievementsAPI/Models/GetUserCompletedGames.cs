@@ -20,6 +20,6 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
         public int HardcoreMode { get; set; }
 
         [JsonProperty("PctWon")]
-        public double PctWon { get; set; }
+        public double? PctWon { get; set; }
     }
 }

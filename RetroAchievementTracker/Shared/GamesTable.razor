@@ -197,7 +197,7 @@
             return;
         }
 
-        var parameters = new DialogParameters { ["GameDataModal"] = game, ["LoggedIn"] = LoggedIn };
+        var parameters = new DialogParameters { ["GameDataModal"] = game, ["LoggedIn"] = LoggedIn, ["LoggedInUser"] = LoggedInUser };
         var options = new DialogOptions
         {
             MaxWidth = MaxWidth.Medium,
