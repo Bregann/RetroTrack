@@ -1,6 +1,6 @@
-﻿namespace RetroAchievementTracker.Data.GameData
+﻿namespace RetroAchievementTracker.Data.HistoricGameData
 {
-    public class GameData
+    public class HistoricGameData
     {
         public string GameIcon { get; set; }
         public int GameId { get; set; }

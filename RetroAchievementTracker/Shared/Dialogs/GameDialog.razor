@@ -1,9 +1,9 @@
-﻿@using RetroAchievementTracker.Data.GameDataModal
+﻿@using RetroAchievementTracker.Data.GameData
 @using DateTimeToStringWithSuffix
 @using RetroAchievementTracker.Data.TrackedGames
 
 @inject TrackedGamesService TrackedGamesService;
-@inject GameDataModalService GameDataModalService;
+@inject GameDataService GameDataModalService;
 
 <MudDialog Style="min-height 300px; overflow: auto">
     <TitleContent>
@@ -20,13 +20,14 @@
                 </MudItem>
                 <MudItem xs=3>
                     <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: bold">Achievement Count</MudText>
-
-                    <MudText Typo="Typo.h6" Align="Align.Center">
-                        @if(LoggedIn)
-                        {
-                            @GameDataModal.AchievementsUnlocked
-                        }
-                        / @GameDataModal.AchievementCount (@GameDataModal.PercentageCompleted)</MudText>
+                    @if(LoggedIn)
+                    {
+                        <MudText Typo="Typo.h6" Align="Align.Center">@GameDataModal.AchievementsUnlocked / @GameDataModal.AchievementCount (@GameDataModal.PercentageCompleted)</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.h6" Align="Align.Center">0 / @GameDataModal.AchievementCount</MudText>
+                    }
                 </MudItem>
                 <MudItem xs=3>
                     <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: bold">Genre</MudText>
@@ -75,7 +76,7 @@
         @if(LoggedIn)
         {
             <MudSwitch Label="Hide Completed" CheckedChanged="ChangeCompletedGamesToggle" T=bool Checked=hideCompleted Color=Color.Info/>
-                <MudButton Color="Color.Info" Variant="Variant.Filled" Class="mt-3" Style="color: white !important;" OnClick="UpdateAchievements">Update Achievements</MudButton>
+            <MudButton Color="Color.Info" Variant="Variant.Filled" Class="mt-3" Style="color: white !important;" OnClick="UpdateAchievements">Update Achievements</MudButton>
 
             @if(GameDataModal.GameTracked)
             {
@@ -95,14 +96,23 @@
         </MudTooltip>
         }
 
-        <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">Game Page</MudButton>
+        <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@GameDataModal.RAURL">RA</MudButton>
+
+        @if(LoggedIn)
+        {
+            <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@($"/game/{GameDataModal.Id}/{LoggedInUser}")">Game Page</MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Info" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Class="mt-3" Target="_blank" Link="@($"/game/{GameDataModal.Id}")">Game Page</MudButton>
+        }
         <MudButton Color="Color.Error" Variant="Variant.Filled" Class="mt-3" OnClick="Cancel">Close</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] public MudDialogInstance MudDialog { get; set; }
-    [Parameter] public GameDataModal GameDataModal { get; set; }
+    [Parameter] public GameData GameDataModal { get; set; }
     [Parameter] public bool LoggedIn { get; set; }
     [Parameter] public string LoggedInUser { get; set; }
     private bool hideCompleted;

@@ -1,15 +1,20 @@
 ﻿using RetroAchievementTracker.Data.TrackedGames;
 using RetroAchievementTracker.RetroAchievementsAPI;
 
-namespace RetroAchievementTracker.Data.GameDataModal
+namespace RetroAchievementTracker.Data.GameData
 {
-    public class GameDataModalService
+    public class GameDataService
     {
-        public async Task<GameDataModal> GetGameDataToPopulateModal(int gameId)
+        public async Task<GameData> GetGameDataToPopulateModal(int gameId)
         {
             var data = await RetroAchievements.GetSpecificGameInfo(gameId);
 
-            var gameModal = new GameDataModal
+            if (data == null)
+            {
+                return null;
+            }
+
+            var gameModal = new GameData
             {
                 AchievementCount = data.AchievementCount,
                 ConsoleName = data.ConsoleName,
@@ -27,6 +32,18 @@ namespace RetroAchievementTracker.Data.GameDataModal
 
             foreach (var achievement in data.Achievements)
             {
+                var achievementBadgeName = "";
+                var chars = achievement.Value.BadgeName.ToString().ToCharArray();
+
+                if (chars[0] == '1' && chars.Length <= 4)
+                {
+                    achievementBadgeName = "0" + achievement.Value.BadgeName.ToString();
+                }
+                else
+                {
+                    achievementBadgeName = achievement.Value.BadgeName.ToString();
+                }
+
                 gameModal.Achievements.Add(achievement.Key, new Achievement
                 {
                     NumAwarded = achievement.Value.NumAwarded,
@@ -34,18 +51,23 @@ namespace RetroAchievementTracker.Data.GameDataModal
                     Title = achievement.Value.Title,
                     Description = achievement.Value.Description,
                     Points = achievement.Value.Points,
-                    BadgeUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png"
+                    BadgeUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievementBadgeName + "_lock.png"
                 });
             }
 
             return gameModal;
         }
 
-        public async Task<GameDataModal> GetLoggedInDataToPopulateModal(int gameId, string username)
+        public async Task<GameData> GetLoggedInDataToPopulateModal(int gameId, string username)
         {
             var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, username);
 
-            var gameModal = new GameDataModal
+            if (data == null)
+            {
+                return null;
+            }
+
+            var gameModal = new GameData
             {
                 AchievementCount = data.AchievementCount,
                 AchievementsUnlocked = data.NumAwardedToUser,
@@ -68,6 +90,19 @@ namespace RetroAchievementTracker.Data.GameDataModal
             foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
             {
                 var achievementState = "";
+                var achievementBadgeName = "";
+
+                var chars = achievement.Value.BadgeName.ToString().ToCharArray();
+
+                if (chars[0] == '1' && chars.Length <= 4)
+                {
+                    achievementBadgeName = "0" + achievement.Value.BadgeName.ToString();
+                }
+                else
+                {
+                    achievementBadgeName = achievement.Value.BadgeName.ToString();
+                }
+
 
                 if (achievement.Value.DateEarned != null || achievement.Value.DateEarnedHardcore != null)
                 {
@@ -87,7 +122,7 @@ namespace RetroAchievementTracker.Data.GameDataModal
                     Title = achievement.Value.Title,
                     Description = achievement.Value.Description,
                     Points = achievement.Value.Points,
-                    BadgeUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + achievementState
+                    BadgeUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievementBadgeName + achievementState
                 });
             }
 

@@ -335,6 +335,12 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 return null;
             }
 
+            //if there's no achievements
+            if(response.Content.Contains("{\"Achievements\":[],") || response.Content.Contains("Achievements\":[]"))
+            {
+                return null;
+            }
+
             return JsonConvert.DeserializeObject<GameInfo>(response.Content);
         }
 
@@ -349,6 +355,12 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
+                return null;
+            }
+
+            //if there's no achievements
+            if (response.Content.Contains("Achievements\":[]"))
+            {
                 return null;
             }
 

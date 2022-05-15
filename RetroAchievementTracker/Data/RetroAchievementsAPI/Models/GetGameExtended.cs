@@ -38,7 +38,7 @@ namespace RetroAchievementTracker.Data.RetroAchievementsAPI.Models
         public int PlayersHardcore { get; set; }
 
         [JsonProperty("Achievements")]
-        public Dictionary<string, Achievement> Achievements { get; set; }
+        public Dictionary<string, Achievement>? Achievements { get; set; }
     }
 
     public partial class Achievement

@@ -1,11 +1,11 @@
 ﻿using RetroAchievementTracker.Database.Context;
 using RetroAchievementTracker.Database.Models;
 
-namespace RetroAchievementTracker.Data.GameData
+namespace RetroAchievementTracker.Data.HistoricGameData
 {
-    public class GameDataService
+    public class HistoricGameDataService
     {
-        public List<GameData> GetGamesAddedOnSpecificDate(DateTime dt)
+        public List<HistoricGameData> GetGamesAddedOnSpecificDate(DateTime dt)
         {
             var gameList = new List<Games>();
 
@@ -20,7 +20,7 @@ namespace RetroAchievementTracker.Data.GameData
             }
 
             //Convert that to the object
-            return (gameList.Select(game => new GameData
+            return (gameList.Select(game => new HistoricGameData
             {
                 AchievementCount = (int)game.AchievementCount,
                 Console = game.ConsoleName,

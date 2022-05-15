@@ -1,10 +1,10 @@
-﻿@using RetroAchievementTracker.Data.GameDataModal
+﻿@using RetroAchievementTracker.Data.GameData
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Data.TableData
 @using RetroAchievementTracker.Data.Enums
 @using RetroAchievementTracker.Shared.Dialogs
 
-@inject GameDataModalService GameDataModalService;
+@inject GameDataService GameDataModalService;
 @inject ISnackbar Snackbar;
 @inject IDialogService DialogService;
 @inject LoginService LoginService;
@@ -180,7 +180,7 @@
 
     private async Task OpenGameModal(TableRowClickEventArgs<TableData> row)
     {
-        GameDataModal game;
+        GameData game;
 
         if(LoggedIn)
         {

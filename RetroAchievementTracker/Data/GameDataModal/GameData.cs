@@ -1,6 +1,6 @@
-﻿namespace RetroAchievementTracker.Data.GameDataModal
+﻿namespace RetroAchievementTracker.Data.GameData
 {
-    public class GameDataModal
+    public class GameData
     {
         public int Id { get; set; }
         public string RAURL { get; set; }

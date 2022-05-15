@@ -1,13 +1,13 @@
 ﻿@page "/home"
 @using Data.GameData
 @using DateTimeToStringWithSuffix
-@using RetroAchievementTracker.Data.GameDataModal
+@using RetroAchievementTracker.Data.HistoricGameData
 @using RetroAchievementTracker.Data.Login
 @using RetroAchievementTracker.Shared.Dialogs
 @using RetroAchievementsAPI
 
-@inject GameDataService GameDataService;
-@inject GameDataModalService GameDataModalService;
+@inject HistoricGameDataService GameDataService;
+@inject GameDataService GameDataModalService;
 @inject LoginService LoginService;
 @inject ISnackbar Snackbar;
 @inject IDialogService DialogService;
@@ -31,7 +31,7 @@ else
     }
     else
     {
-        <MudTable Items="gamesToday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
+        <MudTable Items="gamesToday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="HistoricGameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -56,7 +56,7 @@ else
     }
     else
     {
-        <MudTable Items="gamesYesterday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
+        <MudTable Items="gamesYesterday" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="HistoricGameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -81,7 +81,7 @@ else
     }
     else
     {
-        <MudTable Items="games2Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
+        <MudTable Items="games2Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="HistoricGameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -106,7 +106,7 @@ else
     }
     else
     {
-        <MudTable Items="games3Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
+        <MudTable Items="games3Days" Hover=true Striped=true Class="mt-3" Elevation=5 OnRowClick="OpenGameModal" T="HistoricGameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -131,7 +131,7 @@ else
     }
     else
     {
-        <MudTable Items="games4Days" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5 OnRowClick="OpenGameModal" T="GameData">
+        <MudTable Items="games4Days" Hover=true Striped=true Class="mt-3 mb-4" Elevation=5 OnRowClick="OpenGameModal" T="HistoricGameData">
             <HeaderContent>
                 <MudTh>Game Icon</MudTh>
                 <MudTh>Title</MudTh>
@@ -153,11 +153,11 @@ else
 
 @code {
     //probably a better way of doing this tbf
-    private List<GameData> gamesToday = new();
-    private List<GameData> gamesYesterday = new();
-    private List<GameData> games2Days = new();
-    private List<GameData> games3Days = new();
-    private List<GameData> games4Days = new();
+    private List<HistoricGameData> gamesToday = new();
+    private List<HistoricGameData> gamesYesterday = new();
+    private List<HistoricGameData> games2Days = new();
+    private List<HistoricGameData> games3Days = new();
+    private List<HistoricGameData> games4Days = new();
     private bool LoggedIn = false;
     private bool Last3DaysRendered = false;
     private string LoggedInUser;
@@ -185,17 +185,17 @@ else
 
         if(!Last3DaysRendered)
         {
-            games2Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-2));
-            games3Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-3));
-            games4Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-4));
+                games2Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-2));
+                games3Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-3));
+                games4Days = GameDataService.GetGamesAddedOnSpecificDate(DateTime.Now.AddDays(-4));
             Last3DaysRendered = true;
             StateHasChanged();
         }
     }
 
-    private async Task OpenGameModal(TableRowClickEventArgs<GameData> row)
+    private async Task OpenGameModal(TableRowClickEventArgs<HistoricGameData> row)
     {
-        GameDataModal game;
+        GameData game;
 
         //check login status before opening
         if(LoginService.ValidateUserLogin(await LocalStorage.GetItemAsync<string>("loginToken")))

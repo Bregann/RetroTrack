@@ -4,7 +4,8 @@ using MudBlazor;
 using MudBlazor.Services;
 using RetroAchievementTracker;
 using RetroAchievementTracker.Data.GameData;
-using RetroAchievementTracker.Data.GameDataModal;
+using RetroAchievementTracker.Data.GameData;
+using RetroAchievementTracker.Data.HistoricGameData;
 using RetroAchievementTracker.Data.Login;
 using RetroAchievementTracker.Data.NavbarData;
 using RetroAchievementTracker.Data.TableData;
@@ -32,8 +33,8 @@ builder.Services.AddMudServices(config =>
 
 builder.Services.AddSingleton<NavBarService>();
 builder.Services.AddSingleton<LoginService>();
+builder.Services.AddSingleton<HistoricGameDataService>();
 builder.Services.AddSingleton<GameDataService>();
-builder.Services.AddSingleton<GameDataModalService>();
 builder.Services.AddSingleton<TableDataService>();
 builder.Services.AddSingleton<RetroAchievements>();
 builder.Services.AddSingleton<TrackedGamesService>();
