@@ -178,8 +178,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             var client = new RestClient(BaseUrl);
-            var gamesWith0Achievements = new Dictionary<string, string>();
-
+            var gamesWith0Achievements = new Dictionary<int, Tuple<string, string>>();
 
             foreach (var game in unprocessedGames)
             {
@@ -219,7 +218,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     ConsoleName = game.ConsoleName
                 });
 
-                gamesWith0Achievements.Add(game.Title, game.ConsoleName);
+                gamesWith0Achievements.Add(game.Id, new Tuple<string, string>(game.Title, game.ConsoleName));
 
                 Log.Information($"[RetroAchievements] {game.Title} added to updates list");
                 await Task.Delay(400); //delay a bit to stop hitting the api too hard

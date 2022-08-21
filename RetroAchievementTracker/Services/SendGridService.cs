@@ -9,7 +9,7 @@ namespace RetroAchievementTracker.Services
     {
         private static readonly string ApiKey = "";
 
-        public static async Task Send0AchievementGamesEmail(Dictionary<string, string> gamesToSend)
+        public static async Task Send0AchievementGamesEmail(Dictionary<int, Tuple<string, string>> gamesToSend)
         {
             //Setup the email
             var client = new SendGridClient(ApiKey);
@@ -20,7 +20,7 @@ namespace RetroAchievementTracker.Services
 
             foreach (var game in gamesToSend)
             {
-                plainTextContent.AppendLine($"{game.Key} - {game.Value}");
+                plainTextContent.AppendLine($"{game.Key} - {game.Value.Item1} - {game.Value.Item2}");
             }
 
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent.ToString(), null);
