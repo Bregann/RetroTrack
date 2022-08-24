@@ -94,6 +94,12 @@
         {
             return true;
         }
+        
+        //Weird data bug, some games have a null genre in db
+        if(data.Genre == null)
+        {
+            return false;
+        }
 
         if(data.Genre.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
