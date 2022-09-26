@@ -340,7 +340,21 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<GameInfo>(response.Content);
+            //Deseralise the data
+            var data = JsonConvert.DeserializeObject<GameInfo>(response.Content);
+
+            //Update the player count as the values on the table are out of sync
+            using(var context = new DatabaseContext())
+            {
+                var game = context.Games.Where(x => x.Id == data.Id).FirstOrDefault();
+                game.PlayersCasual = data.PlayersCasual;
+                game.PlayersHardcore = data.PlayersHardcore;
+
+                context.Update(game);
+                context.SaveChanges();
+            }
+
+            return data;
         }
 
         public static async Task<GetGameInfoAndUserProgress> GetSpecificGameInfoAndUserProgress(int gameId, string username)
@@ -363,7 +377,21 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
+            //Deseralise the data
+            var data = JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
+
+            //Update the player count as the values on the table are out of sync
+            using (var context = new DatabaseContext())
+            {
+                var game = context.Games.Where(x => x.Id == data.Id).FirstOrDefault();
+                game.PlayersCasual = data.PlayersCasual;
+                game.PlayersHardcore = data.PlayersHardcore;
+
+                context.Update(game);
+                context.SaveChanges();
+            }
+
+            return data;
         }
 
         //If they change the API - go back to original idea of GetGamesWith0AchievementsAndCheckForAchievements
@@ -378,7 +406,8 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
             }
 
             var timesToLoop = gamesList.Count / 100;
-            var gamesToUpdate = new List<Games>();
+
+            int gamesUpdated = 0;
 
             //Loop through 100 games at a time to not hit the API too hard
             for (int i = 0; i < timesToLoop; i++)
@@ -426,8 +455,14 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                         gameFromDb.AchievementCount = game.Value.NumPossibleAchievements;
                         gameFromDb.IsProcessed = false; //Set not processed to queue it up on the next update
                         gameFromDb.DateAdded = DateTime.Now;
-                        gamesToUpdate.Add(gameFromDb);
 
+                        using(var context = new DatabaseContext())
+                        {
+                            context.Games.Update(gameFromDb);
+                            context.SaveChanges();
+                        }
+
+                        gamesUpdated++;
                         Log.Information($"[RetroAchievements] Game {gameFromDb.Title} ready to update. New achievement count - {game.Value.NumPossibleAchievements}");
                     }
                 }
@@ -436,21 +471,7 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 await Task.Delay(400); //wait a bit so we don't keep spamming the api
             }
 
-            Log.Information($"[RetroAchievements] {gamesToUpdate.Count} games to update");
-
-            //Update the games left
-            using (var context = new DatabaseContext())
-            {
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    context.Games.UpdateRange(gamesToUpdate);
-
-                    context.SaveChanges();
-                    transaction.Commit();
-                }
-            }
-
-            Log.Information($"[RetroAchievements] {gamesToUpdate.Count} games updated");
+            Log.Information($"[RetroAchievements] {gamesUpdated} games updated");
         }
 
         public static async Task<GetUserSummary> GetUserProfileData(string username)

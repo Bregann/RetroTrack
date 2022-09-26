@@ -36,6 +36,8 @@
         <MudNavLink Href="/inprogressgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.Percent" IconColor="Color.Warning">In Progress Games</MudNavLink>
         }
         <MudNavLink Href="/home" Style="color: #E3F2FD;" Icon="@Icons.Filled.Home" IconColor="Color.Warning">Home</MudNavLink>
+        <MudNavLink Href="/allgames" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">All Games</MudNavLink>
+
         <MudNavGroup Title="Nintendo" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/gameboy" Style="color: #E3F2FD;">Game Boy<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoy]/@gameCounts[(int)Consoles.ConsoleNames.GameBoy]</MudText></MudNavLink>
             <MudNavLink Href="/gameboycolour" Style="color: #E3F2FD;">Game Boy Colour<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.GameBoyColour]/@gameCounts[(int)Consoles.ConsoleNames.GameBoyColour]</MudText></MudNavLink>
@@ -49,6 +51,7 @@
         </MudNavGroup>
         <MudNavGroup Title="Playstation" Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">
             <MudNavLink Href="/ps1" Style="color: #E3F2FD;">PlayStation 1<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PlayStation]/@gameCounts[(int)Consoles.ConsoleNames.PlayStation]</MudText></MudNavLink>
+            <MudNavLink Href="/ps2" Style="color: #E3F2FD;">PlayStation 2<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PlayStation2]/@gameCounts[(int)Consoles.ConsoleNames.PlayStation2]</MudText></MudNavLink>
             <MudNavLink Href="/psp" Style="color: #E3F2FD;">PSP<MudSpacer /><MudText Color=Color.Error Style="display: inline;">@gameCompletedCounts[(int)Consoles.ConsoleNames.PlayStationPortable]/@gameCounts[(int)Consoles.ConsoleNames.PlayStationPortable]</MudText></MudNavLink>
         </MudNavGroup>
         <MudNavGroup Title="Atari"  Style="color: #E3F2FD;" Icon="@Icons.Filled.Games" IconColor="Color.Warning">

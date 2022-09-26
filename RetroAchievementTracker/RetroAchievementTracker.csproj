@@ -40,4 +40,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Pages\AllGames.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
 </Project>
