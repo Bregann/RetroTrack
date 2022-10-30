@@ -5,6 +5,17 @@ namespace RetroAchievementTracker.Database.Context
 {
     public class DatabaseContext : DbContext
     {
+#if DEBUG
+        public static readonly string DbHost = "";
+        public static readonly string DbUsername = "";
+        public static readonly string DbPassword = "";
+
+#else
+        public static readonly string DbHost = "";
+        public static readonly string DbUsername = "";
+        public static readonly string DbPassword = "";
+#endif
+
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }
         public DbSet<Games> Games { get; set; }
@@ -13,12 +24,7 @@ namespace RetroAchievementTracker.Database.Context
         public DbSet<TrackedGames> TrackedGames { get; set; }
         public string DbPath { get; }
 
-#if DEBUG
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=localhost;Database=retroachievements;Username=ra;Password=yourpassword");
-#else
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=localhost;Database=retroachievements;Username=ra;Password=yourpassword");
-#endif
+            => optionsBuilder.UseNpgsql($"Host={DbHost};Database=retroachievements;Username={DbUsername};Password={DbPassword}");
     }
 }

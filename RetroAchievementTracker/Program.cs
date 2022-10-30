@@ -1,9 +1,8 @@
-using Blazor.Analytics;
 using Blazored.LocalStorage;
 using MudBlazor;
 using MudBlazor.Services;
+using ProjectMonitor.Shared;
 using RetroAchievementTracker;
-using RetroAchievementTracker.Data.GameData;
 using RetroAchievementTracker.Data.GameData;
 using RetroAchievementTracker.Data.HistoricGameData;
 using RetroAchievementTracker.Data.Login;
@@ -16,6 +15,15 @@ using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
+
+//Setup project monitor
+#if DEBUG
+ProjectMonitorConfig.SetupMonitor("debug", "");
+#else
+ProjectMonitorConfig.SetupMonitor("release", "");
+#endif
+
+ProjectMonitorCommon.ReportProjectUp("retroachievements");
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -40,7 +48,6 @@ builder.Services.AddSingleton<RetroAchievements>();
 builder.Services.AddSingleton<TrackedGamesService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddResponseCompression();
-builder.Services.AddGoogleAnalytics("G-MDNWQR4K45");
 builder.Logging.AddSerilog();
 
 var app = builder.Build();

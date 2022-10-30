@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using ProjectMonitor.Shared.Projects;
 using RestSharp;
 using RetroAchievementTracker.Data.RetroAchievementsAPI.Models;
 using RetroAchievementTracker.Database.Context;
@@ -234,7 +235,12 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                     context.SaveChanges();
                     transaction.Commit();
                 }
+
+                //Update the users while here
+                ProjectMonitorRetroAchievementsTracker.SendTotalRegisteredUsersUpdate(context.UserData.Count());
             }
+
+
 
             Log.Information("[RetroAchievements] Games database updated");
 
@@ -405,12 +411,15 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 gamesList = context.Games.ToList();
             }
 
+            //Send the project montior update
+            ProjectMonitorRetroAchievementsTracker.SendTotalGamesUpdate(gamesList.Count);
+
             var timesToLoop = gamesList.Count / 100;
 
             int gamesUpdated = 0;
 
             //Loop through 100 games at a time to not hit the API too hard
-            for (int i = 0; i < timesToLoop; i++)
+            for (int i = 0; i < timesToLoop + 1; i++)
             {
                 var sb = new StringBuilder();
 
@@ -470,6 +479,9 @@ namespace RetroAchievementTracker.RetroAchievementsAPI
                 Log.Information($"[RetroAchievements] Batch {i} ready to update");
                 await Task.Delay(400); //wait a bit so we don't keep spamming the api
             }
+
+            //Update the project monitor
+            ProjectMonitorRetroAchievementsTracker.SendLastGameAndGamesUpdatedCountUpdate(gamesUpdated);
 
             Log.Information($"[RetroAchievements] {gamesUpdated} games updated");
         }
