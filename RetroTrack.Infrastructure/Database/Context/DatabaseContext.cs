@@ -1,10 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RetroTrack.Api.Database.Models;
+using RetroTrack.Infrastructure.Database.Models;
 
-namespace RetroTrack.Api.Database.Context
+namespace RetroTrack.Infrastructure.Database.Context
 {
     public class DatabaseContext : DbContext
     {
+#if DEBUG
+        private static readonly string _connectionString = "";
+#else
+        private static readonly string _connectionString = "";
+#endif
+
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }
         public DbSet<Games> Games { get; set; }
@@ -13,7 +19,6 @@ namespace RetroTrack.Api.Database.Context
         public DbSet<TrackedGames> TrackedGames { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql($"Host={Config.DbHost};Database=retrotrack;Username={Config.DbUsername};Password={Config.DbPassword}");
+            => optionsBuilder.UseNpgsql(_connectionString);
     }
-
 }

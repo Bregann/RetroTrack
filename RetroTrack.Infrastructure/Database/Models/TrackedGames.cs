@@ -1,16 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace RetroTrack.Api.Database.Models
+namespace RetroTrack.Infrastructure.Database.Models
 {
     public class TrackedGames
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-        public int GameID { get; set; }
+        public required string Id { get; set; }
+        public required int GameID { get; set; }
 
         [ForeignKey("username")]
-        [Column("username")]
-        public string Username { get; set; }
+        public required string Username { get; set; }
     }
 }

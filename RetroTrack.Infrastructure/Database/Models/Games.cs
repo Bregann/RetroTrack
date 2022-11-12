@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RetroTrack.Api.Database.Models
+namespace RetroTrack.Infrastructure.Database.Models
 {
     public class Games
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public int ConsoleID { get; set; }
-        public string ConsoleName { get; set; }
+        public required int Id { get; set; }
+        public required string Title { get; set; }
+        public required int ConsoleID { get; set; }
+        public required string ConsoleName { get; set; }
         public string? ImageIcon { get; set; }
         public string? ImageIngame { get; set; }
         public string? ImageBoxArt { get; set; }
@@ -18,6 +18,6 @@ namespace RetroTrack.Api.Database.Models
         public int? AchievementCount { get; set; }
         public int? PlayersCasual { get; set; }
         public int? PlayersHardcore { get; set; }
-        public bool IsProcessed { get; set; }
+        public required bool IsProcessed { get; set; }
     }
 }
