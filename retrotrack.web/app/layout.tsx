@@ -7,7 +7,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en-US">
         <head />
         <body>
-          <RootStyleRegistry>{children}</RootStyleRegistry>
+          <RootStyleRegistry>{children}</RootStyleRegistry> {/* temp due to mantine not supporting nextjs 13 yet https://github.com/mantinedev/mantine/issues/2815*/}
         </body>
       </html>
     );
