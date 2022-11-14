@@ -1,14 +1,12 @@
-'use client';
 import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header } from "@mantine/core";
-import { use, useState } from "react";
+import { AppProps } from "next/app";
+import { useState } from "react";
 import { Container, Col, Row } from "react-bootstrap";
-import { getSession, useSession } from "next-auth/react";
 
-
-export default function Nav({ children }: { children: React.ReactNode }) {
+const Navigation = (props: AppProps) => {
+    const { Component, pageProps } = props;
     const [opened, setOpened] = useState(false);
-    const session = use(getSession());
-    console.log(session);
+
     return ( 
         <AppShell
         header={
@@ -41,7 +39,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             <NavLink label='home' component="a" href='/home'/>
             </Navbar>
         }>
-        {children}
+        <Component {...pageProps} />
     </AppShell>
      );
 }
+ 
+export default Navigation;
