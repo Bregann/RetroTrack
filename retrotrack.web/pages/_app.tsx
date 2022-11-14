@@ -10,7 +10,7 @@ export default function App(props: AppProps) {
     <>
       <SessionProvider>
         <Head>
-          <title>Page title</title>
+          <title>RetroTrack</title>
           <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         </Head>
 

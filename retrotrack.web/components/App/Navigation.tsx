@@ -84,9 +84,11 @@ const Navigation = (props: AppProps) => {
                 <Navbar hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
                     <Navbar.Section>
                     </Navbar.Section>
-                <NavLink label='Home' component="a" href='/home'/>
-                <NavLink label='All Games' component="a" href='/allgames'/>
+
                 <ScrollArea>
+                    <NavLink label='Home' component="a" href='/home'/>
+                    <NavLink label='All Games' component="a" href='/allgames'/>
+                    
                     <NavLink label='Nintendo'>
                         <NavLink label='Game Boy' component="a" href='/console/4'/>
                         <NavLink label='Game Boy Color' component="a" href='/console/6'/>
