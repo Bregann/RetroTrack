@@ -3,13 +3,45 @@ import { AppProps } from "next/app";
 import { useState } from "react";
 import { Container, Col, Row } from "react-bootstrap";
 import { useSession } from "next-auth/react"
+import { unstable_getServerSession } from "next-auth";
 
 const Navigation = (props: AppProps) => {
     const { Component, pageProps } = props;
     const [opened, setOpened] = useState(false);
-    const { data: session, status } = useSession()
+    const { data: session, status } = useSession();
 
     console.log(session);
+
+    if(status === "loading"){
+        return ( 
+            <AppShell
+            header={
+                <Header height={{base: 70}}>
+                    <Container fluid>
+                        <Row>
+                            <Col>
+                            { /* do not display when it's its larger than sm */}
+                                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                                    <Burger
+                                        opened={opened}
+                                        onClick={() => setOpened((o) => !o)}
+                                        size="sm"
+                                        mr="xl"
+                                        style={{marginTop: 20, marginRight: 20}}
+                                    />
+                                </MediaQuery>
+                            </Col>
+                            <Col>
+                            {/* logour buttons here */}
+                            </Col>
+                        </Row>
+                    </Container>
+                </Header>
+            }>
+            <Component {...pageProps} />
+        </AppShell>
+         );
+    }
 
     if(status === "authenticated"){
         return ( 
@@ -45,12 +77,9 @@ const Navigation = (props: AppProps) => {
                         <NavLink label='allgames' component="a" href='/allgames'/>
                         <NavLink label='trackedgames' component="a" href='/trackedgames'/>
                         <NavLink label='inprogressgames' component="a" href='/inprogressgames'/>
-
-
-
                 </Navbar>
             }>
-            <Component {...pageProps} />
+            
         </AppShell>
          );
     }
@@ -157,8 +186,6 @@ const Navigation = (props: AppProps) => {
         </AppShell>
          );
     }
-
-
 }
- 
+
 export default Navigation;

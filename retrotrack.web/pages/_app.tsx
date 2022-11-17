@@ -6,6 +6,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { SessionProvider } from 'next-auth/react';
 
 export default function App(props: AppProps) {
+  if(process.env.NODE_ENV === 'development' ){
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  }
+  const { Component, pageProps } = props;
+  
   return (
     <>
       <SessionProvider>
@@ -21,8 +26,9 @@ export default function App(props: AppProps) {
             colorScheme: 'dark',
           }}
         >
+          
           <Navigation {...props} />
-
+          <Component {...props} />
         </MantineProvider>
       </SessionProvider>
     </>

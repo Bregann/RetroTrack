@@ -2,8 +2,8 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { DoBackendPost } from "../../../Helpers/backendFetchHelper"
 
-export const authOptions = {
-    providers: [
+export default NextAuth({
+  providers: [
     CredentialsProvider({
         // The name to display on the sign in form (e.g. 'Sign in with...')
         name: 'Credentials',
@@ -22,18 +22,38 @@ export const authOptions = {
           // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
           // You can also use the `req` object to obtain additional parameters
           // (i.e., the request IP address)
-
-          const res = await DoBackendPost('', credentials);
+          const res = await DoBackendPost('/api/Auth/LoginUser', credentials);
           const user = await res.json()
-    
+
           // If no error and we have user data, return it
           if (res.ok && user) {
-            return user
+            return user;
           }
           // Return null if user data could not be retrieved
           return null
         }
       })
-  ]
-}
-export default NextAuth(authOptions)
+  ],
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: 'jwt'
+  },
+  callbacks: {
+    async jwt({ token, user}) {
+      if(user){
+        token.sessionId = user?.sessionId;
+        token.username = user?.username;
+      }
+
+      return token
+    },
+    async session({ session, token }) {
+      // Send properties to the client, like an access_token from a provider.
+      session.username = token.username;
+      session.sessionId = token.sessionId;
+
+      return session;
+    }
+  },
+  debug: true
+})

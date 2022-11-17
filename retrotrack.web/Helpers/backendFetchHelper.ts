@@ -3,13 +3,11 @@ export const DoBackendGet = async (apiUrl: string) => {
 }
 
 export const DoBackendPost = async (apiUrl: string, data: any) => {
-    const res = await fetch(process.env.API_URL + apiUrl, {
+    return await fetch(process.env.API_URL + apiUrl, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     });
-
-    return res.json();
 }
 
 export const DoBackendDelete = async(apiUrl: string, data: any) => {
