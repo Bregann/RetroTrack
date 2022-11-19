@@ -4,6 +4,9 @@ import { useState } from "react";
 import { ModalProps } from "../../types/App/modal";
 import ForgotPasswordModal from "../ForgotPasswordModal";
 import { IconAlertCircle } from '@tabler/icons';
+import { DoPost } from "../../Helpers/webFetchHelper";
+import { signIn } from "next-auth/react";
+import { toast } from "react-toastify";
 
 interface FormValues {
     username: string;
@@ -13,7 +16,7 @@ interface FormValues {
 const LoginModal = (props: ModalProps) => {
     const [forgotPasswordOpened, setforgotPasswordOpened] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+    const [loginButtonLoading, setLoginButtonLoading] = useState(false);
     const form = useForm<FormValues>({
         initialValues: {
             username: '',
@@ -21,9 +24,34 @@ const LoginModal = (props: ModalProps) => {
         }
     });
 
-    const SendLoginRequest = (values: FormValues) => {
-        console.log('logged in');
-        setErrorMessage('Invalid username/password');
+    const SendLoginRequest = async (values: FormValues) => {
+        setLoginButtonLoading(true);
+        
+        //Send the signin request
+        const res = await signIn('credentials', {
+            username: values.username,
+            password: values.password,
+            redirect: false
+        });
+
+        if(res?.ok){
+            //Close the menu
+            setLoginButtonLoading(false);
+            toast.success('Successfully logged in!', {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+            
+        }
+        else if(res?.status === 401){
+            setErrorMessage('Invalid username/password');
+            setLoginButtonLoading(false);
+        }
+        else{
+            setErrorMessage('An unknown error has occurred. Please try again');
+            setLoginButtonLoading(false);
+        }
     }
 
     return (
@@ -41,7 +69,7 @@ const LoginModal = (props: ModalProps) => {
                         { errorMessage }
                 </Alert>}
 
-                <form onSubmit={form.onSubmit((values) => SendLoginRequest(values))}>
+                <form onSubmit={form.onSubmit(async (values) => await SendLoginRequest(values))}>
                     <TextInput 
                         label="Username"
                         placeholder="Username"
@@ -64,7 +92,8 @@ const LoginModal = (props: ModalProps) => {
                         <Button 
                             type="submit"
                             variant="gradient" 
-                            gradient={{ from: 'indigo', to: 'cyan' }}>
+                            gradient={{ from: 'indigo', to: 'cyan' }}
+                            loading={loginButtonLoading}>
                                 Login
                         </Button>
                     </Group>

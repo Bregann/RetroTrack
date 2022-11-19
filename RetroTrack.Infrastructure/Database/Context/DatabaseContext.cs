@@ -17,6 +17,7 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<Users> Users { get; set; }
         public DbSet<GameCounts> GameCounts { get; set; }
         public DbSet<TrackedGames> TrackedGames { get; set; }
+        public DbSet<Sessions> Sessions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(_connectionString);

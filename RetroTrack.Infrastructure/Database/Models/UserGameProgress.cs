@@ -7,6 +7,7 @@ namespace RetroTrack.Infrastructure.Database.Models
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public required int Id { get; set; }
+
         [ForeignKey("username")]
         public required string Username { get; set; }
         public required int GameID { get; set; }

@@ -1,3 +1,7 @@
+using Serilog;
+
+Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

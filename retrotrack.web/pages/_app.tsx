@@ -4,6 +4,8 @@ import { MantineProvider } from '@mantine/core';
 import Navigation from '../components/App/Navigation';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SessionProvider } from 'next-auth/react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App(props: AppProps) {
   if(process.env.NODE_ENV === 'development' ){
@@ -31,6 +33,8 @@ export default function App(props: AppProps) {
           <Component {...props} />
         </MantineProvider>
       </SessionProvider>
+
+      <ToastContainer />
     </>
   );
 }

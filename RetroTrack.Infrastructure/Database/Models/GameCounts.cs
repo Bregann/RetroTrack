@@ -5,8 +5,9 @@ namespace RetroTrack.Infrastructure.Database.Models
 {
     public class GameCounts
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public required int ConsoleId { get; set; }
-        public required int GameCount { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public required GameConsoles GameConsole { get; set; }
     }
 }

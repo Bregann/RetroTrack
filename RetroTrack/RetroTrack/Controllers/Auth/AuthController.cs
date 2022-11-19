@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Api.Dtos.Request.Auth;
 using RetroTrack.Api.Dtos.Response;
+using RetroTrack.Domain.Public.Authenication;
 
 namespace RetroTrack.Api.Controllers.Authenication
 {
@@ -12,7 +13,18 @@ namespace RetroTrack.Api.Controllers.Authenication
         [HttpPost("LoginUser")]
         public ActionResult<LoginUserResponseDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            return new LoginUserResponseDto { SessionId = "lolol123", Username = "guinea"};
+            var loginData = Auth.ValidateUserLogin(dto.Username, dto.Password);
+
+            if (!loginData.Successful)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(new LoginUserResponseDto 
+            { 
+                SessionId = loginData.SessionId,
+                Username = dto.Username
+            });
         }
     }
 }

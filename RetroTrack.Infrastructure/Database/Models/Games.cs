@@ -8,8 +8,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public required int Id { get; set; }
         public required string Title { get; set; }
-        public required int ConsoleID { get; set; }
-        public required string ConsoleName { get; set; }
+        public required GameConsoles GameConsole { get; set; }
         public string? ImageIcon { get; set; }
         public string? ImageIngame { get; set; }
         public string? ImageBoxArt { get; set; }
