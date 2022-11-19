@@ -1,13 +1,14 @@
-import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea } from "@mantine/core";
+import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid } from "@mantine/core";
 import { AppProps } from "next/app";
 import { useState } from "react";
-import { Container, Col, Row } from "react-bootstrap";
 import { useSession } from "next-auth/react"
-import { unstable_getServerSession } from "next-auth";
+import LoginModal from "./LoginModal";
 
 const Navigation = (props: AppProps) => {
     const { Component, pageProps } = props;
-    const [opened, setOpened] = useState(false);
+    const [burgerOpened, setburgerOpened] = useState(false);
+    const [loginModalOpened, setloginModalOpened] = useState(false);
+    const [registerModalOpened, setregisterModalOpened] = useState(false);
     const { data: session, status } = useSession();
 
     console.log(session);
@@ -17,25 +18,20 @@ const Navigation = (props: AppProps) => {
             <AppShell
             header={
                 <Header height={{base: 70}}>
-                    <Container fluid>
-                        <Row>
-                            <Col>
-                            { /* do not display when it's its larger than sm */}
-                                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                                    <Burger
-                                        opened={opened}
-                                        onClick={() => setOpened((o) => !o)}
-                                        size="sm"
-                                        mr="xl"
-                                        style={{marginTop: 20, marginRight: 20}}
-                                    />
-                                </MediaQuery>
-                            </Col>
-                            <Col>
-                            {/* logour buttons here */}
-                            </Col>
-                        </Row>
-                    </Container>
+                    <Grid>
+                        <Grid.Col span={6}>
+                        { /* do not display when it's its larger than sm */}
+                            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                                <Burger
+                                    opened={burgerOpened}
+                                    onClick={() => setburgerOpened((o) => !o)}
+                                    size="sm"
+                                    mr="xl"
+                                    style={{marginTop: 20, marginRight: 20}}
+                                />
+                            </MediaQuery>
+                        </Grid.Col>
+                    </Grid>
                 </Header>
             }>
             <Component {...pageProps} />
@@ -48,29 +44,27 @@ const Navigation = (props: AppProps) => {
             <AppShell
             header={
                 <Header height={{base: 70}}>
-                    <Container fluid>
-                        <Row>
-                            <Col>
-                            { /* do not display when it's its larger than sm */}
-                                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                                    <Burger
-                                        opened={opened}
-                                        onClick={() => setOpened((o) => !o)}
-                                        size="sm"
-                                        mr="xl"
-                                        style={{marginTop: 20, marginRight: 20}}
-                                    />
-                                </MediaQuery>
-                            </Col>
-                            <Col>
-                            {/* logour buttons here */}
-                            </Col>
-                        </Row>
-                    </Container>
+                    <Grid>
+                        <Grid.Col span={6}>
+                        { /* do not display when it's its larger than sm */}
+                            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                                <Burger
+                                    opened={burgerOpened}
+                                    onClick={() => setburgerOpened((o) => !o)}
+                                    size="sm"
+                                    mr="xl"
+                                    style={{marginTop: 20, marginRight: 20}}
+                                />
+                            </MediaQuery>
+                        </Grid.Col>
+                        <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
+                            {/* logout button */}
+                        </Grid.Col>
+                    </Grid>
                 </Header>
             }
             navbar={
-                <Navbar hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
+                <Navbar hiddenBreakpoint="sm" hidden={!burgerOpened} width={{ sm: 200, lg: 300 }}>
                     <Navbar.Section>
                     </Navbar.Section>
                         <NavLink label='home' component="a" href='/home'/>
@@ -88,29 +82,33 @@ const Navigation = (props: AppProps) => {
             <AppShell
             header={
                 <Header height={{base: 70}}>
-                    <Container fluid>
-                        <Row>
-                            <Col>
-                            { /* do not display when it's its larger than sm */}
-                                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                                    <Burger
-                                        opened={opened}
-                                        onClick={() => setOpened((o) => !o)}
-                                        size="sm"
-                                        mr="xl"
-                                        style={{marginTop: 20, marginRight: 20}}
-                                    />
-                                </MediaQuery>
-                            </Col>
-                            <Col>
-                            {/* login buttons here */}
-                            </Col>
-                        </Row>
-                    </Container>
+                    <Grid>
+                        <Grid.Col span={6}>
+                        { /* do not display when it's its larger than sm */}
+                            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                                <Burger
+                                    opened={burgerOpened}
+                                    onClick={() => setburgerOpened((o) => !o)}
+                                    size="sm"
+                                    mr="xl"
+                                    style={{marginTop: 20, marginRight: 20}}
+                                />
+                            </MediaQuery>
+                        </Grid.Col>
+                        <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
+                            <Button 
+                            variant="gradient" 
+                            gradient={{ from: 'indigo', to: 'cyan' }} 
+                            sx={{marginTop: 15, marginRight: 10}}
+                            onClick={() => setloginModalOpened(true)}
+                            >Login</Button>
+                            <Button variant="gradient" gradient={{ from: 'teal', to: 'lime', deg: 105 }} sx={{marginTop: 15, marginRight: 10}}>Register</Button>
+                        </Grid.Col>
+                    </Grid>
                 </Header>
             }
             navbar={
-                <Navbar hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
+                <Navbar hiddenBreakpoint="sm" hidden={!burgerOpened} width={{ sm: 200, lg: 300 }}>
                     <Navbar.Section>
                     </Navbar.Section>
 
@@ -183,6 +181,10 @@ const Navigation = (props: AppProps) => {
 
             }>
             <Component {...pageProps} />
+
+            {/* modals*/}
+            <LoginModal setOpened={setloginModalOpened} openedState={loginModalOpened}/>
+
         </AppShell>
          );
     }
