@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,11 @@ namespace RetroTrack.Domain.Dtos.Public
     {
         public required bool Successful { get; set; }
         public string SessionId { get; set; } = "";
+    }
+
+    public class RegisterUserDto
+    {
+        public required bool Successful { get; set; }
+        public string? Reason { get; set; }
     }
 }

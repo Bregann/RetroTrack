@@ -29,7 +29,6 @@ namespace RetroTrack.Infrastructure.Migrations
                 columns: table => new
                 {
                     Username = table.Column<string>(type: "text", nullable: false),
-                    HashedApiKey = table.Column<string>(type: "text", nullable: false),
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     LastActivity = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -91,17 +90,17 @@ namespace RetroTrack.Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Username = table.Column<string>(type: "text", nullable: false),
-                    SessionId = table.Column<string>(type: "text", nullable: false),
-                    UsersUsername = table.Column<string>(type: "text", nullable: true)
+                    SessionId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Sessions_Users_UsersUsername",
-                        column: x => x.UsersUsername,
+                        name: "FK_Sessions_Users_Username",
+                        column: x => x.Username,
                         principalTable: "Users",
-                        principalColumn: "Username");
+                        principalColumn: "Username",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -110,17 +109,17 @@ namespace RetroTrack.Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     GameID = table.Column<int>(type: "integer", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    UsersUsername = table.Column<string>(type: "text", nullable: true)
+                    Username = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TrackedGames", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TrackedGames_Users_UsersUsername",
-                        column: x => x.UsersUsername,
+                        name: "FK_TrackedGames_Users_Username",
+                        column: x => x.Username,
                         principalTable: "Users",
-                        principalColumn: "Username");
+                        principalColumn: "Username",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,17 +134,17 @@ namespace RetroTrack.Infrastructure.Migrations
                     AchievementsGained = table.Column<int>(type: "integer", nullable: false),
                     GameName = table.Column<string>(type: "text", nullable: false),
                     HardcoreMode = table.Column<bool>(type: "boolean", nullable: false),
-                    GamePercentage = table.Column<double>(type: "double precision", nullable: false),
-                    UsersUsername = table.Column<string>(type: "text", nullable: true)
+                    GamePercentage = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserGameProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserGameProgress_Users_UsersUsername",
-                        column: x => x.UsersUsername,
+                        name: "FK_UserGameProgress_Users_Username",
+                        column: x => x.Username,
                         principalTable: "Users",
-                        principalColumn: "Username");
+                        principalColumn: "Username",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -159,19 +158,19 @@ namespace RetroTrack.Infrastructure.Migrations
                 column: "GameConsoleConsoleID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sessions_UsersUsername",
+                name: "IX_Sessions_Username",
                 table: "Sessions",
-                column: "UsersUsername");
+                column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TrackedGames_UsersUsername",
+                name: "IX_TrackedGames_Username",
                 table: "TrackedGames",
-                column: "UsersUsername");
+                column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserGameProgress_UsersUsername",
+                name: "IX_UserGameProgress_Username",
                 table: "UserGameProgress",
-                column: "UsersUsername");
+                column: "Username");
         }
 
         /// <inheritdoc />

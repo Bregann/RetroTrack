@@ -13,8 +13,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        [ForeignKey("username")]
-        public required string Username { get; set; }
+        public required Users User { get; set; }
 
         public required string SessionId { get; set; }
     }

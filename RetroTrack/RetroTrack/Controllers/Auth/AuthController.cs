@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Api.Dtos.Request.Auth;
-using RetroTrack.Api.Dtos.Response;
-using RetroTrack.Domain.Public.Authenication;
+using RetroTrack.Api.Dtos.Response.Auth;
+using RetroTrack.Domain.Data.Public.Auth;
 
 namespace RetroTrack.Api.Controllers.Authenication
 {
@@ -25,6 +25,26 @@ namespace RetroTrack.Api.Controllers.Authenication
                 SessionId = loginData.SessionId,
                 Username = dto.Username
             });
+        }
+
+        [HttpPost("RegisterNewUser")]
+        public async Task<RegisterNewUserResponseDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
+        {
+            var registerData = await Auth.RegisterUser(dto.Username, dto.Password, dto.ApiKey);
+
+            if (registerData.Reason == null)
+            {
+                return new RegisterNewUserResponseDto
+                {
+                    Success = registerData.Successful
+                };
+            }
+
+            return new RegisterNewUserResponseDto
+            {
+                Success = registerData.Successful,
+                Error = registerData.Reason
+            };
         }
     }
 }

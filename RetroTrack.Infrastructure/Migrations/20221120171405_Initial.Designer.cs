@@ -12,7 +12,7 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20221119193154_Initial")]
+    [Migration("20221120171405_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -117,12 +117,9 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsersUsername")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UsersUsername");
+                    b.HasIndex("Username");
 
                     b.ToTable("Sessions");
                 });
@@ -140,12 +137,9 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsersUsername")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UsersUsername");
+                    b.HasIndex("Username");
 
                     b.ToTable("TrackedGames");
                 });
@@ -181,12 +175,9 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsersUsername")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UsersUsername");
+                    b.HasIndex("Username");
 
                     b.ToTable("UserGameProgress");
                 });
@@ -194,10 +185,6 @@ namespace RetroTrack.Infrastructure.Migrations
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>
                 {
                     b.Property<string>("Username")
-                        .HasColumnType("text");
-
-                    b.Property<string>("HashedApiKey")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("HashedPassword")
@@ -236,23 +223,35 @@ namespace RetroTrack.Infrastructure.Migrations
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Sessions", b =>
                 {
-                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", null)
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
                         .WithMany("Sessions")
-                        .HasForeignKey("UsersUsername");
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
                 {
-                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", null)
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
                         .WithMany("TrackedGames")
-                        .HasForeignKey("UsersUsername");
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
                 {
-                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", null)
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
                         .WithMany("UserGameProgress")
-                        .HasForeignKey("UsersUsername");
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>

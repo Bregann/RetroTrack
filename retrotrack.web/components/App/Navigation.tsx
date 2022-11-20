@@ -3,12 +3,13 @@ import { AppProps } from "next/app";
 import { useState } from "react";
 import { useSession } from "next-auth/react"
 import LoginModal from "./LoginModal";
+import RegisterModal from "./RegisterModal";
 
 const Navigation = (props: AppProps) => {
     const { Component, pageProps } = props;
-    const [burgerOpened, setburgerOpened] = useState(false);
-    const [loginModalOpened, setloginModalOpened] = useState(false);
-    const [registerModalOpened, setregisterModalOpened] = useState(false);
+    const [burgerOpened, setBurgerOpened] = useState(false);
+    const [loginModalOpened, setLoginModalOpened] = useState(false);
+    const [registerModalOpened, setRegisterModalOpened] = useState(false);
     const { data: session, status } = useSession();
 
     console.log(session);
@@ -24,7 +25,7 @@ const Navigation = (props: AppProps) => {
                             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                                 <Burger
                                     opened={burgerOpened}
-                                    onClick={() => setburgerOpened((o) => !o)}
+                                    onClick={() => setBurgerOpened((o) => !o)}
                                     size="sm"
                                     mr="xl"
                                     style={{marginTop: 20, marginRight: 20}}
@@ -50,7 +51,7 @@ const Navigation = (props: AppProps) => {
                             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                                 <Burger
                                     opened={burgerOpened}
-                                    onClick={() => setburgerOpened((o) => !o)}
+                                    onClick={() => setBurgerOpened((o) => !o)}
                                     size="sm"
                                     mr="xl"
                                     style={{marginTop: 20, marginRight: 20}}
@@ -88,7 +89,7 @@ const Navigation = (props: AppProps) => {
                             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                                 <Burger
                                     opened={burgerOpened}
-                                    onClick={() => setburgerOpened((o) => !o)}
+                                    onClick={() => setBurgerOpened((o) => !o)}
                                     size="sm"
                                     mr="xl"
                                     style={{marginTop: 20, marginRight: 20}}
@@ -97,12 +98,19 @@ const Navigation = (props: AppProps) => {
                         </Grid.Col>
                         <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
                             <Button 
-                            variant="gradient" 
-                            gradient={{ from: 'indigo', to: 'cyan' }} 
-                            sx={{marginTop: 15, marginRight: 10}}
-                            onClick={() => setloginModalOpened(true)}
-                            >Login</Button>
-                            <Button variant="gradient" gradient={{ from: 'teal', to: 'lime', deg: 105 }} sx={{marginTop: 15, marginRight: 10}}>Register</Button>
+                                variant="gradient" 
+                                gradient={{ from: 'indigo', to: 'cyan' }} 
+                                sx={{marginTop: 15, marginRight: 10}}
+                                onClick={() => setLoginModalOpened(true)}>
+                                    Login
+                            </Button>
+                            <Button 
+                                variant="gradient" 
+                                gradient={{ from: 'teal', to: 'lime', deg: 105 }} 
+                                sx={{marginTop: 15, marginRight: 10}}
+                                onClick={() => setRegisterModalOpened(true)}>
+                                    Register
+                            </Button>
                         </Grid.Col>
                     </Grid>
                 </Header>
@@ -183,8 +191,8 @@ const Navigation = (props: AppProps) => {
             <Component {...pageProps} />
 
             {/* modals*/}
-            <LoginModal setOpened={setloginModalOpened} openedState={loginModalOpened}/>
-
+            <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened}/>
+            <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened}/>
         </AppShell>
          );
     }

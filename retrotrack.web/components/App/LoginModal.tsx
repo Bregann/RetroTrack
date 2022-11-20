@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ModalProps } from "../../types/App/modal";
 import ForgotPasswordModal from "../ForgotPasswordModal";
 import { IconAlertCircle } from '@tabler/icons';
-import { DoPost } from "../../Helpers/webFetchHelper";
 import { signIn } from "next-auth/react";
 import { toast } from "react-toastify";
 
@@ -36,13 +35,14 @@ const LoginModal = (props: ModalProps) => {
 
         if(res?.ok){
             //Close the menu
+            props.setOpened(false);
             setLoginButtonLoading(false);
+            
             toast.success('Successfully logged in!', {
                 position: 'bottom-right',
                 closeOnClick: true,
                 theme: 'colored'
             });
-            
         }
         else if(res?.status === 401){
             setErrorMessage('Invalid username/password');

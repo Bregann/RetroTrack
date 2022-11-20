@@ -7,11 +7,10 @@ namespace RetroTrack.Infrastructure.Database.Models
     {
         [Key]
         public required string Username { get; set; }
-        public required string HashedApiKey { get; set; }
         public required string HashedPassword { get; set; }
         public required DateTime LastActivity { get; set; }
-        public required List<UserGameProgress> UserGameProgress { get; set; }
-        public required List<TrackedGames> TrackedGames { get; set; }
-        public required List<Sessions> Sessions { get; set; }
+        public List<UserGameProgress> UserGameProgress { get; set; }
+        public List<TrackedGames> TrackedGames { get; set; }
+        public List<Sessions> Sessions { get; set; }
     }
 }

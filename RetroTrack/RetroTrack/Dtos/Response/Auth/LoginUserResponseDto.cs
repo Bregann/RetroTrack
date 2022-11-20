@@ -1,4 +1,4 @@
-﻿namespace RetroTrack.Api.Dtos.Response
+﻿namespace RetroTrack.Api.Dtos.Response.Auth
 {
     public class LoginUserResponseDto
     {
