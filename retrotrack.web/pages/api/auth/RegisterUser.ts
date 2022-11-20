@@ -13,10 +13,9 @@ import { RegiserUserData } from '../../../types/Api/Auth/RegisterUser'
         }
 
         const apiData = await apiRes.json();
-        console.log(apiData);
-
-        res.status(200).json({success: apiData.success, reason: apiData.error})
         
+        res.status(200).json({success: apiData.success, reason: apiData.error})
+
     } catch (error) {
         res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."})
     }
