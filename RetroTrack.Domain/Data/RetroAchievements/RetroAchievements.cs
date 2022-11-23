@@ -109,7 +109,8 @@ namespace RetroTrack.Domain.Data.External
                     {
                         JsonData = response.Content,
                         ProcessingStatus = ProcessingStatus.NotScheduled,
-                        FailedProcessingAttempts = 0
+                        FailedProcessingAttempts = 0,
+                        ApiRequestType = ApiRequestType.GetGameList
                     });
 
                     Log.Information($"[RetroAchievements] Console ID {id} processed");

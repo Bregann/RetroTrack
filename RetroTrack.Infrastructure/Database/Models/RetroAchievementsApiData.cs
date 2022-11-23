@@ -18,9 +18,12 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string JsonData { get; set; }
 
         [Required]
-        public required ProcessingStatus ProcessingStatus { get; set; } = ProcessingStatus.NotScheduled;
+        public required ProcessingStatus ProcessingStatus { get; set; }
 
         [Required]
-        public required int FailedProcessingAttempts { get; set; } = 0;
+        public required int FailedProcessingAttempts { get; set; }
+
+        [Required]
+        public required ApiRequestType ApiRequestType { get; set; }
     }
 }

@@ -52,17 +52,24 @@ namespace RetroTrack.Domain
                 Log.Information($"[RetroAchievements] {requestsToSend} game api requests ready to process");
 
                 var rowsToSchedule = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.NotScheduled)
-                    .Select(x => x.Id)
                     .Take(requestsToSend)
                     .ToList();
 
                 foreach (var id in rowsToSchedule)
                 {
-                    BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id));
-                    context.RetroAchievementsApiData.First(x => x.Id == id).ProcessingStatus = ProcessingStatus.Scheduled;
+                    //Check the api request type and send enqueue the right job
+                    switch (id.ApiRequestType)
+                    {
+                        case ApiRequestType.GetGameList:
+                            BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
+                            break;
+                        case ApiRequestType.GetGameExtended:
+                            break;
+                    }
+                    context.RetroAchievementsApiData.First(x => x.Id == id.Id).ProcessingStatus = ProcessingStatus.Scheduled;
                     context.SaveChanges();
 
-                    Log.Information($"[RetroAchievements] game api requests id {id} scheduled to send");
+                    Log.Information($"[RetroAchievements] game api requests id {id.Id} scheduled to send");
                 }
             }
         }
