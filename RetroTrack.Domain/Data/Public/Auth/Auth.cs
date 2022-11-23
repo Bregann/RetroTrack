@@ -16,7 +16,7 @@ namespace RetroTrack.Domain.Data.Public.Auth
             using (var context = new DatabaseContext())
             {
                 //Get the user
-                var user = context.Users.FirstOrDefault(x => x.Username == username.ToLower());
+                var user = context.Users.FirstOrDefault(x => x.Username == username);
 
                 if (user == null)
                 {
@@ -56,7 +56,8 @@ namespace RetroTrack.Domain.Data.Public.Auth
                 return new LoginUserDto
                 {
                     Successful = true,
-                    SessionId = sessionId
+                    SessionId = sessionId,
+                    Username= username
                 };
             }
         }
@@ -77,6 +78,9 @@ namespace RetroTrack.Domain.Data.Public.Auth
 
             using (var context = new DatabaseContext())
             {
+
+                var trackedGames = context.Users.Where(x => x.Username == username).Select(x => x.TrackedGames);
+
                 //Check if the user is actually registered
                 if (context.Users.Any(x => x.Username == username.ToLower()))
                 {

@@ -11,6 +11,7 @@ namespace RetroTrack.Domain.Dtos.Public
     {
         public required bool Successful { get; set; }
         public string SessionId { get; set; } = "";
+        public string Username { get; set; }
     }
 
     public class RegisterUserDto

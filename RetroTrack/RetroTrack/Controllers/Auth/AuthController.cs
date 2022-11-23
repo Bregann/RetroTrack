@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Api.Dtos.Request.Auth;
-using RetroTrack.Api.Dtos.Response.Auth;
 using RetroTrack.Domain.Data.Public.Auth;
+using RetroTrack.Domain.Dtos.Public;
+using RetroTrack.Dtos.Auth;
 
 namespace RetroTrack.Api.Controllers.Authenication
 {
@@ -11,40 +11,22 @@ namespace RetroTrack.Api.Controllers.Authenication
     public class AuthController : ControllerBase
     {
         [HttpPost("LoginUser")]
-        public ActionResult<LoginUserResponseDto> LoginUser([FromBody] LoginUserRequestDto dto)
+        public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = Auth.ValidateUserLogin(dto.Username, dto.Password);
+            var loginData = Auth.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
 
             if (!loginData.Successful)
             {
                 return Unauthorized();
             }
 
-            return Ok(new LoginUserResponseDto 
-            { 
-                SessionId = loginData.SessionId,
-                Username = dto.Username
-            });
+            return Ok(loginData);
         }
 
         [HttpPost("RegisterNewUser")]
-        public async Task<RegisterNewUserResponseDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
+        public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
         {
-            var registerData = await Auth.RegisterUser(dto.Username, dto.Password, dto.ApiKey);
-
-            if (registerData.Reason == null)
-            {
-                return new RegisterNewUserResponseDto
-                {
-                    Success = registerData.Successful
-                };
-            }
-
-            return new RegisterNewUserResponseDto
-            {
-                Success = registerData.Successful,
-                Error = registerData.Reason
-            };
+            return await Auth.RegisterUser(dto.Username.ToLower(), dto.Password, dto.ApiKey);
         }
     }
 }

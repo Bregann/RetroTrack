@@ -7,8 +7,12 @@ namespace RetroTrack.Infrastructure.Database.Models
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public required int Id { get; set; }
+
+        [Required]
         public required string Title { get; set; }
-        public required GameConsoles GameConsole { get; set; }
+
+        [Required]
+        public required int GameConsoleId { get; set; }
         public string? ImageIcon { get; set; }
         public string? ImageIngame { get; set; }
         public string? ImageBoxArt { get; set; }
@@ -17,6 +21,8 @@ namespace RetroTrack.Infrastructure.Database.Models
         public int? AchievementCount { get; set; }
         public int? PlayersCasual { get; set; }
         public int? PlayersHardcore { get; set; }
+
+        [Required]
         public required bool IsProcessed { get; set; }
     }
 }

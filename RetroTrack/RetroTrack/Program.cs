@@ -1,6 +1,9 @@
+using RetroTrack.Domain;
+using RetroTrack.Domain.Data.External;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
+AppConfig.LoadConfigFromDatabase();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,5 +28,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await RetroAchievements.GetConsolesAndInsertToDatabase();
 
 app.Run();
