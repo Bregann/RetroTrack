@@ -18,5 +18,8 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required string RetroAchievementsApiKey { get; set; }
+
+        [Required]
+        public required string HFConnectionString { get; set; }
     }
 }

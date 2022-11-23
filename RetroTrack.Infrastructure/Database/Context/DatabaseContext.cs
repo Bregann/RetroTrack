@@ -18,6 +18,7 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<TrackedGames> TrackedGames { get; set; }
         public DbSet<Sessions> Sessions { get; set; }
         public DbSet<Config> Config { get; set; }
+        public DbSet<RetroAchievementsApiData> RetroAchievementsApiData { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(_connectionString);
@@ -29,7 +30,8 @@ namespace RetroTrack.Infrastructure.Database.Context
             {
                 Id = 1,
                 RetroAchievementsApiKey= "",
-                RetroAchievementsApiUsername= ""
+                RetroAchievementsApiUsername= "",
+                HFConnectionString = ""
             });
         }
     }

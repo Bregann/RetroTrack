@@ -13,6 +13,7 @@ namespace RetroTrack.Domain
         public static readonly string RetroAchievementsApiBaseUrl = "https://retroachievements.org/API/";
         public static string RetroAchievementsApiUsername { get; private set; }
         public static string RetroAchievementsApiKey { get; private set; }
+        public static string HFConnectionString { get; private set; }
 
         public static void LoadConfigFromDatabase()
         {
@@ -22,6 +23,8 @@ namespace RetroTrack.Domain
 
                 RetroAchievementsApiUsername = config.RetroAchievementsApiUsername;
                 RetroAchievementsApiKey = config.RetroAchievementsApiKey;
+                HFConnectionString = config.HFConnectionString;
+
                 Log.Information("[App Config] Config loaded from database");
             }
         }

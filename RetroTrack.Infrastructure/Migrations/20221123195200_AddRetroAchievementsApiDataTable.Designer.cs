@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RetroTrack.Infrastructure.Database.Context;
@@ -11,9 +12,11 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221123195200_AddRetroAchievementsApiDataTable")]
+    partial class AddRetroAchievementsApiDataTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,10 +32,6 @@ namespace RetroTrack.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("HFConnectionString")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("RetroAchievementsApiKey")
                         .IsRequired()
@@ -50,7 +49,6 @@ namespace RetroTrack.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            HFConnectionString = "",
                             RetroAchievementsApiKey = "",
                             RetroAchievementsApiUsername = ""
                         });
@@ -78,17 +76,8 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AchievementCount")
+                    b.Property<int?>("AchievementCount")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("DiscordMessageProcessed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("EmailMessageProcessed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ExtraDataProcessed")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("GameConsoleId")
                         .HasColumnType("integer");
@@ -96,14 +85,25 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<string>("GameGenre")
                         .HasColumnType("text");
 
-                    b.Property<string>("ImageIcon")
-                        .IsRequired()
+                    b.Property<string>("ImageBoxArt")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastModified")
+                    b.Property<string>("ImageIcon")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageIngame")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("Players")
+                    b.Property<int?>("PlayersCasual")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PlayersHardcore")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
