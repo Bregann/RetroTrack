@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using RestSharp;
 using RetroTrack.Domain.Data.External;
-using RetroTrack.Domain.Dtos.Public;
+using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
 using Serilog;

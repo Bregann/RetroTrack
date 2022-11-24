@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data.Public.Navigation;
-using RetroTrack.Domain.Dtos.LoggedIn.Navigation;
+using RetroTrack.Domain.Dtos;
 
 namespace RetroTrack.Controllers.Navigation
 {

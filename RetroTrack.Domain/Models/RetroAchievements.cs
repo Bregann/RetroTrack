@@ -33,7 +33,23 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("NumAchievements")]
         public int AchievementCount { get; set; }
 
+        [JsonProperty("Points")]
+        public int Points { get; set; }
+
         [JsonProperty("DateModified")]
         public DateTime DateModified { get; set; }
+    }
+
+    public class GetGameExtended
+    {
+        [JsonProperty("ID")]
+        public long Id { get; set; }
+
+        [JsonProperty("Genre")]
+        public string Genre { get; set; }
+
+        [JsonProperty("NumDistinctPlayersHardcore")]
+        public int Players { get; set; }
+
     }
 }

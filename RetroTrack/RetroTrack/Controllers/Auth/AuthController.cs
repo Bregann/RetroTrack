@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data.Public.Auth;
-using RetroTrack.Domain.Dtos.Public;
+using RetroTrack.Domain.Dtos;
 using RetroTrack.Dtos.Auth;
 
 namespace RetroTrack.Api.Controllers.Authenication

@@ -18,6 +18,9 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string ImageIcon { get; set; }
 
         [Required]
+        public required int Points { get; set;}
+
+        [Required]
         public DateTime LastModified { get; set; }
 
         [Required]

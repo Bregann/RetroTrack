@@ -22,8 +22,4 @@
     <ProjectReference Include="..\RetroTrack.Infrastructure\RetroTrack.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\LoggedIn\" />
-  </ItemGroup>
-
 </Project>

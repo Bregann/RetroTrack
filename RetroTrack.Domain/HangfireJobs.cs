@@ -33,7 +33,7 @@ namespace RetroTrack.Domain
 
         public static void QueueGamesToUpdateJob()
         {
-            var maxRequests = 10;
+            var maxRequests = 20;
 
             using(var context = new DatabaseContext())
             {
@@ -64,8 +64,10 @@ namespace RetroTrack.Domain
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
                             break;
                         case ApiRequestType.GetGameExtended:
+                            BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
                     }
+
                     context.RetroAchievementsApiData.First(x => x.Id == id.Id).ProcessingStatus = ProcessingStatus.Scheduled;
                     context.SaveChanges();
 
