@@ -14,5 +14,12 @@ namespace RetroTrack.Controllers.Navigation
         {
             return Domain.Data.Public.Navigation.Navigation.GetGameCounts();
         }
+
+        [HttpGet("GetLoggedInUserGameCounts")]
+        public ActionResult<LoggedInNavigationGameCountsDto> GetLoggedInUserGameCounts()
+        {
+
+            return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn("guinea");
+        }
     }
 }
