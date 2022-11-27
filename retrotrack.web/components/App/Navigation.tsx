@@ -1,13 +1,13 @@
 import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles } from "@mantine/core";
 import { AppProps } from "next/app";
-import { use, useEffect, useState } from "react";
-import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react"
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
-import { LoggedOutGameTypes } from "../../types/Api/Navigation/LoggedOutGameCounts";
 import { NavData } from "../../types/App/NavData";
-import { DoGet } from "../../Helpers/webFetchHelper";
+import { DoDelete, DoGet } from "../../Helpers/webFetchHelper";
 import Link from "next/link";
+import { toast } from "react-toastify";
 const Getcolour = () => {
     return "red";
     }
@@ -36,7 +36,6 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-
 const Navigation = (props: AppProps) => {
     const { Component, pageProps } = props;
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -45,6 +44,22 @@ const Navigation = (props: AppProps) => {
     const [navData, setNavData] = useState<NavData | null>(null);
     const { data: session, status } = useSession();
     const { classes } = useStyles();
+
+    const LogoutUser = (sessionId: string) => {
+        signOut();
+        DoDelete('/api/auth/DeleteUserSession', sessionId);
+    
+        toast.success('Succesfully logged out', {
+            position: 'bottom-right',
+            closeOnClick: true,
+            theme: 'colored'
+        });
+    }
+
+    const UpdateUserGames = (sessionId: string) => {
+
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             if(status === "loading"){
@@ -113,7 +128,21 @@ const Navigation = (props: AppProps) => {
                             </MediaQuery>
                         </Grid.Col>
                         <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
-                            {/* logout button */}
+                        <Button 
+                            variant="gradient" 
+                            gradient={{ from: 'orange', to: 'red' }}
+                            sx={{marginTop: 15, marginRight: 10}}
+                            onClick={() => LogoutUser(session.sessionId)}>
+                                Update games
+                        </Button>
+
+                        <Button 
+                            variant="gradient" 
+                            gradient={{ from: 'orange', to: 'red' }}
+                            sx={{marginTop: 15, marginRight: 10}}
+                            onClick={() => LogoutUser(session.sessionId)}>
+                                Logout
+                        </Button>
                         </Grid.Col>
                     </Grid>
                 </Header>

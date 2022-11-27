@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data.Public.Navigation;
 using RetroTrack.Domain.Dtos;
+using RetroTrack.Domain.Helpers;
 
 namespace RetroTrack.Controllers.Navigation
 {
@@ -18,8 +19,14 @@ namespace RetroTrack.Controllers.Navigation
         [HttpGet("GetLoggedInUserGameCounts")]
         public ActionResult<LoggedInNavigationGameCountsDto> GetLoggedInUserGameCounts()
         {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
-            return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn("guinea");
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn(user);
         }
     }
 }

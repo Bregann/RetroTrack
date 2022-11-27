@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using RestSharp;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
@@ -78,7 +79,6 @@ namespace RetroTrack.Domain.Data.Public.Auth
 
             using (var context = new DatabaseContext())
             {
-
                 var trackedGames = context.Users.Where(x => x.Username == username).Select(x => x.TrackedGames);
 
                 //Check if the user is actually registered
@@ -104,16 +104,7 @@ namespace RetroTrack.Domain.Data.Public.Auth
                     LastActivity = DateTime.UtcNow
                 });
 
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine();
-                    throw;
-                }
-                
+                context.SaveChanges();
 
                 Log.Information($"[Register User] {username} succesfully registered");
 
