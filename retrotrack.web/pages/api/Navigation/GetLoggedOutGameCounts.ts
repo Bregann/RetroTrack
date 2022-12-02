@@ -5,7 +5,6 @@ import { LoggedOutGameTypes } from "../../../types/Api/Navigation/LoggedOutGameC
 const handler = async (req: NextApiRequest, res: NextApiResponse<LoggedOutGameTypes>) => {
     try {
         const apiRes = await DoBackendGet('/api/Navigation/GetLoggedOutUserGameCounts');
-
         if(!apiRes.ok){
             res.status(apiRes.status);
             return;

@@ -1,5 +1,13 @@
-export const DoBackendGet = async (apiUrl: string) => {
-    return await fetch(process.env.API_URL + apiUrl, { cache: 'no-store' });
+export const DoBackendGet = async (apiUrl: string, sessionId?: string) => {
+    if(sessionId){
+        return await fetch(process.env.API_URL + apiUrl, {
+            method: 'GET',
+            headers: {'Authorization': sessionId}
+        });
+    }
+    else{
+        return await fetch(process.env.API_URL + apiUrl);
+    }
 }
 
 export const DoBackendPost = async (apiUrl: string, data: any) => {

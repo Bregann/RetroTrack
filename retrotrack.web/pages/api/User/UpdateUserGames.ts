@@ -1,14 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { handleClientScriptLoad } from 'next/script'
 import { DoBackendGet, DoBackendPost } from '../../../Helpers/backendFetchHelper'
-import { RegiserUserData } from '../../../types/Api/Auth/RegisterUser'
 import { UpdateUserGames } from '../../../types/Api/User/UpdateUserGames'
 
  const handler = async (req: NextApiRequest, res: NextApiResponse<UpdateUserGames>) => {
+    
     try {
-        const apiRes = await DoBackendGet('/api/User/UpdateUserGames');
+        const apiRes = await DoBackendGet('/api/Users/UpdateUserGames', req.headers.authorization);
+        console.log(apiRes);
         const data = await apiRes.json();
-
+        
         if(!apiRes.ok){
             res.status(apiRes.status).json(data);
             return;
@@ -17,6 +18,7 @@ import { UpdateUserGames } from '../../../types/Api/User/UpdateUserGames'
         res.status(200).json(data);
 
     } catch (error) {
+        console.log(error);
         res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."})
     }
   }

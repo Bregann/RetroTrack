@@ -19,7 +19,14 @@ namespace RetroTrack.Domain.Helpers
 
             using (var context = new DatabaseContext())
             {
-                var user = context.Sessions.Where(x => x.SessionId == headers["Authorization"]).FirstOrDefault();
+                string authHeader = headers["Authorization"];
+
+                var t = context.Sessions.ToList();
+
+                var user = context.Sessions.Where(x => x.SessionId == authHeader).FirstOrDefault();
+
+
+
                 if (user == null)
                 {
                     return null;

@@ -8,6 +8,7 @@ import { NavData } from "../../types/App/NavData";
 import { DoDelete, DoGet } from "../../Helpers/webFetchHelper";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { UpdateUserGames } from "../../types/Api/User/UpdateUserGames";
 const Getcolour = () => {
     return "red";
     }
@@ -41,6 +42,7 @@ const Navigation = (props: AppProps) => {
     const [burgerOpened, setBurgerOpened] = useState(false);
     const [loginModalOpened, setLoginModalOpened] = useState(false);
     const [registerModalOpened, setRegisterModalOpened] = useState(false);
+    const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false);
     const [navData, setNavData] = useState<NavData | null>(null);
     const { data: session, status } = useSession();
     const { classes } = useStyles();
@@ -56,9 +58,33 @@ const Navigation = (props: AppProps) => {
         });
     }
 
-    const UpdateUserGames = (sessionId: string) => {
+    const UpdateUserGames = async (sessionId: string) => {
+        setUpdateGamesButtonLoading(true);
+        const res = await DoGet('/api/user/UpdateUserGames', sessionId);
+        if(res.ok){
+            const data: UpdateUserGames = await res.json();
+            
+            if(!data.success){
+                toast.warning(data.reason, {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+            else{
+                toast.success(data.reason, {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+        }
 
+        setUpdateGamesButtonLoading(false);
+
+        //Get the nav for logged in games
     }
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,7 +93,7 @@ const Navigation = (props: AppProps) => {
             }
     
             if(status === "unauthenticated"){
-                const res = await DoGet('/api/Navigation/GetLoggedOutGameCounts');
+                const res = await DoGet('/api/navigation/GetLoggedOutGameCounts');
 
                 const data: NavData = {
                     loggedOut: await res.json()
@@ -75,6 +101,10 @@ const Navigation = (props: AppProps) => {
 
                 console.log(data.loggedOut?.games["4"]);
                 setNavData(data);
+            }
+
+            if(status === "authenticated"){
+                UpdateUserGames(session.sessionId);
             }
         }
 
@@ -132,7 +162,8 @@ const Navigation = (props: AppProps) => {
                             variant="gradient" 
                             gradient={{ from: 'orange', to: 'red' }}
                             sx={{marginTop: 15, marginRight: 10}}
-                            onClick={() => LogoutUser(session.sessionId)}>
+                            onClick={() => UpdateUserGames(session.sessionId)}
+                            loading={updateGamesButtonLoading}>
                                 Update games
                         </Button>
 

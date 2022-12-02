@@ -1,5 +1,13 @@
-export const DoGet = async (apiPath: string) => {
-    return await fetch(process.env.NEXT_PUBLIC_WEB_URL + apiPath, { cache: 'no-store' });
+export const DoGet = async (apiPath: string, sessionId?: string) => {
+    if(sessionId){
+        return await fetch(process.env.NEXT_PUBLIC_WEB_URL + apiPath, {
+            method: 'GET',
+            headers: {'Authorization': sessionId}
+        });
+    }
+    else{
+        return await fetch(process.env.NEXT_PUBLIC_WEB_URL + apiPath);
+    }
 }
 
 export const DoPost = async (apiPath: string, data: any) => {

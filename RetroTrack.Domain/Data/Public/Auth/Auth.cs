@@ -101,7 +101,8 @@ namespace RetroTrack.Domain.Data.Public.Auth
                 {
                     Username = username,
                     HashedPassword = hashedPassword,
-                    LastActivity = DateTime.UtcNow
+                    LastActivity = DateTime.UtcNow,
+                    LastUserUpdate = DateTime.UtcNow
                 });
 
                 context.SaveChanges();
