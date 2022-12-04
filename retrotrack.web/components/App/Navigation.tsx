@@ -1,4 +1,4 @@
-import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Stack, Text } from "@mantine/core";
+import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Stack, Text, Paper } from "@mantine/core";
 import { AppProps } from "next/app";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react"
@@ -24,7 +24,7 @@ const getColour = (perc: number) => {
     }
     var h = r * 0x10000 + g * 0x100 + b * 0x1;
     return '#' + ('000000' + h.toString(16)).slice(-6);
-}
+} 
 
 const useStyles = createStyles((theme) => ({
     navbar: {
@@ -49,9 +49,7 @@ const useStyles = createStyles((theme) => ({
         }
     },
     footer: {
-        borderTop: `1px solid ${
-          theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
-        }`
+        marginBottom: 10
     }
 }));
 
@@ -452,7 +450,8 @@ const Navigation = (props: AppProps) => {
                 </Navbar.Section>
 
                 <Navbar.Section className={classes.footer}>
-                    <Grid>
+                    <Paper mr={5}>
+                    <Grid pt={5} pl={5}>
                         <Grid.Col span={4}>
                         <Image
                             src={profileData?.profileImageUrl!}
@@ -462,12 +461,13 @@ const Navigation = (props: AppProps) => {
                             />
                         </Grid.Col>
                         <Grid.Col span={8}>
-                            <Text fz="md">{profileData?.username}</Text>
-                            <Text fz="md">Games 100%: {profileData?.gamesCompleted}</Text>
-                            <Text fz="md">Points: {profileData?.points}</Text>
-                            <Text fz="md">Rank: {profileData?.rank}</Text>
+                            <Text fz="md" fw={700} pl={5}>{profileData?.username}</Text>
+                            <Text fz="md" pl={5}>Games 100%: <b>{profileData?.gamesCompleted}</b></Text>
+                            <Text fz="md" pl={5}>Points: <b>{profileData?.points}</b></Text>
+                            <Text fz="md" pl={5}>Rank: <b>{profileData?.rank}</b></Text>
                         </Grid.Col>
                     </Grid>
+                    </Paper>
                 </Navbar.Section>
             </Navbar>
             }>
