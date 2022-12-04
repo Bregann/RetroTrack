@@ -72,4 +72,19 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("PctWon")]
         public double? PctWon { get; set; }
     }
+
+    public class GetUserSummary
+    {
+        [JsonProperty("TotalPoints")]
+        public long TotalPoints { get; set; }
+
+        [JsonProperty("Rank")]
+        public long Rank { get; set; }
+
+        [JsonProperty("UserPic")]
+        public string UserPic { get; set; }
+
+        [JsonProperty("TotalRanked")]
+        public long TotalRanked { get; set; }
+    }
 }

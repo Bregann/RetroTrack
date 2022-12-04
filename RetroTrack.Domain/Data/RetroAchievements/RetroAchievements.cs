@@ -160,6 +160,22 @@ namespace RetroTrack.Domain.Data.External
             }
         }
 
+        public static async Task<GetUserSummary?> GetUserProfile(string username)
+        {
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            var request = new RestRequest($"API_GetUserSummary.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting user profile for {username}. Status code: {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
+        }
+
         public static async Task GetUserGames(string username)
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -192,13 +208,16 @@ namespace RetroTrack.Domain.Data.External
                 foreach (var game in gameList)
                 {
                     //Check if it already exists, if so update the field
-                    var userData = context.UserGameProgress.Where(x => x.Id == game.GameId && x.User.Username == username).FirstOrDefault();
+                    var userData = context.UserGameProgress.Where(x => x.GameID == game.GameId && x.User.Username == username).FirstOrDefault();
 
                     if (userData != null)
                     {
                         userData.AchievementsGained = game.AchievementsAwarded;
                         userData.GamePercentage = userData.GamePercentage;
                         userData.HardcoreMode = userData.HardcoreMode;
+                        context.SaveChanges();
+
+                        Log.Information($"[RetroAchievements] Game progress for ID {game.GameId} updated for {username}");
                         continue;
                     }
 
@@ -236,6 +255,7 @@ namespace RetroTrack.Domain.Data.External
                 {
                     var dataToProcess = context.RetroAchievementsApiData.First(x => x.Id == id);
                     var gameList = JsonConvert.DeserializeObject<List<GetGameList>>(dataToProcess.JsonData);
+                    var gameConsoles = context.GameConsoles;
 
                     if (gameList == null)
                     {
@@ -254,7 +274,7 @@ namespace RetroTrack.Domain.Data.External
                     }
 
                     //Update the game count for the console
-                    context.GameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Count();
+                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Count;
 
                     foreach (var game in gameList)
                     {
@@ -269,7 +289,7 @@ namespace RetroTrack.Domain.Data.External
                                 EmailMessageProcessed = false,
                                 ExtraDataProcessed = false,
                                 AchievementCount = game.AchievementCount,
-                                GameConsoleId = game.ConsoleId,
+                                GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
                                 ImageIcon = game.ImageIcon,
                                 LastModified = game.DateModified.ToUniversalTime(),
                                 Points = game.Points

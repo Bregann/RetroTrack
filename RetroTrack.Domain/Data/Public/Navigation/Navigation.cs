@@ -1,4 +1,5 @@
-﻿using RetroTrack.Domain.Dtos;
+﻿using RetroTrack.Domain.Data.External;
+using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Infrastructure.Database.Context;
 using System;
@@ -15,16 +16,18 @@ namespace RetroTrack.Domain.Data.Public.Navigation
         {
             using(var context = new DatabaseContext())
             {
+                var gamesDict = context.GameConsoles.Where(x => x.GameCount != 0).ToDictionary(x => x.ConsoleID, x => x.GameCount);
+                gamesDict.Add(-1, context.GameConsoles.Sum(x => x.GameCount));
+
                 return new NavigationGameCountsDto 
                 { 
-                    Games = context.GameConsoles.ToDictionary(x => x.ConsoleID, x => x.GameCount) 
+                    Games = gamesDict
                 };
             }
         }
 
         public static LoggedInNavigationGameCountsDto GetGameCountsLoggedIn(string username)
         {
-
             using (var context = new DatabaseContext())
             {
                 //Get the consoles and the user completed games
@@ -36,20 +39,52 @@ namespace RetroTrack.Domain.Data.Public.Navigation
                 foreach (var console in gameConsoles)
                 {
                     var gamesCompleted = percentage.Where(x => x == console.Key).Count();
+                    var consoleCompletion = Math.Round((100 * ((decimal)gamesCompleted / console.Value)), 2);
 
                     dataDict.Add(console.Key, new NavigationUserStats 
                     { 
-                        GamesCompleted = gamesCompleted, 
-                        GamesTotal = console.Value, 
-                        Percentage = $"{Math.Round((double)(gamesCompleted / console.Value) * 100, 2)}%" 
+                        GamesTotalAndCompleted = $"{gamesCompleted}/{console.Value} ({consoleCompletion}%)",
+                        Percentage = consoleCompletion
                     });
                 }
+
+                var totalGames = gameConsoles.Sum(x => x.Value);
+                var allGamesCompletion = Math.Round((100 * ((decimal)percentage.Count / totalGames)), 2);
+
+                dataDict.Add(-1, new NavigationUserStats
+                {
+                    GamesTotalAndCompleted = $"{percentage.Count}/{totalGames} ({allGamesCompletion}%)",
+                    Percentage = allGamesCompletion
+                });
 
                 return new LoggedInNavigationGameCountsDto 
                 { 
                     Games = dataDict 
                 };
             }
+        }
+
+        public static async Task<UserNavProfileDto?> GetuserNavProfileData(string username)
+        {
+            var userData = await RetroAchievements.GetUserProfile(username);
+
+            if (userData == null)
+            {
+                return null;
+            }
+
+            using(var context = new DatabaseContext())
+            {
+                return new UserNavProfileDto
+                {
+                    Username = username,
+                    ProfileImageUrl = "https://retroachievements.org" + userData.UserPic,
+                    GamesCompleted = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).ToList().Count,
+                    Points = userData.TotalPoints,
+                    Rank = userData.Rank
+                };
+            }
+
         }
     }
 }

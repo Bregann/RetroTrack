@@ -35,8 +35,6 @@ const RegisterModal = (props: ModalProps) => {
 
         const data: RegiserUserData = await res.json();
 
-        console.log(data);
-
         //Check if there's any error
         if(data.reason){
             setErrorMessage(data.reason);

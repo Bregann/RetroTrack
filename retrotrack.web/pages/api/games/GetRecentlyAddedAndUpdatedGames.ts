@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { DoBackendGet } from "../../../Helpers/backendFetchHelper";
-import { LoggedOutGameTypes } from "../../../types/Api/Navigation/NavGameCounts";
+import { RecentGameUpdatesDayList } from "../../../types/Api/Games/GetRecentlyAddedAndUpdatedGames";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse<LoggedOutGameTypes>) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<RecentGameUpdatesDayList[]>) => {
     try {
         const apiRes = await DoBackendGet('/api/Navigation/GetLoggedOutUserGameCounts');
         if(!apiRes.ok){

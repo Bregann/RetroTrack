@@ -28,5 +28,25 @@ namespace RetroTrack.Controllers.Navigation
 
             return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn(user);
         }
+
+        [HttpGet("GetUserNavProfile")]
+        public  async Task<ActionResult<UserNavProfileDto>> GetUserNavProfile()
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var userProfile = await Domain.Data.Public.Navigation.Navigation.GetuserNavProfileData(user);
+
+            if (userProfile == null)
+            {
+                return BadRequest();
+            }
+
+            return userProfile;
+        }
     }
 }

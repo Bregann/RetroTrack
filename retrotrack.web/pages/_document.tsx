@@ -11,7 +11,7 @@ export default class _Document extends Document {
     return (
       <Html>
         <Head />
-        <body>
+        <body style={{color: 'white'}}>
           <Main />
           <NextScript />
         </body>

@@ -10,8 +10,8 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string HashedPassword { get; set; }
         public required DateTime LastActivity { get; set; }
         public required DateTime LastUserUpdate { get; set; }
-        public List<UserGameProgress> UserGameProgress { get; set; }
-        public List<TrackedGames> TrackedGames { get; set; }
-        public List<Sessions> Sessions { get; set; }
+        public virtual List<UserGameProgress> UserGameProgress { get; set; }
+        public virtual List<TrackedGames> TrackedGames { get; set; }
+        public virtual List<Sessions> Sessions { get; set; }
     }
 }

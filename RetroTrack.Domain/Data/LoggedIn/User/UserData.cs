@@ -36,11 +36,13 @@ namespace RetroTrack.Domain.Data.LoggedIn.UserData
                     return new UpdateUserGamesDto
                     {
                         Success = false,
-                        Reason = $"User update is on cooldown! You can next update in {secondsDiff} seconds time"
+                        Reason = $"User update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
                     };
                 }
 
-               await RetroAchievements.GetUserGames(username);
+                await RetroAchievements.GetUserGames(username);
+                user.LastUserUpdate = DateTime.UtcNow;
+                context.SaveChanges();
 
                 return new UpdateUserGamesDto 
                 { 

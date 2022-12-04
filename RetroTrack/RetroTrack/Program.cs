@@ -21,7 +21,7 @@ builder.Services.AddHangfire(configuration => configuration
         .UseDarkDashboard()
         );
 
-builder.Services.AddHangfireServer();
+builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

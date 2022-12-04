@@ -7,7 +7,6 @@ import { UpdateUserGames } from '../../../types/Api/User/UpdateUserGames'
     
     try {
         const apiRes = await DoBackendGet('/api/Users/UpdateUserGames', req.headers.authorization);
-        console.log(apiRes);
         const data = await apiRes.json();
         
         if(!apiRes.ok){
@@ -18,7 +17,6 @@ import { UpdateUserGames } from '../../../types/Api/User/UpdateUserGames'
         res.status(200).json(data);
 
     } catch (error) {
-        console.log(error);
         res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."})
     }
   }

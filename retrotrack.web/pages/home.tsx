@@ -1,20 +1,22 @@
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import App from "./_app";
 import { DoGet } from "../Helpers/webFetchHelper";
-const Poo = async () => {
-    const res = await DoGet('/api/Navigation/GetLoggedOutGameCounts');
-
-    console.log(await res.json());
-}
-
+import { Text } from "@mantine/core";
+import { GetServerSideProps } from "next";
 const Home = () => {
+    const { data: session, status } = useSession();
+
     return ( 
         <>
-        <h1>hello2</h1>
-        <button onClick={async () => await Poo()}></button>
-            
+            {status === "authenticated" && <Text size={55} align="center">Welcome back, {session.username}!</Text>}
+            {status === "unauthenticated" && <h1>Home</h1>}
         </>
      );
 }
  
+export const getServerSideProps: GetServerSideProps = async () => {
+    return {
+        props: {}, // will be passed to the page component as props
+        }
+  }
 export default Home;

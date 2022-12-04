@@ -19,8 +19,16 @@ namespace RetroTrack.Domain.Dtos
 
     public class NavigationUserStats
     {
-        public required int GamesTotal { get; set; }
+        public required string GamesTotalAndCompleted { get; set; }
+        public required decimal Percentage { get; set; }
+    }
+
+    public class UserNavProfileDto
+    {
+        public required string ProfileImageUrl { get; set; }
+        public required string Username { get; set; }
+        public required long Points { get; set; }
+        public required long Rank { get; set; }
         public required int GamesCompleted { get; set; }
-        public required string Percentage { get; set; }
     }
 }

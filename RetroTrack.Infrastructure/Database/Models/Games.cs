@@ -12,7 +12,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string Title { get; set; }
 
         [Required]
-        public required int GameConsoleId { get; set; }
+        public required GameConsoles GameConsole { get; set; }
 
         [Required]
         public required string ImageIcon { get; set; }

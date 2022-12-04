@@ -19,7 +19,7 @@ namespace RetroTrack.Domain
             RecurringJob.AddOrUpdate("GetConsolesAndInsertToDatabaseJob", () => GetConsolesAndInsertToDatabaseJob(), "0 0 * * *");
             RecurringJob.AddOrUpdate("GetGamesFromConsoleIdsJob", () => GetGamesFromConsoleIdsJob(), "0 */6 * * *");
             RecurringJob.AddOrUpdate("GetUnprocessedGameData", () => GetUnprocessedGameDataJob(), "10 */6 * * *");
-            RecurringJob.AddOrUpdate("GetGamesFromConsoleIdsJob", () => QueueGamesToUpdateJob(), "*/20 * * * * *");
+            RecurringJob.AddOrUpdate("QueueGamesToUpdateJob", () => QueueGamesToUpdateJob(), "*/20 * * * * *");
         }
 
         public static async Task GetConsolesAndInsertToDatabaseJob()

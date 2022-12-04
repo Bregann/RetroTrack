@@ -1,17 +1,30 @@
-import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles } from "@mantine/core";
+import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Stack, Text } from "@mantine/core";
 import { AppProps } from "next/app";
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react"
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
-import { NavData } from "../../types/App/NavData";
 import { DoDelete, DoGet } from "../../Helpers/webFetchHelper";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { UpdateUserGames } from "../../types/Api/User/UpdateUserGames";
-const Getcolour = () => {
-    return "red";
+import { NavData } from "../../types/Api/Navigation/NavGameCounts";
+import Image from 'next/image'
+import { UserNavProfile } from "../../types/Api/Navigation/UserNavProfile";
+
+const getColour = (perc: number) => {
+    var r, g, b = 0;
+    if(perc < 50) {
+        r = 255;
+        g = Math.round(5.1 * perc);
     }
+    else {
+        g = 255;
+        r = Math.round(510 - 5.10 * perc);
+    }
+    var h = r * 0x10000 + g * 0x100 + b * 0x1;
+    return '#' + ('000000' + h.toString(16)).slice(-6);
+}
 
 const useStyles = createStyles((theme) => ({
     navbar: {
@@ -34,6 +47,11 @@ const useStyles = createStyles((theme) => ({
             backgroundColor: theme.colors.dark[5],
             color: theme.colorScheme === 'dark' ? theme.white : theme.black
         }
+    },
+    footer: {
+        borderTop: `1px solid ${
+          theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+        }`
     }
 }));
 
@@ -43,7 +61,10 @@ const Navigation = (props: AppProps) => {
     const [loginModalOpened, setLoginModalOpened] = useState(false);
     const [registerModalOpened, setRegisterModalOpened] = useState(false);
     const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false);
+    const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false);
     const [navData, setNavData] = useState<NavData | null>(null);
+    const [profileData, setProfileData] = useState<UserNavProfile>();
+
     const { data: session, status } = useSession();
     const { classes } = useStyles();
 
@@ -60,9 +81,9 @@ const Navigation = (props: AppProps) => {
 
     const UpdateUserGames = async (sessionId: string) => {
         setUpdateGamesButtonLoading(true);
-        const res = await DoGet('/api/user/UpdateUserGames', sessionId);
-        if(res.ok){
-            const data: UpdateUserGames = await res.json();
+        const updateRes = await DoGet('/api/user/UpdateUserGames', sessionId);
+        if(updateRes.ok){
+            const data: UpdateUserGames = await updateRes.json();
             
             if(!data.success){
                 toast.warning(data.reason, {
@@ -82,13 +103,25 @@ const Navigation = (props: AppProps) => {
 
         setUpdateGamesButtonLoading(false);
 
-        //Get the nav for logged in games
-    }
+        const gameCountsRes = await DoGet('/api/navigation/GetLoggedInGameCounts', sessionId);
 
+        const data: NavData = {
+            loggedIn: await gameCountsRes.json()
+        }
+
+        const profileDataRes = await DoGet('/api/navigation/GetUserNavProfile', sessionId);
+        const profileData: UserNavProfile = await profileDataRes.json();
+
+        setProfileData(profileData);
+        setNavData(data);
+        setLoadingOverlayVisible(false);
+    }
 
     useEffect(() => {
         const fetchData = async () => {
+            console.log(status);
             if(status === "loading"){
+                setLoadingOverlayVisible(true);
                 return;
             }
     
@@ -99,8 +132,8 @@ const Navigation = (props: AppProps) => {
                     loggedOut: await res.json()
                 }
 
-                console.log(data.loggedOut?.games["4"]);
                 setNavData(data);
+                setLoadingOverlayVisible(false);
             }
 
             if(status === "authenticated"){
@@ -112,30 +145,32 @@ const Navigation = (props: AppProps) => {
 
     }, [status])
 
-
-    if(status === "loading"){
+    if(status === "loading" || status === "authenticated" && !navData || status === "unauthenticated" && !navData){
         return ( 
-            <AppShell
-            header={
-                <Header height={{base: 70}} className={classes.header} >
-                    <Grid>
-                        <Grid.Col span={6}>
-                        { /* do not display when it's its larger than sm */}
-                            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                                <Burger
-                                    opened={burgerOpened}
-                                    onClick={() => setBurgerOpened((o) => !o)}
-                                    size="sm"
-                                    mr="xl"
-                                    style={{marginTop: 20, marginRight: 20}}
-                                />
-                            </MediaQuery>
-                        </Grid.Col>
-                    </Grid>
-                </Header>
-            }>
-            <Component {...pageProps} />
-        </AppShell>
+            <div style={{position: 'relative' }}>
+                <LoadingOverlay visible={loadingOverlayVisible} overlayBlur={2} />
+                <AppShell
+                    header={
+                        <Header height={{base: 70}} className={classes.header} >
+                            <Grid>
+                                <Grid.Col span={6}>
+                                    { /* do not display when it's its larger than sm */}
+                                    <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                                            <Burger
+                                            opened={burgerOpened}
+                                            onClick={() => setBurgerOpened((o) => !o)}
+                                            size="sm"
+                                            mr="xl"
+                                            style={{marginTop: 20, marginRight: 20}}
+                                        />
+                                    </MediaQuery>
+                                </Grid.Col>
+                            </Grid>
+                        </Header>
+                    }>
+                    <Component {...pageProps} />
+                </AppShell>
+            </div>
          );
     }
 
@@ -160,7 +195,7 @@ const Navigation = (props: AppProps) => {
                         <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
                         <Button 
                             variant="gradient" 
-                            gradient={{ from: 'orange', to: 'red' }}
+                            gradient={{ from: 'indigo', to: 'cyan' }}
                             sx={{marginTop: 15, marginRight: 10}}
                             onClick={() => UpdateUserGames(session.sessionId)}
                             loading={updateGamesButtonLoading}>
@@ -179,14 +214,228 @@ const Navigation = (props: AppProps) => {
                 </Header>
             }
             navbar={
-                <Navbar hiddenBreakpoint="sm" hidden={!burgerOpened} width={{ sm: 200, lg: 300 }} className={classes.navbar}>
-                    <Navbar.Section>
-                    </Navbar.Section>
-                        <NavLink label='Home' component="a" href='/home' className={classes.mainLinks} active={'/home' === window.location.pathname}/>
-                        <NavLink label='All Games'component="a" href='/allgames' className={classes.mainLinks} active={'/allgames' === window.location.pathname}/>
-                        <NavLink label='Tracked Games'component="a" href='/trackedgames' className={classes.mainLinks} active={'/trackedgames' === window.location.pathname}/>
-                        <NavLink label='In Progress Games'component="a" href='/inprogressgames' className={classes.mainLinks} active={'/inprogressgames' === window.location.pathname}/>
-                </Navbar>
+            <Navbar hiddenBreakpoint="sm" hidden={!burgerOpened} width={{ sm: 200, lg: 300 }} className={classes.navbar}>
+                <Navbar.Section grow component={ScrollArea}>
+                    <Link href='/home' passHref style={{ textDecoration: 'none' }}>
+                        <NavLink label='Home' className={classes.mainLinks} active={'/home' === window.location.pathname}/>
+                    </Link>
+
+                    <Link href='/allgames' passHref style={{ textDecoration: 'none' }}>
+                        <NavLink label='All Games' className={classes.mainLinks} active={'/allgames' === window.location.pathname} description={navData.loggedIn?.games["-1"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["-1"].percentage!)}}}/>
+                    </Link>
+
+                    <Link href='/trackedgames' passHref style={{ textDecoration: 'none' }}>
+                        <NavLink label='Tracked Games' className={classes.mainLinks} active={'/trackedgames' === window.location.pathname} description={"aaaa"} />
+                    </Link>
+                    
+                    <Link href='/inprogressgames' passHref style={{ textDecoration: 'none' }}>
+                        <NavLink label='In Progress Games' className={classes.mainLinks} active={'/inprogressgames' === window.location.pathname} description={"aaaa"} />
+                    </Link>
+
+                    <NavLink label='Nintendo' className={classes.mainLinks}>
+                        <Link href='/console/4' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Game Boy' active={'/console/4' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["4"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["4"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/6' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Game Boy Color' active={'/console/6' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["6"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["6"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/5' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Game Boy Advance' active={'/console/5' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["5"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["5"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/7' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='NES' active={'/console/7' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["7"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["7"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/3' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='SNES' active={'/console/3' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["3"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["3"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/2' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Nintendo 64' active={'/console/2' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["2"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["2"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/18' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Nintendo DS' active={'/console/18' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["18"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["18"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/24' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Pokemon Mini' active={'/console/24' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["44"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["44"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/28' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Virtual Boy' active={'/console/28' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["28"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["28"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+
+                    <NavLink label='Sony' className={classes.mainLinks}>
+                        <Link href='/console/12' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PlayStation' active={'/console/12' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["12"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["12"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/21' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PlayStation 2' active={'/console/21' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["21"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["21"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/41' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PlayStation Portable' active={'/console/41' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["41"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["41"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+
+                    <NavLink label='Atari' className={classes.mainLinks}>
+                        <Link href='/console/25' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari 2600' active={'/console/25' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["25"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["25"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/51' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari 7800' active={'/console/51' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["51"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["51"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/17' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari Jaguar' active={'/console/17' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["17"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["17"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/13' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari Lynx' active={'/console/13' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["13"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["13"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+
+                    <NavLink label='NEC' className={classes.mainLinks}>
+                        <Link href='/console/8' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PC Engine' active={'/console/8' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["8"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["8"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/47' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PC-8000' active={'/console/47' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["47"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["47"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/49' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='PC-FX' active={'/console/49' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["49"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["49"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+
+                    <NavLink label='Sega' className={classes.mainLinks}>
+                        <Link href='/console/33' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='SG-1000' active={'/console/33' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["33"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["33"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/11' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Master System' active={'/console/11' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["11"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["11"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/15' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Game Gear' active={'/console/15' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["15"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["15"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/1' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Mega Drive' active={'/console/1' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["1"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["1"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/9' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Sega CD' active={'/console/9' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["9"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["9"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/10' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Sega 32X' active={'/console/10' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["10"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["10"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/39' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Sega Saturn' active={'/console/39' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["39"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["39"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/40' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Sega Dreamcast' active={'/console/40' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["40"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["40"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+
+                    <NavLink label='Other' className={classes.mainLinks}>
+                        <Link href='/console/43' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='3DO Interactive Multiplayer' active={'/console/43' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["43"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["43"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/37' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Amstrad CPC' active={'/console/37' === window.location.pathname} className={classes.subLinks}  description={navData.loggedIn?.games["37"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["37"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/38' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Apple II' active={'/console/38' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["38"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["38"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/27' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Arcade' active={'/console/27' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["27"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["27"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/71' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Arduboy' active={'/console/71' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["71"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["71"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/44' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='ColecoVision' active={'/console/44' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["44"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["44"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/57' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Fairchild Channel F' active={'/console/57' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["57"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["57"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/45' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Intellivision' active={'/console/45' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["45"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["45"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/23' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Magnavox Odyssey 2' active={'/console/23' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["23"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["23"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/69' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Mega Duck' active={'/console/69' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["69"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["69"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/29' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='MSX' active={'/console/29' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["29"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["29"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/14' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Neo Geo Pocket' active={'/console/14' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["14"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["14"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/46' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Vectrex' active={'/console/46' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["46"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["46"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/72' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='WASM-4' active={'/console/72' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["72"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["72"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/63' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Watara Supervision' active={'/console/63' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["63"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["63"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/53' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='WonderSwan'active={'/console/53' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["53"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["53"].percentage!)}}}/>
+                        </Link>
+                    </NavLink>
+                </Navbar.Section>
+
+                <Navbar.Section className={classes.footer}>
+                    <Grid>
+                        <Grid.Col span={4}>
+                        <Image
+                            src={profileData?.profileImageUrl!}
+                            alt="Profile picture of user"
+                            width={100}
+                            height={100}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={8}>
+                            <Text fz="md">{profileData?.username}</Text>
+                            <Text fz="md">Games 100%: {profileData?.gamesCompleted}</Text>
+                            <Text fz="md">Points: {profileData?.points}</Text>
+                            <Text fz="md">Rank: {profileData?.rank}</Text>
+                        </Grid.Col>
+                    </Grid>
+                </Navbar.Section>
+            </Navbar>
             }>
 
             <Component {...pageProps} />
@@ -238,194 +487,194 @@ const Navigation = (props: AppProps) => {
 
                 <ScrollArea>
                     <Link href='/home' passHref style={{ textDecoration: 'none' }}>
-                        <NavLink label='Home' className={classes.mainLinks} active={'/home' === window.location.pathname} sx={{color: Getcolour()}}/>
+                        <NavLink label='Home' className={classes.mainLinks} active={'/home' === window.location.pathname}/>
                     </Link>
 
                     <Link href='/allgames' passHref style={{ textDecoration: 'none' }}>
-                        <NavLink label='All Games' className={classes.mainLinks} active={'/allgames' === window.location.pathname}/>
+                        <NavLink label='All Games' className={classes.mainLinks} active={'/allgames' === window.location.pathname} description={navData.loggedOut?.games["-1"] + " games"}/>
                     </Link>
 
                     <NavLink label='Nintendo' className={classes.mainLinks}>
                         <Link href='/console/4' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Game Boy' active={'/console/4' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Game Boy' active={'/console/4' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["4"] + " games"}/>
                         </Link>
 
                         <Link href='/console/6' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Game Boy Color' active={'/console/6' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Game Boy Color' active={'/console/6' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["6"] + " games"}/>
                         </Link>
 
                         <Link href='/console/5' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Game Boy Advance' active={'/console/5' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Game Boy Advance' active={'/console/5' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["5"] + " games"}/>
                         </Link>
 
                         <Link href='/console/7' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='NES' active={'/console/7' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='NES' active={'/console/7' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["7"] + " games"}/>
                         </Link>
 
                         <Link href='/console/3' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='SNES' active={'/console/3' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='SNES' active={'/console/3' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["3"] + " games"}/>
                         </Link>
 
                         <Link href='/console/2' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Nintendo 64' active={'/console/2' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Nintendo 64' active={'/console/2' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["2"] + " games"}/>
                         </Link>
 
                         <Link href='/console/18' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Nintendo DS' active={'/console/18' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Nintendo DS' active={'/console/18' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["18"] + " games"}/>
                         </Link>
 
                         <Link href='/console/24' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Pokemon Mini' active={'/console/24' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Pokemon Mini' active={'/console/24' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["24"] + " games"}/>
                         </Link>
 
                         <Link href='/console/28' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Virtual Boy' active={'/console/28' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Virtual Boy' active={'/console/28' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["28"] + " games"}/>
                         </Link>
                     </NavLink>
 
                     <NavLink label='Sony' className={classes.mainLinks}>
                         <Link href='/console/12' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PlayStation' active={'/console/12' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PlayStation' active={'/console/12' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["12"] + " games"}/>
                         </Link>
 
                         <Link href='/console/21' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PlayStation 2' active={'/console/21' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PlayStation 2' active={'/console/21' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["21"] + " games"}/>
                         </Link>
 
                         <Link href='/console/41' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PlayStation Portable' active={'/console/41' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PlayStation Portable' active={'/console/41' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["41"] + " games"}/>
                         </Link>
                     </NavLink>
 
                     <NavLink label='Atari' className={classes.mainLinks}>
                         <Link href='/console/25' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Atari 2600' active={'/console/25' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Atari 2600' active={'/console/25' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["25"] + " games"}/>
                         </Link>
 
                         <Link href='/console/51' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Atari 7800' active={'/console/51' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Atari 7800' active={'/console/51' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["51"] + " games"}/>
                         </Link>
 
                         <Link href='/console/17' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Atari Jaguar' active={'/console/17' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Atari Jaguar' active={'/console/17' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["17"] + " games"}/>
                         </Link>
 
                         <Link href='/console/13' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Atari Lynx' active={'/console/13' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Atari Lynx' active={'/console/13' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["13"] + " games"}/>
                         </Link>
                     </NavLink>
 
                     <NavLink label='NEC' className={classes.mainLinks}>
                         <Link href='/console/8' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PC Engine' active={'/console/8' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PC Engine' active={'/console/8' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["8"] + " games"}/>
                         </Link>
 
                         <Link href='/console/47' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PC-8000' active={'/console/47' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PC-8000' active={'/console/47' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["47"] + " games"}/>
                         </Link>
 
                         <Link href='/console/49' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='PC-FX' active={'/console/49' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='PC-FX' active={'/console/49' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["49"] + " games"}/>
                         </Link>
                     </NavLink>
 
                     <NavLink label='Sega' className={classes.mainLinks}>
                         <Link href='/console/33' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='SG-1000' active={'/console/33' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='SG-1000' active={'/console/33' === window.location.pathname} className={classes.subLinks}  description={navData.loggedOut?.games["33"] + " games"}/>
                         </Link>
 
                         <Link href='/console/11' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Master System' active={'/console/11' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Master System' active={'/console/11' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["11"] + " games"}/>
                         </Link>
 
                         <Link href='/console/15' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Game Gear' active={'/console/15' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Game Gear' active={'/console/15' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["15"] + " games"}/>
                         </Link>
 
                         <Link href='/console/1' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Mega Drive' active={'/console/1' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Mega Drive' active={'/console/1' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["1"] + " games"}/>
                         </Link>
 
                         <Link href='/console/9' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Sega CD' active={'/console/9' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Sega CD' active={'/console/9' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["9"] + " games"}/>
                         </Link>
 
                         <Link href='/console/10' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Sega 32X' active={'/console/10' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Sega 32X' active={'/console/10' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["10"] + " games"}/>
                         </Link>
 
                         <Link href='/console/39' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Sega Saturn' active={'/console/39' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Sega Saturn' active={'/console/39' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["39"] + " games"}/>
                         </Link>
 
                         <Link href='/console/40' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Sega Dreamcast' active={'/console/40' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Sega Dreamcast' active={'/console/40' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["40"] + " games"}/>
                         </Link>
                     </NavLink>
 
                     <NavLink label='Other' className={classes.mainLinks}>
                         <Link href='/console/43' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='3DO Interactive Multiplayer' active={'/console/43' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='3DO Interactive Multiplayer' active={'/console/43' === window.location.pathname} className={classes.subLinks}  description={navData.loggedOut?.games["43"] + " games"}/>
                         </Link>
 
                         <Link href='/console/37' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Amstrad CPC' active={'/console/37' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Amstrad CPC' active={'/console/37' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["37"] + " games"}/>
                         </Link>
 
                         <Link href='/console/38' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Apple II' active={'/console/38' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Apple II' active={'/console/38' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["38"] + " games"}/>
                         </Link>
 
                         <Link href='/console/27' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Arcade' active={'/console/27' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Arcade' active={'/console/27' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["27"] + " games"}/>
                         </Link>
 
                         <Link href='/console/71' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Arduboy' active={'/console/71' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Arduboy' active={'/console/71' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["71"] + " games"}/>
                         </Link>
 
                         <Link href='/console/44' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='ColecoVision' active={'/console/44' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='ColecoVision' active={'/console/44' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["44"] + " games"}/>
                         </Link>
 
                         <Link href='/console/57' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Fairchild Channel F' active={'/console/57' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Fairchild Channel F' active={'/console/57' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["57"] + " games"}/>
                         </Link>
 
                         <Link href='/console/45' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Intellivision' active={'/console/45' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Intellivision' active={'/console/45' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["45"] + " games"}/>
                         </Link>
 
                         <Link href='/console/23' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Magnavox Odyssey 2' active={'/console/23' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Magnavox Odyssey 2' active={'/console/23' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["23"] + " games"}/>
                         </Link>
 
                         <Link href='/console/69' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Mega Duck' active={'/console/69' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Mega Duck' active={'/console/69' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["69"] + " games"}/>
                         </Link>
 
                         <Link href='/console/29' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='MSX' active={'/console/29' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='MSX' active={'/console/29' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["29"] + " games"}/>
                         </Link>
 
                         <Link href='/console/14' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Neo Geo Pocket' active={'/console/14' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Neo Geo Pocket' active={'/console/14' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["14"] + " games"}/>
                         </Link>
 
                         <Link href='/console/46' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Vectrex' active={'/console/46' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Vectrex' active={'/console/46' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["46"] + " games"}/>
                         </Link>
 
                         <Link href='/console/72' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='WASM-4' active={'/console/72' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='WASM-4' active={'/console/72' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["72"] + " games"}/>
                         </Link>
 
                         <Link href='/console/63' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='Watara Supervision' active={'/console/63' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='Watara Supervision' active={'/console/63' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["63"] + " games"}/>
                         </Link>
 
                         <Link href='/console/53' passHref style={{ textDecoration: 'none' }}>
-                            <NavLink label='WonderSwan'active={'/console/53' === window.location.pathname} className={classes.subLinks}/>
+                            <NavLink label='WonderSwan'active={'/console/53' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["53"] + " games"}/>
                         </Link>
                     </NavLink>
                 </ScrollArea>
@@ -440,6 +689,8 @@ const Navigation = (props: AppProps) => {
         </AppShell>
          );
     }
+
+    return null;
 }
 
 export default Navigation;

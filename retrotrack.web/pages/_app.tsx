@@ -26,11 +26,11 @@ export default function App(props: AppProps) {
           withNormalizeCSS
           theme={{
             colorScheme: 'dark',
+            
           }}
         >
           
           <Navigation {...props} />
-          <Component {...props} />
         </MantineProvider>
       </SessionProvider>
 

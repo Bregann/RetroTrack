@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { DoBackendGet } from "../../../Helpers/backendFetchHelper";
-import { LoggedOutGameTypes } from "../../../types/Api/Navigation/NavGameCounts";
+import { UserNavProfile } from "../../../types/Api/Navigation/UserNavProfile";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse<LoggedOutGameTypes>) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<UserNavProfile>) => {
     try {
-        const apiRes = await DoBackendGet('/api/Navigation/GetLoggedOutUserGameCounts');
+        const apiRes = await DoBackendGet('/api/Navigation/GetUserNavProfile', req.headers.authorization);
+
         if(!apiRes.ok){
             res.status(apiRes.status);
             return;

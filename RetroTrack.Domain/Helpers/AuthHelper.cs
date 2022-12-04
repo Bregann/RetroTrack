@@ -23,9 +23,7 @@ namespace RetroTrack.Domain.Helpers
 
                 var t = context.Sessions.ToList();
 
-                var user = context.Sessions.Where(x => x.SessionId == authHeader).FirstOrDefault();
-
-
+                var user = context.Sessions.Where(x => x.SessionId == authHeader).Select(x => x.User).FirstOrDefault();
 
                 if (user == null)
                 {
@@ -33,7 +31,7 @@ namespace RetroTrack.Domain.Helpers
                 }
                 else
                 {
-                    return user.User.Username;
+                    return user.Username;
                 }
             }
         }
