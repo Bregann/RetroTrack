@@ -2,6 +2,8 @@
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Infrastructure.Database.Models;
+using RetroTrack.Infrastructure.Database.Enums;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -40,15 +42,39 @@ namespace RetroTrack.Domain.Data.LoggedIn.UserData
                     };
                 }
 
-                await RetroAchievements.GetUserGames(username);
+                context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
+                {
+                    ApiRequestType = ApiRequestType.UserUpdate,
+                    JsonData = username,
+                    FailedProcessingAttempts = 0,
+                    ProcessingStatus = ProcessingStatus.NotScheduled
+                });
+
                 user.LastUserUpdate = DateTime.UtcNow;
                 context.SaveChanges();
 
                 return new UpdateUserGamesDto 
                 { 
                     Success = true, 
-                    Reason = "User games updated" 
+                    Reason = "User games update queued",
                 };
+            }
+        }
+
+        public static bool CheckUserUpdateCompleted(string username)
+        {
+            using(var context = new DatabaseContext())
+            {
+                var updateStatus = context.RetroAchievementsApiData.Where(x => x.JsonData == username).OrderBy(x => x.Id).Last(x => x.JsonData == username);
+
+                if (updateStatus.ProcessingStatus == ProcessingStatus.Processed)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

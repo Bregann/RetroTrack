@@ -19,7 +19,7 @@ namespace RetroTrack.Domain
             RecurringJob.AddOrUpdate("GetConsolesAndInsertToDatabaseJob", () => GetConsolesAndInsertToDatabaseJob(), "0 0 * * *");
             RecurringJob.AddOrUpdate("GetGamesFromConsoleIdsJob", () => GetGamesFromConsoleIdsJob(), "0 */6 * * *");
             RecurringJob.AddOrUpdate("GetUnprocessedGameData", () => GetUnprocessedGameDataJob(), "10 */6 * * *");
-            RecurringJob.AddOrUpdate("QueueGamesToUpdateJob", () => QueueGamesToUpdateJob(), "*/20 * * * * *");
+            RecurringJob.AddOrUpdate("QueueLogAndLoadJob", () => QueueLogAndLoadJob(), "*/20 * * * * *");
         }
 
         public static async Task GetConsolesAndInsertToDatabaseJob()
@@ -36,7 +36,7 @@ namespace RetroTrack.Domain
             await RetroAchievements.GetUnprocessedGameData();
         }
 
-        public static void QueueGamesToUpdateJob()
+        public static void QueueLogAndLoadJob()
         {
             var maxRequests = 20;
 
@@ -49,16 +49,17 @@ namespace RetroTrack.Domain
                     return;
                 }
 
-                Log.Information($"[RetroAchievements] There are {requestsToProcess} game api requests to process");
+                Log.Information($"[RetroAchievements] There are {requestsToProcess} requests to process");
 
                 var activeRequests = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.Scheduled || x.ProcessingStatus == ProcessingStatus.BeingProcessed).Count();
                 var requestsToSend = maxRequests - activeRequests;
 
-                Log.Information($"[RetroAchievements] {requestsToSend} game api requests ready to process");
 
                 var rowsToSchedule = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.NotScheduled)
                     .Take(requestsToSend)
                     .ToList();
+
+                Log.Information($"[RetroAchievements] {rowsToSchedule.Count} requests ready to process");
 
                 foreach (var id in rowsToSchedule)
                 {
@@ -71,12 +72,15 @@ namespace RetroTrack.Domain
                         case ApiRequestType.GetGameExtended:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
+                        case ApiRequestType.UserUpdate:
+                            BackgroundJob.Enqueue(() => RetroAchievements.GetUserGames(id.JsonData, id.Id)); //this is the username
+                            break;
                     }
 
                     context.RetroAchievementsApiData.First(x => x.Id == id.Id).ProcessingStatus = ProcessingStatus.Scheduled;
                     context.SaveChanges();
 
-                    Log.Information($"[RetroAchievements] game api requests id {id.Id} scheduled to send");
+                    Log.Information($"[RetroAchievements] request id {id.Id} scheduled to send");
                 }
             }
         }

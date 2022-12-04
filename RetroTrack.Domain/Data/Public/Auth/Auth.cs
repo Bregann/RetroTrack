@@ -96,13 +96,19 @@ namespace RetroTrack.Domain.Data.Public.Auth
                 //hash the password and store it
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
+                //Get the users details from the API
+                var userProfile = await RetroAchievements.GetUserProfile(username);
+
                 //Add the user into the database
                 context.Users.Add(new Users
                 {
                     Username = username,
                     HashedPassword = hashedPassword,
                     LastActivity = DateTime.UtcNow,
-                    LastUserUpdate = DateTime.UtcNow
+                    LastUserUpdate = DateTime.UtcNow,
+                    UserPoints = userProfile.TotalPoints,
+                    UserProfileUrl = userProfile.UserPic,
+                    UserRank = userProfile.Rank
                 });
 
                 context.SaveChanges();

@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RetroTrack.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Data.Public.Games;
 
 namespace RetroTrack.Domain.Data.External
 {
@@ -176,75 +177,108 @@ namespace RetroTrack.Domain.Data.External
             return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
 
-        public static async Task GetUserGames(string username)
+        public static async Task GetUserGames(string username, int updateId)
         {
-            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
-            var request = new RestRequest($"API_GetUserCompletedGames.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}", Method.Get);
-
-            //Get the response and Deserialize
-            var response = await client.ExecuteAsync(request);
-
-            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            try
             {
-                Log.Warning($"[RetroAchievements] Error getting completed games data. Status code: {response.StatusCode}");
-                return;
-            }
+                var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+                var request = new RestRequest($"API_GetUserCompletedGames.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}", Method.Get);
 
-            var responseDeserialized = JsonConvert.DeserializeObject<List<GetUserCompletedGames>>(response.Content);
+                //Get the response and Deserialize
+                var response = await client.ExecuteAsync(request);
 
-            if (responseDeserialized.Count == 0)
-            {
-                Log.Information($"[RetroAchievements] No completed games found for {username}");
-                return;
-            }
-
-            //Order the list so it only has hardcore first and no dupes
-            var gameList = responseDeserialized.OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
-
-            using (var context = new DatabaseContext()) 
-            {
-                var user = context.Users.Where(x => x.Username == username).First();
-
-                foreach (var game in gameList)
+                if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
                 {
-                    //Check if it already exists, if so update the field
-                    var userData = context.UserGameProgress.Where(x => x.GameID == game.GameId && x.User.Username == username).FirstOrDefault();
+                    Log.Warning($"[RetroAchievements] Error getting completed games data. Status code: {response.StatusCode}");
+                    return;
+                }
 
-                    if (userData != null)
+                var responseDeserialized = JsonConvert.DeserializeObject<List<GetUserCompletedGames>>(response.Content);
+
+                if (responseDeserialized.Count == 0)
+                {
+                    Log.Information($"[RetroAchievements] No completed games found for {username}");
+                    return;
+                }
+
+                //Order the list so it only has hardcore first and no dupes
+                var gameList = responseDeserialized.OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
+
+                using (var context = new DatabaseContext())
+                {
+                    var user = context.Users.Where(x => x.Username == username).First();
+
+                    var userProfile = await GetUserProfile(username);
+
+                    user.UserProfileUrl = userProfile.UserPic;
+                    user.UserRank = userProfile.Rank;
+                    user.UserPoints = userProfile.TotalPoints;
+
+                    foreach (var game in gameList)
                     {
-                        userData.AchievementsGained = game.AchievementsAwarded;
-                        userData.GamePercentage = userData.GamePercentage;
-                        userData.HardcoreMode = userData.HardcoreMode;
-                        context.SaveChanges();
+                        //Check if it already exists, if so update the field
+                        var userData = context.UserGameProgress.Where(x => x.GameID == game.GameId && x.User.Username == username).FirstOrDefault();
 
-                        Log.Information($"[RetroAchievements] Game progress for ID {game.GameId} updated for {username}");
-                        continue;
+                        if (userData != null)
+                        {
+                            userData.AchievementsGained = game.AchievementsAwarded;
+                            userData.GamePercentage = userData.GamePercentage;
+                            userData.HardcoreMode = userData.HardcoreMode;
+                            context.SaveChanges();
+                            continue;
+                        }
+
+                        //weird bug with some games - says null max achievements/percentage so prevent crashing with the deralised object as nullable
+                        double pct = 0;
+
+                        if (game.PctWon != null)
+                        {
+                            pct = (double)game.PctWon;
+                        }
+
+                        context.UserGameProgress.Add(new UserGameProgress
+                        {
+                            User = user,
+                            AchievementsGained = game.AchievementsAwarded,
+                            ConsoleID = game.ConsoleId,
+                            GameID = game.GameId,
+                            GameName = game.Title,
+                            GamePercentage = pct,
+                            HardcoreMode = game.HardcoreMode
+                        });
                     }
 
-                    //weird bug with some games - says null max achievements/percentage so prevent crashing with the deralised object as nullable
-                    double pct = 0;
-
-                    if (game.PctWon != null)
-                    {
-                        pct = (double)game.PctWon;
-                    }
-
-                    context.UserGameProgress.Add(new UserGameProgress
-                    {
-                        User = user,
-                        AchievementsGained = game.AchievementsAwarded,
-                        ConsoleID = game.ConsoleId, 
-                        GameID = game.GameId,
-                        GameName = game.Title,
-                        GamePercentage = pct,
-                        HardcoreMode = game.HardcoreMode
-                    });
-
+                    context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
                     context.SaveChanges();
 
-                    Log.Information($"[RetroAchievements] Game progress for ID {game.GameId} updated for {username}");
+                    Log.Information($"[RetroAchievements] Game progress updated for {username}");
                 }
             }
+            catch (Exception e)
+            {
+                using (var context = new DatabaseContext())
+                {
+                    var erroredData = context.RetroAchievementsApiData.First(x => x.Id == updateId);
+
+                    //Check if it's already failed 3 times, if it has then set it to errrored
+                    if (erroredData.FailedProcessingAttempts == 3)
+                    {
+                        erroredData.ProcessingStatus = ProcessingStatus.Errored;
+                        //todo: send message on error
+                    }
+                    else
+                    {
+                        erroredData.ProcessingStatus = ProcessingStatus.NotScheduled;
+                        erroredData.FailedProcessingAttempts = erroredData.FailedProcessingAttempts + 1;
+                    }
+
+                    context.SaveChanges();
+                }
+
+                Log.Fatal($"[RetroAchievements] Error updating user {username} - reason {e.Message}");
+                return;
+            }
+
         }
 
         public static void AddOrUpdateGamesToDatabase(int id)
@@ -281,7 +315,7 @@ namespace RetroTrack.Domain.Data.External
                         //Check if it exists in the database, if not then add it in
                         if (!context.Games.Any(x => x.Id == game.Id))
                         {
-                            context.Games.Add(new Games
+                            context.Games.Add(new Infrastructure.Database.Models.Games
                             {
                                 Title = game.Title,
                                 Id = game.Id,

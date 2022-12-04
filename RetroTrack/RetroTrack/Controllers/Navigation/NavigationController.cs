@@ -39,7 +39,7 @@ namespace RetroTrack.Controllers.Navigation
                 return BadRequest();
             }
 
-            var userProfile = await Domain.Data.Public.Navigation.Navigation.GetuserNavProfileData(user);
+            var userProfile = Domain.Data.Public.Navigation.Navigation.GetUserNavProfileData(user);
 
             if (userProfile == null)
             {

@@ -22,14 +22,14 @@ namespace RetroTrack.Domain.Data.Public.Games
                 {
                     if (i == 0)
                     {
-                        var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).ToList();
+                        var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).Include(x => x.GameConsole).ToList();
                         var gamesTable = new List<GamesTableDto>();
 
                         gamesTable.AddRange(gamesFromDay.Select(games => new GamesTableDto
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/Images/" + games.ImageIcon,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
                             GameName = games.Title
@@ -51,7 +51,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/Images/" + games.ImageIcon,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
                             GameName = games.Title

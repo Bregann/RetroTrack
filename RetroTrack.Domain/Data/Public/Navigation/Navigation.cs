@@ -64,24 +64,25 @@ namespace RetroTrack.Domain.Data.Public.Navigation
             }
         }
 
-        public static async Task<UserNavProfileDto?> GetuserNavProfileData(string username)
+        public static UserNavProfileDto? GetUserNavProfileData(string username)
         {
-            var userData = await RetroAchievements.GetUserProfile(username);
-
-            if (userData == null)
-            {
-                return null;
-            }
-
             using(var context = new DatabaseContext())
             {
+                var user = context.Users.Where(x => x.Username== username.ToLower()).FirstOrDefault();
+
+                if (user == null)
+                {
+                    return null;
+                }
+
+
                 return new UserNavProfileDto
                 {
                     Username = username,
-                    ProfileImageUrl = "https://retroachievements.org" + userData.UserPic,
+                    ProfileImageUrl = "https://retroachievements.org" + user.UserProfileUrl,
                     GamesCompleted = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).ToList().Count,
-                    Points = userData.TotalPoints,
-                    Rank = userData.Rank
+                    Points = user.UserPoints,
+                    Rank = user.UserRank
                 };
             }
 

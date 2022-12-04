@@ -30,7 +30,7 @@ export default function App(props: AppProps) {
           }}
         >
           
-          <Navigation {...props} />
+        <Navigation {...props} />
         </MantineProvider>
       </SessionProvider>
 

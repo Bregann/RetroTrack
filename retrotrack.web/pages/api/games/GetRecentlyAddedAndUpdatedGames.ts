@@ -4,7 +4,7 @@ import { RecentGameUpdatesDayList } from "../../../types/Api/Games/GetRecentlyAd
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<RecentGameUpdatesDayList[]>) => {
     try {
-        const apiRes = await DoBackendGet('/api/Navigation/GetLoggedOutUserGameCounts');
+        const apiRes = await DoBackendGet('/api/Games/GetRecentlyAddedAndUpdatedGames');
         if(!apiRes.ok){
             res.status(apiRes.status);
             return;

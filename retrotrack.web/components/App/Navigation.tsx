@@ -1,6 +1,6 @@
 import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Stack, Text } from "@mantine/core";
 import { AppProps } from "next/app";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react"
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
@@ -62,11 +62,14 @@ const Navigation = (props: AppProps) => {
     const [registerModalOpened, setRegisterModalOpened] = useState(false);
     const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false);
     const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false);
+    const [userUpdateRequested, setUserUpdateRequested] = useState(false);
     const [navData, setNavData] = useState<NavData | null>(null);
     const [profileData, setProfileData] = useState<UserNavProfile>();
 
     const { data: session, status } = useSession();
     const { classes } = useStyles();
+    const interval = useRef<Timer>(null);
+    let userUpdateIntervalId: NodeJS.Timer | undefined = undefined;
 
     const LogoutUser = (sessionId: string) => {
         signOut();
@@ -93,16 +96,19 @@ const Navigation = (props: AppProps) => {
                 });
             }
             else{
-                toast.success(data.reason, {
+                toast.info(data.reason, {
                     position: 'bottom-right',
                     closeOnClick: true,
                     theme: 'colored'
                 });
             }
         }
-
+        
+        setUserUpdateRequested(true);
         setUpdateGamesButtonLoading(false);
+    }
 
+    const GetUserNavData = async (sessionId: string) => {
         const gameCountsRes = await DoGet('/api/navigation/GetLoggedInGameCounts', sessionId);
 
         const data: NavData = {
@@ -116,6 +122,42 @@ const Navigation = (props: AppProps) => {
         setNavData(data);
         setLoadingOverlayVisible(false);
     }
+
+    //Used for checking the status of a user update
+    useEffect(() => {
+        console.log(userUpdateRequested);
+
+        if(userUpdateRequested && !interval.current){
+            interval.current = setInterval(async () => {
+                if(!userUpdateRequested){
+                    console.log('????');
+                }
+        
+                const res = await DoGet('/api/user/CheckUserUpdateProcessingState', session?.sessionId);
+        
+                if(res.ok){
+                    const processed: boolean = await res.json();
+        
+                    if(processed){
+                        setUserUpdateRequested(false);
+                        await GetUserNavData(session?.sessionId!);
+                        
+                        toast.success("User update successful", {
+                            position: 'bottom-right',
+                            closeOnClick: true,
+                            theme: 'colored'
+                        });
+                    }
+                }
+            }, 5000)
+        }
+
+
+        if(!userUpdateRequested && interval.current){
+            clearInterval(interval.current);
+            interval.current = null;
+        }
+    }, [userUpdateRequested])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -137,7 +179,7 @@ const Navigation = (props: AppProps) => {
             }
 
             if(status === "authenticated"){
-                UpdateUserGames(session.sessionId);
+                GetUserNavData(session.sessionId);
             }
         }
 

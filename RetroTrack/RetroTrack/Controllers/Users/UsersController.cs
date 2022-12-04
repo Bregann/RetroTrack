@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data.LoggedIn.UserData;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
+using System.ComponentModel;
 
 namespace RetroTrack.Controllers.Users
 {
@@ -21,6 +22,19 @@ namespace RetroTrack.Controllers.Users
             }
 
             return await UserData.UpdateUserGames(user);
+        }
+
+        [HttpGet("CheckUserUpdateProcessingState")]
+        public ActionResult<bool> CheckUserUpdateProcessingState()
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            return UserData.CheckUserUpdateCompleted(user);
         }
     }
 }
