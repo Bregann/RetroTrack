@@ -69,7 +69,6 @@ const Navigation = (props: AppProps) => {
     const { data: session, status } = useSession();
     const { classes } = useStyles();
     const interval = useRef<Timer>(null);
-    let userUpdateIntervalId: NodeJS.Timer | undefined = undefined;
 
     const LogoutUser = (sessionId: string) => {
         signOut();
@@ -125,14 +124,8 @@ const Navigation = (props: AppProps) => {
 
     //Used for checking the status of a user update
     useEffect(() => {
-        console.log(userUpdateRequested);
-
         if(userUpdateRequested && !interval.current){
             interval.current = setInterval(async () => {
-                if(!userUpdateRequested){
-                    console.log('????');
-                }
-        
                 const res = await DoGet('/api/user/CheckUserUpdateProcessingState', session?.sessionId);
         
                 if(res.ok){
@@ -151,7 +144,6 @@ const Navigation = (props: AppProps) => {
                 }
             }, 5000)
         }
-
 
         if(!userUpdateRequested && interval.current){
             clearInterval(interval.current);

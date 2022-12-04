@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BreganUtils\BreganUtils\BreganUtils.csproj" />
     <ProjectReference Include="..\RetroTrack.Infrastructure\RetroTrack.Infrastructure.csproj" />
   </ItemGroup>
 

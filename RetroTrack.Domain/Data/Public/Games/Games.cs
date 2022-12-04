@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BreganUtils;
+using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
 using System;
@@ -37,7 +38,7 @@ namespace RetroTrack.Domain.Data.Public.Games
 
                         dayList.Add(new DayList
                         {
-                            Date = DateTime.UtcNow.Date.ToString(),
+                            Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date),
                             GamesTable = gamesTable
                         });
                     }
@@ -59,7 +60,7 @@ namespace RetroTrack.Domain.Data.Public.Games
 
                         dayList.Add(new DayList
                         {
-                            Date = DateTime.UtcNow.Date.AddDays(i * -1).ToString(),
+                            Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date.AddDays(i * -1)),
                             GamesTable = gamesTable
                         });
                     }
