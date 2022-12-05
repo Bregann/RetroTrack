@@ -2,8 +2,8 @@ import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Butt
 import { AppProps } from "next/app";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react"
-import LoginModal from "./LoginModal";
-import RegisterModal from "./RegisterModal";
+import LoginModal from "../Nav/LoginModal";
+import RegisterModal from "../Nav/RegisterModal";
 import { DoDelete, DoGet } from "../../Helpers/webFetchHelper";
 import Link from "next/link";
 import { toast } from "react-toastify";

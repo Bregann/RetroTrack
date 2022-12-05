@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using RetroTrack.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Data.Public.Games;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace RetroTrack.Domain.Data.External
 {
@@ -176,6 +177,77 @@ namespace RetroTrack.Domain.Data.External
 
             return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
+
+        public static async Task<GetGameExtended?> GetSpecificGameInfo(int gameId)
+        {
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetGameExtended.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={gameId}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
+                return null;
+            }
+
+            //if there's no achievements
+            if (response.Content.Contains("{\"Achievements\":[],") || response.Content.Contains("Achievements\":[]"))
+            {
+                return null;
+            }
+
+            //Deseralise the data
+            var data = JsonConvert.DeserializeObject<GetGameExtended>(response.Content);
+
+            //Update the player count as the values on the table are out of sync
+            using (var context = new DatabaseContext())
+            {
+                var game = context.Games.Where(x => x.Id == data.Id).First();
+                game.Players = data.Players;
+
+                context.SaveChanges();
+            }
+
+            return data;
+        }
+
+        public static async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(int gameId, string username)
+        {
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&g={gameId}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
+                return null;
+            }
+
+            //if there's no achievements
+            if (response.Content.Contains("Achievements\":[]"))
+            {
+                return null;
+            }
+
+            //Deseralise the data
+            var data = JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
+
+            //Update the player count as the values on the table are out of sync
+            using (var context = new DatabaseContext())
+            {
+                var game = context.Games.Where(x => x.Id == data.Id).First();
+                game.Players = data.Players;
+
+                context.SaveChanges();
+            }
+
+            return data;
+        }
+
 
         public static async Task GetUserGames(string username, int updateId)
         {
@@ -420,6 +492,5 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-
     }
 }

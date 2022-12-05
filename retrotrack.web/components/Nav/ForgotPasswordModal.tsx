@@ -1,5 +1,5 @@
 import { Modal } from "@mantine/core";
-import { ModalProps } from "../types/App/modal";
+import { ModalProps } from "../../types/App/modal";
 
 const ForgotPasswordModal = (props: ModalProps) => {
     return ( 

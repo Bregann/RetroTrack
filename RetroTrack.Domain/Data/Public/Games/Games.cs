@@ -1,5 +1,6 @@
 ﻿using BreganUtils;
 using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
 using System;
@@ -13,11 +14,11 @@ namespace RetroTrack.Domain.Data.Public.Games
 {
     public class Games
     {
-        public static List<DayList> GetNewAndUpdatedGamesFromLast5Days()
+        public static List<DayListDto> GetNewAndUpdatedGamesFromLast5Days()
         {
             using(var context = new DatabaseContext())
             {
-                var dayList = new List<DayList>();
+                var dayList = new List<DayListDto>();
 
                 for (int i = 0; i < 5; i++)
                 {
@@ -36,7 +37,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                             GameName = games.Title
                         }));
 
-                        dayList.Add(new DayList
+                        dayList.Add(new DayListDto
                         {
                             Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date),
                             GamesTable = gamesTable
@@ -58,7 +59,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                             GameName = games.Title
                         }));
 
-                        dayList.Add(new DayList
+                        dayList.Add(new DayListDto
                         {
                             Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date.AddDays(i * -1)),
                             GamesTable = gamesTable
@@ -68,6 +69,40 @@ namespace RetroTrack.Domain.Data.Public.Games
 
                 return dayList;
             }
+        }
+
+
+        public static async Task<GameInfoDto?> GetSpecificGameInfo(int gameId)
+        {
+            var data = await RetroAchievements.GetSpecificGameInfo(gameId);
+
+            if (data == null)
+            {
+                return null;
+            }
+
+            return new GameInfoDto
+            {
+                GameId = data.Id,
+                ImageBoxArt = data.ImageBoxArt,
+                ImageInGame = data.ImageInGame,
+                ConsoleId = data.ConsoleId,
+                ConsoleName = data.ConsoleName,
+                Genre = data.Genre,
+                AchievementCount = data.AchievementCount,
+                Players = data.Players,
+                Title = data.Title,
+                Achievements = data.Achievements.Select(x => new Achievement
+                {
+                    Id = x.Value.Id,
+                    BadgeName = x.Value.BadgeName,
+                    Description= x.Value.Description,
+                    NumAwarded = x.Value.NumAwarded,
+                    NumAwardedHardcore = x.Value.NumAwardedHardcore,
+                    Points = x.Value.Points,
+                    Title = x.Value.Title
+                }).ToList()
+            };
         }
     }
 }

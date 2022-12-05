@@ -2,7 +2,7 @@ import { Modal, Anchor , TextInput, PasswordInput, Group, Button, Alert } from "
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { ModalProps } from "../../types/App/modal";
-import ForgotPasswordModal from "../ForgotPasswordModal";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 import { IconAlertCircle } from '@tabler/icons';
 import { signIn } from "next-auth/react";
 import { toast } from "react-toastify";

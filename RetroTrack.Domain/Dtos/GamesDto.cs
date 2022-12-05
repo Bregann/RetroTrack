@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Dtos
 {
-    public class DayList
+    public class DayListDto
     {
         public List<GamesTableDto> GamesTable { get; set; }
         public string Date { get; set; }
