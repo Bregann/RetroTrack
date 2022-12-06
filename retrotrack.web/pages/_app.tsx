@@ -1,6 +1,6 @@
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import { MantineProvider } from '@mantine/core';
+import { ButtonStylesParams, MantineProvider } from '@mantine/core';
 import Navigation from '../components/App/Navigation';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SessionProvider } from 'next-auth/react';
@@ -26,6 +26,40 @@ export default function App(props: AppProps) {
           withNormalizeCSS
           theme={{
             colorScheme: 'dark',
+            components: {
+              Text: {
+                styles: (theme, params: ButtonStylesParams) => ({
+                  root: {
+                    color: 'white'
+                  }
+                })
+              },
+              Table: {
+                styles: (theme, params: ButtonStylesParams) => ({
+                  root: {
+                    color: 'white'
+                  },
+                  header: {
+                    color: 'white'
+                  }
+                })
+              },
+              TextInput: {
+                styles: (theme, params: ButtonStylesParams) => ({
+                  label: {
+                    color: 'white'
+                  }
+                })
+              },
+              PasswordInput: {
+                styles: (theme, params: ButtonStylesParams) => ({
+                  label: {
+                    color: 'white'
+                  }
+                })
+              }
+              
+            }
             
           }}
         >

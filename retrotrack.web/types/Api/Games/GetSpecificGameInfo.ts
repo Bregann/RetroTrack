@@ -1,5 +1,5 @@
 export interface GetSpecificGameInfo {
-    id:               number;
+    gameId:           number;
     title:            string;
     consoleId:        number;
     consoleName:      string;
