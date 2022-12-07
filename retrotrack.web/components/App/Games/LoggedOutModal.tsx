@@ -1,8 +1,7 @@
-import { Autocomplete, Button, Container, Divider, Footer, Grid, Group, HoverCard, Modal, Stack, Switch, Text, Image as MantineImage } from "@mantine/core";
-import { forwardRef, useState } from "react";
+import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
+import { useState } from "react";
 import Image from 'next/image' 
 import { GetSpecificGameInfo } from "../../../types/Api/Games/GetSpecificGameInfo";
-import { useDisclosure } from "@mantine/hooks";
 
 type LoggedOutModalProps = {
     recentGames: GetSpecificGameInfo
@@ -11,7 +10,6 @@ type LoggedOutModalProps = {
   
 const LoggedOutModal = (props: LoggedOutModalProps) => {
     const [checked, setChecked] = useState(false);
-    const [opened, { close, open }] = useDisclosure(false);
 
     return ( 
         <>
@@ -76,7 +74,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                                     style={{marginRight: 5, marginBottom: 5}}
                                     width={48}
                                     height={48}
-                                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName + "_lock.png"}
+                                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName}
                                     alt=""
                                 />
                             </HoverCard.Target>
@@ -97,7 +95,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                                 style={{marginRight: 5, marginBottom: 5}}
                                 width={48}
                                 height={48}
-                                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName + "_lock.png"}
+                                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName}
                                 alt=""
                             />
                         </Grid.Col>
@@ -139,7 +137,6 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                     <Switch onLabel="Compact" offLabel="Full" size="lg" mt={-20} onChange={(event) => setChecked(event.currentTarget.checked)}/>
                 </Group>
             </Grid.Col>
-            
             </Grid>
         </Modal>
         </>

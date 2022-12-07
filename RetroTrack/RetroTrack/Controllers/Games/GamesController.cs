@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;
 
 namespace RetroTrack.Controllers.Games
@@ -25,6 +26,21 @@ namespace RetroTrack.Controllers.Games
             {
                 return BadRequest();
             }
+
+            return Ok(data);
+        }
+
+        [HttpGet("GetGameInfoForUser")]
+        public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser(int gameId)
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var data = await Domain.Data.Public.Games.Games.GetUserGameInfo(user, gameId);
 
             return Ok(data);
         }

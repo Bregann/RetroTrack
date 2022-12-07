@@ -157,7 +157,7 @@ namespace RetroTrack.Domain.Models
         public string ImageTitle { get; set; }
 
         [JsonProperty("ImageIngame")]
-        public string ImageIngame { get; set; }
+        public string ImageInGame { get; set; }
 
         [JsonProperty("ImageBoxArt")]
         public string ImageBoxArt { get; set; }

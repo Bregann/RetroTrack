@@ -8,6 +8,8 @@ import { useState } from "react";
 import { GetSpecificGameInfo } from "../types/Api/Games/GetSpecificGameInfo";
 import { toast } from "react-toastify";
 import LoggedOutModal from "../components/App/Games/LoggedOutModal";
+import LoggedInModal from "../components/App/Games/LoggedInModal";
+import { GetGameInfoForUser } from "../types/Api/Games/GetGameInfoForUser";
 
 type HomeProps = {
     recentGames: RecentGameUpdatesDayList[]
@@ -16,22 +18,20 @@ type HomeProps = {
 const Home = (props: HomeProps) => {
     const { data: session, status } = useSession();
     const [loggedOutModal, useLoggedOutModal] = useState<GetSpecificGameInfo | undefined>(undefined);
+    const [loggedInModal, useLoggedInModal] = useState<GetGameInfoForUser | undefined>(undefined);
     const [loadingOverlayVisible, useLoadingOverlayVisible] = useState(false);
     const [modalOpened, useModalOpened] = useState(true);
 
     const GetGameInfo = async (gameId: number, sessionId: string | undefined) => {
         if(sessionId){
-            //logged in
+            await GetLoggedInGameInfo(gameId, sessionId);
         }
         else{
             await GetLoggedOutGameInfo(gameId);
         }
     }
 
-    const GetLoggedOutGameInfo = async (gameId: number) =>{
-        console.log(modalOpened);
-        console.log(loggedOutModal);
-
+    const GetLoggedOutGameInfo = async (gameId: number) => {
         useLoadingOverlayVisible(true);
         const res = await DoGet('/api/games/GetSpecificGameInfo/'+ gameId);
         let data: GetSpecificGameInfo | undefined = undefined;
@@ -49,6 +49,28 @@ const Home = (props: HomeProps) => {
 
         useModalOpened(true);
         useLoggedOutModal(data);
+        useLoadingOverlayVisible(false);
+    }
+
+    const GetLoggedInGameInfo = async(gameId: number, sessionId: string) => {
+        useLoadingOverlayVisible(true);
+
+        const res = await DoGet('/api/games/GetGameInfoForUser/'+ 1842, sessionId); //hard coded for dev purposes - change back lol
+        let data: GetGameInfoForUser | undefined = undefined;
+
+        if(res.ok){
+            data = await res.json();
+        }
+        else{
+            toast.error("Error getting game info: " + res.status, {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+        }
+
+        useModalOpened(true);
+        useLoggedInModal(data);
         useLoadingOverlayVisible(false);
     }
 
@@ -105,6 +127,7 @@ const Home = (props: HomeProps) => {
             }
 
             {loggedOutModal && modalOpened && <LoggedOutModal recentGames={loggedOutModal} loggedOutModal={useModalOpened}/>}
+            {loggedInModal && modalOpened && <LoggedInModal recentGames={loggedInModal} loggedInModal={useModalOpened}/>}
         </>
      );
 }
