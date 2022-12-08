@@ -12,7 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GetGameInfoForU
             return;
         }
 
-        const apiData = await apiRes.json();
+        const apiData: GetGameInfoForUser = await apiRes.json();
         res.status(200).json(apiData);
         
     } catch (error) {

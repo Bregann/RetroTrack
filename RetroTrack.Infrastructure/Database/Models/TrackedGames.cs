@@ -6,8 +6,8 @@ namespace RetroTrack.Infrastructure.Database.Models
     public class TrackedGames
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public required string Id { get; set; }
-        public required int GameID { get; set; }
+        public int Id { get; set; }
+        public required Games Game { get; set; }
         public required Users User { get; set; }
     }
 }

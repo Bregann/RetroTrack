@@ -24,7 +24,7 @@ namespace RetroTrack.Controllers.Games
 
             if (data == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             return Ok(data);
@@ -37,7 +37,7 @@ namespace RetroTrack.Controllers.Games
 
             if (user == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             var data = await Domain.Data.Public.Games.Games.GetUserGameInfo(user, gameId);

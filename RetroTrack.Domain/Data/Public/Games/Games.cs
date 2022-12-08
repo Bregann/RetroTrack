@@ -25,9 +25,9 @@ namespace RetroTrack.Domain.Data.Public.Games
                     if (i == 0)
                     {
                         var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).Include(x => x.GameConsole).ToList();
-                        var gamesTable = new List<GamesTableDto>();
+                        var gamesTable = new List<PublicGamesTableDto>();
 
-                        gamesTable.AddRange(gamesFromDay.Select(games => new GamesTableDto
+                        gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,
@@ -47,9 +47,9 @@ namespace RetroTrack.Domain.Data.Public.Games
                     {
                         var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date).Include(x => x.GameConsole).ToList();
 
-                        var gamesTable = new List<GamesTableDto>();
+                        var gamesTable = new List<PublicGamesTableDto>();
 
-                        gamesTable.AddRange(gamesFromDay.Select(games => new GamesTableDto
+                        gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,

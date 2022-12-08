@@ -23,7 +23,7 @@ namespace RetroTrack.Controllers.Navigation
 
             if (user == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn(user);
@@ -36,7 +36,7 @@ namespace RetroTrack.Controllers.Navigation
 
             if (user == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             var userProfile = Domain.Data.Public.Navigation.Navigation.GetUserNavProfileData(user);

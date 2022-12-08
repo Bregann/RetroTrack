@@ -18,7 +18,7 @@ namespace RetroTrack.Controllers.Users
 
             if (user == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             return await UserData.UpdateUserGames(user);
@@ -31,7 +31,7 @@ namespace RetroTrack.Controllers.Users
 
             if (user == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             return UserData.CheckUserUpdateCompleted(user);
