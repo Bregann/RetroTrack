@@ -30,7 +30,7 @@ namespace RetroTrack.Controllers.Navigation
         }
 
         [HttpGet("GetUserNavProfile")]
-        public  async Task<ActionResult<UserNavProfileDto>> GetUserNavProfile()
+        public ActionResult<UserNavProfileDto> GetUserNavProfile()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 

@@ -44,5 +44,20 @@ namespace RetroTrack.Controllers.Games
 
             return Ok(data);
         }
+
+        [HttpGet("GetUserAchievementsForGame")]
+        public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var data = await Domain.Data.Public.Games.Games.GetUserAchievementsForGame(user, gameId);
+
+            return Ok(data);
+        }
     }
 }

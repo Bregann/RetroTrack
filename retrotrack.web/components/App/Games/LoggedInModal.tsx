@@ -3,26 +3,109 @@ import { useState } from "react";
 import Image from 'next/image'
 import { GetSpecificGameInfo } from "../../../types/Api/Games/GetSpecificGameInfo";
 import { GetGameInfoForUser } from "../../../types/Api/Games/GetGameInfoForUser";
+import { DoDelete, DoGet } from "../../../Helpers/webFetchHelper";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { UserAchievementsForGame } from "../../../types/Api/Games/GetUserAchievementsForGame";
 
 type LoggedOutModalProps = {
-    recentGames: GetGameInfoForUser;
+    gameInfo: GetGameInfoForUser;
     loggedInModal: (toggleState: boolean) => void;
 }
 
 const LoggedInModal = (props: LoggedOutModalProps) => {
     const [gameLayoutChecked, setGameLayoutChecked] = useState(false);
-    const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.recentGames.achievements);
-    const [achievementsFiltered, setAchievementsFiltered] = useState(false);
+    const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements);
+    const [gameTracked, setGameTracked] = useState(props.gameInfo.gameTracked);
+    const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false);
+    const { data: session, status } = useSession();
 
     const FilterCurrentAchievements = (checked: boolean) => {
         if(checked){
-            setCurrentDisplayedAchievements(props.recentGames.achievements.filter(x => x.dateEarned === null));
+            setCurrentDisplayedAchievements(props.gameInfo.achievements.filter(x => x.dateEarned === null));
         }
         else{
-            setCurrentDisplayedAchievements(props.recentGames.achievements)
+            setCurrentDisplayedAchievements(props.gameInfo.achievements)
         }
+    }
 
-        setAchievementsFiltered(checked);
+    const UpdateTrackedGame = async () => {
+        setTrackedGameButtonLoading(true);
+
+        if(gameTracked){
+            const res = await DoDelete('/api/trackedgames/DeleteTrackedGame/'+ props.gameInfo.gameId, null, session?.sessionId);
+
+            if(res.ok){
+                setGameTracked(false);
+                toast.success("The game has been removed from your tracked list", {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+            else{
+                toast.error("Error updating tracked game: " + res.status, {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+        }
+        else{
+            const res = await DoDelete('/api/trackedgames/AddTrackedGame/'+ props.gameInfo.gameId, null, session?.sessionId);
+
+            if(res.ok){
+                setGameTracked(true);
+                toast.success("The game has been added to your tracked list", {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+            else{
+                toast.error("Error updating tracked game: " + res.status, {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+        }
+        setTrackedGameButtonLoading(false);
+    }
+
+    const UpdateUserProgress = async () => {
+        const res = await DoGet('/api/games/GetUserAchievementsForGame/'+ props.gameInfo.gameId, session?.sessionId); //hard coded for dev purposes - change back lol
+        console.log(res);
+
+        if(res.ok){
+            const data: UserAchievementsForGame = await res.json();
+
+            console.log('poo123' + data.success);
+            if(data.success){
+                setCurrentDisplayedAchievements(data.achievements!);
+                toast.success("Achievements updated", {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+                
+                return;
+            }
+            else{
+                toast.warning(data.reason, {
+                    position: 'bottom-right',
+                    closeOnClick: true,
+                    theme: 'colored'
+                });
+            }
+        }
+        else{
+            toast.error("Error updating user: " + res.status, {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+        }
     }
 
     return (
@@ -32,13 +115,13 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
           onClose={() => props.loggedInModal(false)}
           size="xl"
         >
-            <Text align="center" mt={-50} mb={20} size={40}>{props.recentGames.title}</Text>
+            <Text align="center" mt={-50} mb={20} size={40}>{props.gameInfo.title}</Text>
             <Grid>
                 <Grid.Col xs={6}>
                 <Image
                 width={256}
                 height={256}
-                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.recentGames.imageBoxArt}
+                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageBoxArt}
                 alt=""
                 style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                 />
@@ -48,7 +131,7 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
                     <Image
                     width={256}
                     height={256}
-                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.recentGames.imageInGame}
+                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageInGame}
                     alt=""
                     style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                     />
@@ -56,22 +139,22 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Achievements</Text>
-                    <Text align="center">{props.recentGames.numAwardedToUser}/{props.recentGames.achievementCount} ({props.recentGames.userCompletion})</Text>
+                    <Text align="center">{props.gameInfo.numAwardedToUser}/{props.gameInfo.achievementCount} ({props.gameInfo.userCompletion})</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Genre</Text>
-                    <Text align="center">{props.recentGames.genre}</Text>
+                    <Text align="center">{props.gameInfo.genre}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Console</Text>
-                    <Text align="center">{props.recentGames.consoleName}</Text>
+                    <Text align="center">{props.gameInfo.consoleName}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Players</Text>
-                    <Text align="center">{props.recentGames.players}</Text>
+                    <Text align="center">{props.gameInfo.players}</Text>
                 </Grid.Col>
 
                 <Grid.Col>
@@ -127,8 +210,46 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
 
             <Grid.Col>
                 <Group position="left" spacing={0}>
-                    <Button mr={5}>Update</Button>
-                    <Button mr={5}>Track Game</Button>
+                    <Button 
+                        mr={5} 
+                        variant="gradient"
+                        loading={trackedGameButtonLoading}
+                        gradient={{ from: 'indigo', to: 'cyan'  }}
+                        onClick={() => UpdateUserProgress()}>
+                            Update
+                    </Button>
+
+                    {gameTracked && 
+                    <Button 
+                        mr={5} 
+                        variant="gradient"
+                        loading={trackedGameButtonLoading}
+                        gradient={{ from: 'orange', to: 'red' }}
+                        onClick={() => UpdateTrackedGame()}>
+                            Untrack Game
+                    </Button>}
+
+                    {!gameTracked && 
+                    <Button 
+                        mr={5} 
+                        variant="gradient"
+                        loading={trackedGameButtonLoading}
+                        gradient={{ from: 'teal', to: 'lime', deg: 105 }} 
+                        onClick={() => UpdateTrackedGame()}
+                        >
+                            Track Game
+                    </Button>}
+
+                    <Button
+                        component="a"
+                        mr={5} 
+                        variant="gradient" 
+                        gradient={{ from: 'indigo', to: 'cyan' }}
+                        sx={{':hover': {color: 'white'}}}
+                        href={'game/' + props.gameInfo.gameId}
+                        >
+                            Game Page
+                    </Button>
 
                     <Button
                         component="a"
@@ -137,17 +258,7 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
                         sx={{':hover': {color: 'white'}}}
-                        >
-                            Game Page
-                        </Button>
-                    <Button
-                        component="a"
-                        mr={5} 
-                        variant="gradient" 
-                        gradient={{ from: 'indigo', to: 'cyan' }}
-                        target="_blank"
-                        sx={{':hover': {color: 'white'}}}
-                        href={"https://retroachievements.org/game/" + props.recentGames.gameId}
+                        href={"https://retroachievements.org/game/" + props.gameInfo.gameId}
                         >
                             RA Page
                         </Button>

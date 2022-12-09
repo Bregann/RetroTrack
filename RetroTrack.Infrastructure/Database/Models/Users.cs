@@ -10,6 +10,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string HashedPassword { get; set; }
         public required DateTime LastActivity { get; set; }
         public required DateTime LastUserUpdate { get; set; }
+        public required DateTime LastAchievementsUpdate { get; set; }
         public required string UserProfileUrl { get; set; }
         public required long UserPoints { get; set; }
         public required long UserRank { get; set; }

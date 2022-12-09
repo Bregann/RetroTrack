@@ -1,3 +1,5 @@
+import { Achievement } from "./UserAchievement";
+
 export interface GetGameInfoForUser {
     gameId:           number;
     title:            string;
@@ -11,15 +13,5 @@ export interface GetGameInfoForUser {
     achievements:     Achievement[];
     numAwardedToUser: number;
     userCompletion:   string;
-}
-
-export interface Achievement {
-    id:                 number;
-    title:              string;
-    description:        string;
-    points:             number;
-    badgeName:          string;
-    numAwarded:         number;
-    numAwardedHardcore: number;
-    dateEarned:         null | string;
+    gameTracked:      boolean;
 }

@@ -126,8 +126,8 @@ const Home = (props: HomeProps) => {
                 })
             }
 
-            {loggedOutModal && modalOpened && <LoggedOutModal recentGames={loggedOutModal} loggedOutModal={useModalOpened}/>}
-            {loggedInModal && modalOpened && <LoggedInModal recentGames={loggedInModal} loggedInModal={useModalOpened}/>}
+            {loggedOutModal && modalOpened && <LoggedOutModal gameInfo={loggedOutModal} loggedOutModal={useModalOpened}/>}
+            {loggedInModal && modalOpened && <LoggedInModal gameInfo={loggedInModal} loggedInModal={useModalOpened}/>}
         </>
      );
 }

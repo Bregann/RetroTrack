@@ -122,6 +122,7 @@ namespace RetroTrack.Domain.Data.Public.Games
             using (var context = new DatabaseContext())
             {
                 context.Games.First(x => x.Id == gameId).Players = data.Players;
+                context.Users.First(x => x.Username == username).LastAchievementsUpdate = DateTime.UtcNow;
                 context.SaveChanges();
             }
 
@@ -159,20 +160,102 @@ namespace RetroTrack.Domain.Data.Public.Games
                 }
             }
 
-            return new UserGameInfoDto
+            using(var context = new DatabaseContext())
             {
-                GameId = data.Id,
-                ImageBoxArt = data.ImageBoxArt,
-                ImageInGame = data.ImageInGame,
-                ConsoleId = data.ConsoleId,
-                ConsoleName = data.ConsoleName,
-                Genre = data.Genre,
-                AchievementCount = data.AchievementCount,
-                Players = data.Players,
-                Title = data.Title,
-                NumAwardedToUser= data.NumAwardedToUser,
-                UserCompletion = data.UserCompletion,
-                Achievements = achievementList
+                return new UserGameInfoDto
+                {
+                    GameId = data.Id,
+                    ImageBoxArt = data.ImageBoxArt,
+                    ImageInGame = data.ImageInGame,
+                    ConsoleId = data.ConsoleId,
+                    ConsoleName = data.ConsoleName,
+                    Genre = data.Genre,
+                    AchievementCount = data.AchievementCount,
+                    Players = data.Players,
+                    Title = data.Title,
+                    NumAwardedToUser = data.NumAwardedToUser,
+                    UserCompletion = data.UserCompletion,
+                    Achievements = achievementList,
+                    GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id== gameId)
+                };
+            }
+        }
+
+        public static async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(string username, int gameId)
+        {
+            var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, username);
+
+            if (data == null)
+            {
+                return new UserAchievementsForGameDto
+                {
+                    Achievements = null,
+                    Success = false,
+                    Reason = "Error getting data"
+                };
+     
+            }
+
+            using (var context = new DatabaseContext())
+            {
+                context.Games.First(x => x.Id == gameId).Players = data.Players;
+                context.SaveChanges();
+
+                var user = context.Users.Where(x => x.Username == username).First();
+                var secondsDiff = (DateTime.UtcNow - user.LastAchievementsUpdate).TotalSeconds;
+
+                if (secondsDiff < 30)
+                {
+                    return new UserAchievementsForGameDto
+                    {
+                        Achievements = null,
+                        Success = false,
+                        Reason = $"Achievement update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
+                    };
+                }
+
+                user.LastAchievementsUpdate = DateTime.UtcNow;
+                context.SaveChanges();
+            }
+
+            var achievementList = new List<UserAchievement>();
+
+            foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
+            {
+                if (achievement.Value.DateEarned != null)
+                {
+                    achievementList.Add(new UserAchievement
+                    {
+                        Id = achievement.Value.Id,
+                        BadgeName = achievement.Value.BadgeName + ".png",
+                        Description = achievement.Value.Description,
+                        NumAwarded = achievement.Value.NumAwarded,
+                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                        Points = achievement.Value.Points,
+                        Title = achievement.Value.Title,
+                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                    });
+                }
+                else
+                {
+                    achievementList.Add(new UserAchievement
+                    {
+                        Id = achievement.Value.Id,
+                        BadgeName = achievement.Value.BadgeName + "_lock.png",
+                        Description = achievement.Value.Description,
+                        NumAwarded = achievement.Value.NumAwarded,
+                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                        Points = achievement.Value.Points,
+                        Title = achievement.Value.Title,
+                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                    });
+                }
+            }
+
+            return new UserAchievementsForGameDto 
+            { 
+                Success = true,
+                Achievements = achievementList 
             };
         }
     }

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { GetSpecificGameInfo } from "../../../types/Api/Games/GetSpecificGameInfo";
 
 type LoggedOutModalProps = {
-    recentGames: GetSpecificGameInfo
+    gameInfo: GetSpecificGameInfo
     loggedOutModal: (toggleState: boolean) => void;
 }
   
@@ -18,13 +18,13 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
           onClose={() => props.loggedOutModal(false)}
           size="xl"
         >
-            <Text align="center" mt={-50} mb={20} size={40}>{props.recentGames.title}</Text>
+            <Text align="center" mt={-50} mb={20} size={40}>{props.gameInfo.title}</Text>
             <Grid>
                 <Grid.Col xs={6}>
                 <Image
                 width={256}
                 height={256}
-                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.recentGames.imageBoxArt}
+                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageBoxArt}
                 alt=""
                 style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                 />
@@ -34,7 +34,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                     <Image
                     width={256}
                     height={256}
-                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.recentGames.imageInGame}
+                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageInGame}
                     alt=""
                     style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                     />
@@ -42,29 +42,29 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Achievements</Text>
-                    <Text align="center">{props.recentGames.achievementCount}</Text>
+                    <Text align="center">{props.gameInfo.achievementCount}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Genre</Text>
-                    <Text align="center">{props.recentGames.genre}</Text>
+                    <Text align="center">{props.gameInfo.genre}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Console</Text>
-                    <Text align="center">{props.recentGames.consoleName}</Text>
+                    <Text align="center">{props.gameInfo.consoleName}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={3} xs={6}>
                     <Text fw={500} align="center">Players</Text>
-                    <Text align="center">{props.recentGames.players}</Text>
+                    <Text align="center">{props.gameInfo.players}</Text>
                 </Grid.Col>
 
                 <Grid.Col>
                     <Divider my="xs" />
                 </Grid.Col>
 
-                {!checked && props.recentGames.achievements.map((achievement) => {
+                {!checked && props.gameInfo.achievements.map((achievement) => {
                     return(
                     <div key={achievement.id}>
                         <HoverCard position="bottom">
@@ -87,7 +87,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                     )
                 })}
 
-                {checked && props.recentGames.achievements.map((achievement) => {
+                {checked && props.gameInfo.achievements.map((achievement) => {
                     return(
                     <>
                         <Grid.Col md={1} xs={1} key={achievement.id}>
@@ -130,7 +130,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
                         sx={{':hover': {color: 'white'}}}
-                        href={"https://retroachievements.org/game/" + props.recentGames.gameId}
+                        href={"https://retroachievements.org/game/" + props.gameInfo.gameId}
                         >
                             RA Page
                         </Button>

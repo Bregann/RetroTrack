@@ -26,7 +26,7 @@ namespace RetroTrack.Domain.Data.LoggedIn.UserData
             }
         }
 
-        public static async Task<UpdateUserGamesDto> UpdateUserGames(string username)
+        public static UpdateUserGamesDto UpdateUserGames(string username)
         {
             using (var context = new DatabaseContext())
             {

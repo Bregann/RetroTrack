@@ -12,7 +12,7 @@ namespace RetroTrack.Controllers.Users
     public class UsersController : ControllerBase
     {
         [HttpGet("UpdateUserGames")]
-        public async Task<ActionResult<UpdateUserGamesDto>> UpdateUserGames()
+        public ActionResult<UpdateUserGamesDto> UpdateUserGames()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
@@ -21,7 +21,7 @@ namespace RetroTrack.Controllers.Users
                 return Unauthorized();
             }
 
-            return await UserData.UpdateUserGames(user);
+            return UserData.UpdateUserGames(user);
         }
 
         [HttpGet("CheckUserUpdateProcessingState")]

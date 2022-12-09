@@ -106,6 +106,7 @@ namespace RetroTrack.Domain.Data.Public.Auth
                     HashedPassword = hashedPassword,
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,
+                    LastAchievementsUpdate = DateTime.UtcNow,
                     UserPoints = userProfile.TotalPoints,
                     UserProfileUrl = userProfile.UserPic,
                     UserRank = userProfile.Rank
