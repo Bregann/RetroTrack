@@ -1,12 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { DoBackendGet } from "../../../../Helpers/backendFetchHelper";
-import { GetSpecificGameInfo } from "../../../../types/Api/Games/GetSpecificGameInfo";
+import { GamesAndUserProgressForConsole } from "../../../../types/Api/Games/GetGamesAndUserProgressForConsole";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse<GetSpecificGameInfo>) => {
-    const { gameid } = req.query;
+const handler = async (req: NextApiRequest, res: NextApiResponse<GamesAndUserProgressForConsole>) => {
+    const { consoleid } = req.query;
 
     try {
-        const apiRes = await DoBackendGet('/api/Games/GetSpecificGameInfo?gameId=' + gameid);
+        const apiRes = await DoBackendGet('/api/Games/GetGamesAndUserProgressForConsole?consoleId=' + consoleid, req.headers.authorization);
+
         if(!apiRes.ok){
             res.status(apiRes.status).end();
             return;

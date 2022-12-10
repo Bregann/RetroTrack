@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<UserAchievement
         const apiRes = await DoBackendGet('/api/Games/GetUserAchievementsForGame?gameId=' + gameid, req.headers.authorization);
         console.log(apiRes);
         if(!apiRes.ok){
-            res.status(apiRes.status); //debug this
+            res.status(apiRes.status).end(); //debug this
             return;
         }
 
@@ -18,7 +18,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<UserAchievement
         res.status(200).json(apiData);
         
     } catch (error) {
-        res.status(500);
+        res.status(500).end();
     }
 }
 

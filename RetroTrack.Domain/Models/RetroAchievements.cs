@@ -229,7 +229,7 @@ namespace RetroTrack.Domain.Models
         public DateTimeOffset DateCreated { get; set; }
 
         [JsonProperty("BadgeName")]
-        public int BadgeName { get; set; }
+        public string BadgeName { get; set; }
 
         [JsonProperty("DisplayOrder")]
         public int DisplayOrder { get; set; }

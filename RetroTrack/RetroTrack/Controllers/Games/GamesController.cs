@@ -84,7 +84,7 @@ namespace RetroTrack.Controllers.Games
                 return Unauthorized();
             }
 
-            var games = Domain.Data.Public.Games.Games.GetGamesForConsole(consoleId);
+            var games = Domain.Data.Public.Games.Games.GetGamesAndUserProgressForConsole(user, consoleId);
 
             if (games == null)
             {

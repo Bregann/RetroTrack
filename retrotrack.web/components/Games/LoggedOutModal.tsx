@@ -1,7 +1,7 @@
 import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
 import { useState } from "react";
 import Image from 'next/image' 
-import { GetSpecificGameInfo } from "../../../types/Api/Games/GetSpecificGameInfo";
+import { GetSpecificGameInfo } from "../../types/Api/Games/GetSpecificGameInfo";
 
 type LoggedOutModalProps = {
     gameInfo: GetSpecificGameInfo

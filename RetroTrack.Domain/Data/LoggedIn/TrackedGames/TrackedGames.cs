@@ -48,32 +48,17 @@ namespace RetroTrack.Domain.Data.LoggedIn.TrackedGames
                 {
                     var userProgress = game.User.UserGameProgress.Where(x => x.GameID == game.Game.Id && x.User.Username == username).FirstOrDefault();
 
-                    if (userProgress !=  null)
-                    {
-                        trackedGameList.Add(new UserGamesTableDto
-                        {
-                            GameId = game.Game.Id,
-                            GameName = game.Game.Title,
-                            GameGenre = game.Game.GameGenre,
-                            GameIconUrl = game.Game.ImageIcon,
-                            AchievementCount = game.Game.AchievementCount,
-                            Console = game.Game.GameConsole.ConsoleName,
-                            AchievementsGained = userProgress.AchievementsGained,
-                            PercentageCompleted = userProgress.GamePercentage
-                        });
-
-                        continue;
-                    }
                     trackedGameList.Add(new UserGamesTableDto
                     {
+                        AchievementCount = game.Game.AchievementCount,
+                        AchievementsGained = userProgress?.AchievementsGained ?? 0,
+                        PercentageCompleted = userProgress?.GamePercentage ?? 0,
+                        GameGenre = game.Game.GameGenre,
+                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
                         GameId = game.Game.Id,
                         GameName = game.Game.Title,
-                        GameGenre = game.Game.GameGenre,
-                        GameIconUrl = game.Game.ImageIcon,
-                        AchievementCount = game.Game.AchievementCount,
                         Console = game.Game.GameConsole.ConsoleName,
-                        AchievementsGained = 0,
-                        PercentageCompleted = 0
+                        Players = game.Game.Players ?? 0
                     });
                 }
 

@@ -133,34 +133,17 @@ namespace RetroTrack.Domain.Data.Public.Games
 
             foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
             {
-                if (achievement.Value.DateEarned != null)
+                achievementList.Add(new UserAchievement
                 {
-                    achievementList.Add(new UserAchievement
-                    {
-                        Id = achievement.Value.Id,
-                        BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
-                        Description = achievement.Value.Description,
-                        NumAwarded = achievement.Value.NumAwarded,
-                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
-                    });
-                }
-                else
-                {
-                    achievementList.Add(new UserAchievement
-                    {
-                        Id = achievement.Value.Id,
-                        BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png",
-                        Description = achievement.Value.Description,
-                        NumAwarded = achievement.Value.NumAwarded,
-                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
-                    });
-                }
+                    Id = achievement.Value.Id,
+                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
+                    Description = achievement.Value.Description,
+                    NumAwarded = achievement.Value.NumAwarded,
+                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                    Points = achievement.Value.Points,
+                    Title = achievement.Value.Title,
+                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                });
             }
 
             using(var context = new DatabaseContext())
@@ -168,8 +151,8 @@ namespace RetroTrack.Domain.Data.Public.Games
                 return new UserGameInfoDto
                 {
                     GameId = data.Id,
-                    ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + data.ImageBoxArt,
-                    ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + data.ImageInGame,
+                    ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageBoxArt,
+                    ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageInGame,
                     ConsoleId = data.ConsoleId,
                     ConsoleName = data.ConsoleName,
                     Genre = data.Genre,
@@ -225,34 +208,24 @@ namespace RetroTrack.Domain.Data.Public.Games
 
             foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
             {
-                if (achievement.Value.DateEarned != null)
+                var userAchievement = new UserAchievement
                 {
-                    achievementList.Add(new UserAchievement
-                    {
-                        Id = achievement.Value.Id,
-                        BadgeName = achievement.Value.BadgeName + ".png",
-                        Description = achievement.Value.Description,
-                        NumAwarded = achievement.Value.NumAwarded,
-                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
-                    });
-                }
-                else
+                    Id = achievement.Value.Id,
+                    BadgeName = achievement.Value.BadgeName + ".png",
+                    Description = achievement.Value.Description,
+                    NumAwarded = achievement.Value.NumAwarded,
+                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                    Points = achievement.Value.Points,
+                    Title = achievement.Value.Title,
+                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                };
+
+                if (achievement.Value.DateEarned == null)
                 {
-                    achievementList.Add(new UserAchievement
-                    {
-                        Id = achievement.Value.Id,
-                        BadgeName = achievement.Value.BadgeName + "_lock.png",
-                        Description = achievement.Value.Description,
-                        NumAwarded = achievement.Value.NumAwarded,
-                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
-                    });
+                    userAchievement.BadgeName = achievement.Value.BadgeName + "_lock.png";
                 }
+
+                achievementList.Add(userAchievement);
             }
 
             return new UserAchievementsForGameDto 
@@ -303,6 +276,66 @@ namespace RetroTrack.Domain.Data.Public.Games
                         GameId = x.Id,
                         GameName = x.Title
                     }).ToList()
+                };
+            }
+        }
+
+        public static UserConsoleGamesDto? GetGamesAndUserProgressForConsole(string username, int consoleId)
+        {
+            using(var context = new DatabaseContext())
+            {
+                var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).ToList();
+                var consoleGames = new List<UserGamesTableDto>();
+
+                if (consoleId == 0)
+                {
+                    foreach (var game in context.Games)
+                    {
+                        var userProgress = userGameProgress.FirstOrDefault(x => x.GameID == game.Id);
+
+                        consoleGames.Add(new UserGamesTableDto
+                        {
+                            AchievementCount = game.AchievementCount,
+                            AchievementsGained = userProgress?.AchievementsGained ?? 0,
+                            PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                            GameGenre = game.GameGenre,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
+                            GameId = game.Id,
+                            GameName = game.Title,
+                            Players = game.Players ?? 0
+                        });
+                    }
+
+                    return new UserConsoleGamesDto
+                    {
+                        ConsoleId = consoleId,
+                        ConsoleName = "All Games",
+                        Games = consoleGames
+                    };
+                }
+
+                foreach (var game in context.Games.Where(x => x.GameConsole.ConsoleID == consoleId))
+                {
+                    var userProgress = userGameProgress.FirstOrDefault(x => x.GameID == game.Id);
+
+                    consoleGames.Add(new UserGamesTableDto
+                    {
+                        AchievementCount = game.AchievementCount,
+                        AchievementsGained = userProgress?.AchievementsGained ?? 0,
+                        PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                        GameGenre = game.GameGenre,
+                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
+                        GameId = game.Id,
+                        GameName = game.Title,
+                        Players = game.Players ?? 0
+                    });
+                }
+
+                return new UserConsoleGamesDto
+                {
+                    ConsoleId = consoleId,
+                    ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                    Games = consoleGames
                 };
             }
         }

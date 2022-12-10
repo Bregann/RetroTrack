@@ -17,7 +17,7 @@ try {
     res.status(200).json(data);
 
 } catch (error) {
-    res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."})
+    res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."});
 }
 }
 

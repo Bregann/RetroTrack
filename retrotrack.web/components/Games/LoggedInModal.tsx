@@ -1,12 +1,12 @@
 import { Autocomplete, Button, Container, Divider, Footer, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
 import { useState } from "react";
 import Image from 'next/image'
-import { GetSpecificGameInfo } from "../../../types/Api/Games/GetSpecificGameInfo";
-import { GetGameInfoForUser } from "../../../types/Api/Games/GetGameInfoForUser";
-import { DoDelete, DoGet } from "../../../Helpers/webFetchHelper";
+import { GetSpecificGameInfo } from "../../types/Api/Games/GetSpecificGameInfo";
+import { GetGameInfoForUser } from "../../types/Api/Games/GetGameInfoForUser";
+import { DoDelete, DoGet } from "../../Helpers/webFetchHelper";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-import { UserAchievementsForGame } from "../../../types/Api/Games/GetUserAchievementsForGame";
+import { UserAchievementsForGame } from "../../types/Api/Games/GetUserAchievementsForGame";
 
 type LoggedOutModalProps = {
     gameInfo: GetGameInfoForUser;

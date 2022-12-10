@@ -15,6 +15,7 @@ namespace RetroTrack.Domain.Dtos
         public required int AchievementsGained { get; set; }
         public required double PercentageCompleted { get; set; }
         public required string? GameGenre { get; set; }
-        public required string Console { get; set; }
+        public required int Players { get; set; }
+        public string Console { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import { ButtonStylesParams, MantineProvider } from '@mantine/core';
-import Navigation from '../components/App/Navigation';
+import Navigation from '../components/Nav/Navigation';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SessionProvider } from 'next-auth/react';
 import { ToastContainer } from 'react-toastify';

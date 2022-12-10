@@ -6,7 +6,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<RecentGameUpdat
     try {
         const apiRes = await DoBackendGet('/api/Games/GetRecentlyAddedAndUpdatedGames');
         if(!apiRes.ok){
-            res.status(apiRes.status);
+            res.status(apiRes.status).end();
             return;
         }
 
@@ -14,7 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<RecentGameUpdat
         res.status(200).json(apiData);
         
     } catch (error) {
-        res.status(500);
+        res.status(500).end();
     }
 }
 

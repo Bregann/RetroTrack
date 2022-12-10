@@ -9,14 +9,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<boolean>) => {
         const data = await apiRes.json();
         
         if(!apiRes.ok){
-            res.status(apiRes.status).json(data);
+            res.status(apiRes.status).json(false);
             return;
         }
     
         res.status(200).json(data);
     
     } catch (error) {
-        res.status(500).json(false)
+        res.status(500).json(false);
     }
 }
     

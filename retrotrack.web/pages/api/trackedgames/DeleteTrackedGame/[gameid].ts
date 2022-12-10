@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<boolean>) => {
         res.status(200).json(data);
     
     } catch (error) {
-        res.status(500).json(false)
+        res.status(500).json(false);
     }
 }
     

@@ -7,8 +7,8 @@ import Image from 'next/image'
 import { useState } from "react";
 import { GetSpecificGameInfo } from "../types/Api/Games/GetSpecificGameInfo";
 import { toast } from "react-toastify";
-import LoggedOutModal from "../components/App/Nav/LoggedOutModal";
-import LoggedInModal from "../components/App/Nav/LoggedInModal";
+import LoggedOutModal from "../components/Games/LoggedOutModal";
+import LoggedInModal from "../components/Games/LoggedInModal";
 import { GetGameInfoForUser } from "../types/Api/Games/GetGameInfoForUser";
 
 type HomeProps = {
@@ -17,10 +17,10 @@ type HomeProps = {
 
 const Home = (props: HomeProps) => {
     const { data: session, status } = useSession();
-    const [loggedOutModal, useLoggedOutModal] = useState<GetSpecificGameInfo | undefined>(undefined);
-    const [loggedInModal, useLoggedInModal] = useState<GetGameInfoForUser | undefined>(undefined);
-    const [loadingOverlayVisible, useLoadingOverlayVisible] = useState(false);
-    const [modalOpened, useModalOpened] = useState(true);
+    const [loggedOutModal, setLoggedOutModal] = useState<GetSpecificGameInfo | undefined>(undefined);
+    const [loggedInModal, setLoggedInModal] = useState<GetGameInfoForUser | undefined>(undefined);
+    const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false);
+    const [modalOpened, setModalOpened] = useState(true);
 
     const GetGameInfo = async (gameId: number, sessionId: string | undefined) => {
         if(sessionId){
@@ -32,7 +32,7 @@ const Home = (props: HomeProps) => {
     }
 
     const GetLoggedOutGameInfo = async (gameId: number) => {
-        useLoadingOverlayVisible(true);
+        setLoadingOverlayVisible(true);
         const res = await DoGet('/api/games/GetSpecificGameInfo/'+ gameId);
         let data: GetSpecificGameInfo | undefined = undefined;
 
@@ -47,13 +47,13 @@ const Home = (props: HomeProps) => {
             });
         }
 
-        useModalOpened(true);
-        useLoggedOutModal(data);
-        useLoadingOverlayVisible(false);
+        setModalOpened(true);
+        setLoggedOutModal(data);
+        setLoadingOverlayVisible(false);
     }
 
     const GetLoggedInGameInfo = async(gameId: number, sessionId: string) => {
-        useLoadingOverlayVisible(true);
+        setLoadingOverlayVisible(true);
 
         const res = await DoGet('/api/games/GetGameInfoForUser/'+ gameId, sessionId); //hard coded for dev purposes - change back lol
         let data: GetGameInfoForUser | undefined = undefined;
@@ -69,9 +69,9 @@ const Home = (props: HomeProps) => {
             });
         }
 
-        useModalOpened(true);
-        useLoggedInModal(data);
-        useLoadingOverlayVisible(false);
+        setModalOpened(true);
+        setLoggedInModal(data);
+        setLoadingOverlayVisible(false);
     }
 
     return ( 
@@ -126,8 +126,8 @@ const Home = (props: HomeProps) => {
                 })
             }
 
-            {loggedOutModal && modalOpened && <LoggedOutModal gameInfo={loggedOutModal} loggedOutModal={useModalOpened}/>}
-            {loggedInModal && modalOpened && <LoggedInModal gameInfo={loggedInModal} loggedInModal={useModalOpened}/>}
+            {loggedOutModal && modalOpened && <LoggedOutModal gameInfo={loggedOutModal} loggedOutModal={setModalOpened}/>}
+            {loggedInModal && modalOpened && <LoggedInModal gameInfo={loggedInModal} loggedInModal={setModalOpened}/>}
         </>
      );
 }
