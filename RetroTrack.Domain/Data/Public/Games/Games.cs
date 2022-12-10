@@ -87,11 +87,13 @@ namespace RetroTrack.Domain.Data.Public.Games
                 context.SaveChanges();
             }
 
+            var achList = new List<Achievement>();
+
             return new GameInfoDto
             {
                 GameId = data.Id,
-                ImageBoxArt = data.ImageBoxArt,
-                ImageInGame = data.ImageInGame,
+                ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageBoxArt,
+                ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageInGame,
                 ConsoleId = data.ConsoleId,
                 ConsoleName = data.ConsoleName,
                 Genre = data.Genre,
@@ -101,7 +103,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                 Achievements = data.Achievements.Select(x => new Achievement
                 {
                     Id = x.Value.Id,
-                    BadgeName = x.Value.BadgeName + ".png",
+                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",
                     Description= x.Value.Description,
                     NumAwarded = x.Value.NumAwarded,
                     NumAwardedHardcore = x.Value.NumAwardedHardcore,
@@ -136,7 +138,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                     achievementList.Add(new UserAchievement
                     {
                         Id = achievement.Value.Id,
-                        BadgeName = achievement.Value.BadgeName + ".png",
+                        BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
                         Description = achievement.Value.Description,
                         NumAwarded = achievement.Value.NumAwarded,
                         NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
@@ -150,7 +152,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                     achievementList.Add(new UserAchievement
                     {
                         Id = achievement.Value.Id,
-                        BadgeName = achievement.Value.BadgeName + "_lock.png",
+                        BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png",
                         Description = achievement.Value.Description,
                         NumAwarded = achievement.Value.NumAwarded,
                         NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
@@ -166,8 +168,8 @@ namespace RetroTrack.Domain.Data.Public.Games
                 return new UserGameInfoDto
                 {
                     GameId = data.Id,
-                    ImageBoxArt = data.ImageBoxArt,
-                    ImageInGame = data.ImageInGame,
+                    ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + data.ImageBoxArt,
+                    ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + data.ImageInGame,
                     ConsoleId = data.ConsoleId,
                     ConsoleName = data.ConsoleName,
                     Genre = data.Genre,

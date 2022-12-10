@@ -24,7 +24,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                 <Image
                 width={256}
                 height={256}
-                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageBoxArt}
+                src={props.gameInfo.imageBoxArt}
                 alt=""
                 style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                 />
@@ -34,7 +34,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                     <Image
                     width={256}
                     height={256}
-                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org"+ props.gameInfo.imageInGame}
+                    src={props.gameInfo.imageInGame}
                     alt=""
                     style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
                     />
@@ -74,7 +74,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                                     style={{marginRight: 5, marginBottom: 5}}
                                     width={48}
                                     height={48}
-                                    src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName}
+                                    src={achievement.badgeName}
                                     alt=""
                                 />
                             </HoverCard.Target>
@@ -95,7 +95,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                                 style={{marginRight: 5, marginBottom: 5}}
                                 width={48}
                                 height={48}
-                                src={"https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.badgeName}
+                                src={achievement.badgeName}
                                 alt=""
                             />
                         </Grid.Col>

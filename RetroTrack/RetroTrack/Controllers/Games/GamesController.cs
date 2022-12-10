@@ -73,5 +73,25 @@ namespace RetroTrack.Controllers.Games
 
             return Ok(games);
         }
+
+        [HttpGet("GetGamesAndUserProgressForConsole")]
+        public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole(int consoleId)
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var games = Domain.Data.Public.Games.Games.GetGamesForConsole(consoleId);
+
+            if (games == null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(games);
+        }
     }
 }

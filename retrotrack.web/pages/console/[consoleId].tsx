@@ -6,6 +6,7 @@ import { DoGet } from '../../Helpers/webFetchHelper';
 import { GamesForConsole } from '../../types/Api/Games/GetGamesForConsole'
 import { authOptions } from '../api/auth/[...nextauth]';
 import sortBy from 'lodash/sortBy';
+import { Text } from '@mantine/core';
 
 type ConsoleProps = {
     publicConsoleData: GamesForConsole | null;
@@ -14,15 +15,13 @@ type ConsoleProps = {
 }
 
 const Console = (props: ConsoleProps) => {
-    console.log(props.publicConsoleData?.games.length);
     
     return ( 
         <>
-        <h1>console: {props.publicConsoleData?.consoleName}</h1>
+        <Text size={40} align="center">{props.publicConsoleData?.consoleName}</Text>
 
         {props.publicConsoleData && <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>}
         </>
-
      );
 }
  

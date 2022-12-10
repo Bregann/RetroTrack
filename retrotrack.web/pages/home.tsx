@@ -55,7 +55,7 @@ const Home = (props: HomeProps) => {
     const GetLoggedInGameInfo = async(gameId: number, sessionId: string) => {
         useLoadingOverlayVisible(true);
 
-        const res = await DoGet('/api/games/GetGameInfoForUser/'+ 1842, sessionId); //hard coded for dev purposes - change back lol
+        const res = await DoGet('/api/games/GetGameInfoForUser/'+ gameId, sessionId); //hard coded for dev purposes - change back lol
         let data: GetGameInfoForUser | undefined = undefined;
 
         if(res.ok){
