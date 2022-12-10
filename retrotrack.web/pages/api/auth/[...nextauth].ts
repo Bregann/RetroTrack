@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { DoBackendPost } from "../../../Helpers/backendFetchHelper"
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
         // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -56,4 +56,6 @@ export default NextAuth({
     }
   },
   debug: true
-})
+}
+
+export default NextAuth(authOptions);

@@ -7,8 +7,8 @@ import Image from 'next/image'
 import { useState } from "react";
 import { GetSpecificGameInfo } from "../types/Api/Games/GetSpecificGameInfo";
 import { toast } from "react-toastify";
-import LoggedOutModal from "../components/App/Games/LoggedOutModal";
-import LoggedInModal from "../components/App/Games/LoggedInModal";
+import LoggedOutModal from "../components/App/Nav/LoggedOutModal";
+import LoggedInModal from "../components/App/Nav/LoggedInModal";
 import { GetGameInfoForUser } from "../types/Api/Games/GetGameInfoForUser";
 
 type HomeProps = {

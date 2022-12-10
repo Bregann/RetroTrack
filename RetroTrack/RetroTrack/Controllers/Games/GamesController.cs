@@ -4,6 +4,7 @@ using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;
+using RetroTrack.Infrastructure.Database.Models;
 
 namespace RetroTrack.Controllers.Games
 {
@@ -58,6 +59,19 @@ namespace RetroTrack.Controllers.Games
             var data = await Domain.Data.Public.Games.Games.GetUserAchievementsForGame(user, gameId);
 
             return Ok(data);
+        }
+
+        [HttpGet("GetGamesForConsole")]
+        public ActionResult<PublicConsoleGamesDto> GetGamesForConsole(int consoleId)
+        {
+            var games = Domain.Data.Public.Games.Games.GetGamesForConsole(consoleId);
+
+            if (games == null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(games);
         }
     }
 }

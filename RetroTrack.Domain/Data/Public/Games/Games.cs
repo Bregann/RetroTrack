@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Infrastructure.Database.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -257,6 +258,51 @@ namespace RetroTrack.Domain.Data.Public.Games
                 Success = true,
                 Achievements = achievementList 
             };
+        }
+
+        public static PublicConsoleGamesDto? GetGamesForConsole(int consoleId)
+        {
+            using(var context = new DatabaseContext())
+            {
+                //0 is used for all games
+                if (consoleId == 0)
+                {
+                    return new PublicConsoleGamesDto
+                    {
+                        ConsoleId = consoleId,
+                        ConsoleName = "All Games",
+                        Games = context.Games.Select(x => new PublicGamesTableDto
+                        {
+                            AchievementCount = x.AchievementCount,
+                            GameGenre = x.GameGenre,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                            GameId = x.Id,
+                            GameName = x.Title
+                        }).ToList()
+                    };
+                }
+
+                var consoleGames = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+
+                if (consoleGames.Count == 0)
+                {
+                    return null;
+                }
+
+                return new PublicConsoleGamesDto
+                {
+                    ConsoleId = consoleId,
+                    ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                    Games = consoleGames.Select(x => new PublicGamesTableDto
+                    {
+                        AchievementCount = x.AchievementCount,
+                        GameGenre = x.GameGenre,
+                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                        GameId = x.Id,
+                        GameName = x.Title
+                    }).ToList()
+                };
+            }
         }
     }
 }
