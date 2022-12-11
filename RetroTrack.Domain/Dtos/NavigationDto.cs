@@ -14,7 +14,9 @@ namespace RetroTrack.Domain.Dtos
 
     public class LoggedInNavigationGameCountsDto
     {
-        public Dictionary<int, NavigationUserStats> Games { get; set; }
+        public required Dictionary<int, NavigationUserStats> Games { get; set; }
+        public required int GamesTracked { get; set; }
+        public required int InProgressGames { get; set; }
     }
 
     public class NavigationUserStats

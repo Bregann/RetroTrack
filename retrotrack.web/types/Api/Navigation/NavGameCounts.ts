@@ -4,6 +4,8 @@ export interface LoggedOutGameTypes{
 
 export interface LoggedInGameTypes {
   games: { [key: string]: Game };
+  gamesTracked: number;
+  inProgressGames: number;
 }
 
 export interface Game {

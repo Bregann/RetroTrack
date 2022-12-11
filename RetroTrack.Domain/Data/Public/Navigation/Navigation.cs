@@ -59,7 +59,9 @@ namespace RetroTrack.Domain.Data.Public.Navigation
 
                 return new LoggedInNavigationGameCountsDto 
                 { 
-                    Games = dataDict 
+                    Games = dataDict,
+                    GamesTracked = context.TrackedGames.Where(x => x.User.Username == username).Count(),
+                    InProgressGames = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage != 1).Count()
                 };
             }
         }

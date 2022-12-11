@@ -13,13 +13,14 @@ import LoggedInGamesTable from '../../components/Games/LoggedInGamesTable';
 type ConsoleProps = {
     publicConsoleData: GamesForConsole | null;
     loggedInConsoleData: GamesAndUserProgressForConsole | null;
-    error: string | null;
+    errorMessage: string | null;
 }
 
 const Console = (props: ConsoleProps) => {
     
     return ( 
         <>
+        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
 
         {props.publicConsoleData && 
         <>
@@ -51,7 +52,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
                 props:{
                     publicConsoleData: null,
                     loggedInConsoleData: await res.json(),
-                    error: null
+                    errorMessage: null
                 }
             }
         }
@@ -60,7 +61,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
                 props:{
                     publicConsoleData: null,
                     loggedInConsoleData: null,
-                    error: "Error getting console data - Error code " + res.status
+                    errorMessage: "Error getting console data - Error code " + res.status
                 }
             }
         }
@@ -73,7 +74,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
                 props:{
                     publicConsoleData: await res.json(),
                     loggedInConsoleData: null,
-                    error: null
+                    errorMessage: null
                 }
             }
         }
@@ -82,7 +83,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
                 props:{
                     publicConsoleData: null,
                     loggedInConsoleData: null,
-                    error: "Error getting console data - Error code " + res.status
+                    errorMessage: "Error getting console data - Error code " + res.status
                 }
             }
         }

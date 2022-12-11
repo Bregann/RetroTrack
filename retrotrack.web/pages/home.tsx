@@ -12,7 +12,8 @@ import LoggedInModal from "../components/Games/LoggedInModal";
 import { GetGameInfoForUser } from "../types/Api/Games/GetGameInfoForUser";
 
 type HomeProps = {
-    recentGames: RecentGameUpdatesDayList[]
+    recentGames: RecentGameUpdatesDayList[] | null,
+    errorMessage: string | null;
 }
 
 const Home = (props: HomeProps) => {
@@ -78,7 +79,7 @@ const Home = (props: HomeProps) => {
         <>
             {status === "authenticated" && <Text size={55} align="center">Welcome back, {session.username}!</Text>}
             {status === "unauthenticated" && <Text size={55} align="center">Home</Text>}
-            {props.recentGames === undefined && <Text size={30} align="center">Error loading recent updated games, please try again shortly</Text>}
+            {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
 
             {props.recentGames && 
                 props.recentGames.map((games) => {
@@ -134,12 +135,25 @@ const Home = (props: HomeProps) => {
  
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
     const res = await DoGet('/api/games/GetRecentlyAddedAndUpdatedGames');
-    const recentGames = await res.json();
 
-    return {
-        props: {
-            recentGames: recentGames
-        }, // will be passed to the page component as props
+    if(res.ok){
+        const recentGames = await res.json();
+
+        return {
+            props: {
+                recentGames: recentGames,
+                errorMessage: null
+            }, // will be passed to the page component as props
         }
+    }
+
+    else{
+        return {
+            props: {
+                recentGames: null,
+                errorMessage: 'Error loading game data - reason: ' + res.status
+            }, // will be passed to the page component as props
+        }
+    }
   }
 export default Home;

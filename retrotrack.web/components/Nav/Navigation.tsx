@@ -66,7 +66,7 @@ const Navigation = (props: AppProps) => {
 
     const { data: session, status } = useSession();
     const { classes } = useStyles();
-    const interval = useRef<Timer>(null);
+    const interval = useRef<NodeJS.Timeout | null>(null);
 
     const LogoutUser = (sessionId: string) => {
         signOut();
@@ -108,12 +108,21 @@ const Navigation = (props: AppProps) => {
     const GetUserNavData = async (sessionId: string) => {
         const gameCountsRes = await DoGet('/api/navigation/GetLoggedInGameCounts', sessionId);
 
-        const data: NavData = {
-            loggedIn: await gameCountsRes.json()
+        let data: NavData = {
+            loggedIn: undefined
+        };
+
+        if(gameCountsRes.ok){
+            data.loggedIn = await gameCountsRes.json();
         }
 
         const profileDataRes = await DoGet('/api/navigation/GetUserNavProfile', sessionId);
-        const profileData: UserNavProfile = await profileDataRes.json();
+
+        let profileData: UserNavProfile | undefined = undefined;
+
+        if(profileDataRes.ok){
+            profileData = await profileDataRes.json();
+        }
 
         setProfileData(profileData);
         setNavData(data);
@@ -147,7 +156,7 @@ const Navigation = (props: AppProps) => {
             clearInterval(interval.current);
             interval.current = null;
         }
-    }, [userUpdateRequested])
+    }, [session?.sessionId, userUpdateRequested])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -160,8 +169,12 @@ const Navigation = (props: AppProps) => {
             if(status === "unauthenticated"){
                 const res = await DoGet('/api/navigation/GetLoggedOutGameCounts');
 
-                const data: NavData = {
-                    loggedOut: await res.json()
+                let data: NavData = {
+                    loggedOut: undefined
+                };
+        
+                if(res.ok){
+                    data.loggedOut = await res.json();
                 }
 
                 setNavData(data);
@@ -170,12 +183,13 @@ const Navigation = (props: AppProps) => {
 
             if(status === "authenticated"){
                 GetUserNavData(session.sessionId);
+                UpdateUserGames(session.sessionId);
             }
         }
 
         fetchData();
 
-    }, [status])
+    }, [session?.sessionId, status])
 
     if(status === "loading" || status === "authenticated" && !navData || status === "unauthenticated" && !navData){
         return ( 
@@ -257,11 +271,11 @@ const Navigation = (props: AppProps) => {
                     </Link>
 
                     <Link href='/trackedgames' passHref style={{ textDecoration: 'none' }}>
-                        <NavLink label='Tracked Games' className={classes.mainLinks} active={'/trackedgames' === window.location.pathname} description={"aaaa"} />
+                        <NavLink label='Tracked Games' className={classes.mainLinks} active={'/trackedgames' === window.location.pathname} description={navData.loggedIn?.gamesTracked + " games"} />
                     </Link>
                     
                     <Link href='/inprogressgames' passHref style={{ textDecoration: 'none' }}>
-                        <NavLink label='In Progress Games' className={classes.mainLinks} active={'/inprogressgames' === window.location.pathname} description={"aaaa"} />
+                        <NavLink label='In Progress Games' className={classes.mainLinks} active={'/inprogressgames' === window.location.pathname} description={navData.loggedIn?.inProgressGames + " games"} />
                     </Link>
 
                     <NavLink label='Nintendo' className={classes.mainLinks}>
