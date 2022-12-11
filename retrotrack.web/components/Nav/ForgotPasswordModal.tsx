@@ -7,7 +7,7 @@ const ForgotPasswordModal = (props: ModalProps) => {
         opened={props.openedState}
         onClose={() => props.setOpened(false)}
         title="Forgot Password">
-
+            Under construction - please check support for help on password resets
         </Modal>
      );
 }

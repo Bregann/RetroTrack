@@ -11,6 +11,7 @@ import { UpdateUserGames } from "../../types/Api/User/UpdateUserGames";
 import { NavData } from "../../types/Api/Navigation/NavGameCounts";
 import Image from 'next/image'
 import { UserNavProfile } from "../../types/Api/Navigation/UserNavProfile";
+import SupportModal from "./SupportModal";
 
 const getColour = (perc: number) => {
     var r, g, b = 0;
@@ -58,6 +59,7 @@ const Navigation = (props: AppProps) => {
     const [burgerOpened, setBurgerOpened] = useState(false);
     const [loginModalOpened, setLoginModalOpened] = useState(false);
     const [registerModalOpened, setRegisterModalOpened] = useState(false);
+    const [supportModalOpened, setSupportModalOpened] = useState(false);
     const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false);
     const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false);
     const [userUpdateRequested, setUserUpdateRequested] = useState(false);
@@ -239,6 +241,16 @@ const Navigation = (props: AppProps) => {
                             </MediaQuery>
                         </Grid.Col>
                         <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
+
+                        <Button 
+                            variant="gradient" 
+                            gradient={{ from: 'indigo', to: 'cyan' }}
+                            sx={{marginTop: 15, marginRight: 10}}
+                            onClick={() => setSupportModalOpened(true)}
+                            loading={updateGamesButtonLoading}>
+                                Support
+                        </Button>
+
                         <Button 
                             variant="gradient" 
                             gradient={{ from: 'indigo', to: 'cyan' }}
@@ -512,6 +524,14 @@ const Navigation = (props: AppProps) => {
                         <Grid.Col span={6} sx={{display:'flex', justifyContent:'right'}}>
                             <Button 
                                 variant="gradient" 
+                                gradient={{ from: 'indigo', to: 'cyan' }}
+                                sx={{marginTop: 15, marginRight: 10}}
+                                onClick={() => setSupportModalOpened(true)}
+                                loading={updateGamesButtonLoading}>
+                                    Support
+                            </Button>
+                            <Button 
+                                variant="gradient" 
                                 gradient={{ from: 'indigo', to: 'cyan' }} 
                                 sx={{marginTop: 15, marginRight: 10}}
                                 onClick={() => setLoginModalOpened(true)}>
@@ -734,6 +754,7 @@ const Navigation = (props: AppProps) => {
             {/* modals*/}
             <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened}/>
             <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened}/>
+            <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened}/>
         </AppShell>
          );
     }
