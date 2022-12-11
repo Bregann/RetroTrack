@@ -10,6 +10,21 @@ AppConfig.LoadConfigFromDatabase();
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if RELEASE
+builder.WebHost.UseUrls("http://localhost:5003");
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "allowUrls",
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3001", "https://rtapi.bregan.me", "https://retrotrack.bregan.me");
+                          policy.WithHeaders("Content-Type");
+                          policy.WithMethods("GET", "POST", "DELETE");
+                      });
+});
+#endif
+
 // Add services to the container.
 JobStorage.Current = new PostgreSqlStorage(AppConfig.HFConnectionString, new PostgreSqlStorageOptions { SchemaName = "retrotrack" });
 
@@ -38,6 +53,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAnyOrigin");
 
 app.UseHttpsRedirection();
 

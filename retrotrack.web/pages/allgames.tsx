@@ -33,7 +33,6 @@ export const getServerSideProps: GetServerSideProps<AllGamesProps> = async (cont
 
     if(session?.sessionId){
         const res = await DoGet('/api/games/GetGamesAndUserProgressForConsole/' + 0, session.sessionId);
-        console.log(res.status);
         if(res.ok){
             return{
                 props: {

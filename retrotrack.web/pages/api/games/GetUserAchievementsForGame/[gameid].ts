@@ -8,7 +8,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<UserAchievement
 
     try {
         const apiRes = await DoBackendGet('/api/Games/GetUserAchievementsForGame?gameId=' + gameid, req.headers.authorization);
-        console.log(apiRes);
         if(!apiRes.ok){
             res.status(apiRes.status).end(); //debug this
             return;

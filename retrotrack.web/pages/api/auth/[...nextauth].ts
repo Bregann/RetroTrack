@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
           // You can also use the `req` object to obtain additional parameters
           // (i.e., the request IP address)
           const res = await DoBackendPost('/api/Auth/LoginUser', credentials);
-          const user = await res.json()
+          const user = await res.json();
 
           // If no error and we have user data, return it
           if (res.ok && user) {
@@ -34,12 +34,13 @@ export const authOptions: NextAuthOptions = {
         }
       })
   ],
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt'
   },
   callbacks: {
     async jwt({ token, user}) {
+
       if(user){
         token.sessionId = user?.sessionId;
         token.username = user?.username;
@@ -49,13 +50,13 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Send properties to the client, like an access_token from a provider.
+      
       session.username = token.username;
       session.sessionId = token.sessionId;
 
       return session;
     }
-  },
-  debug: true
+  }
 }
 
 export default NextAuth(authOptions);

@@ -161,7 +161,6 @@ const Navigation = (props: AppProps) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            console.log(status);
             if(status === "loading"){
                 setLoadingOverlayVisible(true);
                 return;

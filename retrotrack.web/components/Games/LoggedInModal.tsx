@@ -76,12 +76,10 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
 
     const UpdateUserProgress = async () => {
         const res = await DoGet('/api/games/GetUserAchievementsForGame/'+ props.gameInfo.gameId, session?.sessionId); //hard coded for dev purposes - change back lol
-        console.log(res);
 
         if(res.ok){
             const data: UserAchievementsForGame = await res.json();
 
-            console.log('poo123' + data.success);
             if(data.success){
                 setCurrentDisplayedAchievements(data.achievements!);
                 toast.success("Achievements updated", {
