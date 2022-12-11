@@ -48,13 +48,13 @@ namespace RetroTrack.Domain.Data
 
                 foreach (var game in gameList)
                 {
-                    var userProgress = userGameProgress.Where(x => x.Game.Id == game.Id).FirstOrDefault();
+                    var userProgress = userGameProgress.Where(x => x.Game.Id == game.Game.Id).FirstOrDefault();
 
                     trackedGameList.Add(new UserGamesTableDto
                     {
                         AchievementCount = game.Game.AchievementCount,
                         AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                        PercentageCompleted = userProgress?.GamePercentage ?? 0,
+                        PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
                         GameGenre = game.Game.GameGenre,
                         GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
                         GameId = game.Game.Id,

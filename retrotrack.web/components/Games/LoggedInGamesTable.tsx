@@ -104,8 +104,8 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps) => {
                         <IconSquareX size={20} />
                     </UnstyledButton>
                     
-                    <Switch size="lg" onLabel="Show Completed" offLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
-                    <Switch size="lg" onLabel="Show In Progress" offLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
+                    <Switch size="lg" offLabel="Show Completed" onLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
+                    <Switch size="lg" offLabel="Show In Progress" onLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
                 </Group>
             </MediaQuery>
 
@@ -123,8 +123,8 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps) => {
                         <IconSquareX size={20} />
                     </UnstyledButton>
                     
-                    <Switch size="lg" onLabel="Show Completed" offLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
-                    <Switch size="lg" onLabel="Show In Progress" offLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
+                    <Switch size="lg" offLabel="Show Completed" onLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
+                    <Switch size="lg" offLabel="Show In Progress" onLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
                 </Group>
             </MediaQuery>
 
