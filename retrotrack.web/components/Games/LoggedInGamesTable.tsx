@@ -173,7 +173,7 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps) => {
             </Paper>
         </MediaQuery>
 
-        {showGameModal && modalOpened && <LoggedInModal gameInfo={showGameModal} loggedInModal={setModalOpened}/>}
+        {showGameModal && modalOpened && <LoggedInModal gameInfo={showGameModal} loggedInModal={setModalOpened} setTableDataUpdateNeeded={props.setTableDataUpdateNeeded}/>}
 
         </>
      );

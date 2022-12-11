@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data.LoggedIn.UserData;
-using RetroTrack.Domain.Data.Public.Auth;
+using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Dtos.Auth;
 
@@ -14,7 +13,7 @@ namespace RetroTrack.Api.Controllers.Authenication
         [HttpPost("LoginUser")]
         public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = Auth.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
+            var loginData = AuthData.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
 
             if (!loginData.Successful)
             {
@@ -27,7 +26,7 @@ namespace RetroTrack.Api.Controllers.Authenication
         [HttpPost("RegisterNewUser")]
         public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
         {
-            return await Auth.RegisterUser(dto.Username.ToLower(), dto.Password, dto.ApiKey);
+            return await AuthData.RegisterUser(dto.Username.ToLower(), dto.Password, dto.ApiKey);
         }
 
         [HttpDelete("DeleteUserSession")]

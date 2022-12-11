@@ -464,7 +464,7 @@ const Navigation = (props: AppProps) => {
                 </Navbar.Section>
 
                 <Navbar.Section className={classes.footer}>
-                    <Paper mr={5}>
+                    <Paper mr={5} mt={10}>
                     <Grid pt={5} pl={5}>
                         <Grid.Col span={4}>
                         <Image

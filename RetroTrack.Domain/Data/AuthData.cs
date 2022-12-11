@@ -8,9 +8,9 @@ using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
 using System.Net;
 
-namespace RetroTrack.Domain.Data.Public.Auth
+namespace RetroTrack.Domain.Data
 {
-    public class Auth
+    public class AuthData
     {
         public static LoginUserDto ValidateUserLogin(string username, string password)
         {
@@ -58,7 +58,7 @@ namespace RetroTrack.Domain.Data.Public.Auth
                 {
                     Successful = true,
                     SessionId = sessionId,
-                    Username= username
+                    Username = username
                 };
             }
         }

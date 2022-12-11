@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Data.External;
+using RetroTrack.Domain.Data.LoggedIn.Games;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;
@@ -15,13 +17,13 @@ namespace RetroTrack.Controllers.Games
         [HttpGet("GetRecentlyAddedAndUpdatedGames")]
         public List<DayListDto> GetRecentlyAddedAndUpdatedGames()
         {
-            return Domain.Data.Public.Games.Games.GetNewAndUpdatedGamesFromLast5Days();
+            return Domain.Data.GamesData.GetNewAndUpdatedGamesFromLast5Days();
         }
 
         [HttpGet("GetSpecificGameInfo")]
         public async Task<ActionResult<GameInfoDto>> GetSpecificGameInfo(int gameId)
         {
-            var data = await Domain.Data.Public.Games.Games.GetSpecificGameInfo(gameId);
+            var data = await GamesData.GetSpecificGameInfo(gameId);
 
             if (data == null)
             {
@@ -41,7 +43,7 @@ namespace RetroTrack.Controllers.Games
                 return Unauthorized();
             }
 
-            var data = await Domain.Data.Public.Games.Games.GetUserGameInfo(user, gameId);
+            var data = await GamesData.GetUserGameInfo(user, gameId);
 
             return Ok(data);
         }
@@ -56,7 +58,7 @@ namespace RetroTrack.Controllers.Games
                 return Unauthorized();
             }
 
-            var data = await Domain.Data.Public.Games.Games.GetUserAchievementsForGame(user, gameId);
+            var data = await GamesData.GetUserAchievementsForGame(user, gameId);
 
             return Ok(data);
         }
@@ -64,7 +66,7 @@ namespace RetroTrack.Controllers.Games
         [HttpGet("GetGamesForConsole")]
         public ActionResult<PublicConsoleGamesDto> GetGamesForConsole(int consoleId)
         {
-            var games = Domain.Data.Public.Games.Games.GetGamesForConsole(consoleId);
+            var games = Domain.Data.GamesData.GetGamesForConsole(consoleId);
 
             if (games == null)
             {
@@ -84,7 +86,7 @@ namespace RetroTrack.Controllers.Games
                 return Unauthorized();
             }
 
-            var games = Domain.Data.Public.Games.Games.GetGamesAndUserProgressForConsole(user, consoleId);
+            var games = GamesData.GetGamesAndUserProgressForConsole(user, consoleId);
 
             if (games == null)
             {
@@ -92,6 +94,20 @@ namespace RetroTrack.Controllers.Games
             }
 
             return Ok(games);
+        }
+
+        [HttpGet("GetUserInProgressGames")]
+        public ActionResult<List<UserGamesTableDto>> GetUserInProgressGames()
+        {
+            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var trackedGames = GamesData.GetInProgressGamesForUser(user);
+            return Ok(trackedGames);
         }
     }
 }

@@ -11,6 +11,7 @@ import { UserAchievementsForGame } from "../../types/Api/Games/GetUserAchievemen
 type LoggedOutModalProps = {
     gameInfo: GetGameInfoForUser;
     loggedInModal: (toggleState: boolean) => void;
+    setTableDataUpdateNeeded?: (toggleState: boolean) => void;
 }
 
 const LoggedInModal = (props: LoggedOutModalProps) => {
@@ -108,11 +109,19 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
         }
     }
 
+    const UpdateCloseModalStates = () => {
+        props.loggedInModal(false)
+
+        if(props.setTableDataUpdateNeeded){
+            props.setTableDataUpdateNeeded(true)
+        }
+    }
+
     return (
         <>
         <Modal
           opened={true}
-          onClose={() => props.loggedInModal(false)}
+          onClose={() => UpdateCloseModalStates()}
           size="xl"
         >
             <Text align="center" mt={-50} mb={20} size={40}>{props.gameInfo.title}</Text>

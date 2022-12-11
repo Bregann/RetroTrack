@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetroTrack.Domain.Data.LoggedIn.UserData
+namespace RetroTrack.Domain.Data
 {
     public class UserData
     {
@@ -53,9 +53,9 @@ namespace RetroTrack.Domain.Data.LoggedIn.UserData
                 user.LastUserUpdate = DateTime.UtcNow;
                 context.SaveChanges();
 
-                return new UpdateUserGamesDto 
-                { 
-                    Success = true, 
+                return new UpdateUserGamesDto
+                {
+                    Success = true,
                     Reason = "User games update queued",
                 };
             }
@@ -63,7 +63,7 @@ namespace RetroTrack.Domain.Data.LoggedIn.UserData
 
         public static bool CheckUserUpdateCompleted(string username)
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var updateStatus = context.RetroAchievementsApiData.Where(x => x.JsonData == username).OrderBy(x => x.Id).Last(x => x.JsonData == username);
 

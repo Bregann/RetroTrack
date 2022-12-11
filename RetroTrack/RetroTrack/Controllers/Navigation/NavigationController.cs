@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data.Public.Navigation;
+using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 
@@ -13,7 +13,7 @@ namespace RetroTrack.Controllers.Navigation
         [HttpGet("GetLoggedOutUserGameCounts")]
         public NavigationGameCountsDto GetLoggedOutUserGameCounts()
         {
-            return Domain.Data.Public.Navigation.Navigation.GetGameCounts();
+            return NavigationData.GetGameCounts();
         }
 
         [HttpGet("GetLoggedInUserGameCounts")]
@@ -26,7 +26,7 @@ namespace RetroTrack.Controllers.Navigation
                 return Unauthorized();
             }
 
-            return Domain.Data.Public.Navigation.Navigation.GetGameCountsLoggedIn(user);
+            return NavigationData.GetGameCountsLoggedIn(user);
         }
 
         [HttpGet("GetUserNavProfile")]
@@ -39,7 +39,7 @@ namespace RetroTrack.Controllers.Navigation
                 return Unauthorized();
             }
 
-            var userProfile = Domain.Data.Public.Navigation.Navigation.GetUserNavProfileData(user);
+            var userProfile = NavigationData.GetUserNavProfileData(user);
 
             if (userProfile == null)
             {

@@ -17,6 +17,7 @@ using RetroTrack.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Data.Public.Games;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PatternContexts;
 
 namespace RetroTrack.Domain.Data.External
 {
@@ -312,9 +313,7 @@ namespace RetroTrack.Domain.Data.External
                         {
                             User = user,
                             AchievementsGained = game.AchievementsAwarded,
-                            ConsoleID = game.ConsoleId,
-                            GameID = game.GameId,
-                            GameName = game.Title,
+                            Game = context.Games.Where(x => x.Id == game.GameId).First(),
                             GamePercentage = pct,
                             HardcoreMode = game.HardcoreMode
                         });

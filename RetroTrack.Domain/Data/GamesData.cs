@@ -11,13 +11,13 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetroTrack.Domain.Data.Public.Games
+namespace RetroTrack.Domain.Data
 {
-    public class Games
+    public class GamesData
     {
         public static List<DayListDto> GetNewAndUpdatedGamesFromLast5Days()
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var dayList = new List<DayListDto>();
 
@@ -81,7 +81,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                 return null;
             }
 
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 context.Games.First(x => x.Id == gameId).Players = data.Players;
                 context.SaveChanges();
@@ -104,13 +104,58 @@ namespace RetroTrack.Domain.Data.Public.Games
                 {
                     Id = x.Value.Id,
                     BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",
-                    Description= x.Value.Description,
+                    Description = x.Value.Description,
                     NumAwarded = x.Value.NumAwarded,
                     NumAwardedHardcore = x.Value.NumAwardedHardcore,
                     Points = x.Value.Points,
                     Title = x.Value.Title
                 }).ToList()
             };
+        }
+
+        public static PublicConsoleGamesDto? GetGamesForConsole(int consoleId)
+        {
+            using (var context = new DatabaseContext())
+            {
+                //0 is used for all games
+                if (consoleId == 0)
+                {
+                    return new PublicConsoleGamesDto
+                    {
+                        ConsoleId = consoleId,
+                        ConsoleName = "All Games",
+                        Games = context.Games.Select(x => new PublicGamesTableDto
+                        {
+                            AchievementCount = x.AchievementCount,
+                            GameGenre = x.GameGenre,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                            GameId = x.Id,
+                            GameName = x.Title
+                        }).ToList()
+                    };
+                }
+
+                var consoleGames = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+
+                if (consoleGames.Count == 0)
+                {
+                    return null;
+                }
+
+                return new PublicConsoleGamesDto
+                {
+                    ConsoleId = consoleId,
+                    ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                    Games = consoleGames.Select(x => new PublicGamesTableDto
+                    {
+                        AchievementCount = x.AchievementCount,
+                        GameGenre = x.GameGenre,
+                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                        GameId = x.Id,
+                        GameName = x.Title
+                    }).ToList()
+                };
+            }
         }
 
         public static async Task<UserGameInfoDto?> GetUserGameInfo(string username, int gameId)
@@ -146,7 +191,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                 });
             }
 
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 return new UserGameInfoDto
                 {
@@ -162,7 +207,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                     NumAwardedToUser = data.NumAwardedToUser,
                     UserCompletion = data.UserCompletion,
                     Achievements = achievementList,
-                    GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id== gameId)
+                    GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
                 };
             }
         }
@@ -179,7 +224,7 @@ namespace RetroTrack.Domain.Data.Public.Games
                     Success = false,
                     Reason = "Error getting data"
                 };
-     
+
             }
 
             using (var context = new DatabaseContext())
@@ -228,70 +273,25 @@ namespace RetroTrack.Domain.Data.Public.Games
                 achievementList.Add(userAchievement);
             }
 
-            return new UserAchievementsForGameDto 
-            { 
-                Success = true,
-                Achievements = achievementList 
-            };
-        }
-
-        public static PublicConsoleGamesDto? GetGamesForConsole(int consoleId)
-        {
-            using(var context = new DatabaseContext())
+            return new UserAchievementsForGameDto
             {
-                //0 is used for all games
-                if (consoleId == 0)
-                {
-                    return new PublicConsoleGamesDto
-                    {
-                        ConsoleId = consoleId,
-                        ConsoleName = "All Games",
-                        Games = context.Games.Select(x => new PublicGamesTableDto
-                        {
-                            AchievementCount = x.AchievementCount,
-                            GameGenre = x.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
-                            GameId = x.Id,
-                            GameName = x.Title
-                        }).ToList()
-                    };
-                }
-
-                var consoleGames = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
-
-                if (consoleGames.Count == 0)
-                {
-                    return null;
-                }
-
-                return new PublicConsoleGamesDto
-                {
-                    ConsoleId = consoleId,
-                    ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
-                    Games = consoleGames.Select(x => new PublicGamesTableDto
-                    {
-                        AchievementCount = x.AchievementCount,
-                        GameGenre = x.GameGenre,
-                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
-                        GameId = x.Id,
-                        GameName = x.Title
-                    }).ToList()
-                };
-            }
+                Success = true,
+                Achievements = achievementList
+            };
         }
 
         public static UserConsoleGamesDto? GetGamesAndUserProgressForConsole(string username, int consoleId)
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
-                var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).ToList();
+                var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game);
                 var consoleGames = new List<UserGamesTableDto>();
 
                 if (consoleId == 0)
                 {
                     foreach (var game in context.Games)
                     {
-                        var userProgress = userGameProgress.FirstOrDefault(x => x.GameID == game.Id);
+                        var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
 
                         consoleGames.Add(new UserGamesTableDto
                         {
@@ -337,6 +337,33 @@ namespace RetroTrack.Domain.Data.Public.Games
                     ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
                     Games = consoleGames
                 };
+            }
+        }
+
+        public static List<UserGamesTableDto> GetInProgressGamesForUser(string username)
+        {
+            using (var context = new DatabaseContext())
+            {
+                var gameList = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage != 1);
+                var progressGameList = new List<UserGamesTableDto>();
+
+                foreach (var game in gameList)
+                {
+                    progressGameList.Add(new UserGamesTableDto
+                    {
+                        AchievementCount = game.Game.AchievementCount,
+                        AchievementsGained = game?.AchievementsGained ?? 0,
+                        PercentageCompleted = game?.GamePercentage ?? 0,
+                        GameGenre = game.Game.GameGenre,
+                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
+                        GameId = game.Game.Id,
+                        GameName = game.Game.Title,
+                        Console = game.Game.GameConsole.ConsoleName,
+                        Players = game.Game.Players ?? 0
+                    });
+                }
+
+                return progressGameList;
             }
         }
     }

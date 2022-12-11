@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data.LoggedIn.UserData;
+using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 using System.ComponentModel;

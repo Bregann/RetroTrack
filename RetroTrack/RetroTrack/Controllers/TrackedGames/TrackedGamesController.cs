@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 
@@ -19,7 +20,7 @@ namespace RetroTrack.Controllers.TrackedGames
                 return Unauthorized(false);
             }
 
-            if (Domain.Data.LoggedIn.TrackedGames.TrackedGames.AddNewTrackedGame(user, gameId))
+            if (TrackedGamesData.AddNewTrackedGame(user, gameId))
             {
                 return Ok(true);
             }
@@ -39,7 +40,7 @@ namespace RetroTrack.Controllers.TrackedGames
                 return Unauthorized(false);
             }
 
-            if (Domain.Data.LoggedIn.TrackedGames.TrackedGames.RemoveTrackedGame(user, gameId))
+            if (TrackedGamesData.RemoveTrackedGame(user, gameId))
             {
                 return Ok(true);
             }
@@ -59,7 +60,7 @@ namespace RetroTrack.Controllers.TrackedGames
                 return Unauthorized();
             }
 
-            var trackedGames = Domain.Data.LoggedIn.TrackedGames.TrackedGames.GetTrackedGamesForUser(user);
+            var trackedGames = TrackedGamesData.GetTrackedGamesForUser(user);
             return Ok(trackedGames);
         }
     }

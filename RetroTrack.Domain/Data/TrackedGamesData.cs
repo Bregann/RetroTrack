@@ -7,20 +7,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetroTrack.Domain.Data.LoggedIn.TrackedGames
+namespace RetroTrack.Domain.Data
 {
-    public class TrackedGames
+    public class TrackedGamesData
     {
         public static bool AddNewTrackedGame(string username, int gameId)
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
-                var user = context.Users.Where(x=> x.Username == username).First();
+                var user = context.Users.Where(x => x.Username == username).First();
 
-                context.TrackedGames.Add(new Infrastructure.Database.Models.TrackedGames 
-                { 
-                    Game = context.Games.Where(x => x.Id == gameId).First(), 
-                    User = user 
+                context.TrackedGames.Add(new Infrastructure.Database.Models.TrackedGames
+                {
+                    Game = context.Games.Where(x => x.Id == gameId).First(),
+                    User = user
                 });
 
                 context.SaveChanges();
@@ -30,7 +30,7 @@ namespace RetroTrack.Domain.Data.LoggedIn.TrackedGames
 
         public static bool RemoveTrackedGame(string username, int gameId)
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 context.TrackedGames.Where(x => x.Game.Id == gameId && x.User.Username == username).ExecuteDelete();
                 return true;
@@ -46,7 +46,7 @@ namespace RetroTrack.Domain.Data.LoggedIn.TrackedGames
 
                 foreach (var game in gameList)
                 {
-                    var userProgress = game.User.UserGameProgress.Where(x => x.GameID == game.Game.Id && x.User.Username == username).FirstOrDefault();
+                    var userProgress = game.User.UserGameProgress.Where(x => x.Game.Id == game.Game.Id && x.User.Username == username).FirstOrDefault();
 
                     trackedGameList.Add(new UserGamesTableDto
                     {
