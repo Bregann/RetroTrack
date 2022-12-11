@@ -21,7 +21,7 @@ const InProgressGames = (props: InProgressGamesProps) => {
     useEffect(() => {
         const fetchData = async () => {
             if(tableUpdatedNeeded){
-                const res = await DoGet('/api/trackedgames/GetTrackedGamesForUser', session?.sessionId);
+                const res = await DoGet('/api/games/GetUserInProgressGames', session?.sessionId);
 
                 if(res.ok){
                     const data = await res.json();
@@ -59,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<InProgressGamesProps> = asyn
         }
     }
 
-    const res = await DoGet('/api/trackedgames/GetTrackedGamesForUser', session.sessionId);
+    const res = await DoGet('/api/games/GetUserInProgressGames', session.sessionId);
     if(res.ok){
       return {
         props: {

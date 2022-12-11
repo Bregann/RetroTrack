@@ -89,20 +89,45 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps) => {
         <>
         <MediaQuery smallerThan="sm" styles={{width: 600, marginLeft: 'auto', marginRight: 'auto', display: 'block'}}>
             <Paper shadow="md" p="md" withBorder mt={15}>
+
+            <MediaQuery query="(max-width: 1660px)" styles={{display: 'none'}}>
                 <Group>
-                <TextInput
-                    sx={{width:'80%', marginBottom: 20}}
-                    placeholder="Search games..."
-                    icon={<IconSearch size={16} />}
-                    value={query}
-                    onChange={(e) => setQuery(e.currentTarget.value)}
-                />
-                <UnstyledButton sx={{marginBottom: 21, marginLeft:-45, zIndex: 1}} onClick={() => setQuery('')}>
-                    <IconSquareX size={20} />
-                </UnstyledButton>
-                <Switch size="lg" onLabel="Show Completed" offLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
-                <Switch size="lg" onLabel="Show In Progress" offLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
+                    <TextInput
+                        sx={{width:'80%', marginBottom: 20}}
+                        placeholder="Search games..."
+                        icon={<IconSearch size={16} />}
+                        value={query}
+                        onChange={(e) => setQuery(e.currentTarget.value)}
+                    />
+
+                    <UnstyledButton sx={{marginBottom: 21, marginLeft:-45, zIndex: 1}} onClick={() => setQuery('')}>
+                        <IconSquareX size={20} />
+                    </UnstyledButton>
+                    
+                    <Switch size="lg" onLabel="Show Completed" offLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
+                    <Switch size="lg" onLabel="Show In Progress" offLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
                 </Group>
+            </MediaQuery>
+
+            <MediaQuery query="(min-width: 1661px)" styles={{display: 'none'}}>
+                <Group>
+                    <TextInput
+                        sx={{width:'50%', marginBottom: 20}}
+                        placeholder="Search games..."
+                        icon={<IconSearch size={16} />}
+                        value={query}
+                        onChange={(e) => setQuery(e.currentTarget.value)}
+                    />
+
+                    <UnstyledButton sx={{marginBottom: 21, marginLeft:-45, zIndex: 1}} onClick={() => setQuery('')}>
+                        <IconSquareX size={20} />
+                    </UnstyledButton>
+                    
+                    <Switch size="lg" onLabel="Show Completed" offLabel="Hide Completed" pb={35} pl={10} onChange={(event) => setCompletedSwitch(event.currentTarget.checked)} defaultChecked={true}/>
+                    <Switch size="lg" onLabel="Show In Progress" offLabel="Hide In Progress" pb={35}onChange={(event) => setInProgressSwitch(event.currentTarget.checked)}/>
+                </Group>
+            </MediaQuery>
+
                 <div style={{position: 'relative'}}>
                     <LoadingOverlay visible={loadingOverlayVisible} overlayBlur={2} />
                     <DataTable 

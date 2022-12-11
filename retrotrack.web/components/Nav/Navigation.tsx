@@ -113,7 +113,8 @@ const Navigation = (props: AppProps) => {
         };
 
         if(gameCountsRes.ok){
-            data.loggedIn = await gameCountsRes.json();
+            const gameCountsResData = await gameCountsRes.json();
+            data.loggedIn = gameCountsResData;
         }
 
         const profileDataRes = await DoGet('/api/navigation/GetUserNavProfile', sessionId);
