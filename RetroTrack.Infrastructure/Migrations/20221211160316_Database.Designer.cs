@@ -12,8 +12,8 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20221203185720_AddGameConseoleFKToGames")]
-    partial class AddGameConseoleFKToGames
+    [Migration("20221211160316_Database")]
+    partial class Database
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,33 @@ namespace RetroTrack.Infrastructure.Migrations
                             RetroAchievementsApiKey = "",
                             RetroAchievementsApiUsername = ""
                         });
+                });
+
+            modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.DataCaching", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CacheData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CacheName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MinutesToCacheFor")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataCaching");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.GameConsoles", b =>
@@ -172,11 +199,13 @@ namespace RetroTrack.Infrastructure.Migrations
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
+                        .HasColumnType("integer");
 
-                    b.Property<int>("GameID")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Username")
@@ -184,6 +213,8 @@ namespace RetroTrack.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GameId");
 
                     b.HasIndex("Username");
 
@@ -201,15 +232,8 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<int>("AchievementsGained")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ConsoleID")
+                    b.Property<int>("GameId")
                         .HasColumnType("integer");
-
-                    b.Property<int>("GameID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("GameName")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<double>("GamePercentage")
                         .HasColumnType("double precision");
@@ -222,6 +246,8 @@ namespace RetroTrack.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GameId");
 
                     b.HasIndex("Username");
 
@@ -237,11 +263,24 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("LastAchievementsUpdate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("LastActivity")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("LastUserUpdate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserPoints")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserProfileUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("UserRank")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Username");
 
@@ -272,22 +311,38 @@ namespace RetroTrack.Infrastructure.Migrations
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
                 {
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Games", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
                         .WithMany("TrackedGames")
                         .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Game");
+
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
                 {
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Games", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
                         .WithMany("UserGameProgress")
                         .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Game");
 
                     b.Navigation("User");
                 });
