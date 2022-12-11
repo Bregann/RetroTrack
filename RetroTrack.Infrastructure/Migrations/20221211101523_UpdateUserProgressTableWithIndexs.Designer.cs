@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RetroTrack.Infrastructure.Database.Context;
@@ -11,9 +12,11 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221211101523_UpdateUserProgressTableWithIndexs")]
+    partial class UpdateUserProgressTableWithIndexs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,33 +57,6 @@ namespace RetroTrack.Infrastructure.Migrations
                             RetroAchievementsApiKey = "",
                             RetroAchievementsApiUsername = ""
                         });
-                });
-
-            modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.DataCaching", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CacheData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CacheName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("MinutesToCacheFor")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DataCaching");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.GameConsoles", b =>

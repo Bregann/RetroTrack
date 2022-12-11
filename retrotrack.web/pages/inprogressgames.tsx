@@ -40,7 +40,7 @@ const InProgressGames = (props: InProgressGamesProps) => {
         {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
         {gameData &&
         <>
-            <Text size={40} align="center">{session?.username}&apos;s Tracked Games</Text>
+            <Text size={40} align="center">{session?.username}&apos;s In Progress Games</Text>
             <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded}/>
         </>}
         </>
@@ -72,9 +72,9 @@ export const getServerSideProps: GetServerSideProps<InProgressGamesProps> = asyn
     return {
         props: {
             games: null,
-            errorMessage: 'Error getting tracked game data ' + res.status
+            errorMessage: 'Error getting in progress game data ' + res.status
         }
       }  
 }
 
-export default TrackedGames;
+export default InProgressGames;

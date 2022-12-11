@@ -1,7 +1,9 @@
 ﻿using BreganUtils;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
+using RetroTrack.Infrastructure.Caching;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
 using System;
@@ -117,6 +119,27 @@ namespace RetroTrack.Domain.Data
         {
             using (var context = new DatabaseContext())
             {
+                var cacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}");
+                var gameList = new List<Games>();
+
+                if (cacheData != null)
+                {
+                    gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
+                }
+                else
+                {
+                    if (consoleId == 0)
+                    {
+                        gameList = context.Games.ToList();
+                    }
+                    else
+                    {
+                        gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+                    }
+
+                    CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                }
+
                 //0 is used for all games
                 if (consoleId == 0)
                 {
@@ -124,7 +147,7 @@ namespace RetroTrack.Domain.Data
                     {
                         ConsoleId = consoleId,
                         ConsoleName = "All Games",
-                        Games = context.Games.Select(x => new PublicGamesTableDto
+                        Games = gameList.Select(x => new PublicGamesTableDto
                         {
                             AchievementCount = x.AchievementCount,
                             GameGenre = x.GameGenre,
@@ -135,9 +158,7 @@ namespace RetroTrack.Domain.Data
                     };
                 }
 
-                var consoleGames = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
-
-                if (consoleGames.Count == 0)
+                if (gameList.Count == 0)
                 {
                     return null;
                 }
@@ -146,7 +167,7 @@ namespace RetroTrack.Domain.Data
                 {
                     ConsoleId = consoleId,
                     ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
-                    Games = consoleGames.Select(x => new PublicGamesTableDto
+                    Games = gameList.Select(x => new PublicGamesTableDto
                     {
                         AchievementCount = x.AchievementCount,
                         GameGenre = x.GameGenre,
@@ -287,9 +308,67 @@ namespace RetroTrack.Domain.Data
                 var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game);
                 var consoleGames = new List<UserGamesTableDto>();
 
+                var cacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}");
+                var gameList = new List<Games>();
+
+                if (cacheData != null)
+                {
+                    gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
+                }
+                else
+                {
+                    if (consoleId == 0)
+                    {
+                        gameList = context.Games.ToList();
+                    }
+                    else
+                    {
+                        gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+                    }
+                    
+                    CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                }
+
                 if (consoleId == 0)
                 {
-                    foreach (var game in context.Games)
+                    //User progress is cached, check and return if needed
+                    var userAllGamesCacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}-User-{username}");
+
+                    if (userAllGamesCacheData != null)
+                    {
+                        return JsonConvert.DeserializeObject<UserConsoleGamesDto>(userAllGamesCacheData);
+                    }
+
+                    foreach (var game in gameList)
+                    {
+                        var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
+
+                        consoleGames.Add(new UserGamesTableDto
+                        {
+                            AchievementCount = game.AchievementCount,
+                            AchievementsGained = userProgress?.AchievementsGained ?? 0,
+                            PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                            GameGenre = game.GameGenre,
+                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
+                            GameId = game.Id,
+                            GameName = game.Title,
+                            Players = game.Players ?? 0
+                        });
+                    }
+
+                    var allGamesUserProgress = new UserConsoleGamesDto
+                    {
+                        ConsoleId = consoleId,
+                        ConsoleName = "All Games",
+                        Games = consoleGames
+                    };
+
+                    CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{username}", JsonConvert.SerializeObject(allGamesUserProgress));
+                    return allGamesUserProgress;
+                }
+                else
+                {
+                    foreach (var game in gameList)
                     {
                         var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
 
@@ -309,34 +388,10 @@ namespace RetroTrack.Domain.Data
                     return new UserConsoleGamesDto
                     {
                         ConsoleId = consoleId,
-                        ConsoleName = "All Games",
+                        ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
                         Games = consoleGames
                     };
                 }
-
-                foreach (var game in context.Games.Where(x => x.GameConsole.ConsoleID == consoleId))
-                {
-                    var userProgress = userGameProgress.FirstOrDefault(x => x.GameID == game.Id);
-
-                    consoleGames.Add(new UserGamesTableDto
-                    {
-                        AchievementCount = game.AchievementCount,
-                        AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                        PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
-                        GameGenre = game.GameGenre,
-                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
-                        GameId = game.Id,
-                        GameName = game.Title,
-                        Players = game.Players ?? 0
-                    });
-                }
-
-                return new UserConsoleGamesDto
-                {
-                    ConsoleId = consoleId,
-                    ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
-                    Games = consoleGames
-                };
             }
         }
 

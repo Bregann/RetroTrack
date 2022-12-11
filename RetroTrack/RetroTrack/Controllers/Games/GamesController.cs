@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Data.External;
-using RetroTrack.Domain.Data.LoggedIn.Games;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;

@@ -15,7 +15,6 @@ using System.Text;
 using System.Threading.Tasks;
 using RetroTrack.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using RetroTrack.Domain.Data.Public.Games;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PatternContexts;
 
@@ -290,7 +289,7 @@ namespace RetroTrack.Domain.Data.External
                     foreach (var game in gameList)
                     {
                         //Check if it already exists, if so update the field
-                        var userData = context.UserGameProgress.Where(x => x.GameID == game.GameId && x.User.Username == username).FirstOrDefault();
+                        var userData = context.UserGameProgress.Where(x => x.Game.Id == game.GameId && x.User.Username == username).FirstOrDefault();
 
                         if (userData != null)
                         {

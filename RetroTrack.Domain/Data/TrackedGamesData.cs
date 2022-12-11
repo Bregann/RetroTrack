@@ -41,12 +41,14 @@ namespace RetroTrack.Domain.Data
         {
             using (var context = new DatabaseContext())
             {
-                var gameList = context.TrackedGames.Where(x => x.User.Username == username).Include(x => x.Game.GameConsole).Include(x => x.User.UserGameProgress);
+                var gameList = context.TrackedGames.Where(x => x.User.Username == username).Include(x => x.Game).Include(x => x.Game.GameConsole).ToList();
+                var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game).ToList();
+
                 var trackedGameList = new List<UserGamesTableDto>();
 
                 foreach (var game in gameList)
                 {
-                    var userProgress = game.User.UserGameProgress.Where(x => x.Game.Id == game.Game.Id && x.User.Username == username).FirstOrDefault();
+                    var userProgress = userGameProgress.Where(x => x.Game.Id == game.Id).FirstOrDefault();
 
                     trackedGameList.Add(new UserGamesTableDto
                     {
