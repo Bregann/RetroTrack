@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RetroTrack.Infrastructure
 {
     //Rename to DbSettings.cs to use
-    public class DbSettings
+    public class DbSettingsExample
     {
 #if DEBUG
         public static readonly string ConnectionString = "";
