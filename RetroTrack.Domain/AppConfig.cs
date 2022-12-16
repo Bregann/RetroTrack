@@ -1,10 +1,5 @@
 ﻿using RetroTrack.Infrastructure.Database.Context;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain
 {
@@ -17,7 +12,7 @@ namespace RetroTrack.Domain
 
         public static void LoadConfigFromDatabase()
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var config = context.Config.First();
 

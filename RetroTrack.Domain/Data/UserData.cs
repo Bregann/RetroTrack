@@ -1,15 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
-using RetroTrack.Infrastructure.Database.Models;
 using RetroTrack.Infrastructure.Database.Enums;
+using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Data
 {

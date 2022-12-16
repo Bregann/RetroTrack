@@ -1,14 +1,8 @@
 ﻿using Hangfire;
-using Hangfire.Storage.Monitoring;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain
 {
@@ -31,6 +25,7 @@ namespace RetroTrack.Domain
         {
             await RetroAchievements.GetGamesFromConsoleIds();
         }
+
         public static async Task GetUnprocessedGameDataJob()
         {
             await RetroAchievements.GetUnprocessedGameData();
@@ -40,7 +35,7 @@ namespace RetroTrack.Domain
         {
             var maxRequests = 20;
 
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var requestsToProcess = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.NotScheduled).Count();
 
@@ -53,7 +48,6 @@ namespace RetroTrack.Domain
 
                 var activeRequests = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.Scheduled || x.ProcessingStatus == ProcessingStatus.BeingProcessed).Count();
                 var requestsToSend = maxRequests - activeRequests;
-
 
                 var rowsToSchedule = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.NotScheduled)
                     .Take(requestsToSend)
@@ -69,9 +63,11 @@ namespace RetroTrack.Domain
                         case ApiRequestType.GetGameList:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
                             break;
+
                         case ApiRequestType.GetGameExtended:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
+
                         case ApiRequestType.UserUpdate:
                             BackgroundJob.Enqueue(() => RetroAchievements.GetUserGames(id.JsonData, id.Id)); //this is the username
                             break;

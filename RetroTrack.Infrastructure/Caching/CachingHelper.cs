@@ -1,12 +1,6 @@
-﻿using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
-using RetroTrack.Infrastructure.Database.Context;
+﻿using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Infrastructure.Caching
 {

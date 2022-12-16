@@ -1,22 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestSharp;
-using RetroTrack.Domain.Dtos;
-using RetroTrack.Infrastructure.Database.Context;
-using RetroTrack.Infrastructure.Database.Models;
-using RetroTrack.Infrastructure.Database.Enums;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 using RetroTrack.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.PatternContexts;
+using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Infrastructure.Database.Enums;
+using RetroTrack.Infrastructure.Database.Models;
+using Serilog;
+using System.Net;
 
 namespace RetroTrack.Domain.Data.External
 {
@@ -57,7 +46,7 @@ namespace RetroTrack.Domain.Data.External
             var responseDeserialized = JsonConvert.DeserializeObject<List<ConsoleIDs>>(response.Content);
 
             //Add all the new consoles into the database
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 foreach (var console in responseDeserialized)
                 {
@@ -128,7 +117,7 @@ namespace RetroTrack.Domain.Data.External
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
 
-            using (var context = new DatabaseContext()) 
+            using (var context = new DatabaseContext())
             {
                 //Get all the new unprocessed games
                 var unprocessedGames = context.Games.Where(x => !x.ExtraDataProcessed).Select(x => x.Id).ToList();
@@ -248,7 +237,6 @@ namespace RetroTrack.Domain.Data.External
             return data;
         }
 
-
         public static async Task GetUserGames(string username, int updateId)
         {
             try
@@ -348,7 +336,6 @@ namespace RetroTrack.Domain.Data.External
                 Log.Fatal($"[RetroAchievements] Error updating user {username} - reason {e.Message}");
                 return;
             }
-
         }
 
         public static void AddOrUpdateGamesToDatabase(int id)
@@ -425,7 +412,7 @@ namespace RetroTrack.Domain.Data.External
             {
                 Log.Warning($"[RetroAchievements] Error updating RetroAchievement API data for ID {id} - Error: {e}");
 
-                using(var context = new DatabaseContext())
+                using (var context = new DatabaseContext())
                 {
                     var erroredData = context.RetroAchievementsApiData.First(x => x.Id == id);
 

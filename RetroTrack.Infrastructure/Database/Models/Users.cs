@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Infrastructure.Database.Models
 {
@@ -7,6 +6,7 @@ namespace RetroTrack.Infrastructure.Database.Models
     {
         [Key]
         public required string Username { get; set; }
+
         public required string HashedPassword { get; set; }
         public required DateTime LastActivity { get; set; }
         public required DateTime LastUserUpdate { get; set; }

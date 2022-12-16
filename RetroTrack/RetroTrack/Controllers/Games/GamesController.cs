@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.Data;
-using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Domain.Helpers;
-using RetroTrack.Domain.Models;
-using RetroTrack.Infrastructure.Database.Models;
 
-namespace RetroTrack.Controllers.Games
+namespace RetroTrack.Api.Controllers.Games
 {
     [Route("api/[controller]")]
     [ApiController]

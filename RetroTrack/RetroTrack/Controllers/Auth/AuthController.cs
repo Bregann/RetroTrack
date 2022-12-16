@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Api.Dtos.Auth;
 using RetroTrack.Domain.Data;
 using RetroTrack.Domain.Dtos;
-using RetroTrack.Dtos.Auth;
 
-namespace RetroTrack.Api.Controllers.Authenication
+namespace RetroTrack.Api.Api.Controllers.Authenication
 {
     [Route("api/[controller]")]
     [ApiController]

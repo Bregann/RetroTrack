@@ -1,4 +1,4 @@
-﻿namespace RetroTrack.Dtos.Auth
+﻿namespace RetroTrack.Api.Dtos.Auth
 {
     public class RegisterNewUserRequestDto
     {

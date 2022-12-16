@@ -30,8 +30,8 @@ namespace RetroTrack.Infrastructure.Database.Context
             modelBuilder.Entity<Config>().HasData(new Config
             {
                 Id = 1,
-                RetroAchievementsApiKey= "",
-                RetroAchievementsApiUsername= "",
+                RetroAchievementsApiKey = "",
+                RetroAchievementsApiUsername = "",
                 HFConnectionString = ""
             });
         }

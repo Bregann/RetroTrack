@@ -1,9 +1,8 @@
-using Hangfire.PostgreSql;
 using Hangfire;
-using RetroTrack.Domain;
-using RetroTrack.Domain.Data.External;
-using Serilog;
 using Hangfire.Dashboard.Dark;
+using Hangfire.PostgreSql;
+using RetroTrack.Domain;
+using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 AppConfig.LoadConfigFromDatabase();

@@ -6,7 +6,7 @@ namespace RetroTrack.Infrastructure.Database.Models
     public class Games
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public required string Title { get; set; }
@@ -18,10 +18,10 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string ImageIcon { get; set; }
 
         [Required]
-        public required int Points { get; set;}
+        public required int Points { get; set; }
 
         [Required]
-        public DateTime LastModified { get; set; }
+        public required DateTime LastModified { get; set; }
 
         [Required]
         public required int AchievementCount { get; set; }

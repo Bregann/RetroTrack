@@ -1,12 +1,5 @@
-﻿using RetroTrack.Domain.Data.External;
-using RetroTrack.Domain.Dtos;
-using RetroTrack.Domain.Enums;
+﻿using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Data
 {
@@ -77,7 +70,6 @@ namespace RetroTrack.Domain.Data
                     return null;
                 }
 
-
                 return new UserNavProfileDto
                 {
                     Username = username,
@@ -87,7 +79,6 @@ namespace RetroTrack.Domain.Data
                     Rank = user.UserRank
                 };
             }
-
         }
     }
 }

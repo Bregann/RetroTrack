@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Infrastructure.Database.Models
 {
     public class GameConsoles
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public required int ConsoleID { get; set; }
+        public int ConsoleID { get; set; }
 
         [Required]
         public required string ConsoleName { get; set; }

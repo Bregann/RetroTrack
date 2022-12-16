@@ -6,12 +6,6 @@ using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Caching;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Data
 {
@@ -245,7 +239,6 @@ namespace RetroTrack.Domain.Data
                     Success = false,
                     Reason = "Error getting data"
                 };
-
             }
 
             using (var context = new DatabaseContext())
@@ -277,7 +270,7 @@ namespace RetroTrack.Domain.Data
                 var userAchievement = new UserAchievement
                 {
                     Id = achievement.Value.Id,
-                    BadgeName = achievement.Value.BadgeName + ".png",
+                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
                     Description = achievement.Value.Description,
                     NumAwarded = achievement.Value.NumAwarded,
                     NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
@@ -288,7 +281,7 @@ namespace RetroTrack.Domain.Data
 
                 if (achievement.Value.DateEarned == null)
                 {
-                    userAchievement.BadgeName = achievement.Value.BadgeName + "_lock.png";
+                    userAchievement.BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png";
                 }
 
                 achievementList.Add(userAchievement);
@@ -325,7 +318,7 @@ namespace RetroTrack.Domain.Data
                     {
                         gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
                     }
-                    
+
                     CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
                 }
 
