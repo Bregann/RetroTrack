@@ -5,11 +5,7 @@ namespace RetroTrack.Infrastructure.Database.Context
 {
     public class DatabaseContext : DbContext
     {
-#if DEBUG
-        private static readonly string _connectionString = "Host=vm.bregan.home;Database=retrotrack;Username=bregan;Password=tilly123";
-#else
-        private static readonly string _connectionString = "";
-#endif
+
 
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }
@@ -22,7 +18,7 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<DataCaching> DataCaching { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql(_connectionString);
+            => optionsBuilder.UseNpgsql(DbSettings.ConnectionString);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
