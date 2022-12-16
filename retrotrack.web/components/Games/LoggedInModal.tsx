@@ -1,5 +1,5 @@
 import { Autocomplete, Button, Container, Divider, Footer, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from 'next/image'
 import { GetSpecificGameInfo } from "../../types/Api/Games/GetSpecificGameInfo";
 import { GetGameInfoForUser } from "../../types/Api/Games/GetGameInfoForUser";
@@ -17,17 +17,22 @@ type LoggedOutModalProps = {
 const LoggedInModal = (props: LoggedOutModalProps) => {
     const [gameLayoutChecked, setGameLayoutChecked] = useState(false);
     const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements);
+    const [achievementList, setAchievementList] = useState(props.gameInfo.achievements);
     const [gameTracked, setGameTracked] = useState(props.gameInfo.gameTracked);
     const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false);
+    const [achievementsFiltered, setAchievementsFiltered] = useState(false);
     const { data: session, status } = useSession();
 
     const FilterCurrentAchievements = (checked: boolean) => {
+        setAchievementsFiltered(checked);
+
         if(checked){
-            setCurrentDisplayedAchievements(props.gameInfo.achievements.filter(x => x.dateEarned === null));
+            setCurrentDisplayedAchievements(achievementList.filter(x => x.dateEarned === null));
         }
         else{
-            setCurrentDisplayedAchievements(props.gameInfo.achievements)
+            setCurrentDisplayedAchievements(achievementList)
         }
+
     }
 
     const UpdateTrackedGame = async () => {
@@ -81,13 +86,14 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
             const data: UserAchievementsForGame = await res.json();
 
             if(data.success){
-                setCurrentDisplayedAchievements(data.achievements!);
+                setAchievementList(data.achievements!);
                 toast.success("Achievements updated", {
                     position: 'bottom-right',
                     closeOnClick: true,
                     theme: 'colored'
                 });
                 
+                FilterCurrentAchievements(achievementsFiltered);
                 return;
             }
             else{
@@ -114,6 +120,12 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
             props.setTableDataUpdateNeeded(true)
         }
     }
+
+    useEffect(() =>  {
+        FilterCurrentAchievements(achievementsFiltered);
+    // Ignoring the below warning as the filter is used in other places
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [achievementList]);
 
     return (
         <>

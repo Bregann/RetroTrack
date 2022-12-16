@@ -282,8 +282,8 @@ namespace RetroTrack.Domain.Data.External
                         if (userData != null)
                         {
                             userData.AchievementsGained = game.AchievementsAwarded;
-                            userData.GamePercentage = userData.GamePercentage;
-                            userData.HardcoreMode = userData.HardcoreMode;
+                            userData.GamePercentage = game.PctWon ?? 0;
+                            userData.HardcoreMode = game.HardcoreMode;
                             context.SaveChanges();
                             continue;
                         }
