@@ -1,4 +1,5 @@
-﻿using RetroTrack.Domain.Data.External;
+﻿using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Data.External;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
@@ -68,7 +69,7 @@ namespace RetroTrack.Domain.Data
             {
                 return new RegisterUserDto
                 {
-                    Successful = false,
+                    Success = false,
                     Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
                 };
             }
@@ -84,7 +85,7 @@ namespace RetroTrack.Domain.Data
 
                     return new RegisterUserDto
                     {
-                        Successful = false,
+                        Success = false,
                         Reason = "User already registered. Forgot your password? Use the forgot password link on the login form"
                     };
                 }
@@ -114,10 +115,64 @@ namespace RetroTrack.Domain.Data
 
                 return new RegisterUserDto
                 {
-                    Successful = true,
+                    Success = true,
                     Reason = null
                 };
             }
         }
+
+        public static async Task<ResetUserPasswordDto> ResetUserPassword(string username, string password, string raApiKey)
+        {
+            //Validate the API key to make sure that it's the correct username/api key combo
+            var validKey = await RetroAchievements.ValidateApiKey(username, raApiKey);
+
+            if (!validKey)
+            {
+                return new ResetUserPasswordDto
+                {
+                    Success = false,
+                    Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
+                };
+            }
+
+            using (var context = new DatabaseContext())
+            {
+                var trackedGames = context.Users.Where(x => x.Username == username).Select(x => x.TrackedGames);
+                var user = context.Users.FirstOrDefault(x => x.Username == username.ToLower());
+
+                //Check if the user is actually registered
+                if (user == null)
+                {
+                    Log.Information($"[Password Reset] User {username} doesn't exist");
+
+                    return new ResetUserPasswordDto
+                    {
+                        Success = false,
+                        Reason = "User does not exist. Please register using the register popup"
+                    };
+                }
+
+                //hash the password and store it
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+                //Add the user into the database
+                user.HashedPassword = hashedPassword;
+                user.LastActivity = DateTime.UtcNow;
+
+                //Delete any sessions
+                context.Sessions.Where(x => x.User.Username == username.ToLower()).ExecuteDelete();
+
+                context.SaveChanges();
+
+                Log.Information($"[Password Reset] {username} succesfully reset their password");
+
+                return new ResetUserPasswordDto
+                {
+                    Success = true,
+                    Reason = null
+                };
+            }
+        }
+
     }
 }

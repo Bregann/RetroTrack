@@ -9,7 +9,13 @@
 
     public class RegisterUserDto
     {
-        public required bool Successful { get; set; }
+        public required bool Success { get; set; }
+        public string? Reason { get; set; }
+    }
+
+    public class ResetUserPasswordDto
+    {
+        public required bool Success { get; set; }
         public string? Reason { get; set; }
     }
 }

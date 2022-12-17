@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { ModalProps } from "../../types/App/modal";
 import { DoPost } from "../../Helpers/webFetchHelper";
-import { IconAlertCircle } from '@tabler/icons';
+import { IconAlertCircle, IconLock } from '@tabler/icons';
 import { RegiserUserData } from "../../types/Api/Auth/RegisterUser";
 import { signIn } from "next-auth/react";
 import { toast } from "react-toastify";
@@ -24,10 +24,19 @@ const RegisterModal = (props: ModalProps) => {
     });
 
     const RegisterUser = async (values: FormValues) => {
+        setErrorMessage(null);
+
+        let spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+        if (values.password.length < 6 || !spChars.test(values.password)) {
+            setErrorMessage("Password must be at least 6 characters and contain a special character!");
+            return;
+        }
+
         setRegisterButtonLoading(true);
         const res = await DoPost('/api/auth/RegisterUser', values);
 
-        if(!res.ok){
+        if (!res.ok) {
             setErrorMessage('There has been an unexpected error. Please try again shortly');
             setRegisterButtonLoading(false);
             return;
@@ -35,15 +44,17 @@ const RegisterModal = (props: ModalProps) => {
 
         const data: RegiserUserData = await res.json();
 
+        console.log(data);
+
         //Check if there's any error
-        if(data.reason){
+        if (!data.success) {
             setErrorMessage(data.reason);
             setRegisterButtonLoading(false);
             return;
         }
 
         //If the registration was successful then login the user
-        if(data.success && !data.reason){
+        if (data.success && !data.reason) {
             //Send the signin request
             const res = await signIn('credentials', {
                 username: values.username,
@@ -51,7 +62,7 @@ const RegisterModal = (props: ModalProps) => {
                 redirect: false
             });
 
-            if(res?.ok){
+            if (res?.ok) {
                 //Close the menu
                 setRegisterButtonLoading(false);
                 props.setOpened(false);
@@ -62,7 +73,7 @@ const RegisterModal = (props: ModalProps) => {
                     theme: 'colored'
                 });
             }
-            else{
+            else {
                 setRegisterButtonLoading(false);
                 props.setOpened(false);
 
@@ -80,22 +91,22 @@ const RegisterModal = (props: ModalProps) => {
     const [registerButtonLoading, setRegisterButtonLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    return ( 
+    return (
         <Modal
-        opened={props.openedState}
-        onClose={() => props.setOpened(false)}
-        title="Register">
-            {errorMessage && 
-            <Alert 
-                icon={<IconAlertCircle size={16} />} 
-                title="Error registering user" 
-                color="red" 
-                sx={{marginTop: 20}}>
-                    { errorMessage }
-            </Alert>}
+            opened={props.openedState}
+            onClose={() => props.setOpened(false)}
+            title="Register">
+            {errorMessage &&
+                <Alert
+                    icon={<IconAlertCircle size={16} />}
+                    title="Error registering user"
+                    color="red"
+                    sx={{ marginTop: 20 }}>
+                    {errorMessage}
+                </Alert>}
 
             <form onSubmit={form.onSubmit((values) => RegisterUser(values))}>
-                <TextInput 
+                <TextInput
                     label="RetroAchievements Username"
                     placeholder="RetroAchievements Username"
                     withAsterisk
@@ -103,12 +114,12 @@ const RegisterModal = (props: ModalProps) => {
                     {...form.getInputProps('username')}
                 />
 
-                <TextInput 
+                <TextInput
                     label="RetroAchievements API Key"
                     placeholder="RetroAchievements API Key"
                     withAsterisk
                     required
-                    sx={{marginTop: 15, marginBottom: 10}}
+                    sx={{ marginTop: 15, marginBottom: 10 }}
                     {...form.getInputProps('apiKey')}
                 />
                 <Text fz="sm">You can find your API at <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">https://retroachievements.org/controlpanel.php</a>. <br />The key is only used for verifying that username and API key match. <b>Your key is not stored.</b></Text>
@@ -116,25 +127,28 @@ const RegisterModal = (props: ModalProps) => {
                 <PasswordInput
                     placeholder="Password"
                     label="Password"
+                    description="Password must contain at least 6 characters and 1 special character"
                     required
                     withAsterisk
-                    sx={{marginTop: 15, marginBottom: 10}}
+                    error="ggggggg"
+                    icon={<IconLock size={16} />}
+                    sx={{ marginTop: 15, marginBottom: 10 }}
                     {...form.getInputProps('password')}
                 />
                 <Text fz="sm">This is the password to log in to RetroTrack, <b>not your RetroAchievements password!</b></Text>
 
-                <Group position="right" sx={{marginTop: 20}}>
-                        <Button 
-                            type="submit"
-                            variant="gradient" 
-                            gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                            loading={registerButtonLoading}>
-                                Register
-                        </Button>
-                    </Group>
+                <Group position="right" sx={{ marginTop: 20 }}>
+                    <Button
+                        type="submit"
+                        variant="gradient"
+                        gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                        loading={registerButtonLoading}>
+                        Register
+                    </Button>
+                </Group>
             </form>
         </Modal>
-     );
+    );
 }
- 
+
 export default RegisterModal;
