@@ -397,11 +397,18 @@ namespace RetroTrack.Domain.Data
 
                 foreach (var game in gameList)
                 {
+                    double gamePct = 0;
+
+                    if(game?.GamePercentage != null)
+                    {
+                        gamePct = Math.Round((game.GamePercentage * 100), 2);
+                    }
+
                     progressGameList.Add(new UserGamesTableDto
                     {
                         AchievementCount = game.Game.AchievementCount,
                         AchievementsGained = game?.AchievementsGained ?? 0,
-                        PercentageCompleted = game?.GamePercentage * 100 ?? 0,
+                        PercentageCompleted = gamePct,
                         GameGenre = game.Game.GameGenre,
                         GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
                         GameId = game.Game.Id,
