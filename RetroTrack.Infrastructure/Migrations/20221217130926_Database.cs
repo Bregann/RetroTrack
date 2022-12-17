@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -140,8 +141,7 @@ namespace RetroTrack.Infrastructure.Migrations
                 name: "TrackedGames",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     GameId = table.Column<int>(type: "integer", nullable: false),
                     Username = table.Column<string>(type: "text", nullable: false)
                 },

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Infrastructure.Database.Models;
 
 namespace RetroTrack.Domain.Data
 {
@@ -12,8 +13,14 @@ namespace RetroTrack.Domain.Data
             {
                 var user = context.Users.Where(x => x.Username == username).First();
 
-                context.TrackedGames.Add(new Infrastructure.Database.Models.TrackedGames
+                if (context.TrackedGames.Any(x => x.Game.Id == gameId && x.User == user))
                 {
+                    return false;
+                }
+
+                context.TrackedGames.Add(new TrackedGames
+                {
+                    Id = $"{gameId}-{user.Username}",
                     Game = context.Games.Where(x => x.Id == gameId).First(),
                     User = user
                 });

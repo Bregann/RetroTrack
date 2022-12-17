@@ -17,7 +17,7 @@ namespace RetroTrack.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -196,11 +196,8 @@ namespace RetroTrack.Infrastructure.Migrations
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
