@@ -31,7 +31,7 @@ const Console = (props: ConsoleProps) => {
         {props.loggedInConsoleData &&
         <>
         <Text size={40} align="center">{props.loggedInConsoleData?.consoleName}</Text>
-        <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')}/>
+        <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>
         </>
         }
 

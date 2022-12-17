@@ -16,7 +16,7 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps) => {
     const [pageSize, setPageSize] = useState(15);
     const [page, setPage] = useState(1);
     const [games, setGames] = useState(sortBy(props.gameData.slice(0, pageSize), 'gameName'));
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'gameName', direction: 'asc' });
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: props.sortByName, direction: props.sortByDirection });
     const [query, setQuery] = useState('');
     const [debouncedQuery] = useDebouncedValue(query, 200);
     const [totalRecords, setTotalRecords] = useState(props.gameData.length);

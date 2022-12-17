@@ -41,7 +41,7 @@ const InProgressGames = (props: InProgressGamesProps) => {
         {gameData &&
         <>
             <Text size={40} align="center">{session?.username}&apos;s In Progress Games</Text>
-            <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded}/>
+            <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded} sortByName="percentageCompleted" sortByDirection="desc"/>
         </>}
         </>
      );

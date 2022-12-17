@@ -41,7 +41,7 @@ const TrackedGames = (props: TrackedGameProps) => {
         {gameData &&
         <>
             <Text size={40} align="center">{session?.username}&apos;s Tracked Games</Text>
-            <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded}/>
+            <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded} sortByName="gameName" sortByDirection="asc"/>
         </>}
         </>
      );

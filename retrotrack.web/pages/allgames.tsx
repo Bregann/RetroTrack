@@ -21,7 +21,7 @@ const AllGames = (props: AllGamesProps) => {
         <Text size={40} align="center">All Games</Text>
 
         {props.publicConsoleData && <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>}
-        {props.loggedInConsoleData && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')}/>}
+        {props.loggedInConsoleData && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>}
         {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
 
         </>
