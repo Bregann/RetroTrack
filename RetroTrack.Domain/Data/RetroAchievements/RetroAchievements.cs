@@ -102,7 +102,8 @@ namespace RetroTrack.Domain.Data.External
                         JsonData = response.Content,
                         ProcessingStatus = ProcessingStatus.NotScheduled,
                         FailedProcessingAttempts = 0,
-                        ApiRequestType = ApiRequestType.GetGameList
+                        ApiRequestType = ApiRequestType.GetGameList,
+                        LastUpdate = DateTime.UtcNow
                     });
 
                     Log.Information($"[RetroAchievements] Console ID {id} processed");
@@ -140,7 +141,8 @@ namespace RetroTrack.Domain.Data.External
                         JsonData = response.Content,
                         ProcessingStatus = ProcessingStatus.NotScheduled,
                         FailedProcessingAttempts = 0,
-                        ApiRequestType = ApiRequestType.GetGameExtended
+                        ApiRequestType = ApiRequestType.GetGameExtended,
+                        LastUpdate = DateTime.UtcNow
                     });
 
                     Log.Information($"[RetroAchievements] Game data processed for ID {gameId}");
@@ -372,7 +374,7 @@ namespace RetroTrack.Domain.Data.External
                         //Check if it exists in the database, if not then add it in
                         if (!context.Games.Any(x => x.Id == game.Id))
                         {
-                            context.Games.Add(new Infrastructure.Database.Models.Games
+                            context.Games.Add(new Games
                             {
                                 Title = game.Title,
                                 Id = game.Id,

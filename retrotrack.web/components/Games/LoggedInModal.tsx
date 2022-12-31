@@ -156,22 +156,27 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
                     />
                 </Grid.Col>
 
-                <Grid.Col md={3} xs={6}>
+                <Grid.Col md={2} xs={6} ml={60}>
                     <Text fw={500} align="center">Achievements</Text>
                     <Text align="center">{props.gameInfo.numAwardedToUser}/{props.gameInfo.achievementCount} ({props.gameInfo.userCompletion})</Text>
                 </Grid.Col>
 
-                <Grid.Col md={3} xs={6}>
+                <Grid.Col md={2} xs={6}>
+                    <Text fw={500} align="center">Points</Text>
+                    <Text align="center">{props.gameInfo.numAwardedToUser}/{props.gameInfo.achievementCount}</Text>
+                </Grid.Col>
+
+                <Grid.Col md={2} xs={6}>
                     <Text fw={500} align="center">Genre</Text>
                     <Text align="center">{props.gameInfo.genre}</Text>
                 </Grid.Col>
 
-                <Grid.Col md={3} xs={6}>
+                <Grid.Col md={2} xs={6}>
                     <Text fw={500} align="center">Console</Text>
                     <Text align="center">{props.gameInfo.consoleName}</Text>
                 </Grid.Col>
 
-                <Grid.Col md={3} xs={6}>
+                <Grid.Col md={2} xs={6}>
                     <Text fw={500} align="center">Players</Text>
                     <Text align="center">{props.gameInfo.players}</Text>
                 </Grid.Col>

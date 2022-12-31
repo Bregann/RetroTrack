@@ -41,7 +41,8 @@ namespace RetroTrack.Domain.Data
                     ApiRequestType = ApiRequestType.UserUpdate,
                     JsonData = username,
                     FailedProcessingAttempts = 0,
-                    ProcessingStatus = ProcessingStatus.NotScheduled
+                    ProcessingStatus = ProcessingStatus.NotScheduled,
+                    LastUpdate = DateTime.UtcNow
                 });
 
                 user.LastUserUpdate = DateTime.UtcNow;

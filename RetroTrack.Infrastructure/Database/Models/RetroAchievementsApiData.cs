@@ -20,5 +20,8 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required ApiRequestType ApiRequestType { get; set; }
+
+        [Required]
+        public required DateTime LastUpdate { get; set; } = DateTime.UtcNow;
     }
 }

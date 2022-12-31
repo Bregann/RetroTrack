@@ -15,6 +15,8 @@
         public required int NumAwardedToUser { get; set; }
         public required string UserCompletion { get; set; }
         public required bool GameTracked { get; set; }
+        public required int PointsEarned { get; set; }
+        public required int TotalPoints { get; set; }
     }
 
     public class UserAchievement

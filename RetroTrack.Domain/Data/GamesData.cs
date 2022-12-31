@@ -222,6 +222,8 @@ namespace RetroTrack.Domain.Data
                     NumAwardedToUser = data.NumAwardedToUser,
                     UserCompletion = data.UserCompletion,
                     Achievements = achievementList,
+                    PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
+                    TotalPoints = data.Achievements.Sum(x => x.Value.Points),
                     GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
                 };
             }
