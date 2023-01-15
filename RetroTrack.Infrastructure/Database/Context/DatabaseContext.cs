@@ -16,6 +16,8 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<Config> Config { get; set; }
         public DbSet<RetroAchievementsApiData> RetroAchievementsApiData { get; set; }
         public DbSet<DataCaching> DataCaching { get; set; }
+        public DbSet<DevWishlist> DevWishlist { get; set; }
+        public DbSet<UndevvedGames> UndevvedGames { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(DbSettings.ConnectionString);

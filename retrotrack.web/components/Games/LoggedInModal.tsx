@@ -8,16 +8,17 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { UserAchievementsForGame } from "../../types/Api/Games/GetUserAchievementsForGame";
 
-type LoggedOutModalProps = {
+type LoggedInModalProps = {
     gameInfo: GetGameInfoForUser;
     loggedInModal: (toggleState: boolean) => void;
     setTableDataUpdateNeeded?: (toggleState: boolean) => void;
 }
 
-const LoggedInModal = (props: LoggedOutModalProps) => {
+const LoggedInModal = (props: LoggedInModalProps) => {
     const [gameLayoutChecked, setGameLayoutChecked] = useState(false);
     const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements);
     const [achievementList, setAchievementList] = useState(props.gameInfo.achievements);
+    const [gameStats, setGameStats] = useState(props.gameInfo)
     const [gameTracked, setGameTracked] = useState(props.gameInfo.gameTracked);
     const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false);
     const [achievementsFiltered, setAchievementsFiltered] = useState(false);
@@ -32,7 +33,6 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
         else{
             setCurrentDisplayedAchievements(achievementList)
         }
-
     }
 
     const UpdateTrackedGame = async () => {
@@ -80,29 +80,21 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
     }
 
     const UpdateUserProgress = async () => {
-        const res = await DoGet('/api/games/GetUserAchievementsForGame/'+ props.gameInfo.gameId, session?.sessionId); //hard coded for dev purposes - change back lol
+        const res = await DoGet('/api/games/GetGameInfoForUser/'+ props.gameInfo.gameId, session?.sessionId); //hard coded for dev purposes - change back lol
 
         if(res.ok){
-            const data: UserAchievementsForGame = await res.json();
+            const data: GetGameInfoForUser = await res.json();
 
-            if(data.success){
-                setAchievementList(data.achievements!);
-                toast.success("Achievements updated", {
-                    position: 'bottom-right',
-                    closeOnClick: true,
-                    theme: 'colored'
-                });
-                
-                FilterCurrentAchievements(achievementsFiltered);
-                return;
-            }
-            else{
-                toast.warning(data.reason, {
-                    position: 'bottom-right',
-                    closeOnClick: true,
-                    theme: 'colored'
-                });
-            }
+            setGameStats(data);
+            setAchievementList(data.achievements!);
+            toast.success("Achievements updated", {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+            
+            FilterCurrentAchievements(achievementsFiltered);
+            return;
         }
         else{
             toast.error("Error updating user: " + res.status, {
@@ -158,12 +150,12 @@ const LoggedInModal = (props: LoggedOutModalProps) => {
 
                 <Grid.Col md={2} xs={6} ml={60}>
                     <Text fw={500} align="center">Achievements</Text>
-                    <Text align="center">{props.gameInfo.numAwardedToUser}/{props.gameInfo.achievementCount} ({props.gameInfo.userCompletion})</Text>
+                    <Text align="center">{gameStats.numAwardedToUser}/{gameStats.achievementCount} ({gameStats.userCompletion})</Text>
                 </Grid.Col>
 
                 <Grid.Col md={2} xs={6}>
                     <Text fw={500} align="center">Points</Text>
-                    <Text align="center">{props.gameInfo.numAwardedToUser}/{props.gameInfo.achievementCount}</Text>
+                    <Text align="center">{gameStats.numAwardedToUser}/{gameStats.achievementCount}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={2} xs={6}>

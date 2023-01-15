@@ -16,6 +16,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required long UserRank { get; set; }
         public virtual List<UserGameProgress> UserGameProgress { get; set; }
         public virtual List<TrackedGames> TrackedGames { get; set; }
+        public virtual List<DevWishlist> DevWishlist { get; set; }
         public virtual List<Sessions> Sessions { get; set; }
     }
 }

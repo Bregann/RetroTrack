@@ -13,5 +13,8 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required int GameCount { get; set; }
+
+        [Required]
+        public required int NoAchievementsGameCount { get; set; }
     }
 }

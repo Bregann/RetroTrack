@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RestSharp;
 using RetroTrack.Domain.Models;
 using RetroTrack.Infrastructure.Database.Context;
@@ -67,7 +68,8 @@ namespace RetroTrack.Domain.Data.External
                     {
                         ConsoleID = console.Id,
                         ConsoleName = console.Name,
-                        GameCount = 0
+                        GameCount = 0,
+                        NoAchievementsGameCount = 0
                     });
 
                     Log.Information($"[RetroAchievements] Console ID {console.Id} added");
@@ -87,7 +89,7 @@ namespace RetroTrack.Domain.Data.External
 
                 foreach (var id in consoleIds)
                 {
-                    var request = new RestRequest($"API_GetGameList.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={id}&f=1", Method.Get);
+                    var request = new RestRequest($"API_GetGameList.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={id}", Method.Get);
                     var response = await client.ExecuteAsync(request);
 
                     if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
@@ -367,42 +369,64 @@ namespace RetroTrack.Domain.Data.External
                     }
 
                     //Update the game count for the console
-                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Count;
+                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Where(x => x.AchievementCount != 0).Count();
+                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().NoAchievementsGameCount = gameList.Where(x => x.AchievementCount == 0).Count();
 
                     foreach (var game in gameList)
                     {
-                        //Check if it exists in the database, if not then add it in
-                        if (!context.Games.Any(x => x.Id == game.Id))
+                        //Check if there's achievements or not
+                        if (game.AchievementCount == 0)
                         {
-                            context.Games.Add(new Games
+                            if(!context.UndevvedGames.Any(x => x.Id == game.Id) && !context.Games.Any(x => x.Id == game.Id))
                             {
-                                Title = game.Title,
-                                Id = game.Id,
-                                DiscordMessageProcessed = false,
-                                EmailMessageProcessed = false,
-                                ExtraDataProcessed = false,
-                                AchievementCount = game.AchievementCount,
-                                GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
-                                ImageIcon = game.ImageIcon,
-                                LastModified = game.DateModified.ToUniversalTime(),
-                                Points = game.Points
-                            });
+                                context.UndevvedGames.Add(new UndevvedGames
+                                {
+                                    Id = game.Id,
+                                    GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
+                                    Title = game.Title
+                                });
 
-                            Log.Information($"[RetroAchievements] Game {game.Title} added to system");
-
-                            continue;
+                                Log.Information($"[RetroAchievements] Game {game.Title} added to undevved games");
+                                continue;
+                            }
                         }
-
-                        //Check if it's been changed in the last 6 hours
-                        if ((DateTime.UtcNow - game.DateModified).TotalHours <= 6)
+                        else
                         {
-                            //Update the game
-                            var gameFromDb = context.Games.Where(x => x.Id == game.Id).First();
-                            gameFromDb.LastModified = game.DateModified.ToUniversalTime();
-                            gameFromDb.AchievementCount = game.AchievementCount;
-                            gameFromDb.Points = game.Points;
+                            //Delete it from the undevved games if needed
+                            context.UndevvedGames.Where(x => x.Id == id).ExecuteDelete();
 
-                            Log.Information($"[RetroAchievements] Game {game.Title} updated");
+                            //Check if it exists in the database, if not then add it in
+                            if (!context.Games.Any(x => x.Id == game.Id))
+                            {
+                                context.Games.Add(new Games
+                                {
+                                    Title = game.Title,
+                                    Id = game.Id,
+                                    DiscordMessageProcessed = false,
+                                    EmailMessageProcessed = false,
+                                    ExtraDataProcessed = false,
+                                    AchievementCount = game.AchievementCount,
+                                    GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
+                                    ImageIcon = game.ImageIcon,
+                                    LastModified = game.DateModified.ToUniversalTime(),
+                                    Points = game.Points
+                                });
+
+                                Log.Information($"[RetroAchievements] Game {game.Title} added to system");
+                                continue;
+                            }
+
+                            //Check if it's been changed in the last 6 hours
+                            if ((DateTime.UtcNow - game.DateModified).TotalHours <= 6)
+                            {
+                                //Update the game
+                                var gameFromDb = context.Games.Where(x => x.Id == game.Id).First();
+                                gameFromDb.LastModified = game.DateModified.ToUniversalTime();
+                                gameFromDb.AchievementCount = game.AchievementCount;
+                                gameFromDb.Points = game.Points;
+
+                                Log.Information($"[RetroAchievements] Game {game.Title} updated");
+                            }
                         }
                     }
 
@@ -478,6 +502,11 @@ namespace RetroTrack.Domain.Data.External
                     context.SaveChanges();
                 }
             }
+        }
+
+        public static GetActiveClaims GetActiveClaims()
+        {
+
         }
     }
 }

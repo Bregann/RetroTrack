@@ -235,4 +235,16 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("DateEarnedHardcore", NullValueHandling = NullValueHandling.Ignore)]
         public DateTimeOffset? DateEarnedHardcore { get; set; }
     }
+
+    public partial class GetActiveClaims
+    {
+        [JsonProperty("ID")]
+        public int Id { get; set; }
+
+        [JsonProperty("User")]
+        public string User { get; set; }
+
+        [JsonProperty("GameID")]
+        public long GameId { get; set; }
+    }
 }

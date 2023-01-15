@@ -62,5 +62,9 @@ namespace RetroTrack.Api.Controllers.TrackedGames
             var trackedGames = TrackedGamesData.GetTrackedGamesForUser(user);
             return Ok(trackedGames);
         }
+
+        //Get tracked dev list games
+        //Delete tracked dev list games
+        //Add tracked dev list games
     }
 }

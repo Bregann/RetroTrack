@@ -16,5 +16,8 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required string HFConnectionString { get; set; }
+
+        [Required]
+        public required string ProjectMonitorApiKey { get; set; }
     }
 }

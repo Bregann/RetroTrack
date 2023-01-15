@@ -1,11 +1,19 @@
+using BreganUtils.ProjectMonitor;
 using Hangfire;
 using Hangfire.Dashboard.Dark;
 using Hangfire.PostgreSql;
 using RetroTrack.Domain;
 using Serilog;
 
-Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
+Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: 3, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 AppConfig.LoadConfigFromDatabase();
+
+//Setup project monitor
+#if DEBUG
+ProjectMonitorConfig.SetupMonitor("debug", AppConfig.ProjectMonitorApiKey);
+#else
+ProjectMonitorConfig.SetupMonitor("release", AppConfig.ProjectMonitorApiKey);
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
