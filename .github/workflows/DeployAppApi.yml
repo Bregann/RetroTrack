@@ -20,8 +20,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        tree
-        docker build -t retrotrackapi -f ProjectMonitor/ProjectMonitor/Dockerfile .
+        docker build -t retrotrackapi -f RetroTrack/RetroTrack/Dockerfile .
         
     - name: Save Docker Image
       run: |
