@@ -32,7 +32,7 @@ const ForgotPasswordModal = (props: ModalProps) => {
         let spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
 
         if (values.password.length < 6 || !spChars.test(values.password)) {
-            setErrorMessage("Password must be at least 6 characters and contain a special character!");
+            setErrorMessage("Password must be at least 6 characters and a special character!");
             return;
         }
 
