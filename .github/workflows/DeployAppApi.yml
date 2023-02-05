@@ -3,7 +3,7 @@ name: Build and Package Api project
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
     paths-ignore:
       - 'retrotrack.web/**'
 
