@@ -83,7 +83,7 @@ const Navigation = (props: AppProps) => {
 
     const UpdateUserGames = async (sessionId: string) => {
         setUpdateGamesButtonLoading(true);
-        const updateRes = await DoGet('/api/user/UpdateUserGames', sessionId);
+        const updateRes = await DoGet('/api/User/UpdateUserGames', sessionId);
         if(updateRes.ok){
             const data: UpdateUserGames = await updateRes.json();
             
@@ -136,7 +136,7 @@ const Navigation = (props: AppProps) => {
     useEffect(() => {
         if(userUpdateRequested && !interval.current){
             interval.current = setInterval(async () => {
-                const res = await DoGet('/api/user/CheckUserUpdateProcessingState', session?.sessionId);
+                const res = await DoGet('/api/User/CheckUserUpdateProcessingState', session?.sessionId);
         
                 if(res.ok){
                     const processed: boolean = await res.json();
