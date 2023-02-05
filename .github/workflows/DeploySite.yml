@@ -3,7 +3,7 @@ name: Build and Package Website
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
     paths:
       - 'retrotrack.web/**'
 
@@ -57,7 +57,7 @@ jobs:
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.KEY }}
         script: |
-          docker run -d -p 3000:3000 --name retrotrackwebsite retrotrackwebsite:latest
+          docker run -d -p 3001:3000 --name retrotrackwebsite retrotrackwebsite:latest
 
     - name: Clean Up The Tar File
       uses: appleboy/ssh-action@v0.1.7
