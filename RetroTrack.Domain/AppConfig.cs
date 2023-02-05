@@ -10,7 +10,8 @@ namespace RetroTrack.Domain
         public static string RetroAchievementsApiKey { get; private set; }
         public static string HFConnectionString { get; private set; }
         public static string ProjectMonitorApiKey { get; private set; }
-
+        public static string HFUsername { get; private set; } = "";
+        public static string HFPassword { get; private set; } = "";
         public static void LoadConfigFromDatabase()
         {
             using (var context = new DatabaseContext())
@@ -21,6 +22,8 @@ namespace RetroTrack.Domain
                 RetroAchievementsApiKey = config.RetroAchievementsApiKey;
                 HFConnectionString = config.HFConnectionString;
                 ProjectMonitorApiKey = config.ProjectMonitorApiKey;
+                HFUsername = config.HangfireUsername;
+                HFPassword = config.HangfirePassword;
 
                 Log.Information("[App Config] Config loaded from database");
             }

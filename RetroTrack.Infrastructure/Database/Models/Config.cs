@@ -18,6 +18,12 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string HFConnectionString { get; set; }
 
         [Required]
+        public required string HangfireUsername { get; set; }
+
+        [Required]
+        public required string HangfirePassword { get; set; }
+
+        [Required]
         public required string ProjectMonitorApiKey { get; set; }
     }
 }

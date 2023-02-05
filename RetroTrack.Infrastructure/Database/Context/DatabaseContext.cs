@@ -31,7 +31,9 @@ namespace RetroTrack.Infrastructure.Database.Context
                 RetroAchievementsApiKey = "",
                 RetroAchievementsApiUsername = "",
                 HFConnectionString = "",
-                ProjectMonitorApiKey = ""
+                ProjectMonitorApiKey = "",
+                HangfirePassword = "",
+                HangfireUsername = ""
             });
         }
     }

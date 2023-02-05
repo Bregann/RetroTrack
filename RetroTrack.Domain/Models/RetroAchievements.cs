@@ -32,7 +32,7 @@ namespace RetroTrack.Domain.Models
         public int Points { get; set; }
 
         [JsonProperty("DateModified")]
-        public DateTime DateModified { get; set; }
+        public DateTime? DateModified { get; set; }
     }
 
     public class GetUserCompletedGames

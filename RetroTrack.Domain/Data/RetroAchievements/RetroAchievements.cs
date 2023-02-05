@@ -413,7 +413,7 @@ namespace RetroTrack.Domain.Data.External
                                     AchievementCount = game.AchievementCount,
                                     GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
                                     ImageIcon = game.ImageIcon,
-                                    LastModified = game.DateModified.ToUniversalTime(),
+                                    LastModified = game.DateModified!.Value.ToUniversalTime(),
                                     Points = game.Points
                                 });
 
@@ -422,11 +422,11 @@ namespace RetroTrack.Domain.Data.External
                             }
 
                             //Check if it's been changed in the last 6 hours
-                            if ((DateTime.UtcNow - game.DateModified).TotalHours <= 6)
+                            if ((DateTime.UtcNow - game.DateModified!.Value).TotalHours <= 6)
                             {
                                 //Update the game
                                 var gameFromDb = context.Games.Where(x => x.Id == game.Id).First();
-                                gameFromDb.LastModified = game.DateModified.ToUniversalTime();
+                                gameFromDb.LastModified = game.DateModified!.Value.ToUniversalTime();
                                 gameFromDb.AchievementCount = game.AchievementCount;
                                 gameFromDb.Points = game.Points;
 
