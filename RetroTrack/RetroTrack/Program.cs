@@ -17,9 +17,6 @@ ProjectMonitorConfig.SetupMonitor("release", AppConfig.ProjectMonitorApiKey);
 
 var builder = WebApplication.CreateBuilder(args);
 
-#if RELEASE
-builder.WebHost.UseUrls("http://localhost:5003");
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "allowUrls",
@@ -30,7 +27,6 @@ builder.Services.AddCors(options =>
                           policy.WithMethods("GET", "POST", "DELETE");
                       });
 });
-#endif
 
 // Add services to the container.
 JobStorage.Current = new PostgreSqlStorage(AppConfig.HFConnectionString, new PostgreSqlStorageOptions { SchemaName = "retrotrack" });

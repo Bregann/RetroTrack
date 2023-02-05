@@ -5,7 +5,7 @@ namespace RetroTrack.Infrastructure.Database.Context
 {
     public class DatabaseContext : DbContext
     {
-
+        private static readonly string _connectionString = Environment.GetEnvironmentVariable("RetroTrackConnString");
 
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }
@@ -20,7 +20,7 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<UndevvedGames> UndevvedGames { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql(DbSettings.ConnectionString);
+            => optionsBuilder.UseNpgsql(_connectionString);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,7 +30,8 @@ namespace RetroTrack.Infrastructure.Database.Context
                 Id = 1,
                 RetroAchievementsApiKey = "",
                 RetroAchievementsApiUsername = "",
-                HFConnectionString = ""
+                HFConnectionString = "",
+                ProjectMonitorApiKey = ""
             });
         }
     }

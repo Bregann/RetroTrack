@@ -503,10 +503,10 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-
+        /*
         public static GetActiveClaims GetActiveClaims()
         {
 
-        }
+        }*/
     }
 }
