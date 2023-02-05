@@ -300,14 +300,19 @@ namespace RetroTrack.Domain.Data.External
                             pct = (double)game.PctWon;
                         }
 
-                        context.UserGameProgress.Add(new UserGameProgress
+                        var gameForUserProgress = context.Games.Where(x => x.Id == game.GameId).FirstOrDefault();
+
+                        if(gameForUserProgress != null)
                         {
-                            User = user,
-                            AchievementsGained = game.AchievementsAwarded,
-                            Game = context.Games.Where(x => x.Id == game.GameId).First(),
-                            GamePercentage = pct,
-                            HardcoreMode = game.HardcoreMode
-                        });
+                            context.UserGameProgress.Add(new UserGameProgress
+                            {
+                                User = user,
+                                AchievementsGained = game.AchievementsAwarded,
+                                Game = gameForUserProgress,
+                                GamePercentage = pct,
+                                HardcoreMode = game.HardcoreMode
+                            });
+                        }
                     }
 
                     context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
