@@ -58,7 +58,7 @@ namespace RetroTrack.Domain.Data
                         AchievementsGained = userProgress?.AchievementsGained ?? 0,
                         PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
                         GameGenre = game.Game.GameGenre,
-                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
+                        GameIconUrl = "https://media.retroachievements.org" + game.Game.ImageIcon,
                         GameId = game.Game.Id,
                         GameName = game.Game.Title,
                         Console = game.Game.GameConsole.ConsoleName,

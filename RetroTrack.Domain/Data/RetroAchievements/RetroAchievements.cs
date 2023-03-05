@@ -274,7 +274,7 @@ namespace RetroTrack.Domain.Data.External
 
                     var userProfile = await GetUserProfile(username);
 
-                    user.UserProfileUrl = userProfile.UserPic;
+                    user.UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png";
                     user.UserRank = userProfile.Rank;
                     user.UserPoints = userProfile.TotalPoints;
 

@@ -28,7 +28,7 @@ namespace RetroTrack.Domain.Data
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + games.ImageIcon,
+                            GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
                             GameName = games.Title
@@ -50,7 +50,7 @@ namespace RetroTrack.Domain.Data
                         {
                             AchievementCount = games.AchievementCount,
                             GameGenre = games.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + games.ImageIcon,
+                            GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
                             GameName = games.Title
@@ -88,8 +88,8 @@ namespace RetroTrack.Domain.Data
             return new GameInfoDto
             {
                 GameId = data.Id,
-                ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageBoxArt,
-                ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageInGame,
+                ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
+                ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
                 ConsoleId = data.ConsoleId,
                 ConsoleName = data.ConsoleName,
                 Genre = data.Genre,
@@ -99,7 +99,7 @@ namespace RetroTrack.Domain.Data
                 Achievements = data.Achievements.Select(x => new Achievement
                 {
                     Id = x.Value.Id,
-                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",
+                    BadgeName = "https://media.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",
                     Description = x.Value.Description,
                     NumAwarded = x.Value.NumAwarded,
                     NumAwardedHardcore = x.Value.NumAwardedHardcore,
@@ -145,7 +145,7 @@ namespace RetroTrack.Domain.Data
                         {
                             AchievementCount = x.AchievementCount,
                             GameGenre = x.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                            GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                             GameId = x.Id,
                             GameName = x.Title
                         }).ToList()
@@ -165,7 +165,7 @@ namespace RetroTrack.Domain.Data
                     {
                         AchievementCount = x.AchievementCount,
                         GameGenre = x.GameGenre,
-                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + x.ImageIcon,
+                        GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                         GameId = x.Id,
                         GameName = x.Title
                     }).ToList()
@@ -196,7 +196,7 @@ namespace RetroTrack.Domain.Data
                 achievementList.Add(new UserAchievement
                 {
                     Id = achievement.Value.Id,
-                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
+                    BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
                     Description = achievement.Value.Description,
                     NumAwarded = achievement.Value.NumAwarded,
                     NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
@@ -211,8 +211,8 @@ namespace RetroTrack.Domain.Data
                 return new UserGameInfoDto
                 {
                     GameId = data.Id,
-                    ImageBoxArt = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageBoxArt,
-                    ImageInGame = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + data.ImageInGame,
+                    ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
+                    ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
                     ConsoleId = data.ConsoleId,
                     ConsoleName = data.ConsoleName,
                     Genre = data.Genre,
@@ -272,7 +272,7 @@ namespace RetroTrack.Domain.Data
                 var userAchievement = new UserAchievement
                 {
                     Id = achievement.Value.Id,
-                    BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
+                    BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
                     Description = achievement.Value.Description,
                     NumAwarded = achievement.Value.NumAwarded,
                     NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
@@ -283,7 +283,7 @@ namespace RetroTrack.Domain.Data
 
                 if (achievement.Value.DateEarned == null)
                 {
-                    userAchievement.BadgeName = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png";
+                    userAchievement.BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png";
                 }
 
                 achievementList.Add(userAchievement);
@@ -344,7 +344,7 @@ namespace RetroTrack.Domain.Data
                             AchievementsGained = userProgress?.AchievementsGained ?? 0,
                             PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
                             GameGenre = game.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
+                            GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
                             GameId = game.Id,
                             GameName = game.Title,
                             Players = game.Players ?? 0
@@ -373,7 +373,7 @@ namespace RetroTrack.Domain.Data
                             AchievementsGained = userProgress?.AchievementsGained ?? 0,
                             PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
                             GameGenre = game.GameGenre,
-                            GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.ImageIcon,
+                            GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
                             GameId = game.Id,
                             GameName = game.Title,
                             Players = game.Players ?? 0
@@ -412,7 +412,7 @@ namespace RetroTrack.Domain.Data
                         AchievementsGained = game?.AchievementsGained ?? 0,
                         PercentageCompleted = gamePct,
                         GameGenre = game.Game.GameGenre,
-                        GameIconUrl = "https://s3-eu-west-1.amazonaws.com/i.retroachievements.org" + game.Game.ImageIcon,
+                        GameIconUrl = "https://media.retroachievements.org" + game.Game.ImageIcon,
                         GameId = game.Game.Id,
                         GameName = game.Game.Title,
                         Console = game.Game.GameConsole.ConsoleName,

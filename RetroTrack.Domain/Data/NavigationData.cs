@@ -73,7 +73,7 @@ namespace RetroTrack.Domain.Data
                 return new UserNavProfileDto
                 {
                     Username = username,
-                    ProfileImageUrl = "https://retroachievements.org" + user.UserProfileUrl,
+                    ProfileImageUrl = "https://media.retroachievements.org" + user.UserProfileUrl,
                     GamesCompleted = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).ToList().Count,
                     Points = user.UserPoints,
                     Rank = user.UserRank

@@ -105,7 +105,7 @@ namespace RetroTrack.Domain.Data
                     LastUserUpdate = DateTime.UtcNow,
                     LastAchievementsUpdate = DateTime.UtcNow,
                     UserPoints = userProfile.TotalPoints,
-                    UserProfileUrl = userProfile.UserPic,
+                    UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png",
                     UserRank = userProfile.Rank
                 });
 

@@ -69,6 +69,15 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("TotalRanked")]
         public long TotalRanked { get; set; }
+
+        [JsonProperty("LastActivity")]
+        public LastActivity LastActivity { get; set; }
+    }
+
+    public class LastActivity
+    {
+        [JsonProperty("User")]
+        public string User { get; set; }
     }
 
     public class GetGameExtended
