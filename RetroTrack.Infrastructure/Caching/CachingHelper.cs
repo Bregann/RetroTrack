@@ -47,8 +47,10 @@ namespace RetroTrack.Infrastructure.Caching
                     return null;
                 }
 
+                var cacheMinutes = DateTime.UtcNow - cachedItem.LastUpdate;
+
                 //Check if the cache time has passed, if so then return null as it will need to be updated
-                if (cachedItem.LastUpdate - DateTime.UtcNow > TimeSpan.FromMinutes(cachedItem.MinutesToCacheFor))
+                if (cacheMinutes.TotalMinutes > cachedItem.MinutesToCacheFor)
                 {
                     return null;
                 }
