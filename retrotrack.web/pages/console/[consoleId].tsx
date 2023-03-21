@@ -1,6 +1,5 @@
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth';
-import { useRouter } from 'next/router'
+import { getServerSession } from 'next-auth';
 import PublicGamesTable from '../../components/Games/PublicGamesTable';
 import { DoGet } from '../../Helpers/webFetchHelper';
 import { GamesForConsole } from '../../types/Api/Games/GetGamesForConsole'
@@ -41,7 +40,7 @@ const Console = (props: ConsoleProps) => {
  
 export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (context) => {
     //Check if logged in or logged out
-    const session = await unstable_getServerSession(context.req, context.res, authOptions);
+    const session = await getServerSession(context.req, context.res, authOptions);
     const { consoleId } = context.query
     
     if(session?.sessionId){

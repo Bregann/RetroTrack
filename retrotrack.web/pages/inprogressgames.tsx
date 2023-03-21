@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import { DoGet } from "../Helpers/webFetchHelper";
 import { Game } from "../types/Api/Games/LoggedInGame";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -48,7 +48,7 @@ const InProgressGames = (props: InProgressGamesProps) => {
 }
 
 export const getServerSideProps: GetServerSideProps<InProgressGamesProps> = async (context) => {
-    const session = await unstable_getServerSession(context.req, context.res, authOptions);
+    const session = await getServerSession(context.req, context.res, authOptions);
 
     if(!session){
         return{
