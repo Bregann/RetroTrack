@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using RetroTrack.Domain.Data.External;
+using RetroTrack.Domain.Data.RetroAchievements;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
 using Serilog;
@@ -18,17 +19,17 @@ namespace RetroTrack.Domain
 
         public static async Task GetConsolesAndInsertToDatabaseJob()
         {
-            await RetroAchievements.GetConsolesAndInsertToDatabase();
+            await ApiData.GetConsolesAndInsertToDatabase();
         }
 
         public static async Task GetGamesFromConsoleIdsJob()
         {
-            await RetroAchievements.GetGamesFromConsoleIds();
+            await ApiData.GetGamesFromConsoleIds();
         }
 
         public static async Task GetUnprocessedGameDataJob()
         {
-            await RetroAchievements.GetUnprocessedGameData();
+            await ApiData.GetUnprocessedGameData();
         }
 
         public static void QueueLogAndLoadJob()
@@ -77,15 +78,15 @@ namespace RetroTrack.Domain
                     switch (id.ApiRequestType)
                     {
                         case ApiRequestType.GetGameList:
-                            BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
+                            BackgroundJob.Enqueue(() => ProcessingData.AddOrUpdateGamesToDatabase(id.Id));
                             break;
 
                         case ApiRequestType.GetGameExtended:
-                            BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
+                            BackgroundJob.Enqueue(() => ProcessingData.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
 
                         case ApiRequestType.UserUpdate:
-                            BackgroundJob.Enqueue(() => RetroAchievements.GetUserGames(id.JsonData, id.Id)); //this is the username
+                            BackgroundJob.Enqueue(() => ApiData.GetUserGames(id.JsonData, id.Id)); //this is the username
                             break;
                     }
 

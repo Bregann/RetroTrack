@@ -4,6 +4,7 @@
     {
         GetGameList = 1,
         GetGameExtended = 2,
-        UserUpdate = 3
+        UserUpdate = 3,
+        GetClaims = 4,
     }
 }

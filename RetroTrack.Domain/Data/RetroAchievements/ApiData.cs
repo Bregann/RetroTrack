@@ -1,16 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestSharp;
 using RetroTrack.Domain.Models;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
 using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace RetroTrack.Domain.Data.External
+namespace RetroTrack.Domain.Data.RetroAchievements
 {
-    public class RetroAchievements
+    public class ApiData
     {
         public static async Task<bool> ValidateApiKey(string username, string raApiKey)
         {
@@ -29,7 +33,6 @@ namespace RetroTrack.Domain.Data.External
 
             return true;
         }
-
         public static async Task GetConsolesAndInsertToDatabase()
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -78,7 +81,6 @@ namespace RetroTrack.Domain.Data.External
                 context.SaveChanges();
             }
         }
-
         public static async Task GetGamesFromConsoleIds()
         {
             using (var context = new DatabaseContext())
@@ -115,7 +117,6 @@ namespace RetroTrack.Domain.Data.External
                 context.SaveChanges();
             }
         }
-
         public static async Task GetUnprocessedGameData()
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -154,7 +155,6 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-
         public static async Task<GetUserSummary?> GetUserProfile(string username)
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -170,7 +170,6 @@ namespace RetroTrack.Domain.Data.External
 
             return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
-
         public static async Task<GetGameExtended?> GetSpecificGameInfo(int gameId)
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -205,7 +204,6 @@ namespace RetroTrack.Domain.Data.External
 
             return data;
         }
-
         public static async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(int gameId, string username)
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -240,7 +238,6 @@ namespace RetroTrack.Domain.Data.External
 
             return data;
         }
-
         public static async Task GetUserGames(string username, int updateId)
         {
             try
@@ -302,7 +299,7 @@ namespace RetroTrack.Domain.Data.External
 
                         var gameForUserProgress = context.Games.Where(x => x.Id == game.GameId).FirstOrDefault();
 
-                        if(gameForUserProgress != null)
+                        if (gameForUserProgress != null)
                         {
                             context.UserGameProgress.Add(new UserGameProgress
                             {
@@ -346,172 +343,37 @@ namespace RetroTrack.Domain.Data.External
                 return;
             }
         }
-
-        public static void AddOrUpdateGamesToDatabase(int id)
+        public static async Task GetActiveClaims()
         {
-            try
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            //Get the response and deserialise
+            var request = new RestRequest($"API_GetActiveClaims.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
             {
-                using (var context = new DatabaseContext())
-                {
-                    var dataToProcess = context.RetroAchievementsApiData.First(x => x.Id == id);
-                    var gameList = JsonConvert.DeserializeObject<List<GetGameList>>(dataToProcess.JsonData);
-                    var gameConsoles = context.GameConsoles;
-
-                    if (gameList == null)
-                    {
-                        Log.Information($"[RetroAchievements] No data to process for request ID {id}");
-                        dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-                        context.SaveChanges();
-                        return;
-                    }
-
-                    if (gameList.Count == 0)
-                    {
-                        Log.Information($"[RetroAchievements] No games in array for request ID {id}");
-                        dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-                        context.SaveChanges();
-                        return;
-                    }
-
-                    //Update the game count for the console
-                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Where(x => x.AchievementCount != 0).Count();
-                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().NoAchievementsGameCount = gameList.Where(x => x.AchievementCount == 0).Count();
-
-                    foreach (var game in gameList)
-                    {
-                        //Check if there's achievements or not
-                        if (game.AchievementCount == 0)
-                        {
-                            if(!context.UndevvedGames.Any(x => x.Id == game.Id) && !context.Games.Any(x => x.Id == game.Id))
-                            {
-                                context.UndevvedGames.Add(new UndevvedGames
-                                {
-                                    Id = game.Id,
-                                    GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
-                                    Title = game.Title
-                                });
-
-                                Log.Information($"[RetroAchievements] Game {game.Title} added to undevved games");
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            //Delete it from the undevved games if needed
-                            context.UndevvedGames.Where(x => x.Id == id).ExecuteDelete();
-
-                            //Check if it exists in the database, if not then add it in
-                            if (!context.Games.Any(x => x.Id == game.Id))
-                            {
-                                context.Games.Add(new Games
-                                {
-                                    Title = game.Title,
-                                    Id = game.Id,
-                                    DiscordMessageProcessed = false,
-                                    EmailMessageProcessed = false,
-                                    ExtraDataProcessed = false,
-                                    AchievementCount = game.AchievementCount,
-                                    GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
-                                    ImageIcon = game.ImageIcon,
-                                    LastModified = game.DateModified!.Value.ToUniversalTime(),
-                                    Points = game.Points
-                                });
-
-                                Log.Information($"[RetroAchievements] Game {game.Title} added to system");
-                                continue;
-                            }
-
-                            //Check if it's been changed in the last 6 hours
-                            if ((DateTime.UtcNow - game.DateModified!.Value).TotalHours <= 6)
-                            {
-                                //Update the game
-                                var gameFromDb = context.Games.Where(x => x.Id == game.Id).First();
-                                gameFromDb.LastModified = game.DateModified!.Value.ToUniversalTime();
-                                gameFromDb.AchievementCount = game.AchievementCount;
-                                gameFromDb.Points = game.Points;
-
-                                Log.Information($"[RetroAchievements] Game {game.Title} updated");
-                            }
-                        }
-                    }
-
-                    dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-                    context.SaveChanges();
-                }
+                Log.Warning($"[RetroAchievements] Error claim data from API");
+                return;
             }
-            catch (Exception e)
+
+            using (var context = new DatabaseContext())
             {
-                Log.Warning($"[RetroAchievements] Error updating RetroAchievement API data for ID {id} - Error: {e}");
-
-                using (var context = new DatabaseContext())
+                //Add into the table to be picked up and processed later
+                context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
                 {
-                    var erroredData = context.RetroAchievementsApiData.First(x => x.Id == id);
+                    JsonData = response.Content,
+                    ProcessingStatus = ProcessingStatus.NotScheduled,
+                    FailedProcessingAttempts = 0,
+                    ApiRequestType = ApiRequestType.GetClaims,
+                    LastUpdate = DateTime.UtcNow
+                });
 
-                    //Check if it's already failed 3 times, if it has then set it to errrored
-                    if (erroredData.FailedProcessingAttempts == 3)
-                    {
-                        erroredData.ProcessingStatus = ProcessingStatus.Errored;
-                        //todo: send message on error
-                    }
-                    else
-                    {
-                        erroredData.ProcessingStatus = ProcessingStatus.NotScheduled;
-                        erroredData.FailedProcessingAttempts = erroredData.FailedProcessingAttempts + 1;
-                    }
+                Log.Information($"[RetroAchievements] Claim data added to ");
 
-                    context.SaveChanges();
-                }
+                context.SaveChanges();
             }
+
         }
-
-        public static void AddOrUpdateExtraGameInfoToDatabase(int id)
-        {
-            try
-            {
-                using (var context = new DatabaseContext())
-                {
-                    var dataToProcess = context.RetroAchievementsApiData.First(x => x.Id == id);
-                    var gameData = JsonConvert.DeserializeObject<GetGameExtended>(dataToProcess.JsonData);
-
-                    //Get the game and update the values
-                    var gameFromDb = context.Games.First(x => x.Id == gameData.Id);
-                    gameFromDb.GameGenre = gameData.Genre;
-                    gameFromDb.Players = gameData.Players;
-                    gameFromDb.ExtraDataProcessed = true;
-                    dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-
-                    Log.Information($"[RetroAchievments] Game {gameFromDb.Title} extra data processed");
-                    context.SaveChanges();
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Warning($"[RetroAchievements] Error updating RetroAchievement API data for ID {id} - Error: {e}");
-
-                using (var context = new DatabaseContext())
-                {
-                    var erroredData = context.RetroAchievementsApiData.First(x => x.Id == id);
-
-                    //Check if it's already failed 3 times, if it has then set it to errrored
-                    if (erroredData.FailedProcessingAttempts == 3)
-                    {
-                        erroredData.ProcessingStatus = ProcessingStatus.Errored;
-                        //todo: send message on error
-                    }
-                    else
-                    {
-                        erroredData.ProcessingStatus = ProcessingStatus.NotScheduled;
-                        erroredData.FailedProcessingAttempts = erroredData.FailedProcessingAttempts + 1;
-                    }
-
-                    context.SaveChanges();
-                }
-            }
-        }
-        /*
-        public static GetActiveClaims GetActiveClaims()
-        {
-
-        }*/
     }
 }

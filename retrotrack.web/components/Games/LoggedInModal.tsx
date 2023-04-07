@@ -279,9 +279,9 @@ const LoggedInModal = (props: LoggedInModalProps) => {
                             RA Page
                         </Button>
 
-                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-15} mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
-                    <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mt={-15} mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
-                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-15} mr={5} onChange={(event) => FilterCurrentAchievements(event.currentTarget.checked)}/>
+                    <Switch offLabel="Compact" onLabel="Full" size="lg" mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mr={5} onChange={(event) => FilterCurrentAchievements(event.currentTarget.checked)}/>
                 </Group>
             </Grid.Col>
             </Grid>

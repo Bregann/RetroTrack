@@ -130,7 +130,6 @@ const RegisterModal = (props: ModalProps) => {
                     description="Password must contain at least 6 characters and 1 special character"
                     required
                     withAsterisk
-                    error="ggggggg"
                     icon={<IconLock size={16} />}
                     sx={{ marginTop: 15, marginBottom: 10 }}
                     {...form.getInputProps('password')}

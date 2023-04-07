@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Data.External;
+using RetroTrack.Domain.Data.RetroAchievements;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
@@ -63,7 +64,7 @@ namespace RetroTrack.Domain.Data
         public static async Task<RegisterUserDto> RegisterUser(string username, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo
-            var validKey = await RetroAchievements.ValidateApiKey(username, raApiKey);
+            var validKey = await ApiData.ValidateApiKey(username, raApiKey);
 
             if (!validKey)
             {
@@ -94,7 +95,7 @@ namespace RetroTrack.Domain.Data
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 //Get the users details from the API
-                var userProfile = await RetroAchievements.GetUserProfile(username);
+                var userProfile = await ApiData.GetUserProfile(username);
 
                 //Add the user into the database
                 context.Users.Add(new Users
@@ -124,7 +125,7 @@ namespace RetroTrack.Domain.Data
         public static async Task<ResetUserPasswordDto> ResetUserPassword(string username, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo
-            var validKey = await RetroAchievements.ValidateApiKey(username, raApiKey);
+            var validKey = await ApiData.ValidateApiKey(username, raApiKey);
 
             if (!validKey)
             {

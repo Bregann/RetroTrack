@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RetroTrack.Domain.Data.External;
+using RetroTrack.Domain.Data.RetroAchievements;
 using RetroTrack.Domain.Dtos;
 using RetroTrack.Infrastructure.Caching;
 using RetroTrack.Infrastructure.Database.Context;
@@ -70,7 +71,7 @@ namespace RetroTrack.Domain.Data
 
         public static async Task<GameInfoDto?> GetSpecificGameInfo(int gameId)
         {
-            var data = await RetroAchievements.GetSpecificGameInfo(gameId);
+            var data = await ApiData.GetSpecificGameInfo(gameId);
 
             if (data == null)
             {
@@ -175,7 +176,7 @@ namespace RetroTrack.Domain.Data
 
         public static async Task<UserGameInfoDto?> GetUserGameInfo(string username, int gameId)
         {
-            var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, username);
+            var data = await ApiData.GetSpecificGameInfoAndUserProgress(gameId, username);
 
             if (data == null)
             {
@@ -231,7 +232,7 @@ namespace RetroTrack.Domain.Data
 
         public static async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(string username, int gameId)
         {
-            var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, username);
+            var data = await ApiData.GetSpecificGameInfoAndUserProgress(gameId, username);
 
             if (data == null)
             {

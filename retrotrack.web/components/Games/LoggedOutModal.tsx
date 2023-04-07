@@ -134,7 +134,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                         >
                             RA Page
                         </Button>
-                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-20} onChange={(event) => setChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Compact" onLabel="Full" size="lg" onChange={(event) => setChecked(event.currentTarget.checked)}/>
                 </Group>
             </Grid.Col>
             </Grid>
