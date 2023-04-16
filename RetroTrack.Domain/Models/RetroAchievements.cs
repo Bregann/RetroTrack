@@ -255,5 +255,8 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("GameID")]
         public long GameId { get; set; }
+
+        [JsonProperty("ClaimType")]
+        public int ClaimType { get; set; }
     }
 }

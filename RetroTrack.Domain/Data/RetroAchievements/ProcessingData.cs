@@ -128,7 +128,6 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-
         public static void AddOrUpdateExtraGameInfoToDatabase(int id)
         {
             try
@@ -173,7 +172,138 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-        
+        public static void UpdateGameClaims(int id)
+        {
+            try
+            {
+                using(var context = new DatabaseContext()) 
+                {
+                    var dataToProcess = context.RetroAchievementsApiData.First(x => x.Id == id);
+                    var gameData = JsonConvert.DeserializeObject<List<GetActiveClaims>>(dataToProcess.JsonData);
+
+                    if (gameData == null)
+                    {
+                        var erroredData = context.RetroAchievementsApiData.First(x => x.Id == id);
+
+                        //Check if it's already failed 3 times, if it has then set it to errrored
+                        if (erroredData.FailedProcessingAttempts == 3)
+                        {
+                            erroredData.ProcessingStatus = ProcessingStatus.Errored;
+                            //todo: send message on error
+                        }
+                        else
+                        {
+                            erroredData.ProcessingStatus = ProcessingStatus.NotScheduled;
+                            erroredData.FailedProcessingAttempts = erroredData.FailedProcessingAttempts + 1;
+                        }
+                        return;
+                    }
+
+                    var gamesClaimed = context.UndevvedGames.Where(x => x.PrimaryDeveloper != null).ToList();
+
+                    //Check games that have been claimed in the database and verify if they are still in the active claim list
+                    foreach (var game in gamesClaimed)
+                    {
+                        //If it exists, make sure the developer is the same
+                        var gameFromApi = gameData.FirstOrDefault(x => x.GameId == game.Id);
+
+                        if (gameFromApi == null)
+                        {
+                            game.PrimaryDeveloper = null;
+                            Log.Information($"[RetroAchievements] Claim for game {game.Id} dropped");
+                            continue;
+                        }
+                        else
+                        {
+                            //Check if its primary or collab
+                            if (gameFromApi.ClaimType == 0)
+                            {
+                                game.PrimaryDeveloper = gameFromApi.User;
+                                gameData.Remove(gameFromApi);
+                                Log.Information($"[RetroAchievements] Primary claim for game {game.Id} updated - user claimed: {gameFromApi.User}");
+                                continue;
+                            }
+                            else
+                            {
+                                if (game.CollabDevelopers == null)
+                                {
+                                    game.CollabDevelopers = new List<string> { gameFromApi.User };
+                                    gameData.Remove(gameFromApi);
+                                    Log.Information($"[RetroAchievements] Collab claim for game {game.Id} new - user claimed: {gameFromApi.User}");
+                                    continue;
+                                }
+
+                                game.CollabDevelopers.Clear();
+                                game.CollabDevelopers.Add(gameFromApi.User);
+                                gameData.Remove(gameFromApi);
+                                Log.Information($"[RetroAchievements] Collab claim for game {game.Id} updated - user claimed: {gameFromApi.User}");
+                            }
+                        }
+                    }
+
+                    //Now go through the games from the api
+                    foreach (var game in gameData)
+                    {
+                        //get game from database
+                        var gameFromDb = context.UndevvedGames.FirstOrDefault(x => x.Id == game.GameId);
+
+                        if (gameFromDb == null)
+                        {
+                            Log.Information($"[RetroAchievements] Could not find claimed game {game.GameId} in table");
+                            continue;
+                        }
+
+                        //Check if its primary or collab
+                        if (game.ClaimType == 0)
+                        {
+                            gameFromDb.PrimaryDeveloper = game.User;
+                            Log.Information($"[RetroAchievements] Primary claim made by {game.User} on game {game.GameId}");
+                            continue;
+                        }
+                        else
+                        {
+                            if (gameFromDb.CollabDevelopers == null)
+                            {
+                                gameFromDb.CollabDevelopers = new List<string> { game.User };
+                                Log.Information($"[RetroAchievements] Collab claim for game {game.Id} new - user claimed: {game.User}");
+                                continue;
+                            }
+                            else
+                            {
+                                gameFromDb.CollabDevelopers.Clear();
+                                gameFromDb.CollabDevelopers.Add(game.User);
+                                Log.Information($"[RetroAchievements] Collab claim for game {game.Id} updated - user claimed: {game.User}");
+                            }
+                        }
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"[RetroAchievements] Error updating RetroAchievement API data for ID {id} - Error: {e}");
+
+                using (var context = new DatabaseContext())
+                {
+                    var erroredData = context.RetroAchievementsApiData.First(x => x.Id == id);
+
+                    //Check if it's already failed 3 times, if it has then set it to errrored
+                    if (erroredData.FailedProcessingAttempts == 3)
+                    {
+                        erroredData.ProcessingStatus = ProcessingStatus.Errored;
+                        //todo: send message on error
+                    }
+                    else
+                    {
+                        erroredData.ProcessingStatus = ProcessingStatus.NotScheduled;
+                        erroredData.FailedProcessingAttempts = erroredData.FailedProcessingAttempts + 1;
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+        }
 
     }
 }

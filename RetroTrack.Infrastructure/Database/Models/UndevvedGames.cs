@@ -19,6 +19,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         [Required]
         public required GameConsoles GameConsole { get; set; }
 
-        public string? Developer { get; set; } = null;
+        public string? PrimaryDeveloper { get; set; } = null;
+        public List<string>? CollabDevelopers { get; set; } = null;
     }
 }
