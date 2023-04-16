@@ -318,6 +318,10 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='Nintendo DS' active={'/console/18' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["18"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["18"].percentage!)}}}/>
                         </Link>
 
+                        <Link href='/console/78' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Nintendo DSi' active={'/console/78' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["78"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["78"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/24' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Pokemon Mini' active={'/console/24' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["44"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["44"].percentage!)}}}/>
                         </Link>
@@ -588,6 +592,10 @@ const Navigation = (props: AppProps) => {
 
                         <Link href='/console/18' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Nintendo DS' active={'/console/18' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["18"] + " games"}/>
+                        </Link>
+
+                        <Link href='/console/78' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Nintendo DSi' active={'/console/78' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["78"] + " games"}/>
                         </Link>
 
                         <Link href='/console/24' passHref style={{ textDecoration: 'none' }}>
