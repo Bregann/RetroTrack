@@ -15,6 +15,17 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3.3.0
 
+    - name: Create .env file
+      uses: SpicyPizza/create-envfile@v1.3.0
+      with:
+        envkey_API_URL: ${{ secrets.API_URL }}
+        envkey_NEXT_PUBLIC_WEB_URL: "https://retrotrack.bregan.me"
+        envkey_NEXTAUTH_URL: "https://retrotrack.bregan.me"
+        envkey_NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        directory: retrotrack.web/
+        file_name: .env.production
+        fail_on_empty: false
+
     - name: Build Docker Image
       run: |
         cd retrotrack.web/
