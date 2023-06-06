@@ -12,7 +12,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("GetRecentlyAddedAndUpdatedGames")]
         public List<DayListDto> GetRecentlyAddedAndUpdatedGames()
         {
-            return Domain.Data.GamesData.GetNewAndUpdatedGamesFromLast5Days();
+            return GamesData.GetNewAndUpdatedGamesFromLast5Days();
         }
 
         [HttpGet("GetSpecificGameInfo")]

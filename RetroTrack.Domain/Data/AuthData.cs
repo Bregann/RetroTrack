@@ -100,6 +100,7 @@ namespace RetroTrack.Domain.Data
                 context.Users.Add(new Users
                 {
                     Username = username,
+                    RAUsername = userProfile.LastActivity.User,
                     HashedPassword = hashedPassword,
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,
