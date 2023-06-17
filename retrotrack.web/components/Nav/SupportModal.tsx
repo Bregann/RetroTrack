@@ -9,7 +9,7 @@ const SupportModal = (props: ModalProps) => {
         title="Support">
             <Text>If you need any support or have noticed any issues you can raise an issue with the below contact details:</Text>
             <br />
-            <Text>Discord: Guinea#1337</Text>
+            <Text>Discord: guinea.</Text>
             <Text component="a" href="https://github.com/Bregann/RetroTrack" target="_blank">GitHub</Text>
         </Modal>
      );

@@ -501,6 +501,9 @@ const Navigation = (props: AppProps) => {
             </Navbar>
             }>
 
+            {/* modals*/}
+            <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened}/>
+            
             <Component {...pageProps} />
         </AppShell>
          );
@@ -529,8 +532,7 @@ const Navigation = (props: AppProps) => {
                                 variant="gradient" 
                                 gradient={{ from: 'indigo', to: 'cyan' }}
                                 sx={{marginTop: 15, marginRight: 10}}
-                                onClick={() => setSupportModalOpened(true)}
-                                loading={updateGamesButtonLoading}>
+                                onClick={() => setSupportModalOpened(true)}>
                                     Support
                             </Button>
                             <Button 

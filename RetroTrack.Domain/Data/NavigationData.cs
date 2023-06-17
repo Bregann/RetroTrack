@@ -25,7 +25,7 @@ namespace RetroTrack.Domain.Data
             {
                 //Get the consoles and the user completed games
                 var gameConsoles = context.GameConsoles.Where(x => x.GameCount != 0).ToDictionary(x => x.ConsoleID, x => x.GameCount);
-                var percentage = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).Select(x => x.Game.Id).ToList();
+                var percentage = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).Select(x => x.Game.GameConsole.ConsoleID).ToList();
 
                 var dataDict = new Dictionary<int, NavigationUserStats>();
 

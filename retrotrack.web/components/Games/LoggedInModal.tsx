@@ -1,5 +1,5 @@
 import { Autocomplete, Button, Container, Divider, Footer, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from 'next/image'
 import { GetSpecificGameInfo } from "../../types/Api/Games/GetSpecificGameInfo";
 import { GetGameInfoForUser } from "../../types/Api/Games/GetGameInfoForUser";
@@ -16,6 +16,7 @@ type LoggedInModalProps = {
 
 const LoggedInModal = (props: LoggedInModalProps) => {
     const [gameLayoutChecked, setGameLayoutChecked] = useState(false);
+    const [autoUpdateChecked, setAutoUpdateChecked] = useState(false);
     const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements);
     const [achievementList, setAchievementList] = useState(props.gameInfo.achievements);
     const [gameStats, setGameStats] = useState(props.gameInfo)
@@ -23,6 +24,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false);
     const [achievementsFiltered, setAchievementsFiltered] = useState(false);
     const { data: session, status } = useSession();
+    const interval = useRef<NodeJS.Timeout | null>(null);
 
     const FilterCurrentAchievements = (checked: boolean) => {
         setAchievementsFiltered(checked);
@@ -118,6 +120,30 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     // Ignoring the below warning as the filter is used in other places
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [achievementList]);
+
+    useEffect(() => {
+        if(autoUpdateChecked){
+            toast.success("Achievements auto update enabled", {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+
+            interval.current = setInterval(async () => {
+                UpdateUserProgress();
+            }, 60000)
+        }
+        if(!autoUpdateChecked && interval.current){
+            clearInterval(interval.current);
+            interval.current = null;
+            toast.success("Achievements auto update disabled", {
+                position: 'bottom-right',
+                closeOnClick: true,
+                theme: 'colored'
+            });
+        }
+    
+    }, [autoUpdateChecked]);
 
     return (
         <>
@@ -227,7 +253,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
             <Grid.Col>
                 <Group position="left" spacing={0}>
                     <Button 
-                        mr={5} 
+                        mr={5}
+                        mt={-5}
                         variant="gradient"
                         loading={trackedGameButtonLoading}
                         gradient={{ from: 'indigo', to: 'cyan'  }}
@@ -237,7 +264,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
 
                     {gameTracked && 
                     <Button 
-                        mr={5} 
+                        mr={5}
+                        mt={-5}
                         variant="gradient"
                         loading={trackedGameButtonLoading}
                         gradient={{ from: 'orange', to: 'red' }}
@@ -247,7 +275,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
 
                     {!gameTracked && 
                     <Button 
-                        mr={5} 
+                        mr={5}
+                        mt={-5}
                         variant="gradient"
                         loading={trackedGameButtonLoading}
                         gradient={{ from: 'teal', to: 'lime', deg: 105 }} 
@@ -258,7 +287,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
 
                     <Button
                         component="a"
-                        mr={5} 
+                        mr={5}
+                        mt={-5}
                         variant="gradient" 
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         sx={{':hover': {color: 'white'}}}
@@ -269,7 +299,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
 
                     <Button
                         component="a"
-                        mr={5} 
+                        mr={5}
+                        mt={-5}
                         variant="gradient" 
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
@@ -279,9 +310,9 @@ const LoggedInModal = (props: LoggedInModalProps) => {
                             RA Page
                         </Button>
 
-                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-15} mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
-                    <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mt={-15} mr={5} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
-                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-15} mr={5} onChange={(event) => FilterCurrentAchievements(event.currentTarget.checked)}/>
+                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-9} mr={5} ml={20} onChange={(event) => setGameLayoutChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mt={-9} mr={5} onChange={(event) => setAutoUpdateChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-9} mr={5} onChange={(event) => FilterCurrentAchievements(event.currentTarget.checked)}/>
                 </Group>
             </Grid.Col>
             </Grid>
