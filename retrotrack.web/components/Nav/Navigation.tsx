@@ -1,4 +1,4 @@
-import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Stack, Text, Paper } from "@mantine/core";
+import { AppShell, Burger, MediaQuery, Navbar, NavLink, Header, ScrollArea, Button, Grid, createStyles, LoadingOverlay, Text, Paper } from "@mantine/core";
 import { AppProps } from "next/app";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react"
@@ -358,6 +358,10 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='Atari Jaguar' active={'/console/17' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["17"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["17"].percentage!)}}}/>
                         </Link>
 
+                        <Link href='/console/77' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari Jaguar CD' active={'/console/77' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["77"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["77"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/13' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Atari Lynx' active={'/console/13' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["13"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["13"].percentage!)}}}/>
                         </Link>
@@ -634,6 +638,10 @@ const Navigation = (props: AppProps) => {
 
                         <Link href='/console/17' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Atari Jaguar' active={'/console/17' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["17"] + " games"}/>
+                        </Link>
+
+                        <Link href='/console/77' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Atari Jaguar CD' active={'/console/77' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["77"] + " games"}/>
                         </Link>
 
                         <Link href='/console/13' passHref style={{ textDecoration: 'none' }}>
