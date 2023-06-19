@@ -13,6 +13,7 @@ namespace RetroTrack.Domain
             RecurringJob.AddOrUpdate("GetConsolesAndInsertToDatabaseJob", () => GetConsolesAndInsertToDatabaseJob(), "0 0 * * *");
             RecurringJob.AddOrUpdate("GetGamesFromConsoleIdsJob", () => GetGamesFromConsoleIdsJob(), "0 */6 * * *");
             RecurringJob.AddOrUpdate("GetUnprocessedGameData", () => GetUnprocessedGameDataJob(), "10 */6 * * *");
+            RecurringJob.AddOrUpdate("UpdateGameDataFromRecentlyUpdatedGames", () => UpdateGameDataFromRecentlyUpdatedGames(), "30 0 * * *");
             RecurringJob.AddOrUpdate("QueueLogAndLoadJob", () => QueueLogAndLoadJob(), "*/20 * * * * *");
         }
 
@@ -29,6 +30,11 @@ namespace RetroTrack.Domain
         public static async Task GetUnprocessedGameDataJob()
         {
             await RetroAchievements.GetUnprocessedGameData();
+        }
+
+        public static async Task UpdateGameDataFromRecentlyUpdatedGames()
+        {
+            await RetroAchievements.GetRecentlyModifiedGamesGameData();
         }
 
         public static void QueueLogAndLoadJob()

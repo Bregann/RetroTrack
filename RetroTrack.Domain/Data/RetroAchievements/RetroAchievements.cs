@@ -155,6 +155,86 @@ namespace RetroTrack.Domain.Data.External
             }
         }
 
+        //ONLY TO BE USED LOCALLY FOR MANUALLY UPDATING THE ENTIRE DATABASE
+        //Mainly for player counts
+        public static async Task ProcessEntireGamesDatabase()
+        {
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            using (var context = new DatabaseContext())
+            {
+                //Get all the new unprocessed games
+                var unprocessedGames = context.Games.Select(x => x.Id).ToList();
+                Log.Information($"[RetroAchievements] {unprocessedGames.Count} games to get extra data from");
+
+                foreach (var gameId in unprocessedGames)
+                {
+                    var request = new RestRequest($"API_GetGameExtended.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={gameId}", Method.Get);
+                    var response = await client.ExecuteAsync(request);
+
+                    if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Log.Warning($"[RetroAchievements] Error getting extended game info for game ID {gameId}. Status code: {response.StatusCode}");
+                        continue;
+                    }
+
+                    //Add into the table to be picked up and processed later
+                    context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
+                    {
+                        JsonData = response.Content,
+                        ProcessingStatus = ProcessingStatus.NotScheduled,
+                        FailedProcessingAttempts = 0,
+                        ApiRequestType = ApiRequestType.GetGameExtended,
+                        LastUpdate = DateTime.UtcNow
+                    });
+
+                    Log.Information($"[RetroAchievements] Game data processed for ID {gameId}");
+
+                    context.SaveChanges();
+                    await Task.Delay(500);
+                }
+            }
+        }
+
+        public static async Task GetRecentlyModifiedGamesGameData()
+        {
+            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
+
+            using (var context = new DatabaseContext())
+            {
+                //Get all the new unprocessed games
+                var unprocessedGames = context.Games.Where(x => x.LastModified.Date >= DateTime.UtcNow.AddDays(-4)).Select(x => x.Id).ToList();
+                Log.Information($"[RetroAchievements] {unprocessedGames.Count} games to update the data from");
+
+                foreach (var gameId in unprocessedGames)
+                {
+                    var request = new RestRequest($"API_GetGameExtended.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={gameId}", Method.Get);
+                    var response = await client.ExecuteAsync(request);
+
+                    if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Log.Warning($"[RetroAchievements] Error getting extended game info for game ID {gameId}. Status code: {response.StatusCode}");
+                        continue;
+                    }
+
+                    //Add into the table to be picked up and processed later
+                    context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
+                    {
+                        JsonData = response.Content,
+                        ProcessingStatus = ProcessingStatus.NotScheduled,
+                        FailedProcessingAttempts = 0,
+                        ApiRequestType = ApiRequestType.GetGameExtended,
+                        LastUpdate = DateTime.UtcNow
+                    });
+
+                    Log.Information($"[RetroAchievements] Game data processed for ID {gameId}");
+
+                    context.SaveChanges();
+                    await Task.Delay(500);
+                }
+            }
+        }
+
         public static async Task<GetUserSummary?> GetUserProfile(string username)
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -475,6 +555,30 @@ namespace RetroTrack.Domain.Data.External
 
                     //Get the game and update the values
                     var gameFromDb = context.Games.First(x => x.Id == gameData.Id);
+
+                    //If it's processed already, remove all the current achievements for the game from the database
+                    //This is incase there's been any demoted achievements or updated achievements
+                    if (gameFromDb.ExtraDataProcessed)
+                    {
+                        context.Achievements.Where(x => x.Game == gameFromDb).ExecuteDelete();
+                    }
+
+                    foreach (var achievement in gameData.Achievements)
+                    {
+                        context.Achievements.Add(new Achievements
+                        {
+                            Id = achievement.Value.Id,
+                            AchievementName = achievement.Value.Title,
+                            AchievementDescription = achievement.Value.Description,
+                            AchievementIcon = achievement.Value.BadgeName,
+                            Game = gameFromDb,
+                            Points = achievement.Value.Points
+                        });
+                    }
+
+                    Log.Information($"[RetroAchievements] Achievement data processed for game {gameFromDb.Title}");
+
+                    gameFromDb.Title = gameData.Title;
                     gameFromDb.GameGenre = gameData.Genre;
                     gameFromDb.Players = gameData.Players;
                     gameFromDb.ExtraDataProcessed = true;
@@ -508,10 +612,5 @@ namespace RetroTrack.Domain.Data.External
                 }
             }
         }
-        /*
-        public static GetActiveClaims GetActiveClaims()
-        {
-
-        }*/
     }
 }
