@@ -432,6 +432,10 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='Arcade' active={'/console/27' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["27"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["27"].percentage!)}}}/>
                         </Link>
 
+                        <Link href='/console/73' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Arcadia 2001' active={'/console/73' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["73"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["73"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/71' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Arduboy' active={'/console/71' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["71"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["71"].percentage!)}}}/>
                         </Link>
@@ -440,12 +444,20 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='ColecoVision' active={'/console/44' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["44"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["44"].percentage!)}}}/>
                         </Link>
 
+                        <Link href='/console/75' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Elektor TV Games Computer' active={'/console/75' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["75"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["75"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/57' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Fairchild Channel F' active={'/console/57' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["57"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["57"].percentage!)}}}/>
                         </Link>
 
                         <Link href='/console/45' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Intellivision' active={'/console/45' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["45"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["45"].percentage!)}}}/>
+                        </Link>
+
+                        <Link href='/console/74' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Interton VC 4000' active={'/console/74' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["74"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["74"].percentage!)}}}/>
                         </Link>
 
                         <Link href='/console/23' passHref style={{ textDecoration: 'none' }}>
@@ -714,6 +726,10 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='Arcade' active={'/console/27' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["27"] + " games"}/>
                         </Link>
 
+                        <Link href='/console/73' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Arcadia 2001' active={'/console/73' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["73"] + " games"}/>
+                        </Link>
+
                         <Link href='/console/71' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Arduboy' active={'/console/71' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["71"] + " games"}/>
                         </Link>
@@ -722,12 +738,20 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='ColecoVision' active={'/console/44' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["44"] + " games"}/>
                         </Link>
 
+                        <Link href='/console/75' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Elektor TV Games Computer' active={'/console/75' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["75"] + " games"}/>
+                        </Link>
+
                         <Link href='/console/57' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Fairchild Channel F' active={'/console/57' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["57"] + " games"}/>
                         </Link>
 
                         <Link href='/console/45' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Intellivision' active={'/console/45' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["45"] + " games"}/>
+                        </Link>
+
+                        <Link href='/console/74' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Interton VC 4000' active={'/console/74' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["74"] + " games"}/>
                         </Link>
 
                         <Link href='/console/23' passHref style={{ textDecoration: 'none' }}>
