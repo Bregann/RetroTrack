@@ -131,10 +131,13 @@ namespace RetroTrack.Domain.Models
         public string Description { get; set; }
 
         [JsonProperty("Points")]
-        public long Points { get; set; }
+        public int Points { get; set; }
 
         [JsonProperty("BadgeName")]
         public string BadgeName { get; set; }
+
+        [JsonProperty("DisplayOrder")]
+        public int DisplayOrder { get; set; }
     }
 
     public class GetGameInfoAndUserProgress
