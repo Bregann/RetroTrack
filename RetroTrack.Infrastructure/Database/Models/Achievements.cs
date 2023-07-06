@@ -13,6 +13,7 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string AchievementDescription { get; set; }
         public required string AchievementIcon { get; set; }
         public required int Points { get; set; }
+        public required int DisplayOrder { get; set; }
         public required Games Game { get; set; }
     }
 }

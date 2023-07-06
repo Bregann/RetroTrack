@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Data.External;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
@@ -11,6 +12,7 @@ namespace RetroTrack.Domain
         public static void SetupHangfireJobs()
         {
             RecurringJob.AddOrUpdate("GetConsolesAndInsertToDatabaseJob", () => GetConsolesAndInsertToDatabaseJob(), "0 0 * * *");
+            RecurringJob.AddOrUpdate("CleanupLogAndLoadData", () => CleanupLogAndLoadData(), "0 0 * * *");
             RecurringJob.AddOrUpdate("GetGamesFromConsoleIdsJob", () => GetGamesFromConsoleIdsJob(), "0 */6 * * *");
             RecurringJob.AddOrUpdate("GetUnprocessedGameData", () => GetUnprocessedGameDataJob(), "10 */6 * * *");
             RecurringJob.AddOrUpdate("UpdateGameDataFromRecentlyUpdatedGames", () => UpdateGameDataFromRecentlyUpdatedGames(), "30 0 * * *");
@@ -35,6 +37,15 @@ namespace RetroTrack.Domain
         public static async Task UpdateGameDataFromRecentlyUpdatedGames()
         {
             await RetroAchievements.GetRecentlyModifiedGamesGameData();
+        }
+
+        public static async Task CleanupLogAndLoadData()
+        {
+            using(var context = new DatabaseContext())
+            {
+                var processedDataDeletedCount = await context.RetroAchievementsApiData.Where(x => x.LastUpdate.Date >= DateTime.UtcNow.AddDays(-2) && x.ProcessingStatus == ProcessingStatus.Processed).ExecuteDeleteAsync();
+                Log.Information($"[LogAndLoad] Cleaned up {processedDataDeletedCount} processed requests");
+            }
         }
 
         public static void QueueLogAndLoadJob()

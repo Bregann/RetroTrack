@@ -191,7 +191,7 @@ namespace RetroTrack.Domain.Data.External
                     Log.Information($"[RetroAchievements] Game data processed for ID {gameId}");
 
                     context.SaveChanges();
-                    await Task.Delay(500);
+                    await Task.Delay(300);
                 }
             }
         }
@@ -203,6 +203,7 @@ namespace RetroTrack.Domain.Data.External
             using (var context = new DatabaseContext())
             {
                 //Get all the new unprocessed games
+                //-4 days incase of any API outages
                 var unprocessedGames = context.Games.Where(x => x.LastModified.Date >= DateTime.UtcNow.AddDays(-4)).Select(x => x.Id).ToList();
                 Log.Information($"[RetroAchievements] {unprocessedGames.Count} games to update the data from");
 
@@ -561,6 +562,7 @@ namespace RetroTrack.Domain.Data.External
                     if (gameFromDb.ExtraDataProcessed)
                     {
                         context.Achievements.Where(x => x.Game == gameFromDb).ExecuteDelete();
+                        context.SaveChanges();
                     }
 
                     foreach (var achievement in gameData.Achievements)
@@ -572,7 +574,8 @@ namespace RetroTrack.Domain.Data.External
                             AchievementDescription = achievement.Value.Description,
                             AchievementIcon = achievement.Value.BadgeName,
                             Game = gameFromDb,
-                            Points = achievement.Value.Points
+                            Points = achievement.Value.Points,
+                            DisplayOrder = achievement.Value.DisplayOrder
                         });
                     }
 
