@@ -263,7 +263,42 @@ namespace RetroTrack.Domain.Data.External
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
             {
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
-                return null;
+
+                using(var context = new DatabaseContext())
+                {
+                    var gameFromDb = context.Games.Include(x => x.GameConsole).FirstOrDefault(x => x.Id == gameId);
+
+                    if (gameFromDb == null)
+                    {
+                        return null;
+                    }
+
+                    var achievements = context.Achievements.Where(x => x.GameId == gameId).ToDictionary(x => x.Id.ToString(), x => new Achievement
+                    {
+                        Id = x.Id,
+                        NumAwarded = 0,
+                        NumAwardedHardcore = 0,
+                        BadgeName = x.AchievementIcon,
+                        Description = x.AchievementDescription,
+                        DisplayOrder = x.DisplayOrder,
+                        Points = x.Points,
+                        Title = x.AchievementName
+                    });
+
+                    return new GetGameExtended
+                    {
+                        AchievementCount = achievements.Count,
+                        Achievements = achievements,
+                        ImageBoxArt = "",
+                        ImageInGame = "",
+                        ConsoleId = gameFromDb.ConsoleID,
+                        ConsoleName = gameFromDb.GameConsole.ConsoleName,
+                        Genre = gameFromDb.GameGenre,
+                        Players = gameFromDb.Players.HasValue ? gameFromDb.Players.Value : 0,
+                        Id = gameId,
+                        Title = gameFromDb.Title,
+                    };
+                }
             }
 
             //if there's no achievements
@@ -295,7 +330,7 @@ namespace RetroTrack.Domain.Data.External
             var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&g={gameId}&u={username}", Method.Get);
             var response = await client.ExecuteAsync(request);
 
-            if (response.Content == "" || response.Content == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
             {
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
                 return null;
@@ -355,9 +390,12 @@ namespace RetroTrack.Domain.Data.External
 
                     var userProfile = await GetUserProfile(username);
 
-                    user.UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png";
-                    user.UserRank = userProfile.Rank;
-                    user.UserPoints = userProfile.TotalPoints;
+                    if (userProfile != null)
+                    {
+                        user.UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png";
+                        user.UserRank = userProfile.Rank;
+                        user.UserPoints = userProfile.TotalPoints;
+                    }
 
                     foreach (var game in gameList)
                     {
@@ -383,7 +421,7 @@ namespace RetroTrack.Domain.Data.External
 
                         var gameForUserProgress = context.Games.Where(x => x.Id == game.GameId).FirstOrDefault();
 
-                        if(gameForUserProgress != null)
+                        if (gameForUserProgress != null)
                         {
                             context.UserGameProgress.Add(new UserGameProgress
                             {
@@ -463,7 +501,7 @@ namespace RetroTrack.Domain.Data.External
                         //Check if there's achievements or not
                         if (game.AchievementCount == 0)
                         {
-                            if(!context.UndevvedGames.Any(x => x.Id == game.Id) && !context.Games.Any(x => x.Id == game.Id))
+                            if (!context.UndevvedGames.Any(x => x.Id == game.Id) && !context.Games.Any(x => x.Id == game.Id))
                             {
                                 context.UndevvedGames.Add(new UndevvedGames
                                 {

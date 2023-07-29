@@ -178,38 +178,72 @@ namespace RetroTrack.Domain.Data
         {
             var raUsername = RAHelper.GetRAUsernameFromLoginUsername(username);
             var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, raUsername);
-
-            if (data == null)
-            {
-                return null;
-            }
+            var achievementList = new List<UserAchievement>();
 
             using (var context = new DatabaseContext())
             {
+                //If its null, grab the regular data so the popup will still work
+                if (data == null)
+                {
+                    var loggedOutData = await RetroAchievements.GetSpecificGameInfo(gameId);
+
+                    if (loggedOutData == null)
+                    {
+                        return null;
+                    }
+
+                    achievementList.AddRange(loggedOutData.Achievements.Select(achievement => new UserAchievement
+                    {
+                        BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
+                        DateEarned = null,
+                        Description = achievement.Value.Description,
+                        Id = achievement.Value.Id,
+                        Points = achievement.Value.Points,
+                        Title = achievement.Value.Title
+                    }));
+
+                    return new UserGameInfoDto
+                    {
+                        AchievementCount = loggedOutData.AchievementCount,
+                        Achievements = achievementList,
+                        ImageBoxArt = "https://media.retroachievements.org" + loggedOutData.ImageBoxArt,
+                        NumAwardedToUser = 0,
+                        ConsoleId = loggedOutData.ConsoleId,
+                        ConsoleName = loggedOutData.ConsoleName,
+                        GameId = gameId,
+                        Genre = loggedOutData.Genre,
+                        ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
+                        Players = loggedOutData.Players,
+                        PointsEarned = 0,
+                        Title = loggedOutData.Title,
+                        TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
+                        UserCompletion = "Unable to fetch data",
+                        GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
+                    };
+                }
+
+
                 context.Games.First(x => x.Id == gameId).Players = data.Players;
                 context.Users.First(x => x.Username == username).LastAchievementsUpdate = DateTime.UtcNow;
                 context.SaveChanges();
-            }
 
-            var achievementList = new List<UserAchievement>();
 
-            foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
-            {
-                achievementList.Add(new UserAchievement
+
+                foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
                 {
-                    Id = achievement.Value.Id,
-                    BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
-                    Description = achievement.Value.Description,
-                    NumAwarded = achievement.Value.NumAwarded,
-                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                    Points = achievement.Value.Points,
-                    Title = achievement.Value.Title,
-                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
-                });
-            }
+                    achievementList.Add(new UserAchievement
+                    {
+                        Id = achievement.Value.Id,
+                        BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
+                        Description = achievement.Value.Description,
+                        NumAwarded = achievement.Value.NumAwarded,
+                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                        Points = achievement.Value.Points,
+                        Title = achievement.Value.Title,
+                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                    });
+                }
 
-            using (var context = new DatabaseContext())
-            {
                 return new UserGameInfoDto
                 {
                     GameId = data.Id,
@@ -404,7 +438,7 @@ namespace RetroTrack.Domain.Data
                 {
                     double gamePct = 0;
 
-                    if(game?.GamePercentage != null)
+                    if (game?.GamePercentage != null)
                     {
                         gamePct = Math.Round((game.GamePercentage * 100), 2);
                     }

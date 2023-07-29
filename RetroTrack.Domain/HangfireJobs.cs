@@ -41,7 +41,7 @@ namespace RetroTrack.Domain
 
         public static async Task CleanupLogAndLoadData()
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var processedDataDeletedCount = await context.RetroAchievementsApiData.Where(x => x.LastUpdate.Date >= DateTime.UtcNow.AddDays(-2) && x.ProcessingStatus == ProcessingStatus.Processed).ExecuteDeleteAsync();
                 Log.Information($"[LogAndLoad] Cleaned up {processedDataDeletedCount} processed requests");

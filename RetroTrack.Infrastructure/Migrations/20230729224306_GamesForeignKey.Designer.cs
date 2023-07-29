@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RetroTrack.Infrastructure.Database.Context;
@@ -11,9 +12,11 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230729224306_GamesForeignKey")]
+    partial class GamesForeignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,7 +58,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Achievements", (string)null);
+                    b.ToTable("Achievements");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Config", b =>
@@ -92,7 +95,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Config", (string)null);
+                    b.ToTable("Config");
 
                     b.HasData(
                         new
@@ -131,7 +134,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataCaching", (string)null);
+                    b.ToTable("DataCaching");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.DevWishlist", b =>
@@ -153,7 +156,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("DevWishlist", (string)null);
+                    b.ToTable("DevWishlist");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.GameConsoles", b =>
@@ -173,7 +176,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("ConsoleID");
 
-                    b.ToTable("GameConsoles", (string)null);
+                    b.ToTable("GameConsoles");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Games", b =>
@@ -220,7 +223,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("ConsoleID");
 
-                    b.ToTable("Games", (string)null);
+                    b.ToTable("Games");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.RetroAchievementsApiData", b =>
@@ -249,7 +252,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RetroAchievementsApiData", (string)null);
+                    b.ToTable("RetroAchievementsApiData");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Sessions", b =>
@@ -270,7 +273,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
@@ -291,7 +294,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("TrackedGames", (string)null);
+                    b.ToTable("TrackedGames");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UndevvedGames", b =>
@@ -313,7 +316,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("GameConsoleConsoleID");
 
-                    b.ToTable("UndevvedGames", (string)null);
+                    b.ToTable("UndevvedGames");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
@@ -346,7 +349,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("UserGameProgress", (string)null);
+                    b.ToTable("UserGameProgress");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>
@@ -383,7 +386,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Username");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Achievements", b =>

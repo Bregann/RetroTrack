@@ -11,7 +11,9 @@ namespace RetroTrack.Infrastructure.Database.Models
         [Required]
         public required string Title { get; set; }
 
-        [Required]
+        public int ConsoleID { get; set; }
+
+        [ForeignKey("ConsoleID")]
         public required GameConsoles GameConsole { get; set; }
 
         [Required]

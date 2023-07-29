@@ -80,7 +80,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     }
 
     const UpdateUserProgress = async () => {
-        const res = await DoGet('/api/games/GetGameInfoForUser/'+ props.gameInfo.gameId, session?.sessionId); //hard coded for dev purposes - change back lol
+        const res = await DoGet('/api/games/GetGameInfoForUser/'+ props.gameInfo.gameId, session?.sessionId);
 
         if(res.ok){
             const data: GetGameInfoForUser = await res.json();
@@ -180,7 +180,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
 
                 <Grid.Col md={2} xs={6}>
                     <Text fw={500} align="center">Points</Text>
-                    <Text align="center">{gameStats.numAwardedToUser}/{gameStats.achievementCount}</Text>
+                    <Text align="center">{gameStats.pointsEarned}/{gameStats.totalPoints}</Text>
                 </Grid.Col>
 
                 <Grid.Col md={2} xs={6}>
