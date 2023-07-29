@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Infrastructure.Database.Models
 {
@@ -14,6 +10,10 @@ namespace RetroTrack.Infrastructure.Database.Models
         public required string AchievementIcon { get; set; }
         public required int Points { get; set; }
         public required int DisplayOrder { get; set; }
+
+        public int GameId { get; set; }
+
+        [ForeignKey("GameId")]
         public required Games Game { get; set; }
     }
 }

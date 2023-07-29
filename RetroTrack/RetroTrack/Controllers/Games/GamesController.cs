@@ -104,7 +104,7 @@ namespace RetroTrack.Api.Controllers.Games
             var trackedGames = GamesData.GetInProgressGamesForUser(user);
             return Ok(trackedGames);
         }
-        
+
         //Get undevved games
     }
 }

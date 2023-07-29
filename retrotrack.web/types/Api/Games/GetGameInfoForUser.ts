@@ -14,4 +14,6 @@ export interface GetGameInfoForUser {
     numAwardedToUser: number;
     userCompletion:   string;
     gameTracked:      boolean;
+    totalPoints:      number;
+    pointsEarned:     number;
 }
