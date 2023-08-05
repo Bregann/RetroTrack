@@ -1,17 +1,17 @@
-import { AppProps } from 'next/app';
-import Head from 'next/head';
-import { ButtonStylesParams, MantineProvider } from '@mantine/core';
-import Navigation from '../components/Nav/Navigation';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { SessionProvider } from 'next-auth/react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { type AppProps } from 'next/app'
+import Head from 'next/head'
+import { type ButtonStylesParams, MantineProvider } from '@mantine/core'
+import Navigation from '../components/Nav/Navigation'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import { SessionProvider } from 'next-auth/react'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-export default function App(props: AppProps) {
-  if(process.env.NODE_ENV === 'development' ){
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+export default function App (props: AppProps) {
+  if (process.env.NODE_ENV === 'development') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   }
-  
+
   return (
     <>
       <SessionProvider>
@@ -65,17 +65,17 @@ export default function App(props: AppProps) {
                   }
                 })
               }
-              
+
             }
-            
+
           }}
         >
-          
+
         <Navigation {...props} />
         </MantineProvider>
       </SessionProvider>
 
       <ToastContainer />
     </>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-export interface RegiserUserData{
-    success: boolean;
-    reason: string | null;
+export interface RegiserUserData {
+  success: boolean
+  reason: string | null
 }

@@ -1,19 +1,19 @@
-export interface LoggedOutGameTypes{
-  games: { [key: string]: number };
+export interface LoggedOutGameTypes {
+  games: Record<string, number>
 }
 
 export interface LoggedInGameTypes {
-  games: { [key: string]: Game };
-  gamesTracked: number;
-  inProgressGames: number;
+  games: Record<string, Game>
+  gamesTracked: number
+  inProgressGames: number
 }
 
 export interface Game {
-  gamesTotalAndCompleted: string;
-  percentage:     number;
+  gamesTotalAndCompleted: string
+  percentage: number
 }
 
 export interface NavData {
-  loggedOut?: LoggedOutGameTypes;
-  loggedIn?: LoggedInGameTypes;
+  loggedOut?: LoggedOutGameTypes
+  loggedIn?: LoggedInGameTypes
 }

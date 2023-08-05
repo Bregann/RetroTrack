@@ -1,7 +1,7 @@
-import { Game } from "./PublicGame";
+import { type Game } from './PublicGame'
 
 export interface GamesForConsole {
-    consoleName: string;
-    consoleId:   number;
-    games:       Game[];
+  consoleName: string
+  consoleId: number
+  games: Game[]
 }

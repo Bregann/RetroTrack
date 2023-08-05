@@ -12,7 +12,7 @@
     ]
   },
   "ignorePatterns": [
-    "[...nextauth].js",
+    "[...nextauth].ts",
     "middleware.ts",
     "/"
   ],

@@ -1,100 +1,99 @@
-import { Modal, PasswordInput, TextInput, Text, Group, Button, Alert } from "@mantine/core";
-import { useState } from "react";
-import { useForm } from "@mantine/form";
-import { ModalProps } from "../../types/App/modal";
-import { DoPost } from "../../Helpers/webFetchHelper";
-import { IconAlertCircle, IconLock } from '@tabler/icons';
-import { RegiserUserData } from "../../types/Api/Auth/RegisterUser";
-import { signIn } from "next-auth/react";
-import { toast } from "react-toastify";
+import { Modal, PasswordInput, TextInput, Text, Group, Button, Alert } from '@mantine/core'
+import { useState } from 'react'
+import { useForm } from '@mantine/form'
+import { type ModalProps } from '../../types/App/modal'
+import { DoPost } from '../../Helpers/webFetchHelper'
+import { IconAlertCircle, IconLock } from '@tabler/icons'
+import { type RegiserUserData } from '../../types/Api/Auth/RegisterUser'
+import { signIn } from 'next-auth/react'
+import { toast } from 'react-toastify'
 
 interface FormValues {
-    username: string;
-    password: string;
-    apiKey: string;
+  username: string
+  password: string
+  apiKey: string
 }
 
 const RegisterModal = (props: ModalProps) => {
-    const form = useForm<FormValues>({
-        initialValues: {
-            username: '',
-            password: '',
-            apiKey: ''
-        }
-    });
+  const form = useForm<FormValues>({
+    initialValues: {
+      username: '',
+      password: '',
+      apiKey: ''
+    }
+  })
 
-    const RegisterUser = async (values: FormValues) => {
-        setErrorMessage(null);
+  const RegisterUser = async (values: FormValues) => {
+    setErrorMessage(null)
 
-        let spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    const spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
 
-        if (values.password.length < 6 || !spChars.test(values.password)) {
-            setErrorMessage("Password must be at least 6 characters and contain a special character!");
-            return;
-        }
-
-        setRegisterButtonLoading(true);
-        const res = await DoPost('/api/auth/RegisterUser', values);
-
-        if (!res.ok) {
-            setErrorMessage('There has been an unexpected error. Please try again shortly');
-            setRegisterButtonLoading(false);
-            return;
-        }
-
-        const data: RegiserUserData = await res.json();
-
-        console.log(data);
-
-        //Check if there's any error
-        if (!data.success) {
-            setErrorMessage(data.reason);
-            setRegisterButtonLoading(false);
-            return;
-        }
-
-        //If the registration was successful then login the user
-        if (data.success && !data.reason) {
-            //Send the signin request
-            const res = await signIn('credentials', {
-                username: values.username,
-                password: values.password,
-                redirect: false
-            });
-
-            if (res?.ok) {
-                //Close the menu
-                setRegisterButtonLoading(false);
-                props.setOpened(false);
-
-                toast.success('Account created and successfully logged in!', {
-                    position: 'bottom-right',
-                    closeOnClick: true,
-                    theme: 'colored'
-                });
-            }
-            else {
-                setRegisterButtonLoading(false);
-                props.setOpened(false);
-
-                toast.success('Account created! You can now login', {
-                    position: 'bottom-right',
-                    closeOnClick: true,
-                    theme: 'colored'
-                });
-            }
-        }
-
-        setRegisterButtonLoading(false);
+    if (values.password.length < 6 || !spChars.test(values.password)) {
+      setErrorMessage('Password must be at least 6 characters and contain a special character!')
+      return
     }
 
-    const [registerButtonLoading, setRegisterButtonLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    setRegisterButtonLoading(true)
+    const res = await DoPost('/api/auth/RegisterUser', values)
 
-    return (
+    if (!res.ok) {
+      setErrorMessage('There has been an unexpected error. Please try again shortly')
+      setRegisterButtonLoading(false)
+      return
+    }
+
+    const data: RegiserUserData = await res.json()
+
+    console.log(data)
+
+    // Check if there's any error
+    if (!data.success) {
+      setErrorMessage(data.reason)
+      setRegisterButtonLoading(false)
+      return
+    }
+
+    // If the registration was successful then login the user
+    if (data.success && !data.reason) {
+      // Send the signin request
+      const res = await signIn('credentials', {
+        username: values.username,
+        password: values.password,
+        redirect: false
+      })
+
+      if (res?.ok) {
+        // Close the menu
+        setRegisterButtonLoading(false)
+        props.setOpened(false)
+
+        toast.success('Account created and successfully logged in!', {
+          position: 'bottom-right',
+          closeOnClick: true,
+          theme: 'colored'
+        })
+      } else {
+        setRegisterButtonLoading(false)
+        props.setOpened(false)
+
+        toast.success('Account created! You can now login', {
+          position: 'bottom-right',
+          closeOnClick: true,
+          theme: 'colored'
+        })
+      }
+    }
+
+    setRegisterButtonLoading(false)
+  }
+
+  const [registerButtonLoading, setRegisterButtonLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  return (
         <Modal
             opened={props.openedState}
-            onClose={() => props.setOpened(false)}
+            onClose={() => { props.setOpened(false) }}
             title="Register">
             {errorMessage &&
                 <Alert
@@ -105,7 +104,7 @@ const RegisterModal = (props: ModalProps) => {
                     {errorMessage}
                 </Alert>}
 
-            <form onSubmit={form.onSubmit((values) => RegisterUser(values))}>
+            <form onSubmit={form.onSubmit(async (values) => { await RegisterUser(values) })}>
                 <TextInput
                     label="RetroAchievements Username"
                     placeholder="RetroAchievements Username"
@@ -148,7 +147,7 @@ const RegisterModal = (props: ModalProps) => {
                 </Group>
             </form>
         </Modal>
-    );
+  )
 }
 
-export default RegisterModal;
+export default RegisterModal

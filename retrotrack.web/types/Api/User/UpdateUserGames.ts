@@ -1,4 +1,4 @@
-export interface UpdateUserGames{
-    success: boolean;
-    reason: string;
+export interface UpdateUserGames {
+  success: boolean
+  reason: string
 }

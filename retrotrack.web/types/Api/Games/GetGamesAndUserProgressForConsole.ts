@@ -1,7 +1,7 @@
-import { Game } from "./LoggedInGame";
+import { type Game } from './LoggedInGame'
 
 export interface GamesAndUserProgressForConsole {
-    consoleName: string;
-    consoleId:   number;
-    games:       Game[];
+  consoleName: string
+  consoleId: number
+  games: Game[]
 }

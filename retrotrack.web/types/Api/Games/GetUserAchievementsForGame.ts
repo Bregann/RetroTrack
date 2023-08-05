@@ -1,7 +1,7 @@
-import { Achievement } from "./UserAchievement";
+import { type Achievement } from './UserAchievement'
 
 export interface UserAchievementsForGame {
-    success?:      boolean;
-    reason?:       string;
-    achievements?: Achievement[];
+  success?: boolean
+  reason?: string
+  achievements?: Achievement[]
 }

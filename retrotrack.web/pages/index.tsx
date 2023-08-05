@@ -1,6 +1,6 @@
-import { List, Text } from "@mantine/core";
+import { List, Text } from '@mantine/core'
 
-export default function Home() {
+export default function Home () {
   return (
     <>
     <Text align="center" size={60}>RetroTrack</Text>
@@ -20,6 +20,6 @@ export default function Home() {
     <Text align="center">Please note the website is currently still under construction. If you notice anything please use the support button in the top right for assistance. If you were registered previously on RetroAchievementsTracker, you will be able to use those details to log in</Text>
 
     </>
-    
+
   )
 }

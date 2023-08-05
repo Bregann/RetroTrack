@@ -1,4 +1,4 @@
-export interface ForgotPasswordData{
-    success: boolean;
-    reason: string | null;
+export interface ForgotPasswordData {
+  success: boolean
+  reason: string | null
 }

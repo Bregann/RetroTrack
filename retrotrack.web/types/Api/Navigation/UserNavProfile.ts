@@ -1,7 +1,7 @@
 export interface UserNavProfile {
-    profileImageUrl: string;
-    username:        string;
-    points:          number;
-    rank:            number;
-    gamesCompleted:  number;
+  profileImageUrl: string
+  username: string
+  points: number
+  rank: number
+  gamesCompleted: number
 }

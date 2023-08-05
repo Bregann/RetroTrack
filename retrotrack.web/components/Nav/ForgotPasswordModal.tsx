@@ -1,75 +1,75 @@
-import { Alert, Button, Group, Modal, PasswordInput, TextInput, Text } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { IconAlertCircle, IconLock } from "@tabler/icons";
-import { useState } from "react";
-import { toast } from "react-toastify";
-import { DoPost } from "../../Helpers/webFetchHelper";
-import RegisterUser from "../../pages/api/auth/RegisterUser";
-import { ForgotPasswordData } from "../../types/Api/Auth/ForgotPassword";
-import { ModalProps } from "../../types/App/modal";
+import { Alert, Button, Group, Modal, PasswordInput, TextInput, Text } from '@mantine/core'
+import { useForm } from '@mantine/form'
+import { IconAlertCircle, IconLock } from '@tabler/icons'
+import { useState } from 'react'
+import { toast } from 'react-toastify'
+import { DoPost } from '../../Helpers/webFetchHelper'
+import RegisterUser from '../../pages/api/auth/RegisterUser'
+import { type ForgotPasswordData } from '../../types/Api/Auth/ForgotPassword'
+import { type ModalProps } from '../../types/App/modal'
 
 interface FormValues {
-    username: string;
-    password: string;
-    apiKey: string;
+  username: string
+  password: string
+  apiKey: string
 }
 
 const ForgotPasswordModal = (props: ModalProps) => {
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false)
 
-    const form = useForm<FormValues>({
-        initialValues: {
-            username: '',
-            password: '',
-            apiKey: ''
-        }
-    });
-
-    const ResetPassword = async (values: FormValues) => {
-        setErrorMessage(null);
-
-        let spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-
-        if (values.password.length < 6 || !spChars.test(values.password)) {
-            setErrorMessage("Password must be at least 6 characters and a special character!");
-            return;
-        }
-
-        setForgotPasswordLoading(true);
-        const res = await DoPost('/api/auth/ResetUserPassword', values);
-
-        if (!res.ok) {
-            setErrorMessage('There has been an unexpected error. Please try again shortly');
-            setForgotPasswordLoading(false);
-            return;
-        }
-
-        const data: ForgotPasswordData = await res.json();
-
-        console.log(data);
-
-        //Check if there's any error
-        if (!data.success) {
-            setErrorMessage(data.reason);
-            setForgotPasswordLoading(false);
-            return;
-        }
-
-        toast.success('Password reset! You may login now', {
-            position: 'bottom-right',
-            closeOnClick: true,
-            theme: 'colored'
-        });
-        
-        setForgotPasswordLoading(false);
-        props.setOpened(false);
+  const form = useForm<FormValues>({
+    initialValues: {
+      username: '',
+      password: '',
+      apiKey: ''
     }
-    
-    return (
+  })
+
+  const ResetPassword = async (values: FormValues) => {
+    setErrorMessage(null)
+
+    const spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+
+    if (values.password.length < 6 || !spChars.test(values.password)) {
+      setErrorMessage('Password must be at least 6 characters and a special character!')
+      return
+    }
+
+    setForgotPasswordLoading(true)
+    const res = await DoPost('/api/auth/ResetUserPassword', values)
+
+    if (!res.ok) {
+      setErrorMessage('There has been an unexpected error. Please try again shortly')
+      setForgotPasswordLoading(false)
+      return
+    }
+
+    const data: ForgotPasswordData = await res.json()
+
+    console.log(data)
+
+    // Check if there's any error
+    if (!data.success) {
+      setErrorMessage(data.reason)
+      setForgotPasswordLoading(false)
+      return
+    }
+
+    toast.success('Password reset! You may login now', {
+      position: 'bottom-right',
+      closeOnClick: true,
+      theme: 'colored'
+    })
+
+    setForgotPasswordLoading(false)
+    props.setOpened(false)
+  }
+
+  return (
         <Modal
             opened={props.openedState}
-            onClose={() => props.setOpened(false)}
+            onClose={() => { props.setOpened(false) }}
             title="Forgot Password">
             {errorMessage &&
                 <Alert
@@ -80,7 +80,7 @@ const ForgotPasswordModal = (props: ModalProps) => {
                     {errorMessage}
                 </Alert>}
 
-            <form onSubmit={form.onSubmit((values) => ResetPassword(values))}>
+            <form onSubmit={form.onSubmit(async (values) => { await ResetPassword(values) })}>
                 <TextInput
                     label="RetroAchievements Username"
                     placeholder="RetroAchievements Username"
@@ -123,7 +123,7 @@ const ForgotPasswordModal = (props: ModalProps) => {
                 </Group>
             </form>
         </Modal>
-    );
+  )
 }
 
-export default ForgotPasswordModal;
+export default ForgotPasswordModal

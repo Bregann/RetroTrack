@@ -1,21 +1,21 @@
-import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from "@mantine/core";
-import { useState } from "react";
-import Image from 'next/image' 
-import { GetSpecificGameInfo } from "../../types/Api/Games/GetSpecificGameInfo";
+import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text, Image as MantineImage } from '@mantine/core'
+import { useState } from 'react'
+import Image from 'next/image'
+import { type GetSpecificGameInfo } from '../../types/Api/Games/GetSpecificGameInfo'
 
-type LoggedOutModalProps = {
-    gameInfo: GetSpecificGameInfo
-    loggedOutModal: (toggleState: boolean) => void;
+interface LoggedOutModalProps {
+  gameInfo: GetSpecificGameInfo
+  loggedOutModal: (toggleState: boolean) => void
 }
-  
-const LoggedOutModal = (props: LoggedOutModalProps) => {
-    const [checked, setChecked] = useState(false);
 
-    return ( 
+const LoggedOutModal = (props: LoggedOutModalProps) => {
+  const [checked, setChecked] = useState(false)
+
+  return (
         <>
         <Modal
           opened={true}
-          onClose={() => props.loggedOutModal(false)}
+          onClose={() => { props.loggedOutModal(false) }}
           size="xl"
         >
             <Text align="center" mt={-50} mb={20} size={40}>{props.gameInfo.title}</Text>
@@ -26,7 +26,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                 height={256}
                 src={props.gameInfo.imageBoxArt}
                 alt=""
-                style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
+                style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
                 />
                 </Grid.Col>
 
@@ -36,7 +36,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                     height={256}
                     src={props.gameInfo.imageInGame}
                     alt=""
-                    style={{marginLeft: 'auto', marginRight: 'auto', display: 'block'}}
+                    style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
                     />
                 </Grid.Col>
 
@@ -65,13 +65,13 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                 </Grid.Col>
 
                 {!checked && props.gameInfo.achievements.map((achievement) => {
-                    return(
+                  return (
                     <div key={achievement.id}>
                         <HoverCard position="bottom">
                             <HoverCard.Target>
                                  {/* hovercard is not supported when it comes to next/image */}
-                                <MantineImage 
-                                    style={{marginRight: 5, marginBottom: 5}}
+                                <MantineImage
+                                    style={{ marginRight: 5, marginBottom: 5 }}
                                     width={48}
                                     height={48}
                                     src={achievement.badgeName}
@@ -84,15 +84,15 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                             </HoverCard.Dropdown>
                         </HoverCard>
                      </div>
-                    )
+                  )
                 })}
 
                 {checked && props.gameInfo.achievements.map((achievement) => {
-                    return(
+                  return (
                     <>
                         <Grid.Col md={1} xs={1} key={achievement.id}>
                             <Image
-                                style={{marginRight: 5, marginBottom: 5}}
+                                style={{ marginRight: 5, marginBottom: 5 }}
                                 width={48}
                                 height={48}
                                 src={achievement.badgeName}
@@ -104,7 +104,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                             <Text fz="sm">{achievement.description}</Text>
                         </Grid.Col>
                      </>
-                    )
+                  )
                 })}
 
             <Grid.Col>
@@ -115,32 +115,32 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                 <Group position="left" spacing={0}>
                     <Button
                         component="a"
-                        mr={5} 
-                        variant="gradient" 
+                        mr={5}
+                        variant="gradient"
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
-                        sx={{':hover': {color: 'white'}}}
+                        sx={{ ':hover': { color: 'white' } }}
                         >
                             Game Page
                         </Button>
                     <Button
                         component="a"
-                        mr={5} 
-                        variant="gradient" 
+                        mr={5}
+                        variant="gradient"
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
-                        sx={{':hover': {color: 'white'}}}
-                        href={"https://retroachievements.org/game/" + props.gameInfo.gameId}
+                        sx={{ ':hover': { color: 'white' } }}
+                        href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
                         >
                             RA Page
                         </Button>
-                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-20} onChange={(event) => setChecked(event.currentTarget.checked)}/>
+                    <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-20} onChange={(event) => { setChecked(event.currentTarget.checked) }}/>
                 </Group>
             </Grid.Col>
             </Grid>
         </Modal>
         </>
-     );
+  )
 }
- 
-export default LoggedOutModal;
+
+export default LoggedOutModal
