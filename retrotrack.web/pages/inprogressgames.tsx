@@ -13,13 +13,13 @@ interface InProgressGamesProps {
   errorMessage: string | null
 }
 
-const InProgressGames = (props: InProgressGamesProps) => {
+const InProgressGames = (props: InProgressGamesProps): JSX.Element => {
   const [tableUpdatedNeeded, setTableDataUpdateNeeded] = useState(false)
   const [gameData, setGameData] = useState(props.games)
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       if (tableUpdatedNeeded) {
         const res = await DoGet('/api/games/GetUserInProgressGames', session?.sessionId)
 
@@ -30,13 +30,13 @@ const InProgressGames = (props: InProgressGamesProps) => {
       }
     }
 
-    fetchData()
+    void fetchData()
     setTableDataUpdateNeeded(false)
   }, [session, tableUpdatedNeeded])
 
   return (
         <>
-        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
+        {(props.errorMessage !== null) && <Text size={30} align="center">{props.errorMessage}</Text>}
         {(gameData != null) &&
         <>
             <Text size={40} align="center">{session?.username}&apos;s In Progress Games</Text>
@@ -71,7 +71,7 @@ export const getServerSideProps: GetServerSideProps<InProgressGamesProps> = asyn
   return {
     props: {
       games: null,
-      errorMessage: 'Error getting in progress game data ' + res.status
+      errorMessage: `Error getting in progress game data ${res.status}`
     }
   }
 }

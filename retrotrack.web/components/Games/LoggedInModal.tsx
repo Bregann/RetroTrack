@@ -12,7 +12,7 @@ interface LoggedInModalProps {
   setTableDataUpdateNeeded?: (toggleState: boolean) => void
 }
 
-const LoggedInModal = (props: LoggedInModalProps) => {
+const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   const [gameLayoutChecked, setGameLayoutChecked] = useState(false)
   const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
   const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements)
@@ -21,10 +21,10 @@ const LoggedInModal = (props: LoggedInModalProps) => {
   const [gameTracked, setGameTracked] = useState(props.gameInfo.gameTracked)
   const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false)
   const [achievementsFiltered, setAchievementsFiltered] = useState(false)
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const interval = useRef<NodeJS.Timeout | null>(null)
 
-  const FilterCurrentAchievements = (checked: boolean) => {
+  const FilterCurrentAchievements = async (checked: boolean): Promise<void> => {
     setAchievementsFiltered(checked)
 
     if (checked) {
@@ -34,11 +34,11 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     }
   }
 
-  const UpdateTrackedGame = async () => {
+  const UpdateTrackedGame = async (): Promise<void> => {
     setTrackedGameButtonLoading(true)
 
     if (gameTracked) {
-      const res = await DoDelete('/api/trackedgames/DeleteTrackedGame/' + props.gameInfo.gameId, null, session?.sessionId)
+      const res = await DoDelete(`/api/trackedgames/DeleteTrackedGame/${props.gameInfo.gameId}`, null, session?.sessionId)
 
       if (res.ok) {
         setGameTracked(false)
@@ -48,14 +48,14 @@ const LoggedInModal = (props: LoggedInModalProps) => {
           theme: 'colored'
         })
       } else {
-        toast.error('Error updating tracked game: ' + res.status, {
+        toast.error(`Error updating tracked game: ${res.status}`, {
           position: 'bottom-right',
           closeOnClick: true,
           theme: 'colored'
         })
       }
     } else {
-      const res = await DoDelete('/api/trackedgames/AddTrackedGame/' + props.gameInfo.gameId, null, session?.sessionId)
+      const res = await DoDelete(`/api/trackedgames/AddTrackedGame/${props.gameInfo.gameId}`, null, session?.sessionId)
 
       if (res.ok) {
         setGameTracked(true)
@@ -65,7 +65,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
           theme: 'colored'
         })
       } else {
-        toast.error('Error updating tracked game: ' + res.status, {
+        toast.error(`Error updating tracked game: ${res.status}`, {
           position: 'bottom-right',
           closeOnClick: true,
           theme: 'colored'
@@ -75,8 +75,8 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     setTrackedGameButtonLoading(false)
   }
 
-  const UpdateUserProgress = async () => {
-    const res = await DoGet('/api/games/GetGameInfoForUser/' + props.gameInfo.gameId, session?.sessionId)
+  const UpdateUserProgress = async (): Promise<void> => {
+    const res = await DoGet(`/api/games/GetGameInfoForUser/${props.gameInfo.gameId}`, session?.sessionId)
 
     if (res.ok) {
       const data: GetGameInfoForUser = await res.json()
@@ -89,9 +89,9 @@ const LoggedInModal = (props: LoggedInModalProps) => {
         theme: 'colored'
       })
 
-      FilterCurrentAchievements(achievementsFiltered)
+      await FilterCurrentAchievements(achievementsFiltered)
     } else {
-      toast.error('Error updating user: ' + res.status, {
+      toast.error(`Error updating user: ${res.status}`, {
         position: 'bottom-right',
         closeOnClick: true,
         theme: 'colored'
@@ -99,7 +99,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
     }
   }
 
-  const UpdateCloseModalStates = () => {
+  const UpdateCloseModalStates = async (): Promise<void> => {
     props.loggedInModal(false)
 
     if (props.setTableDataUpdateNeeded != null) {
@@ -108,7 +108,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
   }
 
   useEffect(() => {
-    FilterCurrentAchievements(achievementsFiltered)
+    void FilterCurrentAchievements(achievementsFiltered)
     // Ignoring the below warning as the filter is used in other places
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [achievementList])
@@ -122,7 +122,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
       })
 
       interval.current = setInterval(async () => {
-        UpdateUserProgress()
+        void UpdateUserProgress()
       }, 60000)
     }
     if (!autoUpdateChecked && (interval.current != null)) {
@@ -142,7 +142,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
         <>
         <Modal
           opened={true}
-          onClose={() => { UpdateCloseModalStates() }}
+          onClose={async () => { await UpdateCloseModalStates() }}
           size="xl"
         >
             <Text align="center" mt={-50} mb={20} size={40}>{props.gameInfo.title}</Text>
@@ -285,7 +285,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
                         variant="gradient"
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         sx={{ ':hover': { color: 'white' } }}
-                        href={'game/' + props.gameInfo.gameId}
+                        href={`game/${props.gameInfo.gameId}`}
                         >
                             Game Page
                     </Button>
@@ -298,14 +298,14 @@ const LoggedInModal = (props: LoggedInModalProps) => {
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
                         sx={{ ':hover': { color: 'white' } }}
-                        href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
+                        href={`https://retroachievements.org/game/${props.gameInfo.gameId}`}
                         >
                             RA Page
                         </Button>
 
                     <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-9} mr={5} ml={20} onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }}/>
                     <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mt={-9} mr={5} onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }}/>
-                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-9} mr={5} onChange={(event) => { FilterCurrentAchievements(event.currentTarget.checked) }}/>
+                    <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-9} mr={5} onChange={async (event) => { await FilterCurrentAchievements(event.currentTarget.checked) }}/>
                 </Group>
             </Grid.Col>
             </Grid>

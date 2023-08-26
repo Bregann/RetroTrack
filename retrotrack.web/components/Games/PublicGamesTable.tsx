@@ -11,7 +11,7 @@ import { DoGet } from '../../Helpers/webFetchHelper'
 import LoggedOutModal from './LoggedOutModal'
 import { type PublicGameTableProps } from '../../types/App/publicGameTable'
 
-const PublicGamesTable = (props: PublicGameTableProps) => {
+const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
   const [pageSize, setPageSize] = useState(15)
   const [page, setPage] = useState(1)
   const [games, setGames] = useState(sortBy(props.gameData.slice(0, pageSize), 'gameName'))
@@ -47,15 +47,15 @@ const PublicGamesTable = (props: PublicGameTableProps) => {
     setGames(filteredGames.slice(from, to))
   }, [page, props.gameData, sortStatus, pageSize, debouncedQuery])
 
-  const GetGameInfoForModal = async (gameId: number) => {
+  const GetGameInfoForModal = async (gameId: number): Promise<void> => {
     setLoadingOverlayVisible(true)
-    const res = await DoGet('/api/games/GetSpecificGameInfo/' + gameId)
+    const res = await DoGet(`/api/games/GetSpecificGameInfo/${gameId}`)
     let data: GetSpecificGameInfo | undefined
 
     if (res.ok) {
       data = await res.json()
     } else {
-      toast.error('Error getting game info: ' + res.status, {
+      toast.error(`Error getting game info: ${res.status}`, {
         position: 'bottom-right',
         closeOnClick: true,
         theme: 'colored'

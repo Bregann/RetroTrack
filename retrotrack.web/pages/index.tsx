@@ -1,6 +1,6 @@
 import { List, Text } from '@mantine/core'
 
-export default function Home () {
+export default function Home (): JSX.Element {
   return (
     <>
     <Text align="center" size={60}>RetroTrack</Text>

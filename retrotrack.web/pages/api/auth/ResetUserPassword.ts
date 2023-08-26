@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { handleClientScriptLoad } from 'next/script'
 import { DoBackendPost } from '../../../Helpers/backendFetchHelper'
 import { type ForgotPasswordData } from '../../../types/Api/Auth/ForgotPassword'
-import { RegiserUserData } from '../../../types/Api/Auth/RegisterUser'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<ForgotPasswordData>) => {
   try {

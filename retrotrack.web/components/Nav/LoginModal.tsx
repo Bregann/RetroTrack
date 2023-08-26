@@ -12,7 +12,7 @@ interface FormValues {
   password: string
 }
 
-const LoginModal = (props: ModalProps) => {
+const LoginModal = (props: ModalProps): JSX.Element => {
   const [forgotPasswordOpened, setforgotPasswordOpened] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loginButtonLoading, setLoginButtonLoading] = useState(false)
@@ -23,7 +23,7 @@ const LoginModal = (props: ModalProps) => {
     }
   })
 
-  const SendLoginRequest = async (values: FormValues) => {
+  const SendLoginRequest = async (values: FormValues): Promise<void> => {
     setLoginButtonLoading(true)
 
     // Send the signin request
@@ -33,7 +33,7 @@ const LoginModal = (props: ModalProps) => {
       redirect: false
     })
 
-    if (res?.ok) {
+    if ((res?.ok) === true) {
       // Close the menu
       props.setOpened(false)
       setLoginButtonLoading(false)
@@ -58,7 +58,7 @@ const LoginModal = (props: ModalProps) => {
             opened={props.openedState}
             onClose={() => { props.setOpened(false) }}
             title="Login">
-                {errorMessage &&
+                {(errorMessage !== null) &&
                 <Alert
                     icon={<IconAlertCircle size={16} />}
                     title="Error logging in"

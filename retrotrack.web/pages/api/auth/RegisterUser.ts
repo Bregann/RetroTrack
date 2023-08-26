@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { handleClientScriptLoad } from 'next/script'
 import { DoBackendPost } from '../../../Helpers/backendFetchHelper'
 import { type RegiserUserData } from '../../../types/Api/Auth/RegisterUser'
 

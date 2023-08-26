@@ -15,14 +15,14 @@ interface AllGamesProps {
   errorMessage: string | null
 }
 
-const AllGames = (props: AllGamesProps) => {
+const AllGames = (props: AllGamesProps): JSX.Element => {
   return (
         <>
         <Text size={40} align="center">All Games</Text>
 
-        {(props.publicConsoleData != null) && <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>}
-        {(props.loggedInConsoleData != null) && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>}
-        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
+        {props.publicConsoleData !== null && <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>}
+        {props.loggedInConsoleData !== null && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>}
+        {props.errorMessage !== null && <Text size={30} align="center">{props.errorMessage}</Text>}
 
         </>
   )
@@ -31,8 +31,8 @@ const AllGames = (props: AllGamesProps) => {
 export const getServerSideProps: GetServerSideProps<AllGamesProps> = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)
 
-  if (session?.sessionId) {
-    const res = await DoGet('/api/games/GetGamesAndUserProgressForConsole/' + 0, session.sessionId)
+  if (session?.sessionId != null) {
+    const res = await DoGet('/api/games/GetGamesAndUserProgressForConsole/0', session.sessionId)
     if (res.ok) {
       return {
         props: {
@@ -46,12 +46,12 @@ export const getServerSideProps: GetServerSideProps<AllGamesProps> = async (cont
         props: {
           publicConsoleData: null,
           loggedInConsoleData: null,
-          errorMessage: 'Error getting console data - Error code ' + res.status
+          errorMessage: `Error getting console data - Error code ${res.status}`
         }
       }
     }
   } else {
-    const res = await DoGet('/api/games/GetGamesForConsole/' + 0)
+    const res = await DoGet('/api/games/GetGamesForConsole/0')
 
     if (res.ok) {
       return {
@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps<AllGamesProps> = async (cont
         props: {
           publicConsoleData: null,
           loggedInConsoleData: null,
-          errorMessage: 'Error getting console data - Error code ' + res.status
+          errorMessage: `Error getting console data - Error code ${res.status}`
         }
       }
     }

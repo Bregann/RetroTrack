@@ -7,7 +7,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-export default function App (props: AppProps) {
+export default function App (props: AppProps): JSX.Element {
   if (process.env.NODE_ENV === 'development') {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   }

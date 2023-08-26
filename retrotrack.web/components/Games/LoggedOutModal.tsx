@@ -8,7 +8,7 @@ interface LoggedOutModalProps {
   loggedOutModal: (toggleState: boolean) => void
 }
 
-const LoggedOutModal = (props: LoggedOutModalProps) => {
+const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
   const [checked, setChecked] = useState(false)
 
   return (
@@ -130,7 +130,7 @@ const LoggedOutModal = (props: LoggedOutModalProps) => {
                         gradient={{ from: 'indigo', to: 'cyan' }}
                         target="_blank"
                         sx={{ ':hover': { color: 'white' } }}
-                        href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
+                        href={`https://retroachievements.org/game/${props.gameInfo.gameId}`}
                         >
                             RA Page
                         </Button>

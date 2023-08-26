@@ -1,7 +1,7 @@
 import { Modal, Text } from '@mantine/core'
 import { type ModalProps } from '../../types/App/modal'
 
-const SupportModal = (props: ModalProps) => {
+const SupportModal = (props: ModalProps): JSX.Element => {
   return (
         <Modal
         opened={props.openedState}

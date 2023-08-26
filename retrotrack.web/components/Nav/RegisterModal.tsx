@@ -14,7 +14,7 @@ interface FormValues {
   apiKey: string
 }
 
-const RegisterModal = (props: ModalProps) => {
+const RegisterModal = (props: ModalProps): JSX.Element => {
   const form = useForm<FormValues>({
     initialValues: {
       username: '',
@@ -23,10 +23,10 @@ const RegisterModal = (props: ModalProps) => {
     }
   })
 
-  const RegisterUser = async (values: FormValues) => {
+  const RegisterUser = async (values: FormValues): Promise<void> => {
     setErrorMessage(null)
 
-    const spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+    const spChars = /[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?]+/
 
     if (values.password.length < 6 || !spChars.test(values.password)) {
       setErrorMessage('Password must be at least 6 characters and contain a special character!')
@@ -44,8 +44,6 @@ const RegisterModal = (props: ModalProps) => {
 
     const data: RegiserUserData = await res.json()
 
-    console.log(data)
-
     // Check if there's any error
     if (!data.success) {
       setErrorMessage(data.reason)
@@ -54,7 +52,7 @@ const RegisterModal = (props: ModalProps) => {
     }
 
     // If the registration was successful then login the user
-    if (data.success && !data.reason) {
+    if (data.success && data.reason === null) {
       // Send the signin request
       const res = await signIn('credentials', {
         username: values.username,
@@ -62,7 +60,7 @@ const RegisterModal = (props: ModalProps) => {
         redirect: false
       })
 
-      if (res?.ok) {
+      if ((res?.ok) ?? false) {
         // Close the menu
         setRegisterButtonLoading(false)
         props.setOpened(false)
@@ -95,7 +93,7 @@ const RegisterModal = (props: ModalProps) => {
             opened={props.openedState}
             onClose={() => { props.setOpened(false) }}
             title="Register">
-            {errorMessage &&
+            {(errorMessage !== null) &&
                 <Alert
                     icon={<IconAlertCircle size={16} />}
                     title="Error registering user"

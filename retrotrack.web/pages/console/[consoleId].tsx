@@ -18,15 +18,15 @@ interface ConsoleProps {
 const Console = (props: ConsoleProps): JSX.Element => {
   return (
         <>
-        {(props.errorMessage != null) && <Text size={30} align="center">{props.errorMessage}</Text>}
+        {props.errorMessage !== null && <Text size={30} align="center">{props.errorMessage}</Text>}
 
-        {(props.publicConsoleData != null) &&
+        {props.publicConsoleData !== null &&
         <>
         <Text size={40} align="center">{props.publicConsoleData?.consoleName}</Text>
         <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>
         </>}
 
-        {(props.loggedInConsoleData != null) &&
+        {props.loggedInConsoleData !== null &&
         <>
         <Text size={40} align="center">{props.loggedInConsoleData?.consoleName}</Text>
         <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>
@@ -42,8 +42,8 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
   const session = await getServerSession(context.req, context.res, authOptions)
   const { consoleId } = context.query
 
-  if (session?.sessionId) {
-    const res = await DoGet('/api/games/GetGamesAndUserProgressForConsole/' + consoleId, session.sessionId)
+  if (session !== null) {
+    const res = await DoGet(`/api/games/GetGamesAndUserProgressForConsole/${consoleId}`, session.sessionId)
 
     if (res.ok) {
       return {
@@ -58,12 +58,12 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
         props: {
           publicConsoleData: null,
           loggedInConsoleData: null,
-          errorMessage: 'Error getting console data - Error code ' + res.status
+          errorMessage: `Error getting console data - Error code ${res.status}`
         }
       }
     }
   } else {
-    const res = await DoGet('/api/games/GetGamesForConsole/' + consoleId)
+    const res = await DoGet(`/api/games/GetGamesForConsole/${consoleId}`)
 
     if (res.ok) {
       return {
@@ -78,7 +78,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
         props: {
           publicConsoleData: null,
           loggedInConsoleData: null,
-          errorMessage: 'Error getting console data - Error code ' + res.status
+          errorMessage: `Error getting console data - Error code ${res.status}`
         }
       }
     }

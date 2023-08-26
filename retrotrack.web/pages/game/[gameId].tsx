@@ -1,8 +1,6 @@
-import { useRouter } from 'next/router'
-
-const Console = () => {
-  const router = useRouter()
-  const { gameId } = router.query
+const Console = (): JSX.Element => {
+  // const router = useRouter()
+  // const { gameId } = router.query
   return (
         <h1>Coming soon :)</h1>
   )

@@ -4,7 +4,6 @@ import { IconAlertCircle, IconLock } from '@tabler/icons'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { DoPost } from '../../Helpers/webFetchHelper'
-import RegisterUser from '../../pages/api/auth/RegisterUser'
 import { type ForgotPasswordData } from '../../types/Api/Auth/ForgotPassword'
 import { type ModalProps } from '../../types/App/modal'
 
@@ -14,7 +13,7 @@ interface FormValues {
   apiKey: string
 }
 
-const ForgotPasswordModal = (props: ModalProps) => {
+const ForgotPasswordModal = (props: ModalProps): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false)
 
@@ -26,10 +25,10 @@ const ForgotPasswordModal = (props: ModalProps) => {
     }
   })
 
-  const ResetPassword = async (values: FormValues) => {
+  const ResetPassword = async (values: FormValues): Promise<void> => {
     setErrorMessage(null)
 
-    const spChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+    const spChars = /[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?]+/
 
     if (values.password.length < 6 || !spChars.test(values.password)) {
       setErrorMessage('Password must be at least 6 characters and a special character!')
@@ -46,8 +45,6 @@ const ForgotPasswordModal = (props: ModalProps) => {
     }
 
     const data: ForgotPasswordData = await res.json()
-
-    console.log(data)
 
     // Check if there's any error
     if (!data.success) {
@@ -71,7 +68,7 @@ const ForgotPasswordModal = (props: ModalProps) => {
             opened={props.openedState}
             onClose={() => { props.setOpened(false) }}
             title="Forgot Password">
-            {errorMessage &&
+            {(errorMessage !== null) &&
                 <Alert
                     icon={<IconAlertCircle size={16} />}
                     title="Error resetting user password"

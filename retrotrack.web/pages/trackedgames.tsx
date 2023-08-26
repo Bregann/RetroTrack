@@ -13,13 +13,13 @@ interface TrackedGameProps {
   errorMessage: string | null
 }
 
-const TrackedGames = (props: TrackedGameProps) => {
+const TrackedGames = (props: TrackedGameProps): JSX.Element => {
   const [tableUpdatedNeeded, setTableDataUpdateNeeded] = useState(false)
   const [gameData, setGameData] = useState(props.games)
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       if (tableUpdatedNeeded) {
         const res = await DoGet('/api/trackedgames/GetTrackedGamesForUser', session?.sessionId)
 
@@ -30,13 +30,13 @@ const TrackedGames = (props: TrackedGameProps) => {
       }
     }
 
-    fetchData()
+    void fetchData()
     setTableDataUpdateNeeded(false)
   }, [session, tableUpdatedNeeded])
 
   return (
         <>
-        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
+        {(props.errorMessage !== null) && <Text size={30} align="center">{props.errorMessage}</Text>}
         {(gameData != null) &&
         <>
             <Text size={40} align="center">{session?.username}&apos;s Tracked Games</Text>
@@ -71,7 +71,7 @@ export const getServerSideProps: GetServerSideProps<TrackedGameProps> = async (c
   return {
     props: {
       games: null,
-      errorMessage: 'Error getting tracked game data ' + res.status
+      errorMessage: `Error getting tracked game data ${res.status}`
     }
   }
 }
