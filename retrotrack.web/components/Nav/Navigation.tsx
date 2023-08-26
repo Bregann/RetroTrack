@@ -478,6 +478,10 @@ const Navigation = (props: AppProps): JSX.Element => {
                             <NavLink label='Neo Geo Pocket' active={window.location.pathname === '/console/14'} className={classes.subLinks} description={navData.loggedIn?.games['14'].gamesTotalAndCompleted} styles={{ description: { color: getColour(navData.loggedIn?.games['14'].percentage) } }}/>
                         </Link>
 
+                        <Link href='/console/80' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Uzebox' active={'/console/80' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["80"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["80"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/46' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Vectrex' active={window.location.pathname === '/console/46'} className={classes.subLinks} description={navData.loggedIn?.games['46'].gamesTotalAndCompleted} styles={{ description: { color: getColour(navData.loggedIn?.games['46'].percentage) } }}/>
                         </Link>
@@ -770,6 +774,10 @@ const Navigation = (props: AppProps): JSX.Element => {
 
                         <Link href='/console/14' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Neo Geo Pocket' active={window.location.pathname === '/console/14'} className={classes.subLinks} description={navData.loggedOut?.games['14'] + ' games'}/>
+                        </Link>
+
+                        <Link href='/console/80' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Uzebox' active={'/console/80' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["80"] + " games"}/>
                         </Link>
 
                         <Link href='/console/46' passHref style={{ textDecoration: 'none' }}>
