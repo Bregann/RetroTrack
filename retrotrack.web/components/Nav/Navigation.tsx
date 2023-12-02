@@ -472,6 +472,10 @@ const Navigation = (props: AppProps) => {
                             <NavLink label='MSX' active={'/console/29' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["29"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["29"].percentage!)}}}/>
                         </Link>
 
+                        <Link href='/console/56' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Neo Geo CD' active={'/console/14' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["56"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["56"].percentage!)}}}/>
+                        </Link>
+
                         <Link href='/console/14' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='Neo Geo Pocket' active={'/console/14' === window.location.pathname} className={classes.subLinks} description={navData.loggedIn?.games["14"].gamesTotalAndCompleted} styles={{description: {color: getColour(navData.loggedIn?.games["14"].percentage!)}}}/>
                         </Link>
@@ -768,6 +772,10 @@ const Navigation = (props: AppProps) => {
 
                         <Link href='/console/29' passHref style={{ textDecoration: 'none' }}>
                             <NavLink label='MSX' active={'/console/29' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["29"] + " games"}/>
+                        </Link>
+
+                        <Link href='/console/56' passHref style={{ textDecoration: 'none' }}>
+                            <NavLink label='Neo Geo CD' active={'/console/56' === window.location.pathname} className={classes.subLinks} description={navData.loggedOut?.games["56"] + " games"}/>
                         </Link>
 
                         <Link href='/console/14' passHref style={{ textDecoration: 'none' }}>

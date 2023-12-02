@@ -392,7 +392,7 @@ namespace RetroTrack.Domain.Data.External
 
                     if (userProfile != null)
                     {
-                        user.UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png";
+                        user.UserProfileUrl = userProfile.UserPic;
                         user.UserRank = userProfile.Rank;
                         user.UserPoints = userProfile.TotalPoints;
                     }

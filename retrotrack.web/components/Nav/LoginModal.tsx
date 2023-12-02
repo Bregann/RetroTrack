@@ -26,7 +26,7 @@ const LoginModal = (props: ModalProps) => {
     const SendLoginRequest = async (values: FormValues) => {
         setLoginButtonLoading(true);
         
-        //Send the signin request
+        //Send the sign in request
         const res = await signIn('credentials', {
             username: values.username,
             password: values.password,
