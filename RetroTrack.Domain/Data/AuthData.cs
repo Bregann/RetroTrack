@@ -100,13 +100,13 @@ namespace RetroTrack.Domain.Data
                 context.Users.Add(new Users
                 {
                     Username = username,
-                    RAUsername = userProfile.LastActivity.User,
+                    RAUsername = userProfile.User,
                     HashedPassword = hashedPassword,
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,
                     LastAchievementsUpdate = DateTime.UtcNow,
                     UserPoints = userProfile.TotalPoints,
-                    UserProfileUrl = userProfile.UserPic,
+                    UserProfileUrl = "/UserPic/" + userProfile.User + ".png",
                     UserRank = userProfile.Rank
                 });
 

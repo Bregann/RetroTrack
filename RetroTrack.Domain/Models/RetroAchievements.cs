@@ -58,6 +58,9 @@ namespace RetroTrack.Domain.Models
 
     public class GetUserSummary
     {
+        [JsonProperty("User")]
+        public string User { get; set; }
+
         [JsonProperty("TotalPoints")]
         public long TotalPoints { get; set; }
 
