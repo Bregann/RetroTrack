@@ -249,7 +249,12 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("DateEarnedHardcore", NullValueHandling = NullValueHandling.Ignore)]
         public DateTimeOffset? DateEarnedHardcore { get; set; }
+
+        [JsonProperty("type")]
+        public TypeEnum? Type { get; set; }
     }
+
+    public enum TypeEnum { Missable, Progression, WinCondition };
 
     public partial class GetActiveClaims
     {

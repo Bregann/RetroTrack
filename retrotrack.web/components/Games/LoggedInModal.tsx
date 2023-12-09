@@ -238,7 +238,7 @@ const LoggedInModal = (props: LoggedInModalProps) => {
                             />
                         </Grid.Col>
                         <Grid.Col md={5} xs={10}>
-                            <Text fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
+                            <Text fw={500} mt={-5}>{achievement.title} ({achievement.points}) {achievement.type === "Missable" ? "[m]" : ""}</Text>
                             <Text fz="sm">{achievement.description}</Text>
                         </Grid.Col>
                      </>
