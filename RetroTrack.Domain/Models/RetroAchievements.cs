@@ -254,7 +254,7 @@ namespace RetroTrack.Domain.Models
         public TypeEnum? Type { get; set; }
     }
 
-    public enum TypeEnum { Missable, Progression, WinCondition };
+    public enum TypeEnum { Missable, Progression, Win_Condition, Unknown };
 
     public partial class GetActiveClaims
     {
