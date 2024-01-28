@@ -14,6 +14,8 @@ namespace RetroTrack.Domain.Data.External
     {
         public static async Task<bool> ValidateApiKey(string username, string raApiKey)
         {
+            Log.Information($"[Register User] Request for user {username} received");
+
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
             var request = new RestRequest($"API_GetConsoleIDs.php?z={username}&y={raApiKey}", Method.Get);
 
@@ -27,6 +29,7 @@ namespace RetroTrack.Domain.Data.External
                 return false;
             }
 
+            Log.Information($"[Register User] API key matched for user {username}");
             return true;
         }
 
@@ -599,8 +602,11 @@ namespace RetroTrack.Domain.Data.External
                     //This is incase there's been any demoted achievements or updated achievements
                     if (gameFromDb.ExtraDataProcessed)
                     {
-                        context.Achievements.Where(x => x.Game == gameFromDb).ExecuteDelete();
-                        context.SaveChanges();
+                        //Some achievements can be moved to and from core so this can potentially mess up so we delete by achievement id
+                        foreach (var achievement in gameData.Achievements)
+                        {
+                            context.Achievements.Where(x => x.Id == achievement.Value.Id).ExecuteDelete();
+                        }
                     }
 
                     foreach (var achievement in gameData.Achievements)
