@@ -25,13 +25,13 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         [HttpPost("RegisterNewUser")]
         public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
         {
-            return await AuthData.RegisterUser(dto.Username.ToLower(), dto.Password, dto.ApiKey);
+            return await AuthData.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpPost("ResetUserPassword")]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await AuthData.ResetUserPassword(dto.Username.ToLower(), dto.Password, dto.ApiKey);
+            return await AuthData.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpDelete("DeleteUserSession")]
