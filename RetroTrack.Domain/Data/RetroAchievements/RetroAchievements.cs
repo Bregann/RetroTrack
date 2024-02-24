@@ -629,6 +629,7 @@ namespace RetroTrack.Domain.Data.External
                     gameFromDb.GameGenre = gameData.Genre;
                     gameFromDb.Players = gameData.Players;
                     gameFromDb.ExtraDataProcessed = true;
+                    gameFromDb.LastModified = gameData.Updated;
                     dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
 
                     Log.Information($"[RetroAchievments] Game {gameFromDb.Title} extra data processed");

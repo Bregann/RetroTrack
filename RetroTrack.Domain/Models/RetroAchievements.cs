@@ -112,6 +112,9 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("NumDistinctPlayersCasual")]
         public int Players { get; set; }
 
+        [JsonProperty("Updated")]
+        public DateTime Updated { get; set; }
+
         [JsonProperty("Achievements")]
         public Dictionary<string, Achievement>? Achievements { get; set; }
     }
