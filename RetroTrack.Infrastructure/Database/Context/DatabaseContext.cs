@@ -5,7 +5,7 @@ namespace RetroTrack.Infrastructure.Database.Context
 {
     public class DatabaseContext : DbContext
     {
-        private static readonly string _connectionString = Environment.GetEnvironmentVariable("RetroTrackConnString");
+        private static readonly string _connectionString = Environment.GetEnvironmentVariable("RetroTrackConnStringLive");
 
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsoles> GameConsoles { get; set; }

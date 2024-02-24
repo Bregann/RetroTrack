@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroTrack.Domain", "RetroT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroTrack.Infrastructure", "RetroTrack.Infrastructure\RetroTrack.Infrastructure.csproj", "{E52937A1-E620-470A-AA30-3ECDAE8B08C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetroTrack.DomainTests", "RetroTrack.DomainTests\RetroTrack.DomainTests.csproj", "{D4E56222-9D2E-4D2D-B28F-C2111615E585}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E52937A1-E620-470A-AA30-3ECDAE8B08C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E52937A1-E620-470A-AA30-3ECDAE8B08C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E52937A1-E620-470A-AA30-3ECDAE8B08C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4E56222-9D2E-4D2D-B28F-C2111615E585}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4E56222-9D2E-4D2D-B28F-C2111615E585}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4E56222-9D2E-4D2D-B28F-C2111615E585}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4E56222-9D2E-4D2D-B28F-C2111615E585}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

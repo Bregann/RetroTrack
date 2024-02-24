@@ -4,6 +4,7 @@ using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
 using Hangfire.PostgreSql;
 using RetroTrack.Domain;
+using RetroTrack.Domain.Search;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: 3, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
@@ -35,6 +36,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnString")));
 
+/*
 builder.Services.AddHangfire(configuration => configuration
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
         .UseSimpleAssemblyNameTypeSerializer()
@@ -44,7 +46,7 @@ builder.Services.AddHangfire(configuration => configuration
         );
 
 builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
-
+*/
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -52,7 +54,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-HangfireJobs.SetupHangfireJobs();
+// HangfireJobs.SetupHangfireJobs();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -68,6 +70,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+/*
 
 var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
 {
@@ -87,6 +91,8 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
 app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = auth
-}, JobStorage.Current);
+}, JobStorage.Current);*/
+
+await SearchAlgorithm.LoadData();
 
 app.Run();
