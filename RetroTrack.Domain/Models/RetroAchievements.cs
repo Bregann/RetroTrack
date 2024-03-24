@@ -65,7 +65,7 @@ namespace RetroTrack.Domain.Models
         public long TotalPoints { get; set; }
 
         [JsonProperty("Rank")]
-        public long Rank { get; set; }
+        public long? Rank { get; set; }
 
         [JsonProperty("UserPic")]
         public string UserPic { get; set; }
