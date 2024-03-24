@@ -16,11 +16,11 @@ namespace RetroTrack.Domain.Search
         public int AchievementCount { get; set; }
         public string Genre { get; set; }
         public int PlayerCount { get; set; }
-        public Achievement[] Achievements { get; set; }
     }
 
-    public class Achievement
+    public class AchievementData
     {
+        public int GameId { get; set; }
         public long AchievementId { get; set; }
         public string AchievementName { get; set; }
         public string AchievementDescription { get; set; }

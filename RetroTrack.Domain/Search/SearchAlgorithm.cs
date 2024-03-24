@@ -12,6 +12,7 @@ namespace RetroTrack.Domain.Search
     public static class SearchAlgorithm
     {
         private static SearchData[] GameData = new SearchData[0];
+        private static AchievementData[] AchievementData = new AchievementData[0];
         private static readonly int PageSize = 50;
 
         public static async Task LoadData()
@@ -27,7 +28,16 @@ namespace RetroTrack.Domain.Search
                     AchievementCount = x.AchievementCount,
                     Genre = x.GameGenre,
                     PlayerCount = x.Players ?? 0,
-                    Achievements = new Achievement[0],
+                }).ToArrayAsync();
+
+                AchievementData = await context.Achievements.Select(x => new AchievementData
+                {
+                    AchievementDescription = x.AchievementDescription,
+                    AchievementId = x.Id,
+                    AchievementDisplayOrder = x.DisplayOrder,
+                    AchievementName = x.AchievementName,
+                    AchievementPointValue = x.Points,
+                    GameId = x.GameId
                 }).ToArrayAsync();
             }
         }
