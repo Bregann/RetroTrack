@@ -5,11 +5,11 @@ using RetroTrack.Domain.Dtos;
 
 namespace RetroTrack.Api.Api.Controllers.Authenication
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        [HttpPost("LoginUser")]
+        [HttpPost]
         public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
             var loginData = AuthData.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
@@ -22,19 +22,19 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
             return Ok(loginData);
         }
 
-        [HttpPost("RegisterNewUser")]
+        [HttpPost]
         public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
         {
             return await AuthData.RegisterUser(dto.Username.ToLower(), dto.Password, dto.ApiKey);
         }
 
-        [HttpPost("ResetUserPassword")]
+        [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
             return await AuthData.ResetUserPassword(dto.Username.ToLower(), dto.Password, dto.ApiKey);
         }
 
-        [HttpDelete("DeleteUserSession")]
+        [HttpDelete]
         public ActionResult DeleteUserSession()
         {
             if (Request.Headers["Authorization"].Count == 0)

@@ -1,0 +1,7 @@
+* {
+    color: white;
+}
+
+.mantine-AppShell-main {
+    background-color: var(--mantine-color-dark-6);
+}

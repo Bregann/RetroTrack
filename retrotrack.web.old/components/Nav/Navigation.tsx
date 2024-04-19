@@ -74,7 +74,7 @@ const Navigation = (props: AppProps) => {
         signOut();
         DoDelete('/api/auth/DeleteUserSession', sessionId);
     
-        toast.success('Succesfully logged out', {
+        toast.success('Successfully logged out', {
             position: 'bottom-right',
             closeOnClick: true,
             theme: 'colored'

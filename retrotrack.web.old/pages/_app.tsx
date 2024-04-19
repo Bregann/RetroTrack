@@ -65,9 +65,7 @@ export default function App(props: AppProps) {
                   }
                 })
               }
-              
             }
-            
           }}
         >
           
