@@ -1,9 +1,9 @@
-import '../css/global.css'
+import '../styles/global.css'
 import '@mantine/core/styles.css'
 import { MantineProvider } from '@mantine/core'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import Navigation from '@/components/navigation'
+import Navigation from '@/components/navigation/navigation'
 
 export default function App (props: AppProps): JSX.Element {
   if (process.env.NODE_ENV === 'development') {

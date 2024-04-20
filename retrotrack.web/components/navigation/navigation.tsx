@@ -1,12 +1,15 @@
 import fetchHelper from '@/helpers/FetchHelper'
-import sessionHelper from '@/helpers/sessionHelper'
 import { type GetPublicNavigationDataDto } from '@/pages/api/navigation/GetPublicNavigationData'
-import { AppShell, Burger, Button, Grid, Group, NavLink, ScrollArea } from '@mantine/core'
+import { AppShell, Burger, Button, Group, NavLink, ScrollArea } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconHome2 } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import LoginModal from './LoginModal'
+import RegisterModal from './RegisterModal'
+import SupportModal from './SupportModal'
+import sessionHelper from '@/helpers/SessionHelper'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
@@ -14,7 +17,7 @@ const Navigation = (props: AppProps): JSX.Element => {
   const [loginModalOpened, setLoginModalOpened] = useState(false)
   const [registerModalOpened, setRegisterModalOpened] = useState(false)
   const [supportModalOpened, setSupportModalOpened] = useState(false)
-  const [loggedIn, setLoggedIn] = useState(sessionHelper.hasSession())
+  const [loggedIn, setLoggedIn] = useState(false)
   const [navData, setNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
   const [activePage, setActivePage] = useState('')
 
@@ -29,12 +32,17 @@ const Navigation = (props: AppProps): JSX.Element => {
   ]
 
   useEffect(() => {
+    setLoggedIn(sessionHelper.hasSession())
+  }, [])
+
+  useEffect(() => {
+    console.log('hello')
     if (loggedIn) {
       // get logged in data
     } else {
       const fetchLoggedOutData = async (): Promise<void> => {
         const fetchResult = await fetchHelper.doGet('/navigation/GetPublicNavigationData')
-        console.log(fetchResult)
+
         if (fetchResult.errored) {
           console.error('Error loading navigation data')
         } else {
@@ -70,33 +78,30 @@ const Navigation = (props: AppProps): JSX.Element => {
                 <Button
                   variant="gradient"
                   gradient={{ from: 'indigo', to: 'cyan' }}
-                  onClick={() => { /* TODO: Implement */ }}>
+                  onClick={() => { }}>
                   Update games
-                </Button>
-
-                <Button
+                </Button><Button
                   variant="gradient"
                   gradient={{ from: 'orange', to: 'red' }}
-                  onClick={() => { /* TODO: Implement - router.push them to homepage */ } }>
+                  onClick={() => { }}>
                   Logout
                 </Button>
               </>
               : <>
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
-                  onClick={() => { setLoginModalOpened(true) }}>
-                  Login
-                </Button>
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                  onClick={() => { setRegisterModalOpened(true) }}>
-                  Register
-                </Button>
-              </>
+              <Button
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'cyan' }}
+                onClick={() => { setLoginModalOpened(true) }}>
+                Login
+              </Button>
+              <Button
+                variant="gradient"
+                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                onClick={() => { setRegisterModalOpened(true) }}>
+                Register
+              </Button>
+            </>
             }
-
           </Group>
         </AppShell.Header>
         <AppShell.Navbar>
@@ -121,24 +126,27 @@ const Navigation = (props: AppProps): JSX.Element => {
             {consoleTypes.map(console => {
               return (
                 <NavLink label={console.consoleName} key={console.consoleType}>
-                {navData?.filter(x => x.consoleType === console.consoleType).sort((a, b) => a.consoleName.localeCompare(b.consoleName)).map(data => {
-                  return (
-                    <NavLink
-                      component={Link}
-                      description={`${data.gameCount} games`}
-                      key={data.consoleId}
-                      label={data.consoleName}
-                      href={`console/${data.consoleId}`}
-                      onClick={() => { setActivePage(data.consoleId.toString()) }}
-                    />
-                  )
-                })}
-              </NavLink>
+                  {navData?.filter(x => x.consoleType === console.consoleType).sort((a, b) => a.consoleName.localeCompare(b.consoleName)).map(data => {
+                    return (
+                      <NavLink
+                        component={Link}
+                        description={`${data.gameCount} games`}
+                        key={data.consoleId}
+                        label={data.consoleName}
+                        href={`console/${data.consoleId}`}
+                        onClick={() => { setActivePage(data.consoleId.toString()) }}
+                      />
+                    )
+                  })}
+                </NavLink>
               )
             })}
           </ScrollArea>
         </AppShell.Navbar>
         <AppShell.Main>
+          <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={() => { setLoggedIn(true) }} />
+          <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened} />
+          <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened} />
           <Component {...pageProps} />
         </AppShell.Main>
 

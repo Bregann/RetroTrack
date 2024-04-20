@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
  
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
-  if(request.cookies.has('raSession')){
+  if(request.cookies.has('rtSession')){
     console.log('has cookie')
     return
   }
@@ -20,6 +19,6 @@ export const config = {
        * - _next/image (image optimization files)
        * - favicon.ico (favicon file)
        */
-      '/((?!api|_next/static|_next/image|favicon.ico).*)',
+      '/((?!api|_next/static|_next/image|favicon.ico|__nextjs_original-stack-frame).*)',
     ],
   }

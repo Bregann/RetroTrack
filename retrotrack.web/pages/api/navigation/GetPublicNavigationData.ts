@@ -12,9 +12,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
   if (req.method !== 'GET') {
     res.status(405)
   }
-  console.log('hello')
+
   const fetchResult = await backendFetchHelper.doGet('/Navigation/GetPublicNavigationData')
-  console.log(fetchResult)
+
   if (fetchResult.errored) {
     res.status(500)
   } else {
