@@ -3,6 +3,7 @@ using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
 using Hangfire.PostgreSql;
+using RetroTrack.Api;
 using RetroTrack.Domain;
 using Serilog;
 
@@ -70,6 +71,8 @@ app.UseCors("AllowAnyOrigin");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseApiAuthorizationMiddleware();
 
 app.MapControllers();
 /*

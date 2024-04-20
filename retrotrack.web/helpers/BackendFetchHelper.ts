@@ -31,7 +31,11 @@ class backendFetchHelper {
 
   public static async doGet (url: string): Promise<FetchResponse> {
     const requestOptions = {
-      method: 'GET'
+      method: 'GET',
+      headers:
+      {
+        ApiSecret: process.env.API_SECRET ?? ''
+      }
     }
 
     return await this.doRequest(url, requestOptions)
@@ -40,7 +44,11 @@ class backendFetchHelper {
   public static async doPost (url: string, body: any): Promise<FetchResponse> {
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers:
+      {
+        'Content-Type': 'application/json',
+        ApiSecret: process.env.API_SECRET ?? ''
+      },
       body: JSON.stringify(body)
     }
 
@@ -50,7 +58,11 @@ class backendFetchHelper {
   public static async doPut (url: string, body: any): Promise<FetchResponse> {
     const requestOptions = {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers:
+      {
+        'Content-Type': 'application/json',
+        ApiSecret: process.env.API_SECRET ?? ''
+      },
       body: JSON.stringify(body)
     }
 

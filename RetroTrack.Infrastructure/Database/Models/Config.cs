@@ -25,5 +25,8 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required string ProjectMonitorApiKey { get; set; }
+
+        [Required]
+        public required string ApiSecret { get; set; }
     }
 }
