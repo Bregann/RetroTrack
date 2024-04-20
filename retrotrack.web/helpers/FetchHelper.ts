@@ -1,28 +1,34 @@
 export interface FetchResponse {
   data: any
   errored: boolean
+  statusCode: number
 }
 
 class fetchHelper {
   private static async doRequest (url: string, requestOptions: RequestInit): Promise<FetchResponse> {
     const baseUrl = document.location.origin + '/api'
 
-    const response: FetchResponse = {
+    const fetchResponse: FetchResponse = {
       data: undefined,
-      errored: false
+      errored: false,
+      statusCode: 0
     }
 
     return await fetch(baseUrl + url, requestOptions)
-      .then(async response => await response.json())
+      .then(async response => {
+        fetchResponse.statusCode = response.status
+        return await response.json()
+      })
       .then(data => {
-        response.data = data
-        response.errored = false
-        return response
+        fetchResponse.data = data
+        fetchResponse.errored = false
+        return fetchResponse
       })
       .catch(err => {
-        response.data = err.message ?? 'Error Thrown'
-        response.errored = true
-        return response
+        fetchResponse.data = err.message ?? 'Unknown error thrown'
+        fetchResponse.errored = true
+        fetchResponse.statusCode = 500
+        return fetchResponse
       }
       )
   }

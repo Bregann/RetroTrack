@@ -33,6 +33,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+/*
 JobStorage.Current = new PostgreSqlStorage(AppConfig.HFConnectionString, new PostgreSqlStorageOptions { SchemaName = "retrotrack" });
 
 builder.Services.AddHangfire(configuration => configuration
@@ -44,6 +45,7 @@ builder.Services.AddHangfire(configuration => configuration
         );
 
 builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+*/
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -52,7 +54,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+/*
 HangfireJobs.SetupHangfireJobs();
+*/
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -68,7 +72,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+/*
 var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
 {
     RequireSsl = false,
@@ -88,5 +92,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = auth
 }, JobStorage.Current);
+*/
 
 app.Run();
