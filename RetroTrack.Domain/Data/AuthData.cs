@@ -175,5 +175,29 @@ namespace RetroTrack.Domain.Data
             }
         }
 
+        public static async Task<bool> ValidateSessionStatus(string sessionId)
+        {
+            using(var context = new DatabaseContext())
+            {
+                var session = context.Sessions.FirstOrDefault(x => x.SessionId == sessionId);
+
+                if (session == null)
+                {
+                    return false;
+                }
+
+                //Check if it has expired
+                if (session.ExpiryTime < DateTime.UtcNow)
+                {
+                    context.Sessions.Remove(session);
+                    await context.SaveChangesAsync();
+                    return false;
+                }
+
+                session.ExpiryTime = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+                return true;
+            }
+        }
     }
 }

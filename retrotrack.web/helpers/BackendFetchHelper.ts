@@ -2,7 +2,7 @@ import { type FetchResponse } from '@/helpers/FetchHelper'
 
 class backendFetchHelper {
   private static async doRequest (url: string, requestOptions: RequestInit): Promise<FetchResponse> {
-    const baseUrl: string = (process.env.DataServiceUrl ?? '').concat('/api')
+    const baseUrl: string = (process.env.API_URL ?? '').concat('/api')
 
     const response: FetchResponse = {
       data: undefined,

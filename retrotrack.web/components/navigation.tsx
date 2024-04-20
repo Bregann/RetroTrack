@@ -1,10 +1,18 @@
-import { AppShell, Burger, Group } from '@mantine/core'
+import sessionHelper from '@/helpers/sessionHelper'
+import { AppShell, Burger, Group, NavLink } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
+import { IconHome2 } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
+import Link from 'next/link'
+import { useEffect } from 'react'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
   const [opened, { toggle }] = useDisclosure()
+
+  useEffect(() => {
+    const hasCookie = sessionHelper.hasSession()
+  }, [])
 
   return (
     <>
@@ -22,6 +30,13 @@ const Navigation = (props: AppProps): JSX.Element => {
           </Group>
         </AppShell.Header>
         <AppShell.Navbar p="md">
+          <NavLink
+            component={Link}
+            href="#required-for-focus"
+            label="Home"
+            leftSection={<IconHome2 size="1rem" stroke={1.5} />}
+            active
+          />
         </AppShell.Navbar>
         <AppShell.Main>
           <Component {...pageProps} />
