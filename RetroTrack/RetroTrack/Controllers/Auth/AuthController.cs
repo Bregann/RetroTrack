@@ -37,7 +37,7 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         [HttpPost]
         public async Task<bool> ValidateSessionStatus()
         {
-
+            return await AuthData.ValidateSessionStatus("");
         }
 
         [HttpDelete]

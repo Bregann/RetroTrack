@@ -4,15 +4,19 @@ import { useDisclosure } from '@mantine/hooks'
 import { IconHome2 } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
   const [opened, { toggle }] = useDisclosure()
-
+  const [loggedIn, setLoggedIn] = useState(sessionHelper.hasSession())
   useEffect(() => {
-    const hasCookie = sessionHelper.hasSession()
-  }, [])
+    if (loggedIn) {
+      // get logged in data
+    } else {
+      // get logged out
+    }
+  }, [loggedIn])
 
   return (
     <>
@@ -29,11 +33,18 @@ const Navigation = (props: AppProps): JSX.Element => {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           </Group>
         </AppShell.Header>
-        <AppShell.Navbar p="md">
+        <AppShell.Navbar>
           <NavLink
             component={Link}
-            href="#required-for-focus"
+            href="/"
             label="Home"
+            leftSection={<IconHome2 size="1rem" stroke={1.5} />}
+            active
+          />
+          <NavLink
+            component={Link}
+            href="/"
+            label="All Games"
             leftSection={<IconHome2 size="1rem" stroke={1.5} />}
             active
           />

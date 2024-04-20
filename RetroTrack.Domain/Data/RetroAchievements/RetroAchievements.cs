@@ -69,7 +69,9 @@ namespace RetroTrack.Domain.Data.External
                         ConsoleID = console.Id,
                         ConsoleName = console.Name,
                         GameCount = 0,
-                        NoAchievementsGameCount = 0
+                        NoAchievementsGameCount = 0,
+                        ConsoleType = ConsoleType.NotSet,
+                        DisplayOnSite = false
                     });
 
                     Log.Information($"[RetroAchievements] Console ID {console.Id} added");
