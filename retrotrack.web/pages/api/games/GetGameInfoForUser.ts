@@ -31,15 +31,18 @@ export interface GetGameInfoForUser {
   pointsEarned: number
 }
 
-export default async function handler (req: NextApiRequest, res: NextApiResponse<>): Promise<void> {
+export default async function handler (req: NextApiRequest, res: NextApiResponse<GetGameInfoForUser>): Promise<void> {
   if (req.method !== 'GET') {
     res.status(405)
   }
 
-  const fetchResult = await backendFetchHelper.doGet('')
+  const { gameId } = req.query
+  const fetchResult = await backendFetchHelper.doGet('/Games/GetGameInfoForUser'.concat(gameId?.toString() ?? ''), req.cookies.rtSession, req.cookies.rtUsername)
 
   if (fetchResult.errored) {
     res.status(500)
+  } else if (fetchResult.statusCode === 401) {
+    res.status(401).end()
   } else {
     res.status(200).json(fetchResult.data)
   }

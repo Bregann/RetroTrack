@@ -31,19 +31,7 @@ class backendFetchHelper {
       )
   }
 
-  public static async doGet (url: string): Promise<FetchResponse> {
-    const requestOptions = {
-      method: 'GET',
-      headers:
-      {
-        ApiSecret: process.env.API_SECRET ?? ''
-      }
-    }
-
-    return await this.doRequest(url, requestOptions)
-  }
-
-  public static async doPost (url: string, body: any, auth?: string | undefined): Promise<FetchResponse> {
+  public static async doGet (url: string, auth?: string | undefined, rtUsername?: string | undefined): Promise<FetchResponse> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ApiSecret: process.env.API_SECRET ?? ''
@@ -51,6 +39,26 @@ class backendFetchHelper {
 
     if (auth !== undefined) {
       headers.Authorization = auth
+      headers.RtUsername = rtUsername ?? '' // This should always not be undefined
+    }
+
+    const requestOptions = {
+      method: 'GET',
+      headers
+    }
+
+    return await this.doRequest(url, requestOptions)
+  }
+
+  public static async doPost (url: string, body: any, auth?: string | undefined, rtUsername?: string | undefined): Promise<FetchResponse> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ApiSecret: process.env.API_SECRET ?? ''
+    }
+
+    if (auth !== undefined) {
+      headers.Authorization = auth
+      headers.RtUsername = rtUsername ?? '' // This should always not be undefined
     }
 
     const requestOptions = {

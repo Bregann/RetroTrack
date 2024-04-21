@@ -7,16 +7,20 @@ namespace RetroTrack.Domain.Helpers
     {
         public static string? ValidateSessionIdAndReturnUsername(IHeaderDictionary headers)
         {
-            if (headers["Authorization"].Count == 0)
+            var userSession = headers.Authorization.ToString();
+            var username = headers["RtUsername"].ToString();
+
+            if(string.IsNullOrEmpty(userSession) || string.IsNullOrEmpty(username))
             {
                 return null;
             }
 
             using (var context = new DatabaseContext())
             {
-                string authHeader = headers["Authorization"];
-
-                var user = context.Sessions.Where(x => x.SessionId == authHeader).Select(x => x.User).FirstOrDefault();
+                var user = context.Sessions
+                    .Where(x => x.SessionId == userSession && x.User.Username == username)
+                    .Select(x => x.User)
+                    .FirstOrDefault();
 
                 if (user == null)
                 {

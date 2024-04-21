@@ -28,8 +28,8 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser(int gameId)
+        [HttpGet("{gameId}")]
+        public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
