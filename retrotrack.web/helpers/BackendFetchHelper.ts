@@ -12,6 +12,7 @@ class backendFetchHelper {
 
     return await fetch(baseUrl + url, requestOptions)
       .then(async response => {
+        console.log(response)
         fetchResponse.statusCode = response.status
         return await response.json()
       })
@@ -21,6 +22,7 @@ class backendFetchHelper {
         return fetchResponse
       })
       .catch(err => {
+        console.log(err)
         fetchResponse.data = err.message ?? 'Error Thrown'
         fetchResponse.errored = true
         fetchResponse.statusCode = 500

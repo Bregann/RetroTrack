@@ -5,18 +5,18 @@ using RetroTrack.Domain.Helpers;
 
 namespace RetroTrack.Api.Controllers.Games
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class GamesController : ControllerBase
     {
-        [HttpGet("GetRecentlyAddedAndUpdatedGames")]
+        [HttpGet]
         public List<DayListDto> GetRecentlyAddedAndUpdatedGames()
         {
             return GamesData.GetNewAndUpdatedGamesFromLast5Days();
         }
 
-        [HttpGet("GetSpecificGameInfo")]
-        public async Task<ActionResult<GameInfoDto>> GetSpecificGameInfo(int gameId)
+        [HttpGet("{gameId}")]
+        public async Task<ActionResult<GameInfoDto>> GetSpecificGameInfo([FromRoute] int gameId)
         {
             var data = await GamesData.GetSpecificGameInfo(gameId);
 
@@ -28,7 +28,7 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet("GetGameInfoForUser")]
+        [HttpGet]
         public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser(int gameId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
@@ -43,7 +43,7 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet("GetUserAchievementsForGame")]
+        [HttpGet]
         public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
@@ -58,7 +58,7 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet("GetGamesForConsole")]
+        [HttpGet]
         public ActionResult<PublicConsoleGamesDto> GetGamesForConsole(int consoleId)
         {
             var games = Domain.Data.GamesData.GetGamesForConsole(consoleId);
@@ -71,7 +71,7 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(games);
         }
 
-        [HttpGet("GetGamesAndUserProgressForConsole")]
+        [HttpGet]
         public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole(int consoleId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
@@ -91,7 +91,7 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(games);
         }
 
-        [HttpGet("GetUserInProgressGames")]
+        [HttpGet]
         public ActionResult<List<UserGamesTableDto>> GetUserInProgressGames()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
