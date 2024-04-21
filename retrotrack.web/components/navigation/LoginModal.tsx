@@ -9,7 +9,7 @@ import ForgotPasswordModal from './ForgotPassword'
 interface LoginModalProps {
   setOpened: (value: boolean) => void
   openedState: boolean
-  onSuccessfulLogin: () => void
+  onSuccessfulLogin: () => Promise<void>
 }
 
 interface FormValues {
@@ -39,7 +39,8 @@ const LoginModal = (props: LoginModalProps): JSX.Element => {
       props.setOpened(false)
       setLoginButtonLoading(false)
 
-      notificationHelper.showSuccessNotification('Success', 'Successfully logged in!', 5000, <IconCheck />)
+      notificationHelper.showSuccessNotification('Success', 'Successfully logged in!', 3000, <IconCheck />)
+      await props.onSuccessfulLogin()
     } else {
       setErrorMessage(res.reason)
       setLoginButtonLoading(false)

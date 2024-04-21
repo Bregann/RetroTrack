@@ -2,7 +2,7 @@ import fetchHelper from '@/helpers/FetchHelper'
 import { type GetPublicNavigationDataDto } from '@/pages/api/navigation/GetPublicNavigationData'
 import { AppShell, Burger, Button, Group, NavLink, ScrollArea } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconHome2 } from '@tabler/icons-react'
+import { IconCheck, IconCrossFilled, IconHome2 } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -10,6 +10,8 @@ import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import SupportModal from './SupportModal'
 import sessionHelper from '@/helpers/SessionHelper'
+import notificationHelper from '@/helpers/NotificationHelper'
+import { useRouter } from 'next/router'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
@@ -20,6 +22,7 @@ const Navigation = (props: AppProps): JSX.Element => {
   const [loggedIn, setLoggedIn] = useState(false)
   const [navData, setNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
   const [activePage, setActivePage] = useState('')
+  const router = useRouter()
 
   const consoleTypes = [
     { consoleType: 0, consoleName: 'Nintendo' },
@@ -36,7 +39,6 @@ const Navigation = (props: AppProps): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    console.log('hello')
     if (loggedIn) {
       // get logged in data
     } else {
@@ -53,6 +55,25 @@ const Navigation = (props: AppProps): JSX.Element => {
       void fetchLoggedOutData()
     }
   }, [loggedIn])
+
+  const logoutUser = async (): Promise<void> => {
+    const result = await sessionHelper.LogoutUser()
+
+    if (result) {
+      setLoggedIn(false)
+      setActivePage('/')
+      await router.push('/') // Send them back to the homepage
+      notificationHelper.showSuccessNotification('Success', 'You have successfully logged out!', 3000, <IconCheck />)
+    } else {
+      notificationHelper.showErrorNotification('Error', 'There has been an error logging you out', 5000, <IconCrossFilled />)
+    }
+  }
+
+  const successfulLogin = async (): Promise<void> => {
+    setLoggedIn(true)
+    setActivePage('/')
+    await router.push('/') // Send them back to the homepage
+  }
 
   return (
     <>
@@ -83,7 +104,7 @@ const Navigation = (props: AppProps): JSX.Element => {
                 </Button><Button
                   variant="gradient"
                   gradient={{ from: 'orange', to: 'red' }}
-                  onClick={() => { }}>
+                  onClick={async () => { await logoutUser() }}>
                   Logout
                 </Button>
               </>
@@ -144,7 +165,7 @@ const Navigation = (props: AppProps): JSX.Element => {
           </ScrollArea>
         </AppShell.Navbar>
         <AppShell.Main>
-          <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={() => { setLoggedIn(true) }} />
+          <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={async () => { await successfulLogin() }} />
           <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened} />
           <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened} />
           <Component {...pageProps} />

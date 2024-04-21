@@ -1,4 +1,4 @@
-import { getCookie, setCookie } from 'cookies-next'
+import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 import fetchHelper from './FetchHelper'
 import { type AttemptLoginDto } from '@/pages/api/auth/LoginUser'
 
@@ -47,6 +47,18 @@ class sessionHelper {
         success: false,
         reason: 'An unknown error has occurred. Status code '.concat(fetchResult.statusCode.toString())
       }
+    }
+  }
+
+  public static async LogoutUser (): Promise<boolean> {
+    const fetchResult = await fetchHelper.doDelete('/auth/LogoutUser')
+
+    if (fetchResult.errored) {
+      return false
+    } else {
+      deleteCookie('rtSession')
+      deleteCookie('rtUsername')
+      return true
     }
   }
 }

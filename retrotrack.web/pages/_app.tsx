@@ -1,9 +1,11 @@
 import '../styles/global.css'
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 import { MantineProvider } from '@mantine/core'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import Navigation from '@/components/navigation/navigation'
+import { Notifications } from '@mantine/notifications'
 
 export default function App (props: AppProps): JSX.Element {
   if (process.env.NODE_ENV === 'development') {
@@ -27,6 +29,7 @@ export default function App (props: AppProps): JSX.Element {
 
       <MantineProvider defaultColorScheme="dark">
         <Navigation {...props} />
+        <Notifications />
       </MantineProvider>
     </>
   )

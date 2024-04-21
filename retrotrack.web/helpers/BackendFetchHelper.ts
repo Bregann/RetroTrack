@@ -41,14 +41,19 @@ class backendFetchHelper {
     return await this.doRequest(url, requestOptions)
   }
 
-  public static async doPost (url: string, body: any): Promise<FetchResponse> {
+  public static async doPost (url: string, body: any, auth?: string | undefined): Promise<FetchResponse> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ApiSecret: process.env.API_SECRET ?? ''
+    }
+
+    if (auth !== undefined) {
+      headers.Authorization = auth
+    }
+
     const requestOptions = {
       method: 'POST',
-      headers:
-      {
-        'Content-Type': 'application/json',
-        ApiSecret: process.env.API_SECRET ?? ''
-      },
+      headers,
       body: JSON.stringify(body)
     }
 
@@ -69,9 +74,19 @@ class backendFetchHelper {
     return await this.doRequest(url, requestOptions)
   }
 
-  public static async doDelete (url: string): Promise<FetchResponse> {
+  public static async doDelete (url: string, auth?: string | undefined): Promise<FetchResponse> {
+    const headers: Record<string, string> =
+    {
+      ApiSecret: process.env.API_SECRET ?? ''
+    }
+
+    if (auth !== undefined) {
+      headers.Authorization = auth
+    }
+
     const requestOptions = {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers
     }
 
     return await this.doRequest(url, requestOptions)

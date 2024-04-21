@@ -43,13 +43,13 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         [HttpDelete]
         public ActionResult DeleteUserSession()
         {
-            if (Request.Headers["Authorization"].Count == 0)
+            if (string.IsNullOrEmpty(Request.Headers.Authorization))
             {
                 return BadRequest();
             }
 
-            UserData.DeleteUserSession(Request.Headers["Authorization"]);
-            return Ok();
+            UserData.DeleteUserSession(Request.Headers.Authorization!);
+            return Ok(true);
         }
     }
 }
