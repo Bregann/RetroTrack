@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.Dtos
+﻿using RetroTrack.Domain.Models;
+
+namespace RetroTrack.Domain.Dtos
 {
     public class UserGameInfoDto
     {
@@ -29,5 +31,6 @@
         public long NumAwarded { get; set; }
         public long NumAwardedHardcore { get; set; }
         public required string? DateEarned { get; set; }
+        public required TypeEnum? Type { get; set; }
     }
 }

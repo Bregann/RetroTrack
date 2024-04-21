@@ -63,62 +63,72 @@ namespace RetroTrack.Domain.Data
 
         public static async Task<RegisterUserDto> RegisterUser(string username, string password, string raApiKey)
         {
-            //Validate the API key to make sure that it's the correct username/api key combo
-            var validKey = await RetroAchievements.ValidateApiKey(username, raApiKey);
-
-            if (!validKey)
+            try
             {
-                return new RegisterUserDto
+                //Validate the API key to make sure that it's the correct username/api key combo
+                var validKey = await RetroAchievements.ValidateApiKey(username, raApiKey);
+
+                if (!validKey)
                 {
-                    Success = false,
-                    Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
-                };
-            }
-
-            using (var context = new DatabaseContext())
-            {
-                var trackedGames = context.Users.Where(x => x.Username == username).Select(x => x.TrackedGames);
-
-                //Check if the user is actually registered
-                if (context.Users.Any(x => x.Username == username.ToLower()))
-                {
-                    Log.Information($"[Register User] User {username} already exists");
-
                     return new RegisterUserDto
                     {
                         Success = false,
-                        Reason = "User already registered. Forgot your password? Use the forgot password link on the login form"
+                        Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
                     };
                 }
 
-                //hash the password and store it
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-                //Get the users details from the API
-                var userProfile = await RetroAchievements.GetUserProfile(username);
-
-                //Add the user into the database
-                context.Users.Add(new Users
+                using (var context = new DatabaseContext())
                 {
-                    Username = username,
-                    RAUsername = userProfile.LastActivity.User,
-                    HashedPassword = hashedPassword,
-                    LastActivity = DateTime.UtcNow,
-                    LastUserUpdate = DateTime.UtcNow,
-                    LastAchievementsUpdate = DateTime.UtcNow,
-                    UserPoints = userProfile.TotalPoints,
-                    UserProfileUrl = "/UserPic/" + userProfile.LastActivity.User + ".png",
-                    UserRank = userProfile.Rank
-                });
+                    //Check if the user is actually registered
+                    if (context.Users.Any(x => x.Username == username.ToLower()))
+                    {
+                        Log.Information($"[Register User] User {username} already exists");
 
-                context.SaveChanges();
+                        return new RegisterUserDto
+                        {
+                            Success = false,
+                            Reason = "User already registered. Forgot your password? Use the forgot password link on the login form"
+                        };
+                    }
 
-                Log.Information($"[Register User] {username} succesfully registered");
+                    //hash the password and store it
+                    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
+                    //Get the users details from the API
+                    var userProfile = await RetroAchievements.GetUserProfile(username);
+
+                    //Add the user into the database
+                    context.Users.Add(new Users
+                    {
+                        Username = username,
+                        RAUsername = userProfile.User,
+                        HashedPassword = hashedPassword,
+                        LastActivity = DateTime.UtcNow,
+                        LastUserUpdate = DateTime.UtcNow,
+                        LastAchievementsUpdate = DateTime.UtcNow,
+                        UserPoints = userProfile.TotalPoints,
+                        UserProfileUrl = "/UserPic/" + userProfile.User + ".png",
+                        UserRank = userProfile.Rank ?? 0
+                    });
+
+                    context.SaveChanges();
+
+                    Log.Information($"[Register User] {username} succesfully registered");
+
+                    return new RegisterUserDto
+                    {
+                        Success = true,
+                        Reason = null
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal($"[Register User] Error registering user - {ex}");
                 return new RegisterUserDto
                 {
-                    Success = true,
-                    Reason = null
+                    Success = false,
+                    Reason = "There has been an unknown error trying to register your account. Please try again"
                 };
             }
         }

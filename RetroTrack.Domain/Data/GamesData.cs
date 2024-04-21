@@ -199,7 +199,8 @@ namespace RetroTrack.Domain.Data
                         Description = achievement.Value.Description,
                         Id = achievement.Value.Id,
                         Points = achievement.Value.Points,
-                        Title = achievement.Value.Title
+                        Title = achievement.Value.Title,
+                        Type = Models.TypeEnum.Unknown // temp fix till rewrite todo: fix
                     }));
 
                     return new UserGameInfoDto
@@ -240,7 +241,8 @@ namespace RetroTrack.Domain.Data
                         NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
                         Points = achievement.Value.Points,
                         Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
+                        Type = achievement.Value.Type
                     });
                 }
 
@@ -315,7 +317,8 @@ namespace RetroTrack.Domain.Data
                     NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned)
+                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
+                    Type = achievement.Value.Type
                 };
 
                 if (achievement.Value.DateEarned == null)

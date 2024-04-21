@@ -7,4 +7,5 @@ export interface Achievement {
     numAwarded:         number;
     numAwardedHardcore: number;
     dateEarned:         string;
+    type:               number;
 }

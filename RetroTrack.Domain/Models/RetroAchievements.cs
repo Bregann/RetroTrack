@@ -58,11 +58,14 @@ namespace RetroTrack.Domain.Models
 
     public class GetUserSummary
     {
+        [JsonProperty("User")]
+        public string User { get; set; }
+
         [JsonProperty("TotalPoints")]
         public long TotalPoints { get; set; }
 
         [JsonProperty("Rank")]
-        public long Rank { get; set; }
+        public long? Rank { get; set; }
 
         [JsonProperty("UserPic")]
         public string UserPic { get; set; }
@@ -108,6 +111,9 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("NumDistinctPlayersCasual")]
         public int Players { get; set; }
+
+        [JsonProperty("Updated")]
+        public DateTime Updated { get; set; }
 
         [JsonProperty("Achievements")]
         public Dictionary<string, Achievement>? Achievements { get; set; }
@@ -246,7 +252,12 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("DateEarnedHardcore", NullValueHandling = NullValueHandling.Ignore)]
         public DateTimeOffset? DateEarnedHardcore { get; set; }
+
+        [JsonProperty("type")]
+        public TypeEnum? Type { get; set; }
     }
+
+    public enum TypeEnum { Missable, Progression, Win_Condition, Unknown };
 
     public partial class GetActiveClaims
     {
