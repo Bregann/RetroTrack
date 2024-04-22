@@ -4,7 +4,7 @@ import { useForm } from '@mantine/form'
 import { IconAlertCircle, IconCheck, IconLock } from '@tabler/icons-react'
 import fetchHelper from '@/helpers/FetchHelper'
 import { type RegisterUserDto } from '@/pages/api/auth/RegisterUser'
-import sessionHelper from '@/helpers/SessionHelper'
+import sessionHelper from '@/helpers/ssessionHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
 
 interface FormValues {

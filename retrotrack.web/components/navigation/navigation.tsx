@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import SupportModal from './SupportModal'
-import sessionHelper from '@/helpers/SessionHelper'
+import sessionHelper from '@/helpers/ssessionHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
 import { useRouter } from 'next/router'
 

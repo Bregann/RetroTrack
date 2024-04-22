@@ -3,7 +3,7 @@ import { useForm } from '@mantine/form'
 import { useState } from 'react'
 import notificationHelper from '@/helpers/NotificationHelper'
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react'
-import sessionHelper from '@/helpers/SessionHelper'
+import sessionHelper from '@/helpers/ssessionHelper'
 import ForgotPasswordModal from './ForgotPassword'
 
 interface LoginModalProps {
