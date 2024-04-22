@@ -26,8 +26,16 @@ const Console = (props: ConsoleProps): JSX.Element => {
   console.log(props.loggedInConsoleData)
   return (
     <>
-      {props.publicConsoleData !== null && <PublicGamesTable gameData={sortBy(props.publicConsoleData.games, 'gameName')} />}
-      {props.loggedInConsoleData !== null && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData.games, 'gameName')} sortByName='gameName' sortByDirection='asc' />}
+      {props.publicConsoleData !== null
+        ? <>
+          <h2>{props.publicConsoleData.consoleName}</h2>
+          <PublicGamesTable gameData={sortBy(props.publicConsoleData.games, 'gameName')} />
+        </>
+        : <>
+          <h2>{props.loggedInConsoleData?.consoleName}</h2>
+          <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName='gameName' sortByDirection='asc' />
+        </>
+      }
     </>
   )
 }
