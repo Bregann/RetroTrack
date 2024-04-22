@@ -71,8 +71,8 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(games);
         }
 
-        [HttpGet]
-        public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole(int consoleId)
+        [HttpGet("{consoleId}")]
+        public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 

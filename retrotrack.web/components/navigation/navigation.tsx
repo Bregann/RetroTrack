@@ -154,7 +154,7 @@ const Navigation = (props: AppProps): JSX.Element => {
                         description={`${data.gameCount} games`}
                         key={data.consoleId}
                         label={data.consoleName}
-                        href={`console/${data.consoleId}`}
+                        href={`/console/${data.consoleId}`}
                         onClick={() => { setActivePage(data.consoleId.toString()) }}
                       />
                     )

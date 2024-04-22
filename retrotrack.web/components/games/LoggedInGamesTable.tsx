@@ -1,39 +1,47 @@
+import { Paper, Group, TextInput, UnstyledButton, LoadingOverlay, Text, Switch } from '@mantine/core'
 import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import Image from 'next/image'
-import { Group, LoadingOverlay, Paper, TextInput, UnstyledButton } from '@mantine/core'
-import { useEffect, useState } from 'react'
-import sortBy from 'lodash/sortBy'
 import { useDebouncedValue } from '@mantine/hooks'
-import LoggedOutModal from './LoggedOutModal'
-import { type GetSpecificGameInfo } from '@/pages/api/games/GetSpecificGameInfo'
+import { sortBy } from 'lodash'
+import { useState, useEffect } from 'react'
+import LoggedInModal from './LoggedInModal'
+import { IconCrossFilled, IconSearch, IconSquareX } from '@tabler/icons-react'
+import { type GetGameInfoForUser } from '@/pages/api/games/GetGameInfoForUser'
 import fetchHelper from '@/helpers/FetchHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
-import { IconCrossFilled, IconSearch, IconSquareX } from '@tabler/icons-react'
 
-export interface PublicGame {
+export interface LoggedInGame {
   gameId: number
   gameIconUrl: string
   gameName: string
   achievementCount: number
+  achievementsGained: number
+  percentageCompleted: number
   gameGenre: string
   players: number
+  console: null
 }
 
-interface PublicGameTableProps {
-  gameData: PublicGame[]
+interface LoggedInGameTableProps {
+  gameData: LoggedInGame[]
+  sortByName: string
+  sortByDirection: 'desc' | 'asc'
+  setTableDataUpdateNeeded?: (toggleState: boolean) => void // used for updating the table in /trackedgames and /inprogressgames
 }
 
-const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
+const LoggedInGamesTable = (props: LoggedInGameTableProps): JSX.Element => {
   const [pageSize, setPageSize] = useState(15)
   const [page, setPage] = useState(1)
   const [games, setGames] = useState(sortBy(props.gameData.slice(0, pageSize), 'gameName'))
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'gameName', direction: 'asc' })
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: props.sortByName, direction: props.sortByDirection })
   const [query, setQuery] = useState('')
   const [debouncedQuery] = useDebouncedValue(query, 200)
   const [totalRecords, setTotalRecords] = useState(props.gameData.length)
-  const [loggedOutGameModalData, setLoggedOutGameModalData] = useState<GetSpecificGameInfo | undefined>(undefined)
   const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false)
-  console.log(props.gameData)
+  const [completedSwitch, setCompletedSwitch] = useState(true)
+  const [inProgressSwitch, setInProgressSwitch] = useState(false)
+  const [loggedInGameModalData, setLoggedInGameModalData] = useState<GetGameInfoForUser | undefined>(undefined)
+
   useEffect(() => {
     const from = (page - 1) * pageSize
     const to = from + pageSize
@@ -41,7 +49,7 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
     const data = sortBy(props.gameData, sortStatus.columnAccessor)
     const sortedData = sortStatus.direction === 'desc' ? data.reverse() : data
 
-    const filteredGames = sortedData.filter(({ gameName, achievementCount, gameGenre, players }) => {
+    let filteredGames = sortedData.filter(({ gameName, achievementCount, gameGenre, players }) => {
       if (
         debouncedQuery !== '' &&
         !`${gameName} ${achievementCount} ${gameGenre} ${players}`
@@ -54,18 +62,30 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
       return true
     })
 
+    if (completedSwitch) {
+      filteredGames = filteredGames.filter(({ percentageCompleted }) => {
+        return percentageCompleted !== 100
+      })
+    }
+
+    if (inProgressSwitch) {
+      filteredGames = filteredGames.filter(({ percentageCompleted }) => {
+        return percentageCompleted === 0 || percentageCompleted === 100
+      })
+    }
+
     setTotalRecords(filteredGames.length)
     setGames(filteredGames.slice(from, to))
-  }, [page, props.gameData, sortStatus, pageSize, debouncedQuery])
+  }, [page, props.gameData, sortStatus, pageSize, debouncedQuery, completedSwitch, inProgressSwitch])
 
   const GetGameInfoForModal = async (gameId: number): Promise<void> => {
     setLoadingOverlayVisible(true)
-    const res = await fetchHelper.doGet('/games/GetSpecificGameInfo?gameId=' + gameId)
+    const res = await fetchHelper.doGet('/games/GetGameInfoForUser?gameId=' + gameId)
 
     if (res.errored) {
       notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
     } else {
-      setLoggedOutGameModalData(res.data)
+      setLoggedInGameModalData(res.data)
     }
 
     setLoadingOverlayVisible(false)
@@ -74,25 +94,29 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
   return (
     <>
         <Paper shadow="md" p="md" withBorder mt={15}>
-          <Group>
-            <TextInput
-              style={{ width: '100%', marginBottom: 20 }}
-              placeholder="Search games..."
-              leftSection={<IconSearch size={16} />}
-              value={query}
-              onChange={(e) => { setQuery(e.currentTarget.value) }}
-            />
-            <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
-              <IconSquareX size={20} />
-            </UnstyledButton>
-          </Group>
+            <Group>
+              <TextInput
+                style={{ width: '80%', marginBottom: 20 }}
+                placeholder="Search games..."
+                leftSection={<IconSearch size={16} />}
+                value={query}
+                onChange={(e) => { setQuery(e.currentTarget.value) }}
+              />
+
+              <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
+                <IconSquareX size={20} />
+              </UnstyledButton>
+
+              <Switch size="lg" offLabel="Show Completed" onLabel="Hide Completed" pb={35} pl={10} onChange={(event) => { setCompletedSwitch(event.currentTarget.checked) }} defaultChecked={true} />
+              <Switch size="lg" offLabel="Show In Progress" onLabel="Hide In Progress" pb={35} onChange={(event) => { setInProgressSwitch(event.currentTarget.checked) }} />
+            </Group>
+
           <div style={{ position: 'relative' }}>
             <LoadingOverlay visible={loadingOverlayVisible} />
             <DataTable
               striped
               highlightOnHover
-              highlightOnHoverColor='#4DABF775'
-              records={games as any} // I hate this with a passion
+              records={games as any}
               columns={[
                 {
                   accessor: 'gameIconUrl',
@@ -115,6 +139,20 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
                   accessor: 'achievementCount',
                   title: 'Achievement Count',
                   sortable: true
+                },
+                {
+                  accessor: 'achievementsGained',
+                  title: 'Achievements Gained',
+                  sortable: true
+                },
+                {
+                  accessor: 'percentageCompleted',
+                  title: 'Percentage Completed',
+                  sortable: true,
+
+                  render: ({ percentageCompleted }) => (
+                    <Text>{percentageCompleted as string}%</Text>
+                  )
                 },
                 {
                   accessor: 'gameGenre',
@@ -140,9 +178,10 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
           </div>
         </Paper>
 
-      <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }} />
+        <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} />
+
     </>
   )
 }
 
-export default PublicGamesTable
+export default LoggedInGamesTable
