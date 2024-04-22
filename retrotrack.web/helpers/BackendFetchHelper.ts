@@ -84,7 +84,7 @@ class backendFetchHelper {
     return await this.doRequest(url, requestOptions)
   }
 
-  public static async doDelete (url: string, auth?: string | undefined): Promise<FetchResponse> {
+  public static async doDelete (url: string, auth?: string | undefined, rtUsername?: string | undefined): Promise<FetchResponse> {
     const headers: Record<string, string> =
     {
       ApiSecret: process.env.API_SECRET ?? ''
@@ -92,6 +92,7 @@ class backendFetchHelper {
 
     if (auth !== undefined) {
       headers.Authorization = auth
+      headers.RtUsername = rtUsername ?? '' // This should always not be undefined
     }
 
     const requestOptions = {

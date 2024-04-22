@@ -37,7 +37,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
   }
 
   const { gameId } = req.query
-  const fetchResult = await backendFetchHelper.doGet('/Games/GetGameInfoForUser'.concat(gameId?.toString() ?? ''), req.cookies.rtSession, req.cookies.rtUsername)
+  const fetchResult = await backendFetchHelper.doGet('/Games/GetGameInfoForUser/'.concat(gameId?.toString() ?? ''), req.cookies.rtSession, req.cookies.rtUsername)
 
   if (fetchResult.errored) {
     res.status(500)

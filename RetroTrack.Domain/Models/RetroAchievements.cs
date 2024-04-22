@@ -161,7 +161,7 @@ namespace RetroTrack.Domain.Models
         public int ForumTopicId { get; set; }
 
         [JsonProperty("Flags")]
-        public int Flags { get; set; }
+        public int? Flags { get; set; }
 
         [JsonProperty("ImageIcon")]
         public string ImageIcon { get; set; }

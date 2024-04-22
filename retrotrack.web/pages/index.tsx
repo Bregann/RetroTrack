@@ -8,6 +8,8 @@ import { IconCrossFilled } from '@tabler/icons-react'
 import { type GetSpecificGameInfo } from './api/games/GetSpecificGameInfo'
 import { useState } from 'react'
 import LoggedOutModal from '@/components/games/LoggedOutModal'
+import { type GetGameInfoForUser } from './api/games/GetGameInfoForUser'
+import LoggedInModal from '@/components/games/LoggedInModal'
 
 interface IndexProps {
   loggedIn: boolean
@@ -31,6 +33,7 @@ interface GamesTable {
 
 const Page = (props: IndexProps): JSX.Element => {
   const [loggedOutGameModalData, setLoggedOutGameModalData] = useState<GetSpecificGameInfo | undefined>(undefined)
+  const [loggedInGameModalData, setLoggedInGameModalData] = useState<GetGameInfoForUser | undefined>(undefined)
 
   const GetLoggedOutGameInfo = async (gameId: number): Promise<void> => {
     const res = await fetchHelper.doGet('/games/GetSpecificGameInfo?gameId=' + gameId)
@@ -39,6 +42,16 @@ const Page = (props: IndexProps): JSX.Element => {
       notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
     } else {
       setLoggedOutGameModalData(res.data)
+    }
+  }
+
+  const GetLoggedInGameInfo = async (gameId: number): Promise<void> => {
+    const res = await fetchHelper.doGet('/games/GetGameInfoForUser?gameId=' + gameId)
+
+    if (res.errored) {
+      notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
+    } else {
+      setLoggedInGameModalData(res.data)
     }
   }
 
@@ -66,9 +79,9 @@ const Page = (props: IndexProps): JSX.Element => {
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
-                        {games.gamesTable?.map((gameTableData) => {
+                        {games.gamesTable?.sort((a, b) => a.gameName.localeCompare(b.gameName)).map((gameTableData) => {
                           return (
-                            <Table.Tr key={gameTableData.gameId} onClick={async () => { await GetLoggedOutGameInfo(gameTableData.gameId) } }>
+                            <Table.Tr key={gameTableData.gameId} onClick={async () => { props.loggedIn ? await GetLoggedInGameInfo(gameTableData.gameId) : await GetLoggedOutGameInfo(gameTableData.gameId) } }>
                               <Table.Td>
                                 <Image
                                 width={64}
@@ -92,7 +105,8 @@ const Page = (props: IndexProps): JSX.Element => {
       })
       }
 
-      <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }}/>
+      <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }} />
+      <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} />
     </>
   )
 }

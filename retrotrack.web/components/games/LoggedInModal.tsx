@@ -7,27 +7,37 @@ import { IconCheck, IconCrossFilled } from '@tabler/icons-react'
 import fetchHelper from '@/helpers/FetchHelper'
 
 interface LoggedInModalProps {
-  gameInfo: GetGameInfoForUser
-  loggedInModal: (toggleState: boolean) => void
+  gameInfo: GetGameInfoForUser | undefined
+  onCloseModal: () => void
   setTableDataUpdateNeeded?: (toggleState: boolean) => void
 }
 
 const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   const [gameLayoutChecked, setGameLayoutChecked] = useState(false)
   const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
-  const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo.achievements)
-  const [achievementList, setAchievementList] = useState(props.gameInfo.achievements)
+  const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo?.achievements)
+  const [achievementList, setAchievementList] = useState(props.gameInfo?.achievements)
   const [gameStats, setGameStats] = useState(props.gameInfo)
-  const [gameTracked, setGameTracked] = useState(props.gameInfo.gameTracked)
+  const [gameTracked, setGameTracked] = useState(props.gameInfo?.gameTracked)
   const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false)
   const [achievementsFiltered, setAchievementsFiltered] = useState(false)
   const interval = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    setCurrentDisplayedAchievements(props.gameInfo?.achievements)
+    setAchievementList(props.gameInfo?.achievements)
+    setGameStats(props.gameInfo)
+    setGameTracked(props.gameInfo?.gameTracked)
+  }, [props.gameInfo])
+
+  console.log(props)
+  console.log(currentDisplayedAchievements)
 
   const FilterCurrentAchievements = (checked: boolean): void => {
     setAchievementsFiltered(checked)
 
     if (checked) {
-      setCurrentDisplayedAchievements(achievementList.filter(x => x.dateEarned === null))
+      setCurrentDisplayedAchievements(achievementList?.filter(x => x.dateEarned === null))
     } else {
       setCurrentDisplayedAchievements(achievementList)
     }
@@ -36,8 +46,8 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   const UpdateTrackedGame = async (): Promise<void> => {
     setTrackedGameButtonLoading(true)
 
-    if (gameTracked) {
-      const res = await fetchHelper.doDelete('/api/trackedgames/DeleteTrackedGame?gameId=' + props.gameInfo.gameId)
+    if (gameTracked !== undefined) {
+      const res = await fetchHelper.doDelete('/api/trackedgames/DeleteTrackedGame?gameId=' + props.gameInfo?.gameId)
 
       if (res.statusCode === 401) {
         notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
@@ -48,7 +58,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
         notificationHelper.showSuccessNotification('Success', 'Tracked game has been removed successfully', 3000, <IconCheck />)
       }
     } else {
-      const res = await fetchHelper.doPost('/api/trackedgames/AddTrackedGame/' + props.gameInfo.gameId, {})
+      const res = await fetchHelper.doPost('/api/trackedgames/AddTrackedGame/' + props.gameInfo?.gameId, {})
 
       if (res.statusCode === 401) {
         notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
@@ -63,7 +73,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   }
 
   const UpdateUserProgress = async (): Promise<void> => {
-    const res = await fetchHelper.doGet('/api/games/GetGameInfoForUser?gameId=' + props.gameInfo.gameId)
+    const res = await fetchHelper.doGet('/api/games/GetGameInfoForUser?gameId=' + props.gameInfo?.gameId)
 
     if (res.statusCode === 401) {
       notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
@@ -79,7 +89,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   }
 
   const UpdateCloseModalStates = (): void => {
-    props.loggedInModal(false)
+    props.onCloseModal()
 
     if (props.setTableDataUpdateNeeded !== undefined) {
       props.setTableDataUpdateNeeded(true)
@@ -112,17 +122,17 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   return (
     <>
       <Modal
-        opened={true}
+        opened={props.gameInfo !== undefined}
         onClose={() => { UpdateCloseModalStates() }}
         size="xl"
       >
-        <h2>{props.gameInfo.title}</h2>
+        <h2>{props.gameInfo?.title}</h2>
         <Grid>
           <Grid.Col span={6}>
             <Image
               width={256}
               height={256}
-              src={props.gameInfo.imageBoxArt}
+              src={props.gameInfo?.imageBoxArt ?? ''}
               alt=""
               style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
             />
@@ -132,7 +142,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
             <Image
               width={256}
               height={256}
-              src={props.gameInfo.imageInGame}
+              src={props.gameInfo?.imageInGame ?? ''}
               alt=""
               style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
             />
@@ -140,34 +150,34 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
 
           <Grid.Col span={3}>
             <h6>Achievements</h6>
-            <span>{gameStats.numAwardedToUser}/{gameStats.achievementCount} ({gameStats.userCompletion})</span>
+            <span>{gameStats?.numAwardedToUser}/{gameStats?.achievementCount} ({gameStats?.userCompletion})</span>
           </Grid.Col>
 
           <Grid.Col span={3}>
             <h6>Points</h6>
-            <span>{gameStats.pointsEarned}/{gameStats.totalPoints}</span>
+            <span>{gameStats?.pointsEarned}/{gameStats?.totalPoints}</span>
           </Grid.Col>
 
           <Grid.Col span={3}>
             <h6>Genre</h6>
-            <span>{props.gameInfo.genre}</span>
+            <span>{props.gameInfo?.genre}</span>
           </Grid.Col>
 
           <Grid.Col span={3}>
             <h6>Console</h6>
-            <span>{props.gameInfo.consoleName}</span>
+            <span>{props.gameInfo?.consoleName}</span>
           </Grid.Col>
 
           <Grid.Col span={3}>
             <h6>Players</h6>
-            <span>{props.gameInfo.players}</span>
+            <span>{props.gameInfo?.players}</span>
           </Grid.Col>
 
           <Grid.Col>
             <Divider my="xs" />
           </Grid.Col>
 
-          {!gameLayoutChecked && currentDisplayedAchievements.map((achievement) => {
+          {!gameLayoutChecked && currentDisplayedAchievements?.map((achievement) => {
             return (
               <div key={achievement.id}>
                 <HoverCard position="bottom">
@@ -189,7 +199,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
             )
           })}
 
-          {gameLayoutChecked && currentDisplayedAchievements.map((achievement) => {
+          {gameLayoutChecked && currentDisplayedAchievements?.map((achievement) => {
             return (
               <>
                 <Grid.Col span={1} key={achievement.id}>
@@ -225,7 +235,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
                 Update
               </Button>
 
-              {gameTracked &&
+              {gameTracked === true &&
                 <Button
                   mr={5}
                   mt={-5}
@@ -236,7 +246,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
                   Untrack Game
                 </Button>}
 
-              {!gameTracked &&
+              {gameTracked === false &&
                 <Button
                   mr={5}
                   mt={-5}
@@ -255,7 +265,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
                 variant="gradient"
                 gradient={{ from: 'indigo', to: 'cyan' }}
                 style={{ ':hover': { color: 'white' } }}
-                href={'game/' + props.gameInfo.gameId}
+                href={'game/' + props.gameInfo?.gameId}
               >
                 Game Page
               </Button>
@@ -268,7 +278,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
                 gradient={{ from: 'indigo', to: 'cyan' }}
                 target="_blank"
                 style={{ ':hover': { color: 'white' } }}
-                href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
+                href={'https://retroachievements.org/game/' + props.gameInfo?.gameId}
               >
                 RA Page
               </Button>
