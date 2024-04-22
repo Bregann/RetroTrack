@@ -32,7 +32,8 @@ namespace RetroTrack.Domain.Data
                             GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
-                            GameName = games.Title
+                            GameName = games.Title,
+                            Players = games.Players ?? 0
                         }));
 
                         dayList.Add(new DayListDto
@@ -54,7 +55,8 @@ namespace RetroTrack.Domain.Data
                             GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
-                            GameName = games.Title
+                            GameName = games.Title,
+                            Players = games.Players ?? 0
                         }));
 
                         dayList.Add(new DayListDto
@@ -148,7 +150,8 @@ namespace RetroTrack.Domain.Data
                             GameGenre = x.GameGenre,
                             GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                             GameId = x.Id,
-                            GameName = x.Title
+                            GameName = x.Title,
+                            Players = x.Players ?? 0
                         }).ToList()
                     };
                 }
@@ -168,7 +171,8 @@ namespace RetroTrack.Domain.Data
                         GameGenre = x.GameGenre,
                         GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                         GameId = x.Id,
-                        GameName = x.Title
+                        GameName = x.Title,
+                        Players = x.Players ?? 0
                     }).ToList()
                 };
             }

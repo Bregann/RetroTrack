@@ -58,8 +58,8 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet]
-        public ActionResult<PublicConsoleGamesDto> GetGamesForConsole(int consoleId)
+        [HttpGet("{consoleId}")]
+        public ActionResult<PublicConsoleGamesDto> GetGamesForConsole([FromRoute] int consoleId)
         {
             var games = Domain.Data.GamesData.GetGamesForConsole(consoleId);
 

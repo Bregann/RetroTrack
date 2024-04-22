@@ -1,5 +1,6 @@
 import '../styles/global.css'
 import '@mantine/core/styles.css'
+import 'mantine-datatable/styles.layer.css'
 import '@mantine/notifications/styles.css'
 import { MantineProvider } from '@mantine/core'
 import type { AppProps } from 'next/app'

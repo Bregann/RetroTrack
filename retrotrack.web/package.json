@@ -14,8 +14,12 @@
     "@mantine/hooks": "^7.8.0",
     "@mantine/notifications": "^7.8.0",
     "@tabler/icons-react": "^3.2.0",
+    "@types/lodash": "^4.17.0",
+    "clsx": "^2.1.0",
     "cookies-next": "^4.1.1",
     "eslint-config-standard-with-typescript": "^39.1.1",
+    "lodash": "^4.17.21",
+    "mantine-datatable": "^7.8.1",
     "next": "14.2.2",
     "react": "^18",
     "react-dom": "^18"
