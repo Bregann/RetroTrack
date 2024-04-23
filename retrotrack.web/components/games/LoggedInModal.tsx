@@ -9,7 +9,7 @@ import fetchHelper from '@/helpers/FetchHelper'
 interface LoggedInModalProps {
   gameInfo: GetGameInfoForUser | undefined
   onCloseModal: () => void
-  setTableDataUpdateNeeded?: (toggleState: boolean) => void
+  updateTableData?: () => Promise<void>
 }
 
 const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
@@ -88,11 +88,11 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
     }
   }
 
-  const UpdateCloseModalStates = (): void => {
+  const UpdateCloseModalStates = async (): Promise<void> => {
     props.onCloseModal()
 
-    if (props.setTableDataUpdateNeeded !== undefined) {
-      props.setTableDataUpdateNeeded(true)
+    if (props.updateTableData !== undefined) {
+      await props.updateTableData()
     }
   }
 
@@ -123,7 +123,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
     <>
       <Modal
         opened={props.gameInfo !== undefined}
-        onClose={() => { UpdateCloseModalStates() }}
+        onClose={async () => { await UpdateCloseModalStates() }}
         size="xl"
       >
         <h2>{props.gameInfo?.title}</h2>

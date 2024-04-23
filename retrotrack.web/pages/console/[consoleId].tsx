@@ -4,13 +4,13 @@ import backendFetchHelper from '@/helpers/BackendFetchHelper'
 import PublicGamesTable, { type PublicGame } from '@/components/games/PublicGamesTable'
 import LoggedInGamesTable, { type LoggedInGame } from '@/components/games/LoggedInGamesTable'
 
-interface GamesForConsole {
+export interface GamesForConsole {
   consoleName: string
   consoleId: number
   games: PublicGame[]
 }
 
-interface GamesAndUserProgressForConsole {
+export interface GamesAndUserProgressForConsole {
   consoleName: string
   consoleId: number
   games: LoggedInGame[]
@@ -19,13 +19,12 @@ interface GamesAndUserProgressForConsole {
 interface ConsoleProps {
   publicConsoleData: GamesForConsole | null
   loggedInConsoleData: GamesAndUserProgressForConsole | null
-  errorMessage: string | null
 }
 
 const Console = (props: ConsoleProps): JSX.Element => {
-  console.log(props.loggedInConsoleData)
   return (
     <>
+      {(props.publicConsoleData === null && props.loggedInConsoleData === null) && <h1>There has been an error loading the games. Please refresh to try again</h1>}
       {props.publicConsoleData !== null
         ? <>
           <h2>{props.publicConsoleData.consoleName}</h2>
@@ -52,8 +51,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
     return {
       props: {
         publicConsoleData: null,
-        loggedInConsoleData: res.errored ? null : await res.data,
-        errorMessage: res.errored ? 'Error getting console data - Error code ' + res.statusCode : null
+        loggedInConsoleData: res.errored ? null : await res.data
       }
     }
   } else {
@@ -62,8 +60,7 @@ export const getServerSideProps: GetServerSideProps<ConsoleProps> = async (conte
     return {
       props: {
         publicConsoleData: res.errored ? null : await res.data,
-        loggedInConsoleData: null,
-        errorMessage: res.errored ? 'Error getting console data - Error code ' + res.statusCode : null
+        loggedInConsoleData: null
       }
     }
   }

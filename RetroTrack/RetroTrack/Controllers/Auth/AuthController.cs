@@ -16,7 +16,7 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
 
             if (!loginData.Successful)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             return Ok(loginData);

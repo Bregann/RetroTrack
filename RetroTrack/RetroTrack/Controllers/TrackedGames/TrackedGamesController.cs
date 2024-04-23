@@ -56,7 +56,7 @@ namespace RetroTrack.Api.Controllers.TrackedGames
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var trackedGames = TrackedGamesData.GetTrackedGamesForUser(user);

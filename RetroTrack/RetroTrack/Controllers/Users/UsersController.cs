@@ -16,7 +16,7 @@ namespace RetroTrack.Api.Controllers.Users
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             return UserData.UpdateUserGames(user);
@@ -29,7 +29,7 @@ namespace RetroTrack.Api.Controllers.Users
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             return UserData.CheckUserUpdateCompleted(user);

@@ -26,7 +26,7 @@ interface LoggedInGameTableProps {
   gameData: LoggedInGame[]
   sortByName: string
   sortByDirection: 'desc' | 'asc'
-  setTableDataUpdateNeeded?: (toggleState: boolean) => void // used for updating the table in /trackedgames and /inprogressgames
+  updateTableData?: () => Promise<void> // used for updating the table in /trackedgames and /inprogressgames
 }
 
 const LoggedInGamesTable = (props: LoggedInGameTableProps): JSX.Element => {
@@ -178,7 +178,7 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps): JSX.Element => {
           </div>
         </Paper>
 
-        <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} />
+        <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} updateTableData={async () => { if (props.updateTableData !== undefined) { await props.updateTableData() } }}/>
 
     </>
   )

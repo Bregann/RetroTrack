@@ -2,7 +2,7 @@ import fetchHelper from '@/helpers/FetchHelper'
 import { type GetPublicNavigationDataDto } from '@/pages/api/navigation/GetPublicNavigationData'
 import { AppShell, Burger, Button, Group, NavLink, ScrollArea } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconCheck, IconCrossFilled, IconHome2 } from '@tabler/icons-react'
+import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconPin, IconProgress } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -109,19 +109,19 @@ const Navigation = (props: AppProps): JSX.Element => {
                 </Button>
               </>
               : <>
-              <Button
-                variant="gradient"
-                gradient={{ from: 'indigo', to: 'cyan' }}
-                onClick={() => { setLoginModalOpened(true) }}>
-                Login
-              </Button>
-              <Button
-                variant="gradient"
-                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                onClick={() => { setRegisterModalOpened(true) }}>
-                Register
-              </Button>
-            </>
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'cyan' }}
+                  onClick={() => { setLoginModalOpened(true) }}>
+                  Login
+                </Button>
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                  onClick={() => { setRegisterModalOpened(true) }}>
+                  Register
+                </Button>
+              </>
             }
           </Group>
         </AppShell.Header>
@@ -131,7 +131,7 @@ const Navigation = (props: AppProps): JSX.Element => {
               component={Link}
               href="/"
               label="Home"
-              leftSection={<IconHome2 size="1rem" stroke={1.5} />}
+              leftSection={<IconHome2 size="1.2rem" stroke={1.5} />}
               onClick={() => { setActivePage('/') }}
               active={activePage === '/'}
             />
@@ -139,10 +139,31 @@ const Navigation = (props: AppProps): JSX.Element => {
               component={Link}
               href="/allgames"
               label="All Games"
-              leftSection={<IconHome2 size="1rem" stroke={1.5} />}
+              leftSection={<IconDeviceGamepad3 size="1.2rem" stroke={1.5} />}
               onClick={() => { setActivePage('/allgames') }}
               active={activePage === '/allgames'}
             />
+
+            {loggedIn &&
+              <>
+                <NavLink
+                  component={Link}
+                  href="/trackedgames"
+                  label="Tracked Games"
+                  leftSection={<IconPin size="1.2rem" stroke={1.5} />}
+                  onClick={() => { setActivePage('/trackedgames') }}
+                  active={activePage === '/trackedgames'}
+                />
+                <NavLink
+                  component={Link}
+                  href="/inprogressgames"
+                  label="In Progress Games"
+                  leftSection={<IconProgress size="1.2rem" stroke={1.5} />}
+                  onClick={() => { setActivePage('/inprogressgames') }}
+                  active={activePage === '/inprogressgames'}
+                />
+              </>
+            }
 
             {consoleTypes.map(console => {
               return (

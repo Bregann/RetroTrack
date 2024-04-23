@@ -22,7 +22,7 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (data == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             return Ok(data);
@@ -35,7 +35,7 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var data = await GamesData.GetUserGameInfo(user, gameId);
@@ -50,7 +50,7 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var data = await GamesData.GetUserAchievementsForGame(user, gameId);
@@ -78,7 +78,7 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var games = GamesData.GetGamesAndUserProgressForConsole(user, consoleId);
@@ -98,7 +98,7 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var trackedGames = GamesData.GetInProgressGamesForUser(user);
