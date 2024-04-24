@@ -7,6 +7,7 @@ export interface GetSpecificGameInfo {
   consoleId: number
   consoleName: string
   imageInGame: string
+  imageTitle: string
   imageBoxArt: string
   genre: string
   achievementCount: number

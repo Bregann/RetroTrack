@@ -100,6 +100,9 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("ImageIngame")]
         public string ImageInGame { get; set; }
 
+        [JsonProperty("ImageTitle")]
+        public string ImageTitle { get; set; }
+
         [JsonProperty("ImageBoxArt")]
         public string ImageBoxArt { get; set; }
 

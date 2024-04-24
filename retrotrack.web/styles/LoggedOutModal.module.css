@@ -1,0 +1,28 @@
+.achievementText {
+  @media (min-width: 1500px) {
+    margin-left: -30px;
+  }
+
+  @media (max-width: 1688px) {
+    margin-left: -5px;
+  }
+  
+  @media (max-width: 1248px) {
+    margin-left: 10px;
+  }
+
+  @media (max-width: 985px) {
+    margin-left: 20px;
+  }
+  
+  @media (max-width: 820px) {
+    margin-left: 30px;
+  }
+
+  @media (max-width: 620px) {
+    margin-left: 50px;
+  }
+  @media (max-width: 307px) {
+    margin-left: 0px;
+  }
+}

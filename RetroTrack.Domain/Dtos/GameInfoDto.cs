@@ -7,6 +7,7 @@
         public required int ConsoleId { get; set; }
         public required string ConsoleName { get; set; }
         public required string ImageInGame { get; set; }
+        public required string ImageTitle { get; set; }
         public required string ImageBoxArt { get; set; }
         public required string Genre { get; set; }
         public required int AchievementCount { get; set; }

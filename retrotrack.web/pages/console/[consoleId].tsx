@@ -27,11 +27,11 @@ const Console = (props: ConsoleProps): JSX.Element => {
       {(props.publicConsoleData === null && props.loggedInConsoleData === null) && <h1>There has been an error loading the games. Please refresh to try again</h1>}
       {props.publicConsoleData !== null
         ? <>
-          <h2>{props.publicConsoleData.consoleName}</h2>
+          <h1>{props.publicConsoleData.consoleName}</h1>
           <PublicGamesTable gameData={sortBy(props.publicConsoleData.games, 'gameName')} />
         </>
         : <>
-          <h2>{props.loggedInConsoleData?.consoleName}</h2>
+          <h1>{props.loggedInConsoleData?.consoleName}</h1>
           <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName='gameName' sortByDirection='asc' />
         </>
       }

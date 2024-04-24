@@ -295,6 +295,7 @@ namespace RetroTrack.Domain.Data.External
                         AchievementCount = achievements.Count,
                         Achievements = achievements,
                         ImageBoxArt = "",
+                        ImageTitle = "",
                         ImageInGame = "",
                         ConsoleId = gameFromDb.ConsoleID,
                         ConsoleName = gameFromDb.GameConsole.ConsoleName,
