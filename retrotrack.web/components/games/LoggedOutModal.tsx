@@ -9,7 +9,7 @@ interface LoggedOutModalProps {
 }
 
 const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState(true)
 
   return (
     <>

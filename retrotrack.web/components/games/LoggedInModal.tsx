@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Group, HoverCard, Modal, Paper, Switch, Text } from '@mantine/core'
+import { Button, Checkbox, Divider, Grid, Group, HoverCard, Modal, Paper, Text } from '@mantine/core'
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { type GetGameInfoForUser } from '@/pages/api/games/GetGameInfoForUser'
@@ -14,7 +14,7 @@ interface LoggedInModalProps {
 }
 
 const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
-  const [gameLayoutChecked, setGameLayoutChecked] = useState(false)
+  const [gameLayoutChecked, setGameLayoutChecked] = useState(true)
   const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
   const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo?.achievements)
   const [achievementList, setAchievementList] = useState(props.gameInfo?.achievements)
@@ -34,7 +34,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   console.log(props)
   console.log(currentDisplayedAchievements)
 
-  const FilterCurrentAchievements = (checked: boolean): void => {
+  const filterCurrentAchievements = (checked: boolean): void => {
     setAchievementsFiltered(checked)
 
     if (checked) {
@@ -85,7 +85,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
       setAchievementList(res.data.achievements)
       notificationHelper.showSuccessNotification('Success', 'Achievements have been updated successfully', 3000, <IconCheck />)
 
-      FilterCurrentAchievements(achievementsFiltered)
+      filterCurrentAchievements(achievementsFiltered)
     }
   }
 
@@ -98,7 +98,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   }
 
   useEffect(() => {
-    FilterCurrentAchievements(achievementsFiltered)
+    filterCurrentAchievements(achievementsFiltered)
     // Ignoring the below warning as the filter is used in other places
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [achievementList])
@@ -183,7 +183,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
           </Grid.Col>
         </Grid>
 
-        {!gameLayoutChecked &&
+        {gameLayoutChecked &&
           <div style={{ marginLeft: 35 }}>
             <Group gap={5} justify='flex-start'>
               {currentDisplayedAchievements?.map((achievement) => {
@@ -212,7 +212,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
           </div>
         }
 
-        {gameLayoutChecked &&
+        {!gameLayoutChecked &&
           <>
             <Grid>
               {currentDisplayedAchievements?.map((achievement) => {
@@ -288,9 +288,9 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
             RA Page
           </Button>
 
-          <Switch offLabel="Compact" onLabel="Full" size="lg" onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
-          <Switch offLabel="Auto update" onLabel="Auto update" size="lg" onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
-          <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" onChange={(event) => { FilterCurrentAchievements(event.currentTarget.checked) }} />
+          <Checkbox defaultChecked={true} mt={3} label="Compact" size="lg" onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
+          <Checkbox mt={3} label="Auto update" size="lg" onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
+          <Checkbox mt={3} label="Hide Complete" size="lg" onChange={(event) => { filterCurrentAchievements(event.currentTarget.checked) }} />
         </Group>
         </Paper>
 
