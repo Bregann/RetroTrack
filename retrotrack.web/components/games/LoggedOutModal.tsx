@@ -2,7 +2,7 @@ import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text } from '@m
 import { useState } from 'react'
 import Image from 'next/image'
 import { type GetSpecificGameInfo } from '@/pages/api/games/GetSpecificGameInfo'
-import classes from '@/styles/LoggedOutModal.module.css'
+import classes from '@/styles/GameModal.module.css'
 interface LoggedOutModalProps {
   gameInfo: GetSpecificGameInfo | undefined
   onClose: () => void
@@ -77,7 +77,12 @@ const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
                     <div key={achievement.id}>
                       <HoverCard position="bottom">
                         <HoverCard.Target>
-                          <Image src={achievement.badgeName} alt={''} width={64} height={64} />
+                          <Image
+                            src={achievement.badgeName}
+                            alt={`${achievement.title} achievement badge`}
+                            width={64}
+                            height={64}
+                          />
                         </HoverCard.Target>
                         <HoverCard.Dropdown>
                           <Text fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
@@ -106,7 +111,7 @@ const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
                         />
                       </Grid.Col>
                       <Grid.Col span={{ base: 11, lg: 3, md: 5 }}>
-                        <Text className={classes.achievementText} fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
+                        <Text style={achievement.type === 0 ? { color: 'orange' } : undefined} className={classes.achievementText} fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
                         <Text className={classes.achievementText} fz="sm">{achievement.description}</Text>
                       </Grid.Col>
                     </>

@@ -26,3 +26,10 @@
     margin-left: 0px;
   }
 }
+
+.stickyFooter {
+  position: sticky;
+  bottom: 0; 
+  padding-bottom: 5px;
+  padding-top: 5px;
+}

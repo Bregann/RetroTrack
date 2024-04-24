@@ -1,10 +1,11 @@
-import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text } from '@mantine/core'
+import { Button, Divider, Grid, Group, HoverCard, Modal, Paper, Switch, Text } from '@mantine/core'
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { type GetGameInfoForUser } from '@/pages/api/games/GetGameInfoForUser'
 import notificationHelper from '@/helpers/NotificationHelper'
 import { IconCheck, IconCrossFilled } from '@tabler/icons-react'
 import fetchHelper from '@/helpers/FetchHelper'
+import classes from '@/styles/GameModal.module.css'
 
 interface LoggedInModalProps {
   gameInfo: GetGameInfoForUser | undefined
@@ -124,171 +125,175 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
       <Modal
         opened={props.gameInfo !== undefined}
         onClose={async () => { await UpdateCloseModalStates() }}
-        size="xl"
+        size="75%"
       >
-        <h2>{props.gameInfo?.title}</h2>
-        <Grid>
-          <Grid.Col span={6}>
-            <Image
-              width={256}
-              height={256}
-              src={props.gameInfo?.imageBoxArt ?? ''}
-              alt=""
-              style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
-            />
-          </Grid.Col>
+        <h1 style={{ fontSize: 35, marginTop: -10 }}>{props.gameInfo?.title}</h1>
+        <Group justify='center'>
+          <Image
+            width={420}
+            height={320}
+            src={props.gameInfo?.imageTitle ?? ''}
+            alt={`${props.gameInfo?.title} in game title screen`}
+            style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
+          />
 
-          <Grid.Col span={6}>
-            <Image
-              width={256}
-              height={256}
-              src={props.gameInfo?.imageInGame ?? ''}
-              alt=""
-              style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
-            />
-          </Grid.Col>
-
-          <Grid.Col span={3}>
-            <h6>Achievements</h6>
+          <Image
+            width={420}
+            height={320}
+            src={props.gameInfo?.imageInGame ?? ''}
+            alt={`${props.gameInfo?.title} in game image`}
+            style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
+          />
+          <Image
+            width={320}
+            height={320}
+            src={props.gameInfo?.imageBoxArt ?? ''}
+            alt={`${props.gameInfo?.title} in game box art`}
+            style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
+          />
+        </Group>
+        <Grid justify='center' style={{ textAlign: 'center' }}>
+          <Grid.Col span={{ base: 12, lg: 2, md: 6 }}>
+            <h3>Achievements</h3>
             <span>{gameStats?.numAwardedToUser}/{gameStats?.achievementCount} ({gameStats?.userCompletion})</span>
           </Grid.Col>
 
-          <Grid.Col span={3}>
-            <h6>Points</h6>
+          <Grid.Col span={{ base: 12, lg: 2, md: 6 }}>
+            <h3>Points</h3>
             <span>{gameStats?.pointsEarned}/{gameStats?.totalPoints}</span>
           </Grid.Col>
 
-          <Grid.Col span={3}>
-            <h6>Genre</h6>
+          <Grid.Col span={{ base: 12, lg: 2, md: 6 }}>
+            <h3>Genre</h3>
             <span>{props.gameInfo?.genre}</span>
           </Grid.Col>
 
-          <Grid.Col span={3}>
-            <h6>Console</h6>
+          <Grid.Col span={{ base: 12, lg: 2, md: 6 }}>
+            <h3>Console</h3>
             <span>{props.gameInfo?.consoleName}</span>
           </Grid.Col>
 
-          <Grid.Col span={3}>
-            <h6>Players</h6>
+          <Grid.Col span={{ base: 12, lg: 2, md: 6 }}>
+            <h3>Players</h3>
             <span>{props.gameInfo?.players}</span>
           </Grid.Col>
 
           <Grid.Col>
             <Divider my="xs" />
           </Grid.Col>
-
-          {!gameLayoutChecked && currentDisplayedAchievements?.map((achievement) => {
-            return (
-              <div key={achievement.id}>
-                <HoverCard position="bottom">
-                  <HoverCard.Target>
-                    <Image
-                      style={{ marginRight: 5, marginBottom: 5 }}
-                      width={48}
-                      height={48}
-                      src={achievement.badgeName}
-                      alt=""
-                    />
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <Text fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
-                    <Text fz="sm">{achievement.description}</Text>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              </div>
-            )
-          })}
-
-          {gameLayoutChecked && currentDisplayedAchievements?.map((achievement) => {
-            return (
-              <>
-                <Grid.Col span={1} key={achievement.id}>
-                  <Image
-                    style={{ marginRight: 5, marginBottom: 5 }}
-                    width={48}
-                    height={48}
-                    src={achievement.badgeName}
-                    alt=""
-                  />
-                </Grid.Col>
-                <Grid.Col span={10}>
-                  <Text style={achievement.type === 0 ? { color: 'orange' } : undefined} fw={500} mt={-5}>{achievement.title} ({achievement.points}) {achievement.type === 0 ? '[m]' : ''}</Text>
-                  <Text fz="sm">{achievement.description}</Text>
-                </Grid.Col>
-              </>
-            )
-          })}
-
-          <Grid.Col>
-            <Divider my="xs" />
-          </Grid.Col>
-
-          <Grid.Col>
-            <Group align="left">
-              <Button
-                mr={5}
-                mt={-5}
-                variant="gradient"
-                loading={trackedGameButtonLoading}
-                gradient={{ from: 'indigo', to: 'cyan' }}
-                onClick={async () => { await UpdateUserProgress() }}>
-                Update
-              </Button>
-
-              {gameTracked === true &&
-                <Button
-                  mr={5}
-                  mt={-5}
-                  variant="gradient"
-                  loading={trackedGameButtonLoading}
-                  gradient={{ from: 'orange', to: 'red' }}
-                  onClick={async () => { await UpdateTrackedGame() }}>
-                  Untrack Game
-                </Button>}
-
-              {gameTracked === false &&
-                <Button
-                  mr={5}
-                  mt={-5}
-                  variant="gradient"
-                  loading={trackedGameButtonLoading}
-                  gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                  onClick={async () => { await UpdateTrackedGame() }}
-                >
-                  Track Game
-                </Button>}
-
-              <Button
-                component="a"
-                mr={5}
-                mt={-5}
-                variant="gradient"
-                gradient={{ from: 'indigo', to: 'cyan' }}
-                style={{ ':hover': { color: 'white' } }}
-                href={'game/' + props.gameInfo?.gameId}
-              >
-                Game Page
-              </Button>
-
-              <Button
-                component="a"
-                mr={5}
-                mt={-5}
-                variant="gradient"
-                gradient={{ from: 'indigo', to: 'cyan' }}
-                target="_blank"
-                style={{ ':hover': { color: 'white' } }}
-                href={'https://retroachievements.org/game/' + props.gameInfo?.gameId}
-              >
-                RA Page
-              </Button>
-
-              <Switch offLabel="Compact" onLabel="Full" size="lg" mt={-9} mr={5} ml={20} onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
-              <Switch offLabel="Auto update" onLabel="Auto update" size="lg" mt={-9} mr={5} onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
-              <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" mt={-9} mr={5} onChange={(event) => { FilterCurrentAchievements(event.currentTarget.checked) }} />
-            </Group>
-          </Grid.Col>
         </Grid>
+
+        {!gameLayoutChecked &&
+          <div style={{ marginLeft: 35 }}>
+            <Group gap={5} justify='flex-start'>
+              {currentDisplayedAchievements?.map((achievement) => {
+                return (
+                  <div key={achievement.id}>
+                    <HoverCard position="bottom">
+                      <HoverCard.Target>
+                        <Image
+                          style={{ marginRight: 5, marginBottom: 5 }}
+                          width={64}
+                          height={64}
+                          src={achievement.badgeName}
+                          alt={`${achievement.title} achievement badge`}
+                        />
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text fw={500} mt={-5}>{achievement.title} ({achievement.points})</Text>
+                        <Text fz="sm">{achievement.description}</Text>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  </div>
+                )
+              })}
+            </Group>
+
+          </div>
+        }
+
+        {gameLayoutChecked &&
+          <>
+            <Grid>
+              {currentDisplayedAchievements?.map((achievement) => {
+                return (
+                  <>
+                    <Grid.Col span={1} key={achievement.id}>
+                      <Image
+                        style={{ marginRight: 5, marginBottom: 5 }}
+                        width={64}
+                        height={64}
+                        src={achievement.badgeName}
+                        alt=""
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 11, lg: 3, md: 5 }}>
+                      <Text className={classes.achievementText} style={achievement.type === 0 ? { color: 'orange' } : undefined} fw={500} mt={-5}>{achievement.title} ({achievement.points}) {achievement.type === 0 ? '[m]' : ''}</Text>
+                      <Text className={classes.achievementText} fz="sm">{achievement.description}</Text>
+                    </Grid.Col>
+                  </>
+                )
+              })}
+            </Grid>
+          </>
+        }
+        <Divider my="xs" />
+        <Paper className={classes.stickyFooter}>
+        <Group align="left">
+          <Button
+            variant="gradient"
+            loading={trackedGameButtonLoading}
+            gradient={{ from: 'indigo', to: 'cyan' }}
+            onClick={async () => { await UpdateUserProgress() }}>
+            Update
+          </Button>
+
+          {gameTracked === true &&
+            <Button
+              variant="gradient"
+              loading={trackedGameButtonLoading}
+              gradient={{ from: 'orange', to: 'red' }}
+              onClick={async () => { await UpdateTrackedGame() }}>
+              Untrack Game
+            </Button>}
+
+          {gameTracked === false &&
+            <Button
+              variant="gradient"
+              loading={trackedGameButtonLoading}
+              gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+              onClick={async () => { await UpdateTrackedGame() }}
+            >
+              Track Game
+            </Button>}
+
+          <Button
+            component="a"
+            variant="gradient"
+            gradient={{ from: 'indigo', to: 'cyan' }}
+            style={{ ':hover': { color: 'white' } }}
+            href={'game/' + props.gameInfo?.gameId}
+          >
+            Game Page
+          </Button>
+
+          <Button
+            component="a"
+            variant="gradient"
+            gradient={{ from: 'indigo', to: 'cyan' }}
+            target="_blank"
+            style={{ ':hover': { color: 'white' } }}
+            href={'https://retroachievements.org/game/' + props.gameInfo?.gameId}
+          >
+            RA Page
+          </Button>
+
+          <Switch offLabel="Compact" onLabel="Full" size="lg" onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
+          <Switch offLabel="Auto update" onLabel="Auto update" size="lg" onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
+          <Switch offLabel="Show Complete" onLabel="Hide Complete" size="lg" onChange={(event) => { FilterCurrentAchievements(event.currentTarget.checked) }} />
+        </Group>
+        </Paper>
+
       </Modal>
     </>
   )

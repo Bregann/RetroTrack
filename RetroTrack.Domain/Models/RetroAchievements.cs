@@ -147,6 +147,9 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("DisplayOrder")]
         public int DisplayOrder { get; set; }
+
+        [JsonProperty("type")]
+        public TypeEnum? Type { get; set; }
     }
 
     public class GetGameInfoAndUserProgress

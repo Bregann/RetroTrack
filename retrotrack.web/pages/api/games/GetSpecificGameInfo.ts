@@ -13,10 +13,12 @@ export interface GetSpecificGameInfo {
   achievementCount: number
   players: number
   achievements: Achievement[]
+  type: number
 }
 
 export interface Achievement {
   id: number
+  type: number
   numAwarded: number
   numAwardedHardcore: number
   title: string

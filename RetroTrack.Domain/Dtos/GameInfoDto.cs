@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.Dtos
+﻿using RetroTrack.Domain.Models;
+
+namespace RetroTrack.Domain.Dtos
 {
     public class GameInfoDto
     {
@@ -24,5 +26,6 @@
         public string Description { get; set; }
         public long Points { get; set; }
         public string BadgeName { get; set; }
+        public TypeEnum? Type { get; set; }
     }
 }

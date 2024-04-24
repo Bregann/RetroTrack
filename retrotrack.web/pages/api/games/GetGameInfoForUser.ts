@@ -18,6 +18,7 @@ export interface GetGameInfoForUser {
   title: string
   consoleId: number
   imageInGame: string
+  imageTitle: string
   imageBoxArt: string
   genre: string
   consoleName: string

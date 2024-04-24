@@ -108,7 +108,8 @@ namespace RetroTrack.Domain.Data
                     NumAwarded = x.Value.NumAwarded,
                     NumAwardedHardcore = x.Value.NumAwardedHardcore,
                     Points = x.Value.Points,
-                    Title = x.Value.Title
+                    Title = x.Value.Title,
+                    Type = x.Value.Type,
                 }).ToList()
             };
         }
