@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Group, HoverCard, Modal, Switch, Text } from '@mantine/core'
+import { Button, Checkbox, Divider, Grid, Group, HoverCard, Modal, Paper, Text } from '@mantine/core'
 import { useState } from 'react'
 import Image from 'next/image'
 import { type GetSpecificGameInfo } from '@/pages/api/games/GetSpecificGameInfo'
@@ -10,7 +10,7 @@ interface LoggedOutModalProps {
 
 const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
   const [checked, setChecked] = useState(false)
-  console.log(props)
+
   return (
     <>
       {props.gameInfo !== undefined &&
@@ -69,7 +69,7 @@ const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
             </Grid.Col>
           </Grid>
 
-          {!checked &&
+          {checked &&
             <div style={{ marginLeft: 25 }}>
               <Group gap={5} justify='flex-start'>
                 {props.gameInfo.achievements.map((achievement) => {
@@ -96,7 +96,7 @@ const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
             </div>
           }
 
-          {checked &&
+          {!checked &&
             <>
               <Grid>
                 {props.gameInfo.achievements.map((achievement) => {
@@ -119,43 +119,35 @@ const LoggedOutModal = (props: LoggedOutModalProps): JSX.Element => {
                 })}
               </Grid>
             </>
-
           }
 
-          <Grid>
-            <Grid.Col>
-              <Divider my="xs" />
-            </Grid.Col>
-
-            <Grid.Col>
-              <Group align="left">
-                <Button
-                  component="a"
-                  mr={5}
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
-                  target="_blank"
-                  style={{ ':hover': { color: 'white' } }}
-                >
-                  Game Page
-                </Button>
-                <Button
-                  component="a"
-                  mr={5}
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
-                  target="_blank"
-                  style={{ ':hover': { color: 'white' } }}
-                  href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
-                >
-                  RA Page
-                </Button>
-                <Switch offLabel="Compact" onLabel="Full" size="lg" onChange={(event) => { setChecked(event.currentTarget.checked) }} />
-              </Group>
-            </Grid.Col>
-
-          </Grid>
+          <Divider my="xs" />
+          <Paper className={classes.stickyFooter}>
+            <Group align="left">
+              <Button
+                component="a"
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'cyan' }}
+                target="_blank"
+                style={{ ':hover': { color: 'white' } }}
+              >
+                Game Page
+              </Button>
+              <Button
+                component="a"
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'cyan' }}
+                target="_blank"
+                style={{ ':hover': { color: 'white' } }}
+                href={'https://retroachievements.org/game/' + props.gameInfo.gameId}
+              >
+                RA Page
+              </Button>
+              <Checkbox defaultChecked={true} mt={3} label="Compact" size="lg" onChange={(event) => { setChecked(event.currentTarget.checked) }} />
+            </Group>
+          </Paper>
         </Modal>
+
       }
     </>
   )
