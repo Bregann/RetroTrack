@@ -1,131 +1,42 @@
-import { type GetServerSideProps } from 'next'
-import backendFetchHelper from '@/helpers/BackendFetchHelper'
-import { Paper, Table } from '@mantine/core'
-import Image from 'next/image'
-import fetchHelper from '@/helpers/FetchHelper'
-import notificationHelper from '@/helpers/NotificationHelper'
-import { IconCrossFilled } from '@tabler/icons-react'
-import { type GetSpecificGameInfo } from './api/games/GetSpecificGameInfo'
-import { useState } from 'react'
-import LoggedOutModal from '@/components/games/LoggedOutModal'
-import { type GetGameInfoForUser } from './api/games/GetGameInfoForUser'
-import LoggedInModal from '@/components/games/LoggedInModal'
+import { Container, Divider, List, Text, ThemeIcon, rem } from '@mantine/core'
+import { IconCircleCheck } from '@tabler/icons-react'
 
-interface IndexProps {
-  loggedIn: boolean
-  username: string
-  recentGames: RecentGameUpdatesDayList[] | null
-}
-
-interface RecentGameUpdatesDayList {
-  gamesTable: GamesTable[]
-  date: string
-}
-
-interface GamesTable {
-  gameId: number
-  gameIconUrl: string
-  gameName: string
-  achievementCount: number
-  gameGenre: string
-  console: string
-}
-
-const Page = (props: IndexProps): JSX.Element => {
-  const [loggedOutGameModalData, setLoggedOutGameModalData] = useState<GetSpecificGameInfo | undefined>(undefined)
-  const [loggedInGameModalData, setLoggedInGameModalData] = useState<GetGameInfoForUser | undefined>(undefined)
-
-  const GetLoggedOutGameInfo = async (gameId: number): Promise<void> => {
-    const res = await fetchHelper.doGet('/games/GetSpecificGameInfo?gameId=' + gameId)
-
-    if (res.errored) {
-      notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
-    } else {
-      setLoggedOutGameModalData(res.data)
-    }
-  }
-
-  const GetLoggedInGameInfo = async (gameId: number): Promise<void> => {
-    const res = await fetchHelper.doGet('/games/GetGameInfoForUser?gameId=' + gameId)
-
-    if (res.errored) {
-      notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
-    } else {
-      setLoggedInGameModalData(res.data)
-    }
-  }
-
+const Page = (): JSX.Element => {
   return (
     <>
-      <h1>{props.loggedIn ? `Welcome back, ${props.username}!` : 'Home'}</h1>
+      <Container size="90%">
+        <Text ta="center" size='60px'>RetroTrack</Text>
+        <Text ta="center" size='30px' mt={20}>RetroTrack is an feature full achievement tracker for RetroAchievements!</Text>
+        <Divider mt={10} mb={10} />
+        <Text ta="center" size='25px' mb={10}>All the below features are available as soon as you are a registered user:</Text>
 
-      {props.recentGames?.map((games) => {
-        return (
-            <div key={games.date}>
-                <Paper shadow="md" p="md" withBorder mt={15}>
-                    <h2>{games.date}</h2>
-                    <Table
-                      striped
-                      highlightOnHover
-                      highlightOnHoverColor='#4DABF775'
-                    >
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>Icon</Table.Th>
-                          <Table.Th>Game Name</Table.Th>
-                          <Table.Th>Achievement Count</Table.Th>
-                          <Table.Th>Game Genre</Table.Th>
-                          <Table.Th>Console</Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>
-                        {games.gamesTable?.sort((a, b) => a.gameName.localeCompare(b.gameName)).map((gameTableData) => {
-                          return (
-                            <Table.Tr key={gameTableData.gameId} onClick={async () => { props.loggedIn ? await GetLoggedInGameInfo(gameTableData.gameId) : await GetLoggedOutGameInfo(gameTableData.gameId) } }>
-                              <Table.Td>
-                                <Image
-                                width={64}
-                                height={64}
-                                src={gameTableData.gameIconUrl}
-                                alt=""
-                              />
-                              </Table.Td>
-                              <Table.Td>{gameTableData.gameName}</Table.Td>
-                              <Table.Td>{gameTableData.achievementCount}</Table.Td>
-                              <Table.Td>{gameTableData.gameGenre}</Table.Td>
-                              <Table.Td>{gameTableData.console}</Table.Td>
-                            </Table.Tr>
-                          )
-                        })}
-                      </Table.Tbody>
-                    </Table>
-                </Paper>
-            </div>
-        )
-      })
-      }
+        <List
+          style={{ marginLeft: '25%', marginRight: '25%' }}
+          spacing="xs"
+          size="md"
+          center
+          icon={
+            <ThemeIcon color="teal" size={24} radius="xl">
+              <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
+            </ThemeIcon>
+          }>
+          <List.Item>All RetroAchievements supported consoles with new consoles added swiftly after release!</List.Item>
+          <List.Item>Easy to use user interface!</List.Item>
+          <List.Item>Registration system for simple logging in!</List.Item>
+          <List.Item>Ability to track specific games and all your current in progress games!</List.Item>
+          <List.Item>Filter games by players, achievement counts and even genres!</List.Item>
+          <List.Item>Plus more!</List.Item>
+        </List>
 
-      <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }} />
-      <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} />
+        <Divider mt={10} mb={10} />
+
+        <Text ta="center" size='20px' mb={10}>Registering is simple! All you need is your RetroAchievements username, RetroAchievements API Key and a password you would like to use. It&apos;s really just that easy!</Text>
+        <Text ta="center" size='20px' mb={10}>Please note the website is currently still under active development. If you notice anything please use the support button in the top right for assistance.</Text>
+        <Text ta="center" size='20px'>If you have any suggestions on features you would like, let me know! I&apos;m more than happy to add in new features to improve the site!</Text>
+      </Container>
     </>
+
   )
-}
-
-export const getServerSideProps: GetServerSideProps<IndexProps> = async (context) => {
-  const loggedIn = context.req.cookies.rtSession !== undefined
-  const username = loggedIn ? (context.req.cookies.rtUsername ?? '') : ''
-
-  const fetchResult = await backendFetchHelper.doGet('/Games/GetRecentlyAddedAndUpdatedGames')
-
-  const pageProps: IndexProps = {
-    loggedIn,
-    username,
-    recentGames: fetchResult.errored ? null : fetchResult.data
-  }
-
-  return {
-    props: pageProps
-  }
 }
 
 export default Page

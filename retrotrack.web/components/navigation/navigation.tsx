@@ -12,6 +12,7 @@ import SupportModal from './SupportModal'
 import sessionHelper from '@/helpers/SessionHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
 import { useRouter } from 'next/router'
+import ChangelogModal from './ChangelogModal'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
@@ -19,6 +20,7 @@ const Navigation = (props: AppProps): JSX.Element => {
   const [loginModalOpened, setLoginModalOpened] = useState(false)
   const [registerModalOpened, setRegisterModalOpened] = useState(false)
   const [supportModalOpened, setSupportModalOpened] = useState(false)
+  const [changelogModalOpened, setChangelogModalOpened] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [navData, setNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
   const [activePage, setActivePage] = useState('')
@@ -71,8 +73,8 @@ const Navigation = (props: AppProps): JSX.Element => {
 
   const successfulLogin = async (): Promise<void> => {
     setLoggedIn(true)
-    setActivePage('/')
-    await router.push('/') // Send them back to the homepage
+    setActivePage('/home')
+    await router.push('/home') // Send them back to the homepage
   }
 
   return (
@@ -88,6 +90,12 @@ const Navigation = (props: AppProps): JSX.Element => {
         <AppShell.Header>
           <Group h="100%" px="md" justify="flex-end">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" style={{ marginRight: 'auto' }} />
+            <Button
+              variant="gradient"
+              gradient={{ from: 'indigo', to: 'cyan' }}
+              onClick={() => { setChangelogModalOpened(true) }}>
+              Website Changelog (v1)
+            </Button>
             <Button
               variant="gradient"
               gradient={{ from: 'indigo', to: 'cyan' }}
@@ -129,11 +137,11 @@ const Navigation = (props: AppProps): JSX.Element => {
           <ScrollArea>
             <NavLink
               component={Link}
-              href="/"
+              href="/home"
               label="Home"
               leftSection={<IconHome2 size="1.2rem" stroke={1.5} />}
-              onClick={() => { setActivePage('/') }}
-              active={activePage === '/'}
+              onClick={() => { setActivePage('/home') }}
+              active={activePage === '/home'}
             />
             <NavLink
               component={Link}
@@ -189,6 +197,7 @@ const Navigation = (props: AppProps): JSX.Element => {
           <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={async () => { await successfulLogin() }} />
           <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened} />
           <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened} />
+          <ChangelogModal setOpened={setChangelogModalOpened} openedState={changelogModalOpened} />
           <Component {...pageProps} />
         </AppShell.Main>
 
