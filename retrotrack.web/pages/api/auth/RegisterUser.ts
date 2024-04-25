@@ -6,7 +6,7 @@ export interface RegisterUserDto {
   reason: string
 }
 
-export default async function handler (req: NextApiRequest, res: NextApiResponse<RegisterUserDto>): Promise<void> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<RegisterUserDto>): Promise<void> {
   if (req.method !== 'POST') {
     res.status(405)
   }

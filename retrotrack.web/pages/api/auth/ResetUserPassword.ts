@@ -6,7 +6,7 @@ export interface ResetUserPasswordDto {
   reason: string
 }
 
-export default async function handler (req: NextApiRequest, res: NextApiResponse<ResetUserPasswordDto>): Promise<void> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ResetUserPasswordDto>): Promise<void> {
   if (req.method !== 'POST') {
     res.status(405)
   }

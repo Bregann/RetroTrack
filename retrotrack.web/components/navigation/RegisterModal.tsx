@@ -54,11 +54,11 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
       setErrorMessage(data.reason)
       setRegisterButtonLoading(false)
     } else {
-    // Send the sign in request
+      // Send the sign in request
       const res = await sessionHelper.attemptLogin(values.username, values.password)
 
       if (res.success) {
-      // Close the menu
+        // Close the menu
         setRegisterButtonLoading(false)
         props.setOpened(false)
 

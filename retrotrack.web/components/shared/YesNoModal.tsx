@@ -14,11 +14,11 @@ const YesNoModal = (props: YesNoModalProps): JSX.Element => {
         <Modal.Header>
           <h3 className={classes.modalHeader}>Are You Sure?</h3>
         </Modal.Header>
-          <p className={classes.p}>{props.text}</p>
-          <div className={classes.modalButtons}>
+        <p className={classes.p}>{props.text}</p>
+        <div className={classes.modalButtons}>
           <Button onClick={() => { props.onYesClicked() }} className={classes.yesButton}>Yes</Button>
           <Button onClick={() => { props.onHideModal(false) }} className={classes.noButton}>No</Button>
-          </div>
+        </div>
 
       </Modal>
     </>

@@ -93,92 +93,92 @@ const LoggedInGamesTable = (props: LoggedInGameTableProps): JSX.Element => {
 
   return (
     <>
-        <Paper shadow="md" p="md" withBorder mt={15}>
-            <Group>
-              <TextInput
-                style={{ width: '80%', marginBottom: 20 }}
-                placeholder="Search games..."
-                leftSection={<IconSearch size={16} />}
-                value={query}
-                onChange={(e) => { setQuery(e.currentTarget.value) }}
-              />
+      <Paper shadow="md" p="md" withBorder mt={15}>
+        <Group>
+          <TextInput
+            style={{ width: '80%', marginBottom: 20 }}
+            placeholder="Search games..."
+            leftSection={<IconSearch size={16} />}
+            value={query}
+            onChange={(e) => { setQuery(e.currentTarget.value) }}
+          />
 
-              <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
-                <IconSquareX size={20} />
-              </UnstyledButton>
+          <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
+            <IconSquareX size={20} />
+          </UnstyledButton>
 
-              <Switch size="lg" offLabel="Show Completed" onLabel="Hide Completed" pb={35} pl={10} onChange={(event) => { setCompletedSwitch(event.currentTarget.checked) }} defaultChecked={true} />
-              <Switch size="lg" offLabel="Show In Progress" onLabel="Hide In Progress" pb={35} onChange={(event) => { setInProgressSwitch(event.currentTarget.checked) }} />
-            </Group>
+          <Switch size="lg" offLabel="Show Completed" onLabel="Hide Completed" pb={35} pl={10} onChange={(event) => { setCompletedSwitch(event.currentTarget.checked) }} defaultChecked={true} />
+          <Switch size="lg" offLabel="Show In Progress" onLabel="Hide In Progress" pb={35} onChange={(event) => { setInProgressSwitch(event.currentTarget.checked) }} />
+        </Group>
 
-          <div style={{ position: 'relative' }}>
-            <LoadingOverlay visible={loadingOverlayVisible} />
-            <DataTable
-              striped
-              highlightOnHover
-              records={games as any}
-              columns={[
-                {
-                  accessor: 'gameIconUrl',
-                  title: '',
-                  render: ({ gameIconUrl }) => (
-                    <Image
-                      width={64}
-                      height={64}
-                      src={gameIconUrl as string}
-                      alt={'game icon'}
-                    />
-                  )
-                },
-                {
-                  accessor: 'gameName',
-                  title: 'Game Title',
-                  sortable: true
-                },
-                {
-                  accessor: 'achievementCount',
-                  title: 'Achievement Count',
-                  sortable: true
-                },
-                {
-                  accessor: 'achievementsGained',
-                  title: 'Achievements Gained',
-                  sortable: true
-                },
-                {
-                  accessor: 'percentageCompleted',
-                  title: 'Percentage Completed',
-                  sortable: true,
+        <div style={{ position: 'relative' }}>
+          <LoadingOverlay visible={loadingOverlayVisible} />
+          <DataTable
+            striped
+            highlightOnHover
+            records={games as any}
+            columns={[
+              {
+                accessor: 'gameIconUrl',
+                title: '',
+                render: ({ gameIconUrl }) => (
+                  <Image
+                    width={64}
+                    height={64}
+                    src={gameIconUrl as string}
+                    alt={'game icon'}
+                  />
+                )
+              },
+              {
+                accessor: 'gameName',
+                title: 'Game Title',
+                sortable: true
+              },
+              {
+                accessor: 'achievementCount',
+                title: 'Achievement Count',
+                sortable: true
+              },
+              {
+                accessor: 'achievementsGained',
+                title: 'Achievements Gained',
+                sortable: true
+              },
+              {
+                accessor: 'percentageCompleted',
+                title: 'Percentage Completed',
+                sortable: true,
 
-                  render: ({ percentageCompleted }) => (
-                    <Text>{percentageCompleted as string}%</Text>
-                  )
-                },
-                {
-                  accessor: 'gameGenre',
-                  title: 'Game Genre',
-                  sortable: true
-                },
-                {
-                  accessor: 'players',
-                  title: 'Players',
-                  sortable: true
-                }
-              ]}
-              totalRecords={totalRecords}
-              recordsPerPage={pageSize}
-              page={page}
-              onPageChange={(p) => { setPage(p) }}
-              sortStatus={sortStatus}
-              onSortStatusChange={setSortStatus}
-              recordsPerPageOptions={[5, 15, 25, 50]}
-              onRecordsPerPageChange={setPageSize}
-              onRowClick={async ({ record }) => { await GetGameInfoForModal(record.gameId as number) }}
-            />
-          </div>
-        </Paper>
+                render: ({ percentageCompleted }) => (
+                  <Text>{percentageCompleted as string}%</Text>
+                )
+              },
+              {
+                accessor: 'gameGenre',
+                title: 'Game Genre',
+                sortable: true
+              },
+              {
+                accessor: 'players',
+                title: 'Players',
+                sortable: true
+              }
+            ]}
+            totalRecords={totalRecords}
+            recordsPerPage={pageSize}
+            page={page}
+            onPageChange={(p) => { setPage(p) }}
+            sortStatus={sortStatus}
+            onSortStatusChange={setSortStatus}
+            recordsPerPageOptions={[5, 15, 25, 50]}
+            onRecordsPerPageChange={setPageSize}
+            onRowClick={async ({ record }) => { await GetGameInfoForModal(record.gameId as number) }}
+          />
+        </div>
+      </Paper>
 
-        <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} updateTableData={async () => { if (props.updateTableData !== undefined) { await props.updateTableData() } }}/>
+      <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} updateTableData={async () => { if (props.updateTableData !== undefined) { await props.updateTableData() } }} />
 
     </>
   )

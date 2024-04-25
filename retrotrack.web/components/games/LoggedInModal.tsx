@@ -240,59 +240,59 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
         }
         <Divider my="xs" />
         <Paper className={classes.stickyFooter}>
-        <Group align="left">
-          <Button
-            variant="gradient"
-            loading={trackedGameButtonLoading}
-            gradient={{ from: 'indigo', to: 'cyan' }}
-            onClick={async () => { await UpdateUserProgress() }}>
-            Update
-          </Button>
-
-          {gameTracked &&
+          <Group align="left">
             <Button
               variant="gradient"
               loading={trackedGameButtonLoading}
-              gradient={{ from: 'orange', to: 'red' }}
-              onClick={async () => { await UpdateTrackedGame() }}>
-              Untrack Game
-            </Button>}
+              gradient={{ from: 'indigo', to: 'cyan' }}
+              onClick={async () => { await UpdateUserProgress() }}>
+              Update
+            </Button>
 
-          {!gameTracked &&
+            {gameTracked &&
+              <Button
+                variant="gradient"
+                loading={trackedGameButtonLoading}
+                gradient={{ from: 'orange', to: 'red' }}
+                onClick={async () => { await UpdateTrackedGame() }}>
+                Untrack Game
+              </Button>}
+
+            {!gameTracked &&
+              <Button
+                variant="gradient"
+                loading={trackedGameButtonLoading}
+                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                onClick={async () => { await UpdateTrackedGame() }}
+              >
+                Track Game
+              </Button>}
+
             <Button
+              component="a"
               variant="gradient"
-              loading={trackedGameButtonLoading}
-              gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-              onClick={async () => { await UpdateTrackedGame() }}
+              gradient={{ from: 'indigo', to: 'cyan' }}
+              style={{ ':hover': { color: 'white' } }}
+              href={'/game/' + props.gameInfo?.gameId}
             >
-              Track Game
-            </Button>}
+              Game Page
+            </Button>
 
-          <Button
-            component="a"
-            variant="gradient"
-            gradient={{ from: 'indigo', to: 'cyan' }}
-            style={{ ':hover': { color: 'white' } }}
-            href={'/game/' + props.gameInfo?.gameId}
-          >
-            Game Page
-          </Button>
+            <Button
+              component="a"
+              variant="gradient"
+              gradient={{ from: 'indigo', to: 'cyan' }}
+              target="_blank"
+              style={{ ':hover': { color: 'white' } }}
+              href={'https://retroachievements.org/game/' + props.gameInfo?.gameId}
+            >
+              RA Page
+            </Button>
 
-          <Button
-            component="a"
-            variant="gradient"
-            gradient={{ from: 'indigo', to: 'cyan' }}
-            target="_blank"
-            style={{ ':hover': { color: 'white' } }}
-            href={'https://retroachievements.org/game/' + props.gameInfo?.gameId}
-          >
-            RA Page
-          </Button>
-
-          <Checkbox defaultChecked={true} mt={3} label="Compact" size="lg" onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
-          <Checkbox mt={3} label="Auto update" size="lg" onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
-          <Checkbox mt={3} label="Hide Complete" size="lg" onChange={(event) => { filterCurrentAchievements(event.currentTarget.checked) }} />
-        </Group>
+            <Checkbox defaultChecked={true} mt={3} label="Compact" size="lg" onChange={(event) => { setGameLayoutChecked(event.currentTarget.checked) }} />
+            <Checkbox mt={3} label="Auto update" size="lg" onChange={(event) => { setAutoUpdateChecked(event.currentTarget.checked) }} />
+            <Checkbox mt={3} label="Hide Complete" size="lg" onChange={(event) => { filterCurrentAchievements(event.currentTarget.checked) }} />
+          </Group>
         </Paper>
 
       </Modal>

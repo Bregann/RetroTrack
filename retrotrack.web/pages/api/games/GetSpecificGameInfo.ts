@@ -27,7 +27,7 @@ export interface Achievement {
   badgeName: string
 }
 
-export default async function handler (req: NextApiRequest, res: NextApiResponse<GetSpecificGameInfo>): Promise<void> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<GetSpecificGameInfo>): Promise<void> {
   if (req.method !== 'GET') {
     res.status(405)
   }

@@ -73,72 +73,72 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
 
   return (
     <>
-        <Paper shadow="md" p="md" withBorder mt={15}>
-          <Group>
-            <TextInput
-              style={{ width: '100%', marginBottom: 20 }}
-              placeholder="Search games..."
-              leftSection={<IconSearch size={16} />}
-              value={query}
-              onChange={(e) => { setQuery(e.currentTarget.value) }}
-            />
-            <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
-              <IconSquareX size={20} />
-            </UnstyledButton>
-          </Group>
-          <div style={{ position: 'relative' }}>
-            <LoadingOverlay visible={loadingOverlayVisible} />
-            <DataTable
-              striped
-              highlightOnHover
-              highlightOnHoverColor='#4DABF775'
-              records={games as any} // I hate this with a passion
-              columns={[
-                {
-                  accessor: 'gameIconUrl',
-                  title: '',
-                  render: ({ gameIconUrl }) => (
-                    <Image
-                      width={64}
-                      height={64}
-                      src={gameIconUrl as string}
-                      alt={'game icon'}
-                    />
-                  )
-                },
-                {
-                  accessor: 'gameName',
-                  title: 'Game Title',
-                  sortable: true
-                },
-                {
-                  accessor: 'achievementCount',
-                  title: 'Achievement Count',
-                  sortable: true
-                },
-                {
-                  accessor: 'gameGenre',
-                  title: 'Game Genre',
-                  sortable: true
-                },
-                {
-                  accessor: 'players',
-                  title: 'Players',
-                  sortable: true
-                }
-              ]}
-              totalRecords={totalRecords}
-              recordsPerPage={pageSize}
-              page={page}
-              onPageChange={(p) => { setPage(p) }}
-              sortStatus={sortStatus}
-              onSortStatusChange={setSortStatus}
-              recordsPerPageOptions={[5, 15, 25, 50]}
-              onRecordsPerPageChange={setPageSize}
-              onRowClick={async ({ record }) => { await GetGameInfoForModal(record.gameId as number) }}
-            />
-          </div>
-        </Paper>
+      <Paper shadow="md" p="md" withBorder mt={15}>
+        <Group>
+          <TextInput
+            style={{ width: '100%', marginBottom: 20 }}
+            placeholder="Search games..."
+            leftSection={<IconSearch size={16} />}
+            value={query}
+            onChange={(e) => { setQuery(e.currentTarget.value) }}
+          />
+          <UnstyledButton style={{ marginBottom: 21, marginLeft: -45, zIndex: 1 }} onClick={() => { setQuery('') }}>
+            <IconSquareX size={20} />
+          </UnstyledButton>
+        </Group>
+        <div style={{ position: 'relative' }}>
+          <LoadingOverlay visible={loadingOverlayVisible} />
+          <DataTable
+            striped
+            highlightOnHover
+            highlightOnHoverColor='#4DABF775'
+            records={games as any} // I hate this with a passion
+            columns={[
+              {
+                accessor: 'gameIconUrl',
+                title: '',
+                render: ({ gameIconUrl }) => (
+                  <Image
+                    width={64}
+                    height={64}
+                    src={gameIconUrl as string}
+                    alt={'game icon'}
+                  />
+                )
+              },
+              {
+                accessor: 'gameName',
+                title: 'Game Title',
+                sortable: true
+              },
+              {
+                accessor: 'achievementCount',
+                title: 'Achievement Count',
+                sortable: true
+              },
+              {
+                accessor: 'gameGenre',
+                title: 'Game Genre',
+                sortable: true
+              },
+              {
+                accessor: 'players',
+                title: 'Players',
+                sortable: true
+              }
+            ]}
+            totalRecords={totalRecords}
+            recordsPerPage={pageSize}
+            page={page}
+            onPageChange={(p) => { setPage(p) }}
+            sortStatus={sortStatus}
+            onSortStatusChange={setSortStatus}
+            recordsPerPageOptions={[5, 15, 25, 50]}
+            onRecordsPerPageChange={setPageSize}
+            onRowClick={async ({ record }) => { await GetGameInfoForModal(record.gameId as number) }}
+          />
+        </div>
+      </Paper>
 
       <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }} />
     </>

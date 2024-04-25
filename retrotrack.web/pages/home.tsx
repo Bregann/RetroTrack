@@ -61,46 +61,46 @@ const Page = (props: IndexProps): JSX.Element => {
 
       {props.recentGames?.map((games) => {
         return (
-            <div key={games.date}>
-                <Paper shadow="md" p="md" withBorder mt={15}>
-                    <h2>{games.date}</h2>
-                    <Table
-                      striped
-                      highlightOnHover
-                      highlightOnHoverColor='#4DABF775'
-                    >
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>Icon</Table.Th>
-                          <Table.Th>Game Name</Table.Th>
-                          <Table.Th>Achievement Count</Table.Th>
-                          <Table.Th>Game Genre</Table.Th>
-                          <Table.Th>Console</Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>
-                        {games.gamesTable?.sort((a, b) => a.gameName.localeCompare(b.gameName)).map((gameTableData) => {
-                          return (
-                            <Table.Tr key={gameTableData.gameId} onClick={async () => { props.loggedIn ? await GetLoggedInGameInfo(gameTableData.gameId) : await GetLoggedOutGameInfo(gameTableData.gameId) } }>
-                              <Table.Td>
-                                <Image
-                                width={64}
-                                height={64}
-                                src={gameTableData.gameIconUrl}
-                                alt=""
-                              />
-                              </Table.Td>
-                              <Table.Td>{gameTableData.gameName}</Table.Td>
-                              <Table.Td>{gameTableData.achievementCount}</Table.Td>
-                              <Table.Td>{gameTableData.gameGenre}</Table.Td>
-                              <Table.Td>{gameTableData.console}</Table.Td>
-                            </Table.Tr>
-                          )
-                        })}
-                      </Table.Tbody>
-                    </Table>
-                </Paper>
-            </div>
+          <div key={games.date}>
+            <Paper shadow="md" p="md" withBorder mt={15}>
+              <h2>{games.date}</h2>
+              <Table
+                striped
+                highlightOnHover
+                highlightOnHoverColor='#4DABF775'
+              >
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Icon</Table.Th>
+                    <Table.Th>Game Name</Table.Th>
+                    <Table.Th>Achievement Count</Table.Th>
+                    <Table.Th>Game Genre</Table.Th>
+                    <Table.Th>Console</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {games.gamesTable?.sort((a, b) => a.gameName.localeCompare(b.gameName)).map((gameTableData) => {
+                    return (
+                      <Table.Tr key={gameTableData.gameId} onClick={async () => { props.loggedIn ? await GetLoggedInGameInfo(gameTableData.gameId) : await GetLoggedOutGameInfo(gameTableData.gameId) }}>
+                        <Table.Td>
+                          <Image
+                            width={64}
+                            height={64}
+                            src={gameTableData.gameIconUrl}
+                            alt=""
+                          />
+                        </Table.Td>
+                        <Table.Td>{gameTableData.gameName}</Table.Td>
+                        <Table.Td>{gameTableData.achievementCount}</Table.Td>
+                        <Table.Td>{gameTableData.gameGenre}</Table.Td>
+                        <Table.Td>{gameTableData.console}</Table.Td>
+                      </Table.Tr>
+                    )
+                  })}
+                </Table.Tbody>
+              </Table>
+            </Paper>
+          </div>
         )
       })
       }
