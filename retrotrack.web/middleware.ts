@@ -1,9 +1,23 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
+import backendFetchHelper from './helpers/BackendFetchHelper'
  
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   if(request.cookies.has('rtSession')){
-    console.log('has cookie')
+    console.log('cookie')
+    const fetchResult = await backendFetchHelper.doGet('/Auth/ValidateSessionStatus', request.cookies.get('rtSession')?.value, request.cookies.get('rtUsername')?.value)
+    
+    if(fetchResult.errored) {
+      return
+    }
+
+    if(fetchResult.data === false) {
+      const response = NextResponse.redirect(new URL('/loggedOut', request.url))
+      response.cookies.delete('rtSession')
+      response.cookies.delete('rtUsername')
+      return response
+    }
+
     return
   }
 

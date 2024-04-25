@@ -36,7 +36,7 @@ const Navigation = (props: AppProps): JSX.Element => {
 
   useEffect(() => {
     setLoggedIn(sessionHelper.hasSession())
-  }, [])
+  }, [router.pathname])
 
   useEffect(() => {
     if (loggedIn) {

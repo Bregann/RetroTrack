@@ -34,10 +34,18 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
             return await AuthData.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<bool> ValidateSessionStatus()
         {
-            return await AuthData.ValidateSessionStatus("");
+            if (string.IsNullOrEmpty(Request.Headers.Authorization))
+            {
+                return false;
+            }
+            else
+            {
+                var data = await AuthData.ValidateSessionStatus(Request.Headers.Authorization!);
+                return data;
+            }
         }
 
         [HttpDelete]

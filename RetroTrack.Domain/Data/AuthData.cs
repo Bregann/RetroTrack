@@ -205,7 +205,7 @@ namespace RetroTrack.Domain.Data
                     return false;
                 }
 
-                session.ExpiryTime = DateTime.UtcNow;
+                session.ExpiryTime = DateTime.UtcNow.AddDays(30);
                 await context.SaveChangesAsync();
                 return true;
             }

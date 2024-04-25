@@ -1,7 +1,7 @@
 import backendFetchHelper from '@/helpers/BackendFetchHelper'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-interface RegisterUserDto {
+export interface RegisterUserDto {
   success: boolean
   reason: string
 }

@@ -3,9 +3,10 @@ import { useState } from 'react'
 import { useForm } from '@mantine/form'
 import { IconAlertCircle, IconCheck, IconLock } from '@tabler/icons-react'
 import fetchHelper from '@/helpers/FetchHelper'
-import { type RegisterUserDto } from '@/pages/api/auth/RegisterUser'
+
 import sessionHelper from '@/helpers/SessionHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
+import { type RegisterUserDto } from '@/pages/api/auth/RegisterUser'
 
 interface FormValues {
   username: string
@@ -38,7 +39,7 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
     }
 
     setRegisterButtonLoading(true)
-    const res = await fetchHelper.doPost('/api/auth/RegisterUser', values)
+    const res = await fetchHelper.doPost('/auth/RegisterUser', values)
 
     if (res.errored) {
       setErrorMessage('There has been an unexpected error. Please try again shortly')
