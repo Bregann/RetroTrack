@@ -19,7 +19,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   const [currentDisplayedAchievements, setCurrentDisplayedAchievements] = useState(props.gameInfo?.achievements)
   const [achievementList, setAchievementList] = useState(props.gameInfo?.achievements)
   const [gameStats, setGameStats] = useState(props.gameInfo)
-  const [gameTracked, setGameTracked] = useState(props.gameInfo?.gameTracked)
+  const [gameTracked, setGameTracked] = useState(props.gameInfo?.gameTracked ?? false)
   const [trackedGameButtonLoading, setTrackedGameButtonLoading] = useState(false)
   const [achievementsFiltered, setAchievementsFiltered] = useState(false)
   const interval = useRef<NodeJS.Timeout | null>(null)
@@ -28,7 +28,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
     setCurrentDisplayedAchievements(props.gameInfo?.achievements)
     setAchievementList(props.gameInfo?.achievements)
     setGameStats(props.gameInfo)
-    setGameTracked(props.gameInfo?.gameTracked)
+    setGameTracked(props.gameInfo?.gameTracked ?? false)
   }, [props.gameInfo])
 
   console.log(props)
@@ -47,19 +47,19 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
   const UpdateTrackedGame = async (): Promise<void> => {
     setTrackedGameButtonLoading(true)
 
-    if (gameTracked !== undefined) {
-      const res = await fetchHelper.doDelete('/api/trackedgames/DeleteTrackedGame?gameId=' + props.gameInfo?.gameId)
+    if (gameTracked) {
+      const res = await fetchHelper.doDelete('/trackedgames/DeleteTrackedGame?gameId=' + props.gameInfo?.gameId)
 
       if (res.statusCode === 401) {
         notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
       } else if (res.errored) {
         notificationHelper.showErrorNotification('Error', 'There has been an error updating the tracked game. Please try again', 5000, <IconCrossFilled />)
       } else {
-        setGameTracked(true)
+        setGameTracked(false)
         notificationHelper.showSuccessNotification('Success', 'Tracked game has been removed successfully', 3000, <IconCheck />)
       }
     } else {
-      const res = await fetchHelper.doPost('/api/trackedgames/AddTrackedGame/' + props.gameInfo?.gameId, {})
+      const res = await fetchHelper.doPost('/trackedgames/AddTrackedGame?gameId=' + props.gameInfo?.gameId, {})
 
       if (res.statusCode === 401) {
         notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
@@ -69,12 +69,13 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
         setGameTracked(true)
         notificationHelper.showSuccessNotification('Success', 'Tracked game has been added successfully', 3000, <IconCheck />)
       }
-      setTrackedGameButtonLoading(false)
     }
+
+    setTrackedGameButtonLoading(false)
   }
 
   const UpdateUserProgress = async (): Promise<void> => {
-    const res = await fetchHelper.doGet('/api/games/GetGameInfoForUser?gameId=' + props.gameInfo?.gameId)
+    const res = await fetchHelper.doGet('/games/GetGameInfoForUser?gameId=' + props.gameInfo?.gameId)
 
     if (res.statusCode === 401) {
       notificationHelper.showErrorNotification('Authentication Error', 'There has been an error authenticating you. Please sign out and sign back in', 5000, <IconCrossFilled />)
@@ -248,7 +249,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
             Update
           </Button>
 
-          {gameTracked === true &&
+          {gameTracked &&
             <Button
               variant="gradient"
               loading={trackedGameButtonLoading}
@@ -257,7 +258,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
               Untrack Game
             </Button>}
 
-          {gameTracked === false &&
+          {!gameTracked &&
             <Button
               variant="gradient"
               loading={trackedGameButtonLoading}
@@ -272,7 +273,7 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
             variant="gradient"
             gradient={{ from: 'indigo', to: 'cyan' }}
             style={{ ':hover': { color: 'white' } }}
-            href={'game/' + props.gameInfo?.gameId}
+            href={'/game/' + props.gameInfo?.gameId}
           >
             Game Page
           </Button>

@@ -7,7 +7,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
     res.status(405)
   }
 
-  const fetchResult = await backendFetchHelper.doGet('/trackedgames/GetUserInProgressGames', req.cookies.rtSession, req.cookies.rtUsername)
+  const fetchResult = await backendFetchHelper.doGet('/TrackedGames/GetUserInProgressGames', req.cookies.rtSession, req.cookies.rtUsername)
 
   if (fetchResult.errored) {
     res.status(500)
