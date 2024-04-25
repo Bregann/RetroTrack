@@ -188,7 +188,7 @@ namespace RetroTrack.Domain.Data
 
         public static async Task<bool> ValidateSessionStatus(string sessionId)
         {
-            using(var context = new DatabaseContext())
+            using (var context = new DatabaseContext())
             {
                 var session = context.Sessions.FirstOrDefault(x => x.SessionId == sessionId);
 

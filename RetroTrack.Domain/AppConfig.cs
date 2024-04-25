@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection;
-using RetroTrack.Infrastructure.Database.Context;
+﻿using RetroTrack.Infrastructure.Database.Context;
 using Serilog;
 
 namespace RetroTrack.Domain

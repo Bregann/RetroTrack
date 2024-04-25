@@ -1,8 +1,4 @@
 using BreganUtils.ProjectMonitor;
-using Hangfire;
-using Hangfire.Dashboard.BasicAuthorization;
-using Hangfire.Dashboard.Dark;
-using Hangfire.PostgreSql;
 using RetroTrack.Api;
 using RetroTrack.Domain;
 using Serilog;

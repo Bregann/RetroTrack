@@ -10,7 +10,7 @@ namespace RetroTrack.Domain.Helpers
             var userSession = headers.Authorization.ToString();
             var username = headers["RtUsername"].ToString();
 
-            if(string.IsNullOrEmpty(userSession) || string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userSession) || string.IsNullOrEmpty(username))
             {
                 return null;
             }

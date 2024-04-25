@@ -269,7 +269,7 @@ namespace RetroTrack.Domain.Data.External
             {
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
 
-                using(var context = new DatabaseContext())
+                using (var context = new DatabaseContext())
                 {
                     var gameFromDb = context.Games.Include(x => x.GameConsole).FirstOrDefault(x => x.Id == gameId);
 
