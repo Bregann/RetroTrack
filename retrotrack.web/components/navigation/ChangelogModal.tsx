@@ -15,7 +15,8 @@ const ChangelogModal = (props: ChangelogModalProps): JSX.Element => {
       <List>
         <List.Item>Complete rewrite & upgrade of the website frontend</List.Item>
         <List.Item>Added this changelog modal :D</List.Item>
-        <List.Item>Various bug fixes/polish</List.Item>
+        <List.Item>Various bug fixes/polish code base</List.Item>
+        <List.Item>Add support for beaten games</List.Item>
       </List>
     </Modal>
   )
