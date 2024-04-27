@@ -445,6 +445,7 @@ namespace RetroTrack.Domain.Data.External
                             gameData.GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100;
                             gameData.HighestAwardKind = RAHelper.ConvertHighestAwardKind(game.HighestAwardKind);
                             gameData.HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null;
+                            gameData.ConsoleId = game.ConsoleId;
                             continue;
                         }
                         else
@@ -461,6 +462,7 @@ namespace RetroTrack.Domain.Data.External
                                 AchievementsGained = game.NumAwarded,
                                 AchievementsGainedHardcore = game.NumAwardedHardcore,
                                 GameId = game.GameId,
+                                ConsoleId = game.ConsoleId,
                                 GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100,
                                 GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
                                 Username = username,
