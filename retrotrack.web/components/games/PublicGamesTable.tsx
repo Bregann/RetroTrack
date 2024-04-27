@@ -33,7 +33,7 @@ const PublicGamesTable = (props: PublicGameTableProps): JSX.Element => {
   const [totalRecords, setTotalRecords] = useState(props.gameData.length)
   const [loggedOutGameModalData, setLoggedOutGameModalData] = useState<GetSpecificGameInfo | undefined>(undefined)
   const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false)
-  console.log(props.gameData)
+
   useEffect(() => {
     const from = (page - 1) * pageSize
     const to = from + pageSize

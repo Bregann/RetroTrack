@@ -27,12 +27,11 @@ export interface Achievement {
   badgeName: string
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<GetSpecificGameInfo>): Promise<void> {
+export default async function handler (req: NextApiRequest, res: NextApiResponse<GetSpecificGameInfo>): Promise<void> {
   if (req.method !== 'GET') {
     res.status(405)
   }
   const { gameId } = req.query
-  console.log(gameId)
   const fetchResult = await backendFetchHelper.doGet('/Games/GetSpecificGameInfo/'.concat(gameId?.toString() ?? ''))
 
   if (fetchResult.errored) {

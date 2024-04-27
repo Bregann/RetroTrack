@@ -8,7 +8,7 @@ import Head from 'next/head'
 import Navigation from '@/components/navigation/navigation'
 import { Notifications } from '@mantine/notifications'
 
-export default function App(props: AppProps): JSX.Element {
+export default function App (props: AppProps): JSX.Element {
   if (process.env.NODE_ENV === 'development') {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   }

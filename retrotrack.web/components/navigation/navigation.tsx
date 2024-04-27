@@ -1,10 +1,11 @@
 import fetchHelper from '@/helpers/FetchHelper'
 import { type GetPublicNavigationDataDto } from '@/pages/api/navigation/GetPublicNavigationData'
-import { AppShell, Burger, Button, Group, NavLink, ScrollArea } from '@mantine/core'
+import { AppShell, Burger, Button, Grid, Group, LoadingOverlay, NavLink, Paper, ScrollArea, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconPin, IconProgress } from '@tabler/icons-react'
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
@@ -13,6 +14,8 @@ import sessionHelper from '@/helpers/SessionHelper'
 import notificationHelper from '@/helpers/NotificationHelper'
 import { useRouter } from 'next/router'
 import ChangelogModal from './ChangelogModal'
+import { type GetLoggedInNavigationDataDto } from '@/pages/api/navigation/GetLoggedInNavigationData'
+import classes from '@/styles/Navigation.module.css'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
@@ -21,8 +24,9 @@ const Navigation = (props: AppProps): JSX.Element => {
   const [registerModalOpened, setRegisterModalOpened] = useState(false)
   const [supportModalOpened, setSupportModalOpened] = useState(false)
   const [changelogModalOpened, setChangelogModalOpened] = useState(false)
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [navData, setNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
+  const [loggedIn, setLoggedIn] = useState<boolean | null>()
+  const [publicNavData, setPublicNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
+  const [loggedInNavData, setLoggedInNavData] = useState<GetLoggedInNavigationDataDto | null>(null)
   const [activePage, setActivePage] = useState('')
   const router = useRouter()
 
@@ -38,22 +42,37 @@ const Navigation = (props: AppProps): JSX.Element => {
 
   useEffect(() => {
     setLoggedIn(sessionHelper.hasSession())
-  }, [router.pathname])
+  }, [])
 
   useEffect(() => {
-    if (loggedIn) {
-      // get logged in data
-    } else {
-      const fetchLoggedOutData = async (): Promise<void> => {
-        const fetchResult = await fetchHelper.doGet('/navigation/GetPublicNavigationData')
+    console.log(loggedIn)
+    const fetchLoggedOutData = async (): Promise<void> => {
+      const fetchResult = await fetchHelper.doGet('/navigation/GetPublicNavigationData')
 
-        if (fetchResult.errored) {
-          console.error('Error loading navigation data')
-        } else {
-          setNavData(fetchResult.data)
-        }
+      if (fetchResult.errored) {
+        console.error('Error loading navigation data')
+      } else {
+        setPublicNavData(fetchResult.data)
+        setLoggedInNavData(null)
       }
+    }
 
+    const fetchLoggedInData = async (): Promise<void> => {
+      const fetchResult = await fetchHelper.doGet('/navigation/GetLoggedInNavigationData')
+
+      if (fetchResult.errored) {
+        console.error('Error loading navigation data')
+        void fetchLoggedOutData()
+      } else {
+        setPublicNavData(null)
+        setLoggedInNavData(fetchResult.data)
+      }
+    }
+
+    if (loggedIn === true || sessionHelper.hasSession()) {
+      console.log('aa')
+      void fetchLoggedInData()
+    } else {
       void fetchLoggedOutData()
     }
   }, [loggedIn])
@@ -79,10 +98,11 @@ const Navigation = (props: AppProps): JSX.Element => {
 
   return (
     <>
+      <LoadingOverlay visible={(loggedIn === true && loggedInNavData === null) || (loggedIn === false && publicNavData === null) || loggedIn === null} />
       <AppShell
         header={{ height: 60 }}
         navbar={{
-          width: 250,
+          width: 260,
           breakpoint: 'sm',
           collapsed: { mobile: !opened }
         }}
@@ -94,7 +114,7 @@ const Navigation = (props: AppProps): JSX.Element => {
               variant="gradient"
               gradient={{ from: 'indigo', to: 'cyan' }}
               onClick={() => { setChangelogModalOpened(true) }}>
-              Website Changelog (v1)
+              Website Changelog (v2)
             </Button>
             <Button
               variant="gradient"
@@ -102,7 +122,7 @@ const Navigation = (props: AppProps): JSX.Element => {
               onClick={() => { setSupportModalOpened(true) }}>
               Support
             </Button>
-            {loggedIn
+            {loggedIn === true
               ? <>
                 <Button
                   variant="gradient"
@@ -134,7 +154,7 @@ const Navigation = (props: AppProps): JSX.Element => {
           </Group>
         </AppShell.Header>
         <AppShell.Navbar>
-          <ScrollArea>
+          <ScrollArea style={{ height: loggedIn === true ? '85%' : '100%' }}>
             <NavLink
               component={Link}
               href="/home"
@@ -152,12 +172,13 @@ const Navigation = (props: AppProps): JSX.Element => {
               active={activePage === '/allgames'}
             />
 
-            {loggedIn &&
+            {loggedIn === true &&
               <>
                 <NavLink
                   component={Link}
                   href="/trackedgames"
                   label="Tracked Games"
+                  description={`${loggedInNavData?.trackedGamesCount} games`}
                   leftSection={<IconPin size="1.2rem" stroke={1.5} />}
                   onClick={() => { setActivePage('/trackedgames') }}
                   active={activePage === '/trackedgames'}
@@ -166,6 +187,7 @@ const Navigation = (props: AppProps): JSX.Element => {
                   component={Link}
                   href="/inprogressgames"
                   label="In Progress Games"
+                  description={`${loggedInNavData?.inProgressGamesCount} games`}
                   leftSection={<IconProgress size="1.2rem" stroke={1.5} />}
                   onClick={() => { setActivePage('/inprogressgames') }}
                   active={activePage === '/inprogressgames'}
@@ -176,22 +198,67 @@ const Navigation = (props: AppProps): JSX.Element => {
             {consoleTypes.map(console => {
               return (
                 <NavLink label={console.consoleName} key={console.consoleType}>
-                  {navData?.filter(x => x.consoleType === console.consoleType).sort((a, b) => a.consoleName.localeCompare(b.consoleName)).map(data => {
-                    return (
-                      <NavLink
-                        component={Link}
-                        description={`${data.gameCount} games`}
-                        key={data.consoleId}
-                        label={data.consoleName}
-                        href={`/console/${data.consoleId}`}
-                        onClick={() => { setActivePage(data.consoleId.toString()) }}
-                      />
-                    )
-                  })}
+                  {publicNavData !== null
+                    ? publicNavData.filter(x => x.consoleType === console.consoleType).sort((a, b) => a.consoleName.localeCompare(b.consoleName)).map(data => {
+                      return (
+                        <NavLink
+                          component={Link}
+                          description={`${data.gameCount} games`}
+                          key={data.consoleId}
+                          label={data.consoleName}
+                          href={`/console/${data.consoleId}`}
+                          onClick={() => { setActivePage(data.consoleId.toString()) }}
+                        />
+                      )
+                    })
+                    : loggedInNavData?.consoleProgressData.filter(x => x.consoleType === console.consoleType).sort((a, b) => a.consoleName.localeCompare(b.consoleName)).map(data => {
+                      return (
+                        <NavLink
+                          component={Link}
+                          description={
+                            <>
+                              <span className={classes.navGameConsoleCount}>{data.totalGamesInConsole} games</span>
+                              <br />
+                              <span className={classes.navGamesBeaten}>{data.gamesBeaten}/{data.totalGamesInConsole} beaten ({data.percentageBeaten}%)</span>
+                              <br />
+                              <span className={classes.navGamesMastered}>{data.gamesMastered}/{data.totalGamesInConsole} mastered ({data.percentageMastered}%)</span>
+                            </>
+                          }
+                          key={data.consoleId}
+                          label={data.consoleName}
+                          href={`/console/${data.consoleId}`}
+                          onClick={() => { setActivePage(data.consoleId.toString()) }}
+                          active={activePage === data.consoleId.toString()}
+                        />
+                      )
+                    })}
                 </NavLink>
               )
             })}
           </ScrollArea>
+
+          {loggedInNavData !== null && <div className={classes.footer}>
+            <Paper mt={10} w={249}>
+              <Grid pt={5} pl={5}>
+                <Grid.Col span={4}>
+                  <Image
+                    src={loggedInNavData.raUserProfileUrl}
+                    alt="Profile picture of user"
+                    width={100}
+                    height={100}
+                    style={{ marginTop: 15 }}
+                  />
+                </Grid.Col>
+                <Grid.Col span={8}>
+                  <Text fz="md" fw={700} pl={20}>{loggedInNavData.raName}</Text>
+                  <Text fz="md" pl={20}>Games beat: <b>{loggedInNavData.gamesBeaten}</b></Text>
+                  <Text fz="md" pl={20}>Games 100%: <b>{loggedInNavData.gamesMastered}</b></Text>
+                  <Text fz="md" pl={20}>Points: <b>{loggedInNavData.userPoints}</b></Text>
+                  <Text fz="md" pl={20}>Rank: <b>{loggedInNavData.userRank}</b></Text>
+                </Grid.Col>
+              </Grid>
+            </Paper>
+          </div>}
         </AppShell.Navbar>
         <AppShell.Main>
           <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={async () => { await successfulLogin() }} />

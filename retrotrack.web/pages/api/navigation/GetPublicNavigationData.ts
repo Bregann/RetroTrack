@@ -8,7 +8,7 @@ export interface GetPublicNavigationDataDto {
   consoleType: number
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<GetPublicNavigationDataDto>): Promise<void> {
+export default async function handler (req: NextApiRequest, res: NextApiResponse<GetPublicNavigationDataDto>): Promise<void> {
   if (req.method !== 'GET') {
     res.status(405)
   }

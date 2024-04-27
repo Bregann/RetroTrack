@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.Dtos.Navigation
+﻿using RetroTrack.Infrastructure.Database.Enums;
+
+namespace RetroTrack.Domain.Dtos.Navigation
 {
     public class GetLoggedInNavigationDataDto
     {
@@ -8,12 +10,16 @@
         public required int GamesMastered { get; set; }
         public required long UserPoints { get; set; }
         public required long UserRank { get; set; }
+        public required int TrackedGamesCount { get; set; }
+        public required int InProgressGamesCount { get; set; }
         public required ConsoleProgressData[] ConsoleProgressData { get; set;}
     }
 
     public class ConsoleProgressData
     {
         public required int ConsoleId { get; set; }
+        public required string ConsoleName { get; set; }
+        public required ConsoleType ConsoleType { get; set; }
         public required int GamesMastered { get; set; }
         public required int GamesBeaten { get; set; }
         public required int TotalGamesInConsole { get; set; }

@@ -29,8 +29,8 @@ namespace RetroTrack.Domain.Data
         {
             using (var context = new DatabaseContext())
             {
-                var trackedGameCount = context.TrackedGames.CountAsync(x => x.User.Username == username);
-                var inProgressGameCount = context.UserGameProgress.CountAsync(x => x.Username == username);
+                var trackedGameCount = await context.TrackedGames.CountAsync(x => x.User.Username == username);
+                var inProgressGameCount = await context.UserGameProgress.CountAsync(x => x.Username == username);
 
                 var query = from gc in context.GameConsoles.Where(x => x.DisplayOnSite)
                            join ugp in context.UserGameProgress.Where(x => x.Username.Equals(username))
@@ -38,6 +38,8 @@ namespace RetroTrack.Domain.Data
                            select new ConsoleProgressData
                            {
                                ConsoleId = gc.ConsoleID,
+                               ConsoleName = gc.ConsoleName,
+                               ConsoleType = gc.ConsoleType,
                                TotalGamesInConsole = gc.GameCount,
                                GamesBeaten = grouping.Count(x => x.HighestAwardKind != null),
                                GamesMastered = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered || x.HighestAwardKind == HighestAwardKind.Completed),
@@ -52,11 +54,13 @@ namespace RetroTrack.Domain.Data
                 return new GetLoggedInNavigationDataDto
                 {
                     RAName = user.RAUsername,
-                    RAUserProfileUrl = "https://media.retroachievements.org/UserPic/" + user.UserProfileUrl,
+                    RAUserProfileUrl = "https://media.retroachievements.org" + user.UserProfileUrl,
                     UserPoints = user.UserPoints,
                     UserRank = user.UserRank,
                     GamesBeaten = consoleProgressData.Sum(x => x.GamesBeaten),
                     GamesMastered = consoleProgressData.Sum(x => x.GamesMastered),
+                    TrackedGamesCount = trackedGameCount,
+                    InProgressGamesCount = inProgressGameCount,
                     ConsoleProgressData = consoleProgressData
                 };
             }

@@ -9,3 +9,7 @@
 h1 {
     text-align: center;
 }
+
+.mantine-NavLink-label {
+    font-size: 16px;
+}

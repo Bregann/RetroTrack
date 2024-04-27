@@ -31,9 +31,6 @@ const LoggedInModal = (props: LoggedInModalProps): JSX.Element => {
     setGameTracked(props.gameInfo?.gameTracked ?? false)
   }, [props.gameInfo])
 
-  console.log(props)
-  console.log(currentDisplayedAchievements)
-
   const filterCurrentAchievements = (checked: boolean): void => {
     setAchievementsFiltered(checked)
 

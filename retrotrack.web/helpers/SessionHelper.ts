@@ -15,7 +15,6 @@ class sessionHelper {
       return false
     }
 
-    console.log(cookie)
     return true
   }
 
