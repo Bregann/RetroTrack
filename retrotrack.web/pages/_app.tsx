@@ -19,6 +19,7 @@ export default function App (props: AppProps): JSX.Element {
         <title>RetroTrack</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         <link rel="icon" href="/favicon.ico" />
+        <meta name="msvalidate.01" content="4FB5C772A502D7FEC312A89842400698" />
         <meta property="og:title" content="RetroTrack" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://retrotrack.bregan.me" />
