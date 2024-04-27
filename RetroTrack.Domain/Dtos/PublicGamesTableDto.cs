@@ -8,5 +8,6 @@
         public required int AchievementCount { get; set; }
         public required string? GameGenre { get; set; }
         public string Console { get; set; }
+        public required int Players { get; set; }
     }
 }

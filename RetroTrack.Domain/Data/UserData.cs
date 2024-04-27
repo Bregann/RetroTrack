@@ -27,12 +27,12 @@ namespace RetroTrack.Domain.Data
                 var user = context.Users.Where(x => x.Username == username).First();
                 var secondsDiff = (DateTime.UtcNow - user.LastUserUpdate).TotalSeconds;
 
-                if (secondsDiff < 30)
+                if (secondsDiff < 60)
                 {
                     return new UpdateUserGamesDto
                     {
                         Success = false,
-                        Reason = $"User update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
+                        Reason = $"User update is on cooldown! You can next update in {60 - Math.Round(secondsDiff)} seconds time"
                     };
                 }
 

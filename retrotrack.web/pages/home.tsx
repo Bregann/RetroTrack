@@ -1,159 +1,131 @@
-import { useSession } from "next-auth/react";
-import { DoGet } from "../Helpers/webFetchHelper";
-import { createStyles, LoadingOverlay, MediaQuery, Paper, Table, Text } from "@mantine/core";
-import { GetServerSideProps } from "next";
-import { RecentGameUpdatesDayList } from "../types/Api/Games/GetRecentlyAddedAndUpdatedGames";
+import { type GetServerSideProps } from 'next'
+import backendFetchHelper from '@/helpers/BackendFetchHelper'
+import { Paper, Table } from '@mantine/core'
 import Image from 'next/image'
-import { useState } from "react";
-import { GetSpecificGameInfo } from "../types/Api/Games/GetSpecificGameInfo";
-import { toast } from "react-toastify";
-import LoggedOutModal from "../components/Games/LoggedOutModal";
-import LoggedInModal from "../components/Games/LoggedInModal";
-import { GetGameInfoForUser } from "../types/Api/Games/GetGameInfoForUser";
+import fetchHelper from '@/helpers/FetchHelper'
+import notificationHelper from '@/helpers/NotificationHelper'
+import { IconCrossFilled } from '@tabler/icons-react'
+import { type GetSpecificGameInfo } from './api/games/GetSpecificGameInfo'
+import { useState } from 'react'
+import LoggedOutModal from '@/components/games/LoggedOutModal'
+import { type GetGameInfoForUser } from './api/games/GetGameInfoForUser'
+import LoggedInModal from '@/components/games/LoggedInModal'
 
-type HomeProps = {
-    recentGames: RecentGameUpdatesDayList[] | null,
-    errorMessage: string | null;
+interface IndexProps {
+  loggedIn: boolean
+  username: string
+  recentGames: RecentGameUpdatesDayList[] | null
 }
 
-const Home = (props: HomeProps) => {
-    const { data: session, status } = useSession();
-    const [loggedOutModal, setLoggedOutModal] = useState<GetSpecificGameInfo | undefined>(undefined);
-    const [loggedInModal, setLoggedInModal] = useState<GetGameInfoForUser | undefined>(undefined);
-    const [loadingOverlayVisible, setLoadingOverlayVisible] = useState(false);
-    const [modalOpened, setModalOpened] = useState(true);
-
-    const GetGameInfo = async (gameId: number, sessionId: string | undefined) => {
-        if(sessionId){
-            await GetLoggedInGameInfo(gameId, sessionId);
-        }
-        else{
-            await GetLoggedOutGameInfo(gameId);
-        }
-    }
-
-    const GetLoggedOutGameInfo = async (gameId: number) => {
-        setLoadingOverlayVisible(true);
-        const res = await DoGet('/api/games/GetSpecificGameInfo/'+ gameId);
-        let data: GetSpecificGameInfo | undefined = undefined;
-
-        if(res.ok){
-            data = await res.json();
-        }
-        else{
-            toast.error("Error getting game info: " + res.status, {
-                position: 'bottom-right',
-                closeOnClick: true,
-                theme: 'colored'
-            });
-        }
-
-        setModalOpened(true);
-        setLoggedOutModal(data);
-        setLoadingOverlayVisible(false);
-    }
-
-    const GetLoggedInGameInfo = async(gameId: number, sessionId: string) => {
-        setLoadingOverlayVisible(true);
-
-        const res = await DoGet('/api/games/GetGameInfoForUser/'+ gameId, sessionId); //hard coded for dev purposes - change back lol
-        let data: GetGameInfoForUser | undefined = undefined;
-
-        if(res.ok){
-            data = await res.json();
-        }
-        else{
-            toast.error("Error getting game info: " + res.status, {
-                position: 'bottom-right',
-                closeOnClick: true,
-                theme: 'colored'
-            });
-        }
-
-        setModalOpened(true);
-        setLoggedInModal(data);
-        setLoadingOverlayVisible(false);
-    }
-
-    return ( 
-        <>
-            {status === "authenticated" && <Text size={55} align="center">Welcome back, {session.username}!</Text>}
-            {status === "unauthenticated" && <Text size={55} align="center">Home</Text>}
-            {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
-
-            {props.recentGames && 
-                props.recentGames.map((games) => {
-                    return(
-                        <div key={games.date}>
-                            <Text size={25} align="center" key={games.date} mt={20}> { games.date } </Text>
-                            <MediaQuery smallerThan="sm" styles={{width: 600, marginLeft: 'auto', marginRight: 'auto', display: 'block'}}>
-                                <Paper shadow="md" p="md" withBorder mt={15}>
-                                
-                                    <div style={{position: 'relative'}}>
-                                        <LoadingOverlay visible={loadingOverlayVisible} overlayBlur={2} />
-                                        <Table striped highlightOnHover sx={{'& thead tr th': {color: 'white', paddingBottom: 20}, 'tr:hover td': {backgroundColor: '#5291f770'}}}>
-                                            <thead>
-                                                <tr>
-                                                    <th>Icon</th>
-                                                    <th>Game Name</th>
-                                                    <th>Achievement Count</th>
-                                                    <th>Game Genre</th>
-                                                    <th>Console</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {games.gamesTable?.map((gameTableData) => {
-                                                    return(
-                                                    <tr key={gameTableData.gameId} onClick={async () => await GetGameInfo(gameTableData.gameId, session?.sessionId)}>
-                                                        <td><Image
-                                                            width={64}
-                                                            height={64}
-                                                            src={gameTableData.gameIconUrl}
-                                                            alt=""
-                                                        /></td>
-                                                        <td>{gameTableData.gameName}</td>
-                                                        <td>{gameTableData.achievementCount}</td>
-                                                        <td>{gameTableData.gameGenre}</td>
-                                                        <td>{gameTableData.console}</td>
-                                                    </tr>
-                                                )})}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-                                </Paper>
-                            </MediaQuery>
-                        </div>
-                    )
-                })
-            }
-
-            {loggedOutModal && modalOpened && <LoggedOutModal gameInfo={loggedOutModal} loggedOutModal={setModalOpened}/>}
-            {loggedInModal && modalOpened && <LoggedInModal gameInfo={loggedInModal} loggedInModal={setModalOpened}/>}
-        </>
-     );
+interface RecentGameUpdatesDayList {
+  gamesTable: GamesTable[]
+  date: string
 }
- 
-export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-    const res = await DoGet('/api/games/GetRecentlyAddedAndUpdatedGames');
 
-    if(res.ok){
-        const recentGames = await res.json();
+interface GamesTable {
+  gameId: number
+  gameIconUrl: string
+  gameName: string
+  achievementCount: number
+  gameGenre: string
+  console: string
+}
 
-        return {
-            props: {
-                recentGames: recentGames,
-                errorMessage: null
-            }, // will be passed to the page component as props
-        }
-    }
+const Page = (props: IndexProps): JSX.Element => {
+  const [loggedOutGameModalData, setLoggedOutGameModalData] = useState<GetSpecificGameInfo | undefined>(undefined)
+  const [loggedInGameModalData, setLoggedInGameModalData] = useState<GetGameInfoForUser | undefined>(undefined)
 
-    else{
-        return {
-            props: {
-                recentGames: null,
-                errorMessage: 'Error loading game data - reason: ' + res.status
-            }, // will be passed to the page component as props
-        }
+  const GetLoggedOutGameInfo = async (gameId: number): Promise<void> => {
+    const res = await fetchHelper.doGet('/games/GetSpecificGameInfo?gameId=' + gameId)
+
+    if (res.errored) {
+      notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
+    } else {
+      setLoggedOutGameModalData(res.data)
     }
   }
-export default Home;
+
+  const GetLoggedInGameInfo = async (gameId: number): Promise<void> => {
+    const res = await fetchHelper.doGet('/games/GetGameInfoForUser?gameId=' + gameId)
+
+    if (res.errored) {
+      notificationHelper.showErrorNotification('Error', 'There has been an error trying to get the game data. Please try again', 5000, <IconCrossFilled />)
+    } else {
+      setLoggedInGameModalData(res.data)
+    }
+  }
+
+  return (
+    <>
+      <h1>{props.loggedIn ? `Welcome back, ${props.username}!` : 'Home'}</h1>
+
+      {props.recentGames?.map((games) => {
+        return (
+          <div key={games.date}>
+            <Paper shadow="md" p="md" withBorder mt={15}>
+              <h2>{games.date}</h2>
+              <Table
+                striped
+                highlightOnHover
+                highlightOnHoverColor='#4DABF775'
+              >
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Icon</Table.Th>
+                    <Table.Th>Game Name</Table.Th>
+                    <Table.Th>Achievement Count</Table.Th>
+                    <Table.Th>Game Genre</Table.Th>
+                    <Table.Th>Console</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {games.gamesTable?.sort((a, b) => a.gameName.localeCompare(b.gameName)).map((gameTableData) => {
+                    return (
+                      <Table.Tr key={gameTableData.gameId} onClick={async () => { props.loggedIn ? await GetLoggedInGameInfo(gameTableData.gameId) : await GetLoggedOutGameInfo(gameTableData.gameId) }}>
+                        <Table.Td>
+                          <Image
+                            width={64}
+                            height={64}
+                            src={gameTableData.gameIconUrl}
+                            alt=""
+                          />
+                        </Table.Td>
+                        <Table.Td>{gameTableData.gameName}</Table.Td>
+                        <Table.Td>{gameTableData.achievementCount}</Table.Td>
+                        <Table.Td>{gameTableData.gameGenre}</Table.Td>
+                        <Table.Td>{gameTableData.console}</Table.Td>
+                      </Table.Tr>
+                    )
+                  })}
+                </Table.Tbody>
+              </Table>
+            </Paper>
+          </div>
+        )
+      })
+      }
+
+      <LoggedOutModal gameInfo={loggedOutGameModalData} onClose={() => { setLoggedOutGameModalData(undefined) }} />
+      <LoggedInModal gameInfo={loggedInGameModalData} onCloseModal={() => { setLoggedInGameModalData(undefined) }} />
+    </>
+  )
+}
+
+export const getServerSideProps: GetServerSideProps<IndexProps> = async (context) => {
+  const loggedIn = context.req.cookies.rtSession !== undefined
+  const username = loggedIn ? (context.req.cookies.rtUsername ?? '') : ''
+
+  const fetchResult = await backendFetchHelper.doGet('/Games/GetRecentlyAddedAndUpdatedGames')
+
+  const pageProps: IndexProps = {
+    loggedIn,
+    username,
+    recentGames: fetchResult.errored ? null : fetchResult.data
+  }
+
+  return {
+    props: pageProps
+  }
+}
+
+export default Page

@@ -32,7 +32,8 @@ namespace RetroTrack.Domain.Data
                             GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
-                            GameName = games.Title
+                            GameName = games.Title,
+                            Players = games.Players ?? 0
                         }));
 
                         dayList.Add(new DayListDto
@@ -54,7 +55,8 @@ namespace RetroTrack.Domain.Data
                             GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                             Console = games.GameConsole.ConsoleName,
                             GameId = games.Id,
-                            GameName = games.Title
+                            GameName = games.Title,
+                            Players = games.Players ?? 0
                         }));
 
                         dayList.Add(new DayListDto
@@ -90,6 +92,7 @@ namespace RetroTrack.Domain.Data
             {
                 GameId = data.Id,
                 ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
+                ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
                 ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
                 ConsoleId = data.ConsoleId,
                 ConsoleName = data.ConsoleName,
@@ -105,7 +108,8 @@ namespace RetroTrack.Domain.Data
                     NumAwarded = x.Value.NumAwarded,
                     NumAwardedHardcore = x.Value.NumAwardedHardcore,
                     Points = x.Value.Points,
-                    Title = x.Value.Title
+                    Title = x.Value.Title,
+                    Type = x.Value.Type,
                 }).ToList()
             };
         }
@@ -148,7 +152,8 @@ namespace RetroTrack.Domain.Data
                             GameGenre = x.GameGenre,
                             GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                             GameId = x.Id,
-                            GameName = x.Title
+                            GameName = x.Title,
+                            Players = x.Players ?? 0
                         }).ToList()
                     };
                 }
@@ -168,7 +173,8 @@ namespace RetroTrack.Domain.Data
                         GameGenre = x.GameGenre,
                         GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                         GameId = x.Id,
-                        GameName = x.Title
+                        GameName = x.Title,
+                        Players = x.Players ?? 0
                     }).ToList()
                 };
             }
@@ -208,12 +214,13 @@ namespace RetroTrack.Domain.Data
                         AchievementCount = loggedOutData.AchievementCount,
                         Achievements = achievementList,
                         ImageBoxArt = "https://media.retroachievements.org" + loggedOutData.ImageBoxArt,
+                        ImageTitle = "https://media.retroachievements.org" + loggedOutData.ImageTitle,
+                        ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
                         NumAwardedToUser = 0,
                         ConsoleId = loggedOutData.ConsoleId,
                         ConsoleName = loggedOutData.ConsoleName,
                         GameId = gameId,
                         Genre = loggedOutData.Genre,
-                        ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
                         Players = loggedOutData.Players,
                         PointsEarned = 0,
                         Title = loggedOutData.Title,
@@ -250,6 +257,7 @@ namespace RetroTrack.Domain.Data
                 {
                     GameId = data.Id,
                     ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
+                    ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
                     ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
                     ConsoleId = data.ConsoleId,
                     ConsoleName = data.ConsoleName,

@@ -9,6 +9,8 @@ namespace RetroTrack.Infrastructure.Database.Models
         public string Id { get; set; }
 
         public required virtual Users User { get; set; }
+
         public required string SessionId { get; set; }
+        public required DateTime ExpiryTime { get; set; }
     }
 }

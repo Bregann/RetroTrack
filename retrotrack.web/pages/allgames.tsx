@@ -1,80 +1,55 @@
-import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
-import { DoGet } from "../Helpers/webFetchHelper";
-import { GamesForConsole } from "../types/Api/Games/GetGamesForConsole";
-import { authOptions } from "./api/auth/[...nextauth]";
-import { Text } from '@mantine/core';
-import PublicGamesTable from "../components/Games/PublicGamesTable";
-import { sortBy } from "lodash";
-import { GamesAndUserProgressForConsole } from "../types/Api/Games/GetGamesAndUserProgressForConsole";
-import LoggedInGamesTable from "../components/Games/LoggedInGamesTable";
+import { type GetServerSideProps } from 'next'
+import { sortBy } from 'lodash'
+import { type GamesAndUserProgressForConsole, type GamesForConsole } from './console/[consoleId]'
+import PublicGamesTable from '@/components/games/PublicGamesTable'
+import LoggedInGamesTable from '@/components/games/LoggedInGamesTable'
+import backendFetchHelper from '@/helpers/BackendFetchHelper'
 
-type AllGamesProps = {
-    publicConsoleData: GamesForConsole | null;
-    loggedInConsoleData: GamesAndUserProgressForConsole | null;
-    errorMessage: string | null;
+interface AllGamesProps {
+  publicConsoleData: GamesForConsole | null
+  loggedInConsoleData: GamesAndUserProgressForConsole | null
 }
 
-const AllGames = (props: AllGamesProps) => {
-    return ( 
-        <>
-        <Text size={40} align="center">All Games</Text>
-
-        {props.publicConsoleData && <PublicGamesTable gameData={sortBy(props.publicConsoleData?.games, 'gameName')}/>}
-        {props.loggedInConsoleData && <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName="gameName" sortByDirection="asc"/>}
-        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
-
+const AllGames = (props: AllGamesProps): JSX.Element => {
+  return (
+    <>
+      <h1>All Games</h1>
+      {(props.publicConsoleData === null && props.loggedInConsoleData === null) && <h1>There has been an error loading the games. Please refresh to try again</h1>}
+      {props.publicConsoleData !== null
+        ? <>
+          <PublicGamesTable gameData={sortBy(props.publicConsoleData.games, 'gameName')} />
         </>
-     );
+        : <>
+          <LoggedInGamesTable gameData={sortBy(props.loggedInConsoleData?.games, 'gameName')} sortByName='gameName' sortByDirection='asc' />
+        </>
+      }
+    </>
+  )
 }
 
 export const getServerSideProps: GetServerSideProps<AllGamesProps> = async (context) => {
-    const session = await getServerSession(context.req, context.res, authOptions);
+  // Check if logged in or logged out
+  const loggedIn = context.req.cookies.rtSession !== undefined
 
-    if(session?.sessionId){
-        const res = await DoGet('/api/games/GetGamesAndUserProgressForConsole/' + 0, session.sessionId);
-        if(res.ok){
-            return{
-                props: {
-                    publicConsoleData: null,
-                    loggedInConsoleData: await res.json(),
-                    errorMessage: null
-                }
-            }
-        }
-        else{
-            return{
-                props: {
-                    publicConsoleData: null,
-                    loggedInConsoleData: null,
-                    errorMessage: "Error getting console data - Error code " + res.status
-                }
-            }
-        }
+  if (loggedIn) {
+    const res = await backendFetchHelper.doGet('/games/GetGamesAndUserProgressForConsole/0', context.req.cookies.rtSession, context.req.cookies.rtUsername)
+
+    return {
+      props: {
+        publicConsoleData: null,
+        loggedInConsoleData: res.errored ? null : await res.data
+      }
     }
-    else{
-        const res = await DoGet('/api/games/GetGamesForConsole/' + 0);
+  } else {
+    const res = await backendFetchHelper.doGet('/games/GetGamesForConsole/0')
 
-        if(res.ok){
-            return{
-                props: {
-                    publicConsoleData: await res.json(),
-                    loggedInConsoleData: null,
-                    errorMessage: null
-                }
-            }
-        }
-        else{
-            return{
-                props: {
-                    publicConsoleData: null,
-                    loggedInConsoleData: null,
-                    errorMessage: "Error getting console data - Error code " + res.status
-                }
-            }
-        }
+    return {
+      props: {
+        publicConsoleData: res.errored ? null : await res.data,
+        loggedInConsoleData: null
+      }
     }
-
+  }
 }
- 
-export default AllGames;
+
+export default AllGames

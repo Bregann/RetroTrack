@@ -1,24 +1,21 @@
+import backendFetchHelper from '@/helpers/BackendFetchHelper'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { handleClientScriptLoad } from 'next/script'
-import { DoBackendPost } from '../../../Helpers/backendFetchHelper'
-import { RegiserUserData } from '../../../types/Api/Auth/RegisterUser'
 
- const handler = async (req: NextApiRequest, res: NextApiResponse<RegiserUserData>) => {
-    try {
-        const apiRes = await DoBackendPost('/api/Auth/RegisterNewUser', req.body);
+export interface RegisterUserDto {
+  success: boolean
+  reason: string
+}
 
-        if(!apiRes.ok){
-            res.status(apiRes.status).json({success: false, reason: apiRes.statusText})
-            return;
-        }
-
-        const apiData: RegiserUserData = await apiRes.json();
-        
-        res.status(200).json(apiData);
-
-    } catch (error) {
-        res.status(500).json({success: false, reason: "An error has occurred, please try again shortly."})
-    }
+export default async function handler (req: NextApiRequest, res: NextApiResponse<RegisterUserDto>): Promise<void> {
+  if (req.method !== 'POST') {
+    res.status(405)
   }
 
-  export default handler;
+  const fetchResult = await backendFetchHelper.doPost('/Auth/RegisterNewUser', req.body)
+
+  if (fetchResult.errored) {
+    res.status(500)
+  } else {
+    res.status(fetchResult.statusCode).json(fetchResult.data)
+  }
+}

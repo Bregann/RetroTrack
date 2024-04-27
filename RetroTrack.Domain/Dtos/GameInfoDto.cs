@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.Dtos
+﻿using RetroTrack.Domain.Models;
+
+namespace RetroTrack.Domain.Dtos
 {
     public class GameInfoDto
     {
@@ -7,6 +9,7 @@
         public required int ConsoleId { get; set; }
         public required string ConsoleName { get; set; }
         public required string ImageInGame { get; set; }
+        public required string ImageTitle { get; set; }
         public required string ImageBoxArt { get; set; }
         public required string Genre { get; set; }
         public required int AchievementCount { get; set; }
@@ -23,5 +26,6 @@
         public string Description { get; set; }
         public long Points { get; set; }
         public string BadgeName { get; set; }
+        public TypeEnum? Type { get; set; }
     }
 }

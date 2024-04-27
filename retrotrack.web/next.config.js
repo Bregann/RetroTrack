@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -18,7 +16,7 @@ const nextConfig = {
         hostname: 'media.retroachievements.org',
       },
     ],
-  },
+  }
 }
 
 module.exports = nextConfig

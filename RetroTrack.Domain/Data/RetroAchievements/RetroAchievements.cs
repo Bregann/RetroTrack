@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
 using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
+using System.Diagnostics;
 using System.Net;
 
 namespace RetroTrack.Domain.Data.External
@@ -72,7 +74,9 @@ namespace RetroTrack.Domain.Data.External
                         ConsoleID = console.Id,
                         ConsoleName = console.Name,
                         GameCount = 0,
-                        NoAchievementsGameCount = 0
+                        NoAchievementsGameCount = 0,
+                        ConsoleType = ConsoleType.NotSet,
+                        DisplayOnSite = false
                     });
 
                     Log.Information($"[RetroAchievements] Console ID {console.Id} added");
@@ -267,7 +271,7 @@ namespace RetroTrack.Domain.Data.External
             {
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
 
-                using(var context = new DatabaseContext())
+                using (var context = new DatabaseContext())
                 {
                     var gameFromDb = context.Games.Include(x => x.GameConsole).FirstOrDefault(x => x.Id == gameId);
 
@@ -293,6 +297,7 @@ namespace RetroTrack.Domain.Data.External
                         AchievementCount = achievements.Count,
                         Achievements = achievements,
                         ImageBoxArt = "",
+                        ImageTitle = "",
                         ImageInGame = "",
                         ConsoleId = gameFromDb.ConsoleID,
                         ConsoleName = gameFromDb.GameConsole.ConsoleName,
@@ -362,35 +367,63 @@ namespace RetroTrack.Domain.Data.External
 
         public static async Task GetUserGames(string username, int updateId)
         {
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
             try
             {
                 var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
-                var request = new RestRequest($"API_GetUserCompletedGames.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}", Method.Get);
+                var request = new RestRequest($"API_GetUserCompletionProgress.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}&c=500", Method.Get);
 
                 //Get the response and Deserialize
                 var response = await client.ExecuteAsync(request);
 
                 if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
                 {
-                    Log.Warning($"[RetroAchievements] Error getting completed games data. Status code: {response.StatusCode}");
+                    Log.Warning($"[RetroAchievements] Error getting user game progress data. Status code: {response.StatusCode}");
                     return;
                 }
 
-                var responseDeserialized = JsonConvert.DeserializeObject<List<GetUserCompletedGames>>(response.Content);
+                var responseDeserialized = JsonConvert.DeserializeObject<GetUserCompletionProgress>(response.Content);
 
-                if (responseDeserialized.Count == 0)
+                if (responseDeserialized.Total == 0)
                 {
-                    Log.Information($"[RetroAchievements] No completed games found for {username}");
+                    Log.Information($"[RetroAchievements] No user game progress found for {username}");
                     return;
                 }
 
-                //Order the list so it only has hardcore first and no dupes
-                var gameList = responseDeserialized.OrderByDescending(x => x.HardcoreMode).DistinctBy(x => x.GameId).ToList();
+                var gameList = responseDeserialized.Results;
+
+                //Check if the total is higher than the amount gotten
+                if (responseDeserialized.Total > 500)
+                {
+                    var timesToProcess = Math.Ceiling((decimal)responseDeserialized.Total / 500) - 1;
+                    var skip = 500;
+
+                    for (int i = 0; i < timesToProcess; i++)
+                    {
+                        var extraDataReq = new RestRequest($"API_GetUserCompletionProgress.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}&c=500&o={skip}", Method.Get);
+
+                        //Get the response and Deserialize
+                        var extraDataRes = await client.ExecuteAsync(extraDataReq);
+
+                        if (extraDataRes.Content == "" || extraDataRes.Content == null || extraDataRes.StatusCode != HttpStatusCode.OK)
+                        {
+                            Log.Warning($"[RetroAchievements] Error getting user game progress data. Status code: {response.StatusCode}");
+                            return;
+                        }
+
+                        var extraResponseDeserialized = JsonConvert.DeserializeObject<GetUserCompletionProgress>(extraDataRes.Content);
+
+                        gameList.AddRange(extraResponseDeserialized.Results);
+                        skip += 500;
+                    }
+                }
 
                 using (var context = new DatabaseContext())
                 {
                     var user = context.Users.Where(x => x.Username == username).First();
-
                     var userProfile = await GetUserProfile(username);
 
                     if (userProfile != null)
@@ -402,46 +435,51 @@ namespace RetroTrack.Domain.Data.External
 
                     foreach (var game in gameList)
                     {
-                        //Check if it already exists, if so update the field
-                        var userData = context.UserGameProgress.Where(x => x.Game.Id == game.GameId && x.User.Username == username).FirstOrDefault();
+                        var gameData = await context.UserGameProgress.FirstOrDefaultAsync(x => x.GameId == game.GameId);
 
-                        if (userData != null)
+                        if (gameData != null)
                         {
-                            userData.AchievementsGained = game.AchievementsAwarded;
-                            userData.GamePercentage = game.PctWon ?? 0;
-                            userData.HardcoreMode = game.HardcoreMode;
-                            context.SaveChanges();
+                            gameData.AchievementsGained = game.NumAwarded;
+                            gameData.AchievementsGainedHardcore = game.NumAwardedHardcore;
+                            gameData.GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100;
+                            gameData.GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100;
+                            gameData.HighestAwardKind = RAHelper.ConvertHighestAwardKind(game.HighestAwardKind);
+                            gameData.HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null;
+                            gameData.ConsoleId = game.ConsoleId;
                             continue;
                         }
-
-                        //weird bug with some games - says null max achievements/percentage so prevent crashing with the deralised object as nullable
-                        double pct = 0;
-
-                        if (game.PctWon != null)
+                        else
                         {
-                            pct = (double)game.PctWon;
-                        }
-
-                        var gameForUserProgress = context.Games.Where(x => x.Id == game.GameId).FirstOrDefault();
-
-                        if (gameForUserProgress != null)
-                        {
-                            context.UserGameProgress.Add(new UserGameProgress
+                            // Check if the game is actually in the system yet
+                            if (!await context.Games.AnyAsync(x => x.Id == game.GameId))
                             {
-                                User = user,
-                                AchievementsGained = game.AchievementsAwarded,
-                                Game = gameForUserProgress,
-                                GamePercentage = pct,
-                                HardcoreMode = game.HardcoreMode
+                                Log.Information($"[User Update] Game {game.GameId} not found in database");
+                                continue;
+                            }
+
+                            await context.UserGameProgress.AddAsync(new UserGameProgress
+                            {
+                                AchievementsGained = game.NumAwarded,
+                                AchievementsGainedHardcore = game.NumAwardedHardcore,
+                                GameId = game.GameId,
+                                ConsoleId = game.ConsoleId,
+                                GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100,
+                                GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
+                                Username = username,
+                                HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null,
+                                HighestAwardKind = RAHelper.ConvertHighestAwardKind(game.HighestAwardKind)
                             });
                         }
                     }
 
                     context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
 
                     Log.Information($"[RetroAchievements] Game progress updated for {username}");
                 }
+
+                stopwatch.Stop();
+                Console.WriteLine(stopwatch.Elapsed);
             }
             catch (Exception e)
             {

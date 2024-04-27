@@ -17,7 +17,7 @@ namespace RetroTrack.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -55,7 +55,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Achievements", (string)null);
+                    b.ToTable("Achievements");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Config", b =>
@@ -65,6 +65,10 @@ namespace RetroTrack.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiSecret")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("HFConnectionString")
                         .IsRequired()
@@ -92,12 +96,13 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Config", (string)null);
+                    b.ToTable("Config");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
+                            ApiSecret = "",
                             HFConnectionString = "",
                             HangfirePassword = "",
                             HangfireUsername = "",
@@ -131,7 +136,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataCaching", (string)null);
+                    b.ToTable("DataCaching");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.DevWishlist", b =>
@@ -153,7 +158,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("DevWishlist", (string)null);
+                    b.ToTable("DevWishlist");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.GameConsoles", b =>
@@ -165,6 +170,12 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ConsoleType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("DisplayOnSite")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("GameCount")
                         .HasColumnType("integer");
 
@@ -173,7 +184,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("ConsoleID");
 
-                    b.ToTable("GameConsoles", (string)null);
+                    b.ToTable("GameConsoles");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Games", b =>
@@ -220,7 +231,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("ConsoleID");
 
-                    b.ToTable("Games", (string)null);
+                    b.ToTable("Games");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.RetroAchievementsApiData", b =>
@@ -249,7 +260,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RetroAchievementsApiData", (string)null);
+                    b.ToTable("RetroAchievementsApiData");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Sessions", b =>
@@ -257,6 +268,9 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpiryTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SessionId")
                         .IsRequired()
@@ -270,7 +284,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.TrackedGames", b =>
@@ -291,7 +305,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("Username");
 
-                    b.ToTable("TrackedGames", (string)null);
+                    b.ToTable("TrackedGames");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UndevvedGames", b =>
@@ -313,7 +327,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasIndex("GameConsoleConsoleID");
 
-                    b.ToTable("UndevvedGames", (string)null);
+                    b.ToTable("UndevvedGames");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
@@ -327,13 +341,25 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<int>("AchievementsGained")
                         .HasColumnType("integer");
 
+                    b.Property<int>("AchievementsGainedHardcore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConsoleId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
 
                     b.Property<double>("GamePercentage")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("HardcoreMode")
+                    b.Property<double>("GamePercentageHardcore")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("HighestAwardDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("HighestAwardKind")
                         .HasColumnType("integer");
 
                     b.Property<string>("Username")
@@ -342,11 +368,13 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ConsoleId");
+
                     b.HasIndex("GameId");
 
                     b.HasIndex("Username");
 
-                    b.ToTable("UserGameProgress", (string)null);
+                    b.ToTable("UserGameProgress");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>
@@ -383,7 +411,7 @@ namespace RetroTrack.Infrastructure.Migrations
 
                     b.HasKey("Username");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Achievements", b =>
@@ -470,6 +498,12 @@ namespace RetroTrack.Infrastructure.Migrations
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
                 {
+                    b.HasOne("RetroTrack.Infrastructure.Database.Models.GameConsoles", "Console")
+                        .WithMany()
+                        .HasForeignKey("ConsoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RetroTrack.Infrastructure.Database.Models.Games", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
@@ -477,10 +511,12 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
-                        .WithMany("UserGameProgress")
+                        .WithMany()
                         .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Console");
 
                     b.Navigation("Game");
 
@@ -494,8 +530,6 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Navigation("Sessions");
 
                     b.Navigation("TrackedGames");
-
-                    b.Navigation("UserGameProgress");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,6 +8,7 @@ namespace RetroTrack.Domain.Dtos
         public required string Title { get; set; }
         public required int ConsoleId { get; set; }
         public required string ImageInGame { get; set; }
+        public required string ImageTitle { get; set; }
         public required string ImageBoxArt { get; set; }
         public required string Genre { get; set; }
         public required string ConsoleName { get; set; }

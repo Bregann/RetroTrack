@@ -1,80 +1,60 @@
-import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
-import { DoGet } from "../Helpers/webFetchHelper";
-import { Game } from "../types/Api/Games/LoggedInGame";
-import { authOptions } from "./api/auth/[...nextauth]";
-import { Text } from "@mantine/core";
-import LoggedInGamesTable from "../components/Games/LoggedInGamesTable";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { type GetServerSideProps } from 'next'
+import { useState } from 'react'
+import LoggedInGamesTable, { type LoggedInGame } from '@/components/games/LoggedInGamesTable'
+import backendFetchHelper from '@/helpers/BackendFetchHelper'
+import fetchHelper from '@/helpers/FetchHelper'
 
-type InProgressGamesProps = {
-    games: Game[] | null;
-    errorMessage: string | null;
+interface InProgressGamesProps {
+  games: LoggedInGame[] | null
+  errorMessage: string | null
+  username: string | null
 }
 
-const InProgressGames = (props: InProgressGamesProps) => {
-    const [tableUpdatedNeeded, setTableDataUpdateNeeded] = useState(false);
-    const [gameData, setGameData] = useState(props.games);
-    const { data: session, status } = useSession();
+const InProgressGames = (props: InProgressGamesProps): JSX.Element => {
+  const [gameData, setGameData] = useState(props.games)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if(tableUpdatedNeeded){
-                const res = await DoGet('/api/games/GetUserInProgressGames', session?.sessionId);
+  const updateInProgressGames = async (): Promise<void> => {
+    const res = await fetchHelper.doGet('/games/GetUserInProgressGames')
 
-                if(res.ok){
-                    const data = await res.json();
-                    setGameData(data);
-                }
-            }
-        }
+    if (!res.errored) {
+      setGameData(res.data)
+    }
+  }
 
-        fetchData();
-        setTableDataUpdateNeeded(false);
-
-    }, [session, tableUpdatedNeeded])
-
-    return (
+  return (
+    <>
+      {props.errorMessage !== null && <h1>{props.errorMessage}</h1>}
+      {gameData !== null &&
         <>
-        {props.errorMessage && <Text size={30} align="center">{props.errorMessage}</Text>}
-        {gameData &&
-        <>
-            <Text size={40} align="center">{session?.username}&apos;s In Progress Games</Text>
-            <LoggedInGamesTable gameData={gameData} setTableDataUpdateNeeded={setTableDataUpdateNeeded} sortByName="percentageCompleted" sortByDirection="desc"/>
+          <h1>{props.username}&apos;s In Progress Games</h1>
+          <LoggedInGamesTable gameData={gameData} updateTableData={async () => { await updateInProgressGames() }} sortByName="gameName" sortByDirection="asc" />
         </>}
-        </>
-     );
+    </>
+  )
 }
 
 export const getServerSideProps: GetServerSideProps<InProgressGamesProps> = async (context) => {
-    const session = await getServerSession(context.req, context.res, authOptions);
+  const loggedIn = context.req.cookies.rtSession !== undefined
 
-    if(!session){
-        return{
-            props: {
-                games: null,
-                errorMessage: 'You shall not pass! Please login to see this page'
-            }
-        }
-    }
-
-    const res = await DoGet('/api/games/GetUserInProgressGames', session.sessionId);
-    if(res.ok){
-      return {
-        props: {
-            games: await res.json(),
-            errorMessage: null
-        }
-      }  
-    }
-
+  if (!loggedIn) {
     return {
-        props: {
-            games: null,
-            errorMessage: 'Error getting in progress game data ' + res.status
-        }
-      }  
+      props: {
+        games: null,
+        errorMessage: 'You shall not pass! Please login to see this page',
+        username: null
+      }
+    }
+  }
+
+  const res = await backendFetchHelper.doGet('/games/GetUserInProgressGames', context.req.cookies.rtSession, context.req.cookies.rtUsername)
+
+  return {
+    props: {
+      games: res.errored ? null : await res.data,
+      errorMessage: res.errored ? 'Error getting in progress game data ' + res.statusCode : null,
+      username: context.req.cookies.rtUsername ?? null
+    }
+  }
 }
 
-export default InProgressGames;
+export default InProgressGames

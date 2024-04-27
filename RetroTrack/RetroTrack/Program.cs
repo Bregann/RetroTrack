@@ -3,6 +3,7 @@ using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
 using Hangfire.PostgreSql;
+using RetroTrack.Api;
 using RetroTrack.Domain;
 using Serilog;
 
@@ -45,6 +46,7 @@ builder.Services.AddHangfire(configuration => configuration
 
 builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
 
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -52,7 +54,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+
 HangfireJobs.SetupHangfireJobs();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -66,6 +70,8 @@ app.UseCors("AllowAnyOrigin");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseApiAuthorizationMiddleware();
 
 app.MapControllers();
 
@@ -88,5 +94,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = auth
 }, JobStorage.Current);
+
 
 app.Run();

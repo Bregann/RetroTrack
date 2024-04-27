@@ -5,12 +5,12 @@ using RetroTrack.Domain.Helpers;
 
 namespace RetroTrack.Api.Controllers.TrackedGames
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class TrackedGamesController : ControllerBase
     {
-        [HttpPost("AddTrackedGame")]
-        public ActionResult<bool> AddTrackedGame(int gameId)
+        [HttpPost("{gameId}")]
+        public ActionResult<bool> AddTrackedGame([FromRoute] int gameId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
@@ -29,8 +29,8 @@ namespace RetroTrack.Api.Controllers.TrackedGames
             }
         }
 
-        [HttpDelete("DeleteTrackedGame")]
-        public ActionResult DeleteTrackedGame(int gameId)
+        [HttpDelete("{gameId}")]
+        public ActionResult DeleteTrackedGame([FromRoute] int gameId)
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
@@ -49,14 +49,14 @@ namespace RetroTrack.Api.Controllers.TrackedGames
             }
         }
 
-        [HttpGet("GetTrackedGamesForUser")]
+        [HttpGet]
         public ActionResult<List<UserGamesTableDto>> GetTrackedGamesForUser()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             var trackedGames = TrackedGamesData.GetTrackedGamesForUser(user);

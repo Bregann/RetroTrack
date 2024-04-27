@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RetroTrack.Infrastructure.Database.Enums;
 
 namespace RetroTrack.Domain.Models
 {
@@ -100,6 +101,9 @@ namespace RetroTrack.Domain.Models
         [JsonProperty("ImageIngame")]
         public string ImageInGame { get; set; }
 
+        [JsonProperty("ImageTitle")]
+        public string ImageTitle { get; set; }
+
         [JsonProperty("ImageBoxArt")]
         public string ImageBoxArt { get; set; }
 
@@ -144,6 +148,9 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("DisplayOrder")]
         public int DisplayOrder { get; set; }
+
+        [JsonProperty("type")]
+        public TypeEnum? Type { get; set; }
     }
 
     public class GetGameInfoAndUserProgress
@@ -269,5 +276,53 @@ namespace RetroTrack.Domain.Models
 
         [JsonProperty("GameID")]
         public long GameId { get; set; }
+    }
+
+    public class GetUserCompletionProgress
+    {
+        [JsonProperty("Count")]
+        public long Count { get; set; }
+
+        [JsonProperty("Total")]
+        public long Total { get; set; }
+
+        [JsonProperty("Results")]
+        public List<Result> Results { get; set; }
+    }
+
+    public class Result
+    {
+        [JsonProperty("GameID")]
+        public int GameId { get; set; }
+
+        [JsonProperty("Title")]
+        public string Title { get; set; }
+
+        [JsonProperty("ImageIcon")]
+        public string ImageIcon { get; set; }
+
+        [JsonProperty("ConsoleID")]
+        public int ConsoleId { get; set; }
+
+        [JsonProperty("ConsoleName")]
+        public string ConsoleName { get; set; }
+
+        [JsonProperty("MaxPossible")]
+        public int MaxPossible { get; set; }
+
+        [JsonProperty("NumAwarded")]
+        public int NumAwarded { get; set; }
+
+        [JsonProperty("NumAwardedHardcore")]
+        public int NumAwardedHardcore { get; set; }
+
+        [JsonProperty("MostRecentAwardedDate")]
+        public DateTimeOffset MostRecentAwardedDate { get; set; }
+
+        [JsonProperty("HighestAwardKind")]
+        public string? HighestAwardKind { get; set; }
+
+        [JsonProperty("HighestAwardDate")]
+        public DateTimeOffset? HighestAwardDate { get; set; }
     }
 }

@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://retrotrack.bregan.me
-
-# Sitemaps
-Sitemap: https://retrotrack.bregan.me/sitemap.xml

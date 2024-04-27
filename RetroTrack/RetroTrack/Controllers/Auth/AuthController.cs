@@ -5,45 +5,59 @@ using RetroTrack.Domain.Dtos;
 
 namespace RetroTrack.Api.Api.Controllers.Authenication
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        [HttpPost("LoginUser")]
+        [HttpPost]
         public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
             var loginData = AuthData.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
 
             if (!loginData.Successful)
             {
-                return Unauthorized();
+                return Unauthorized(false);
             }
 
             return Ok(loginData);
         }
 
-        [HttpPost("RegisterNewUser")]
-        public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
+        [HttpPost]
+        public async Task<RegisterUserDto> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
         {
             return await AuthData.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
-        [HttpPost("ResetUserPassword")]
+        [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
             return await AuthData.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
-        [HttpDelete("DeleteUserSession")]
+        [HttpGet]
+        public async Task<bool> ValidateSessionStatus()
+        {
+            if (string.IsNullOrEmpty(Request.Headers.Authorization))
+            {
+                return false;
+            }
+            else
+            {
+                var data = await AuthData.ValidateSessionStatus(Request.Headers.Authorization!);
+                return data;
+            }
+        }
+
+        [HttpDelete]
         public ActionResult DeleteUserSession()
         {
-            if (Request.Headers["Authorization"].Count == 0)
+            if (string.IsNullOrEmpty(Request.Headers.Authorization))
             {
                 return BadRequest();
             }
 
-            UserData.DeleteUserSession(Request.Headers["Authorization"]);
-            return Ok();
+            UserData.DeleteUserSession(Request.Headers.Authorization!);
+            return Ok(true);
         }
     }
 }

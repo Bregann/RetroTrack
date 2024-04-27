@@ -1,0 +1,19 @@
+.navGameConsoleCount {
+  color: white;
+  font-size: 15px;
+}
+
+.navGamesBeaten {
+  color: var(--mantine-color-dark-0);
+  font-size: 15px;
+}
+
+.navGamesMastered {
+  color: var(--mantine-color-yellow-5);
+  font-size: 15px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 5;
+}

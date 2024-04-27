@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RetroTrack.Infrastructure.Database.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Infrastructure.Database.Models
@@ -16,5 +17,11 @@ namespace RetroTrack.Infrastructure.Database.Models
 
         [Required]
         public required int NoAchievementsGameCount { get; set; }
+
+        [Required]
+        public required ConsoleType ConsoleType { get; set; }
+
+        [Required]
+        public required bool DisplayOnSite { get; set; }
     }
 }

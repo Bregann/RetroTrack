@@ -1,22 +1,17 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { DoBackendGet } from "../../../Helpers/backendFetchHelper";
-import { Game } from "../../../types/Api/Games/LoggedInGame";
+import { type LoggedInGame } from '@/components/games/LoggedInGamesTable'
+import backendFetchHelper from '@/helpers/BackendFetchHelper'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-const handler = async (req: NextApiRequest, res: NextApiResponse<Game[]>) => {
-    try {
-        const apiRes = await DoBackendGet('/api/Games/GetUserInProgressGames', req.headers.authorization);
-        const data = await apiRes.json();
-        
-        if(!apiRes.ok){
-            res.status(apiRes.status).end();
-            return;
-        }
-    
-        res.status(200).json(data);
-    
-    } catch (error) {
-        res.status(500).end();
-    }
+export default async function handler (req: NextApiRequest, res: NextApiResponse<LoggedInGame[]>): Promise<void> {
+  if (req.method !== 'GET') {
+    res.status(405)
+  }
+
+  const fetchResult = await backendFetchHelper.doGet('/TrackedGames/GetUserInProgressGames', req.cookies.rtSession, req.cookies.rtUsername)
+
+  if (fetchResult.errored) {
+    res.status(500)
+  } else {
+    res.status(fetchResult.statusCode).json(fetchResult.data)
+  }
 }
-    
-    export default handler;

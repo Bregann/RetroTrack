@@ -1,82 +1,67 @@
-﻿using RetroTrack.Domain.Dtos;
+﻿using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Dtos.Navigation;
 using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Infrastructure.Database.Enums;
 
 namespace RetroTrack.Domain.Data
 {
     public class NavigationData
     {
-        public static NavigationGameCountsDto GetGameCounts()
+        public static async Task<GetPublicNavigationDataDto[]> GetPublicNavigationData()
         {
             using (var context = new DatabaseContext())
             {
-                var gamesDict = context.GameConsoles.Where(x => x.GameCount != 0).ToDictionary(x => x.ConsoleID, x => x.GameCount);
-                gamesDict.Add(-1, context.GameConsoles.Sum(x => x.GameCount));
-
-                return new NavigationGameCountsDto
-                {
-                    Games = gamesDict
-                };
-            }
-        }
-
-        public static LoggedInNavigationGameCountsDto GetGameCountsLoggedIn(string username)
-        {
-            using (var context = new DatabaseContext())
-            {
-                //Get the consoles and the user completed games
-                var gameConsoles = context.GameConsoles.Where(x => x.GameCount != 0).ToDictionary(x => x.ConsoleID, x => x.GameCount);
-                var percentage = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).Select(x => x.Game.GameConsole.ConsoleID).ToList();
-
-                var dataDict = new Dictionary<int, NavigationUserStats>();
-
-                foreach (var console in gameConsoles)
-                {
-                    var gamesCompleted = percentage.Where(x => x == console.Key).Count();
-                    var consoleCompletion = Math.Round(100 * ((decimal)gamesCompleted / console.Value), 2);
-
-                    dataDict.Add(console.Key, new NavigationUserStats
+                return await context.GameConsoles
+                    .Where(x => x.DisplayOnSite)
+                    .Select(x => new GetPublicNavigationDataDto
                     {
-                        GamesTotalAndCompleted = $"{gamesCompleted}/{console.Value} ({consoleCompletion}%)",
-                        Percentage = consoleCompletion
-                    });
-                }
-
-                var totalGames = gameConsoles.Sum(x => x.Value);
-                var allGamesCompletion = Math.Round(100 * ((decimal)percentage.Count / totalGames), 2);
-
-                dataDict.Add(-1, new NavigationUserStats
-                {
-                    GamesTotalAndCompleted = $"{percentage.Count}/{totalGames} ({allGamesCompletion}%)",
-                    Percentage = allGamesCompletion
-                });
-
-                return new LoggedInNavigationGameCountsDto
-                {
-                    Games = dataDict,
-                    GamesTracked = context.TrackedGames.Where(x => x.User.Username == username).Count(),
-                    InProgressGames = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage != 1).Count()
-                };
+                        ConsoleId = x.ConsoleID,
+                        ConsoleName = x.ConsoleName,
+                        ConsoleType = x.ConsoleType,
+                        GameCount = x.GameCount
+                    })
+                    .OrderBy(x => x.ConsoleName)
+                    .ToArrayAsync();
             }
         }
 
-        public static UserNavProfileDto? GetUserNavProfileData(string username)
+        public static async Task<GetLoggedInNavigationDataDto> GetLoggedInNavigationData(string username)
         {
             using (var context = new DatabaseContext())
             {
-                var user = context.Users.Where(x => x.Username == username.ToLower()).FirstOrDefault();
+                var trackedGameCount = await context.TrackedGames.CountAsync(x => x.User.Username == username);
+                var inProgressGameCount = await context.UserGameProgress.CountAsync(x => x.Username == username);
 
-                if (user == null)
-                {
-                    return null;
-                }
+                var query = from gc in context.GameConsoles.Where(x => x.DisplayOnSite)
+                           join ugp in context.UserGameProgress.Where(x => x.Username.Equals(username))
+                               on gc.ConsoleID equals ugp.ConsoleId into grouping
+                           select new ConsoleProgressData
+                           {
+                               ConsoleId = gc.ConsoleID,
+                               ConsoleName = gc.ConsoleName,
+                               ConsoleType = gc.ConsoleType,
+                               TotalGamesInConsole = gc.GameCount,
+                               GamesBeaten = grouping.Count(x => x.HighestAwardKind != null),
+                               GamesMastered = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered || x.HighestAwardKind == HighestAwardKind.Completed),
+                               PercentageBeaten = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind != null) / gc.GameCount * 100, 2) : 0,
+                               PercentageMastered = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered || x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0
+                           };
 
-                return new UserNavProfileDto
+                var user = await context.Users.FirstAsync(x => x.Username == username);
+
+                var consoleProgressData = await query.ToArrayAsync();
+
+                return new GetLoggedInNavigationDataDto
                 {
-                    Username = username,
-                    ProfileImageUrl = "https://media.retroachievements.org" + user.UserProfileUrl,
-                    GamesCompleted = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage == 1).ToList().Count,
-                    Points = user.UserPoints,
-                    Rank = user.UserRank
+                    RAName = user.RAUsername,
+                    RAUserProfileUrl = "https://media.retroachievements.org" + user.UserProfileUrl,
+                    UserPoints = user.UserPoints,
+                    UserRank = user.UserRank,
+                    GamesBeaten = consoleProgressData.Sum(x => x.GamesBeaten),
+                    GamesMastered = consoleProgressData.Sum(x => x.GamesMastered),
+                    TrackedGamesCount = trackedGameCount,
+                    InProgressGamesCount = inProgressGameCount,
+                    ConsoleProgressData = consoleProgressData
                 };
             }
         }
