@@ -293,7 +293,7 @@ namespace RetroTrack.Domain.Models
     public class Result
     {
         [JsonProperty("GameID")]
-        public long GameId { get; set; }
+        public int GameId { get; set; }
 
         [JsonProperty("Title")]
         public string Title { get; set; }
@@ -302,25 +302,25 @@ namespace RetroTrack.Domain.Models
         public string ImageIcon { get; set; }
 
         [JsonProperty("ConsoleID")]
-        public long ConsoleId { get; set; }
+        public int ConsoleId { get; set; }
 
         [JsonProperty("ConsoleName")]
         public string ConsoleName { get; set; }
 
         [JsonProperty("MaxPossible")]
-        public long MaxPossible { get; set; }
+        public int MaxPossible { get; set; }
 
         [JsonProperty("NumAwarded")]
         public int NumAwarded { get; set; }
 
         [JsonProperty("NumAwardedHardcore")]
-        public long NumAwardedHardcore { get; set; }
+        public int NumAwardedHardcore { get; set; }
 
         [JsonProperty("MostRecentAwardedDate")]
         public DateTimeOffset MostRecentAwardedDate { get; set; }
 
         [JsonProperty("HighestAwardKind")]
-        public HighestAwardKind? HighestAwardKind { get; set; }
+        public string? HighestAwardKind { get; set; }
 
         [JsonProperty("HighestAwardDate")]
         public DateTimeOffset? HighestAwardDate { get; set; }

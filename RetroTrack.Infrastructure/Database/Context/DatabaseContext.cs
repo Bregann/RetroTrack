@@ -19,9 +19,11 @@ namespace RetroTrack.Infrastructure.Database.Context
         public DbSet<DevWishlist> DevWishlist { get; set; }
         public DbSet<UndevvedGames> UndevvedGames { get; set; }
         public DbSet<Achievements> Achievements { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql(_connectionString);
+        {
+            optionsBuilder.UseNpgsql(_connectionString);
+            optionsBuilder.EnableSensitiveDataLogging();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

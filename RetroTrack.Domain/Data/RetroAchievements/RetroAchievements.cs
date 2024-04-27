@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Models;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Enums;
 using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
+using System.Diagnostics;
 using System.Net;
 
 namespace RetroTrack.Domain.Data.External
@@ -365,6 +367,10 @@ namespace RetroTrack.Domain.Data.External
 
         public static async Task GetUserGames(string username, int updateId)
         {
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
             try
             {
                 var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -392,7 +398,7 @@ namespace RetroTrack.Domain.Data.External
                 //Check if the total is higher than the amount gotten
                 if (responseDeserialized.Total > 500)
                 {
-                    var timesToProcess = Math.Ceiling((decimal)responseDeserialized.Total / 500);
+                    var timesToProcess = Math.Ceiling((decimal)responseDeserialized.Total / 500) - 1;
                     var skip = 500;
 
                     for (int i = 0; i < timesToProcess; i++)
@@ -400,7 +406,7 @@ namespace RetroTrack.Domain.Data.External
                         var extraDataReq = new RestRequest($"API_GetUserCompletionProgress.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&u={username}&c=500&o={skip}", Method.Get);
 
                         //Get the response and Deserialize
-                        var extraDataRes = await client.ExecuteAsync(request);
+                        var extraDataRes = await client.ExecuteAsync(extraDataReq);
 
                         if (extraDataRes.Content == "" || extraDataRes.Content == null || extraDataRes.StatusCode != HttpStatusCode.OK)
                         {
@@ -408,9 +414,10 @@ namespace RetroTrack.Domain.Data.External
                             return;
                         }
 
-                        var extraResponseDeserialized = JsonConvert.DeserializeObject<GetUserCompletionProgress>(response.Content);
+                        var extraResponseDeserialized = JsonConvert.DeserializeObject<GetUserCompletionProgress>(extraDataRes.Content);
 
                         gameList.AddRange(extraResponseDeserialized.Results);
+                        skip += 500;
                     }
                 }
 
@@ -426,25 +433,51 @@ namespace RetroTrack.Domain.Data.External
                         user.UserPoints = userProfile.TotalPoints;
                     }
 
-                    var userData = context.UserGameProgress.Where(x => x.User.Username == username);
+                    foreach (var game in gameList)
+                    {
+                        var gameData = await context.UserGameProgress.FirstOrDefaultAsync(x => x.GameId == game.GameId);
 
-                    await Parallel.ForEachAsync(gameList,
-                        async (game, _) =>
+                        if (gameData != null)
                         {
-                            var gameData = await userData.FirstOrDefaultAsync(x => x.Game.Id == game.GameId);
-
-                            if (gameData != null)
+                            gameData.AchievementsGained = game.NumAwarded;
+                            gameData.AchievementsGainedHardcore = game.NumAwardedHardcore;
+                            gameData.GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100;
+                            gameData.GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100;
+                            gameData.HighestAwardKind = RAHelper.ConvertHighestAwardKind(game.HighestAwardKind);
+                            gameData.HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null;
+                            continue;
+                        }
+                        else
+                        {
+                            // Check if the game is actually in the system yet
+                            if (!await context.Games.AnyAsync(x => x.Id == game.GameId))
                             {
-                                gameData.AchievementsGained = game.NumAwarded;
+                                Log.Information($"[User Update] Game {game.GameId} not found in database");
+                                continue;
                             }
-                        });
 
+                            await context.UserGameProgress.AddAsync(new UserGameProgress
+                            {
+                                AchievementsGained = game.NumAwarded,
+                                AchievementsGainedHardcore = game.NumAwardedHardcore,
+                                GameId = game.GameId,
+                                GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100,
+                                GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
+                                Username = username,
+                                HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null,
+                                HighestAwardKind = RAHelper.ConvertHighestAwardKind(game.HighestAwardKind)
+                            });
+                        }
+                    }
 
-                    context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
-                    context.SaveChanges();
+                    // context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
+                    await context.SaveChangesAsync();
 
                     Log.Information($"[RetroAchievements] Game progress updated for {username}");
                 }
+
+                stopwatch.Stop();
+                Console.WriteLine(stopwatch.Elapsed);
             }
             catch (Exception e)
             {

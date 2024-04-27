@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RetroTrack.Infrastructure.Database.Context;
@@ -11,9 +12,11 @@ using RetroTrack.Infrastructure.Database.Context;
 namespace RetroTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240426211542_DropOldUserGameProgressTable")]
+    partial class DropOldUserGameProgressTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,48 +333,6 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.ToTable("UndevvedGames");
                 });
 
-            modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AchievementsGained")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AchievementsGainedHardcore")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("GamePercentage")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("GamePercentageHardcore")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("HighestAwardDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("HighestAwardKind")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("Username");
-
-                    b.ToTable("UserGameProgress");
-                });
-
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>
                 {
                     b.Property<string>("Username")
@@ -489,25 +450,6 @@ namespace RetroTrack.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("GameConsole");
-                });
-
-            modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.UserGameProgress", b =>
-                {
-                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Games", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RetroTrack.Infrastructure.Database.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Infrastructure.Database.Models.Users", b =>
