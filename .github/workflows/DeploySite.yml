@@ -20,8 +20,7 @@ jobs:
       with:
         envkey_API_URL: ${{ secrets.API_URL }}
         envkey_NEXT_PUBLIC_WEB_URL: "https://retrotrack.bregan.me"
-        envkey_NEXTAUTH_URL: "https://retrotrack.bregan.me"
-        envkey_NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        envkey_API_SECRET: ${{ secrets.API_SECRET }}
         directory: retrotrack.web/
         file_name: .env.production
         fail_on_empty: false
