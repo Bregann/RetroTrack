@@ -472,7 +472,7 @@ namespace RetroTrack.Domain.Data.External
                         }
                     }
 
-                    // context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
+                    context.RetroAchievementsApiData.Where(x => x.Id == updateId).First().ProcessingStatus = ProcessingStatus.Processed;
                     await context.SaveChangesAsync();
 
                     Log.Information($"[RetroAchievements] Game progress updated for {username}");

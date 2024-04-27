@@ -11,7 +11,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
     res.status(405)
   }
 
-  const fetchResult = await backendFetchHelper.doPost('/Auth/RegisterUser', req.body)
+  const fetchResult = await backendFetchHelper.doPost('/Auth/RegisterNewUser', req.body)
 
   if (fetchResult.errored) {
     res.status(500)

@@ -11,7 +11,7 @@ const ChangelogModal = (props: ChangelogModalProps): JSX.Element => {
       opened={props.openedState}
       onClose={() => { props.setOpened(false) }}
       title="Changelog">
-      <Text>Release 1.0 (27th April 2024)</Text>
+      <Text>Release 2.0 (27th April 2024)</Text>
       <List>
         <List.Item>Complete rewrite & upgrade of the website frontend</List.Item>
         <List.Item>Added this changelog modal :D</List.Item>

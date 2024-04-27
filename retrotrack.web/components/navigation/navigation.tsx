@@ -6,7 +6,7 @@ import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconPin, Ico
 import { type AppProps } from 'next/app'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import SupportModal from './SupportModal'
@@ -16,6 +16,7 @@ import { useRouter } from 'next/router'
 import ChangelogModal from './ChangelogModal'
 import { type GetLoggedInNavigationDataDto } from '@/pages/api/navigation/GetLoggedInNavigationData'
 import classes from '@/styles/Navigation.module.css'
+import { type UpdateUserGamesDto } from '@/pages/api/user/UpdateUserGames'
 
 const Navigation = (props: AppProps): JSX.Element => {
   const { Component, pageProps } = props
@@ -28,6 +29,11 @@ const Navigation = (props: AppProps): JSX.Element => {
   const [publicNavData, setPublicNavData] = useState<GetPublicNavigationDataDto[] | null>(null)
   const [loggedInNavData, setLoggedInNavData] = useState<GetLoggedInNavigationDataDto | null>(null)
   const [activePage, setActivePage] = useState('')
+
+  const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false)
+  const [userUpdateRequested, setUserUpdateRequested] = useState(false)
+  const interval = useRef<NodeJS.Timeout | null>(null)
+
   const router = useRouter()
 
   const consoleTypes = [
@@ -40,12 +46,36 @@ const Navigation = (props: AppProps): JSX.Element => {
     { consoleType: 6, consoleName: 'Other' }
   ]
 
+  // Used for checking the status of a user update
+  useEffect(() => {
+    if (interval !== null) {
+      if (userUpdateRequested && interval.current == null) {
+        interval.current = setInterval(async () => {
+          const res = await fetchHelper.doGet('/user/CheckUserUpdateProcessingState')
+
+          if (!res.errored) {
+            const processed: boolean = res.data
+
+            if (processed) {
+              setUserUpdateRequested(false)
+              notificationHelper.showSuccessNotification('Success', 'User update successful', 4000, <IconCheck />)
+            }
+          }
+        }, 3000)
+      }
+
+      if (!userUpdateRequested && interval.current !== null) {
+        clearInterval(interval.current)
+        interval.current = null
+      }
+    }
+  }, [userUpdateRequested])
+
   useEffect(() => {
     setLoggedIn(sessionHelper.hasSession())
   }, [])
 
   useEffect(() => {
-    console.log(loggedIn)
     const fetchLoggedOutData = async (): Promise<void> => {
       const fetchResult = await fetchHelper.doGet('/navigation/GetPublicNavigationData')
 
@@ -63,19 +93,26 @@ const Navigation = (props: AppProps): JSX.Element => {
       if (fetchResult.errored) {
         console.error('Error loading navigation data')
         void fetchLoggedOutData()
+      } else if (fetchResult.statusCode === 401) {
+        void logoutUser()
       } else {
         setPublicNavData(null)
         setLoggedInNavData(fetchResult.data)
       }
     }
 
+    if (!userUpdateRequested && (loggedIn === true || sessionHelper.hasSession())) {
+      void fetchLoggedInData()
+      return
+    }
+
     if (loggedIn === true || sessionHelper.hasSession()) {
-      console.log('aa')
       void fetchLoggedInData()
     } else {
       void fetchLoggedOutData()
     }
-  }, [loggedIn])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedIn, userUpdateRequested])
 
   const logoutUser = async (): Promise<void> => {
     const result = await sessionHelper.LogoutUser()
@@ -94,6 +131,30 @@ const Navigation = (props: AppProps): JSX.Element => {
     setLoggedIn(true)
     setActivePage('/home')
     await router.push('/home') // Send them back to the homepage
+    await requestGamesUpdate()
+  }
+
+  const requestGamesUpdate = async (): Promise<void> => {
+    setUpdateGamesButtonLoading(true)
+    const updateRes = await fetchHelper.doPost('/user/UpdateUserGames', {})
+
+    if (updateRes.errored) {
+      notificationHelper.showErrorNotification('Error', 'There has been an error requesting to update your games. Please try again', 5000, <IconCrossFilled />)
+      setUpdateGamesButtonLoading(false)
+      return
+    }
+
+    const resData: UpdateUserGamesDto = updateRes.data
+
+    if (!resData.success) {
+      notificationHelper.showErrorNotification('Error', resData.reason, 5000, <IconCrossFilled />)
+      setUpdateGamesButtonLoading(false)
+      return
+    }
+
+    notificationHelper.showSuccessNotification('Success', 'A game update has been requested. A notification will appear when this has completed', 5000, <IconCheck />)
+    setUserUpdateRequested(true)
+    setUpdateGamesButtonLoading(false)
   }
 
   return (
@@ -127,7 +188,8 @@ const Navigation = (props: AppProps): JSX.Element => {
                 <Button
                   variant="gradient"
                   gradient={{ from: 'indigo', to: 'cyan' }}
-                  onClick={() => { }}>
+                  disabled={updateGamesButtonLoading}
+                  onClick={async () => { await requestGamesUpdate() }}>
                   Update games
                 </Button><Button
                   variant="gradient"
@@ -262,7 +324,7 @@ const Navigation = (props: AppProps): JSX.Element => {
         </AppShell.Navbar>
         <AppShell.Main>
           <LoginModal setOpened={setLoginModalOpened} openedState={loginModalOpened} onSuccessfulLogin={async () => { await successfulLogin() }} />
-          <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened} />
+          <RegisterModal setOpened={setRegisterModalOpened} openedState={registerModalOpened} onSuccessfulRegister={async () => { await successfulLogin() }} />
           <SupportModal setOpened={setSupportModalOpened} openedState={supportModalOpened} />
           <ChangelogModal setOpened={setChangelogModalOpened} openedState={changelogModalOpened} />
           <Component {...pageProps} />

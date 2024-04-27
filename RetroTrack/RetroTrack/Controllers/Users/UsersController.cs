@@ -5,11 +5,11 @@ using RetroTrack.Domain.Helpers;
 
 namespace RetroTrack.Api.Controllers.Users
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        [HttpGet("UpdateUserGames")]
+        [HttpPost]
         public ActionResult<UpdateUserGamesDto> UpdateUserGames()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
@@ -22,7 +22,7 @@ namespace RetroTrack.Api.Controllers.Users
             return UserData.UpdateUserGames(user);
         }
 
-        [HttpGet("CheckUserUpdateProcessingState")]
+        [HttpGet]
         public ActionResult<bool> CheckUserUpdateProcessingState()
         {
             var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);

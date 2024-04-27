@@ -23,7 +23,7 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         }
 
         [HttpPost]
-        public async Task<RegisterUserDto> RegisterNewUserAsync([FromBody] RegisterNewUserRequestDto dto)
+        public async Task<RegisterUserDto> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
         {
             return await AuthData.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }

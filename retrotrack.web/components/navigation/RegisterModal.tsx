@@ -16,6 +16,7 @@ interface FormValues {
 
 export interface RegisterModalProps {
   setOpened: (value: boolean) => void
+  onSuccessfulRegister: () => Promise<void>
   openedState: boolean
 }
 
@@ -61,7 +62,7 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
         // Close the menu
         setRegisterButtonLoading(false)
         props.setOpened(false)
-
+        await props.onSuccessfulRegister()
         notificationHelper.showSuccessNotification('Success', 'Account created and successfully logged in!', 5000, <IconCheck />)
       } else {
         setRegisterButtonLoading(false)

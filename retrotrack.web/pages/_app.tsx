@@ -25,7 +25,7 @@ export default function App (props: AppProps): JSX.Element {
         <meta property="og:image" content="/rt.png" />
         <meta property="og:description" content="Achievement tracking website for RetroAchievements" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="description" content="RetroTrack is a Tracker for the website RetroAchievements. This Retro Achievement tracking site allows for you to track games, see your inprogress games, see newly added games plus more. New RetroAchievement consoles are added quickly and the site is updated daily." />
+        <meta name="description" content="RetroTrack is a RetroAchievements Tracker for the website RetroAchievements. This Retro Achievement tracking site allows for you to track games, see your in progress games, see newly added games plus more. New RetroAchievements consoles are added quickly and the site is updated daily." />
       </Head >
 
       <MantineProvider defaultColorScheme="dark">
