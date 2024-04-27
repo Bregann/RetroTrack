@@ -13,10 +13,10 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3.3.0
+      uses: actions/checkout@v4
 
     - name: Create .env file
-      uses: SpicyPizza/create-envfile@v1.3.0
+      uses: SpicyPizza/create-envfile@v2.0
       with:
         envkey_API_URL: ${{ secrets.API_URL }}
         envkey_NEXT_PUBLIC_WEB_URL: "https://retrotrack.bregan.me"
@@ -35,7 +35,7 @@ jobs:
         docker save retrotrackwebsite > retrotrackwebsite.tar
 
     - name: Upload Docker Image
-      uses: appleboy/scp-action@v0.1.3
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -44,7 +44,7 @@ jobs:
         target: ${{ secrets.TARGET }}
         
     - name: Stop And Remove Current Container
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -52,7 +52,7 @@ jobs:
         script: |
             docker stop retrotrackwebsite || true && docker rm retrotrackwebsite || true
     - name: Load New Docker Image
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -61,7 +61,7 @@ jobs:
           docker load -i ${{ secrets.TARGET }}retrotrackwebsite.tar
 
     - name: Start New Container
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -70,7 +70,7 @@ jobs:
           docker run -d -p 3001:3000 --name retrotrackwebsite retrotrackwebsite:latest
 
     - name: Clean Up The Tar File
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
