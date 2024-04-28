@@ -30,7 +30,7 @@
 
 .stickyFooter {
   position: sticky;
-  bottom: -1;
+  bottom: -1px;
   padding-bottom: 5px;
   padding-top: 5px;
 }
