@@ -1,4 +1,3 @@
-using BreganUtils.ProjectMonitor;
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
@@ -7,30 +6,23 @@ using RetroTrack.Api;
 using RetroTrack.Domain;
 using Serilog;
 
-Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("Logs/log.log", retainedFileCountLimit: 3, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
+Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 
 await Task.Delay(2000);
 
 AppConfig.LoadConfigFromDatabase();
-
-//Setup project monitor
-#if DEBUG
-ProjectMonitorConfig.SetupMonitor("debug", AppConfig.ProjectMonitorApiKey);
-#else
-ProjectMonitorConfig.SetupMonitor("release", AppConfig.ProjectMonitorApiKey);
-#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "allowUrls",
-                      policy =>
-                      {
-                          policy.WithOrigins("http://localhost:3001", "https://rtapi.bregan.me", "https://retrotrack.bregan.me");
-                          policy.WithHeaders("Content-Type");
-                          policy.WithMethods("GET", "POST", "DELETE");
-                      });
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000");
+            policy.WithHeaders("Content-Type");
+            policy.WithMethods("GET", "POST", "DELETE");
+        });
 });
 
 // Add services to the container.
