@@ -638,17 +638,19 @@ namespace RetroTrack.Domain.Data.External
 
                     //If it's processed already, remove all the current achievements for the game from the database
                     //This is incase there's been any demoted achievements or updated achievements
-                    if (gameFromDb.ExtraDataProcessed)
-                    {
-                        //Some achievements can be moved to and from core so this can potentially mess up so we delete by achievement id
-                        foreach (var achievement in gameData.Achievements)
-                        {
-                            context.Achievements.Where(x => x.Id == achievement.Value.Id).ExecuteDelete();
-                        }
-                    }
+                    //if (gameFromDb.ExtraDataProcessed)
+                    //{
+                    //    //Some achievements can be moved to and from core so this can potentially mess up so we delete by achievement id
+                    //    foreach (var achievement in gameData.Achievements)
+                    //    {
+                    //        context.Achievements.Where(x => x.Id == achievement.Value.Id).ExecuteDelete();
+                    //    }
+                    //}
 
                     foreach (var achievement in gameData.Achievements)
                     {
+                        context.Achievements.Where(x => x.Id == achievement.Value.Id).ExecuteDelete();
+
                         context.Achievements.Add(new Achievements
                         {
                             Id = achievement.Value.Id,
@@ -659,6 +661,8 @@ namespace RetroTrack.Domain.Data.External
                             Points = achievement.Value.Points,
                             DisplayOrder = achievement.Value.DisplayOrder
                         });
+
+                        context.SaveChanges();
                     }
 
                     Log.Information($"[RetroAchievements] Achievement data processed for game {gameFromDb.Title}");
