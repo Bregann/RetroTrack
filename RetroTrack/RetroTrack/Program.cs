@@ -1,11 +1,15 @@
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
+using Hangfire.MemoryStorage;
 using Hangfire.PostgreSql;
+using Microsoft.EntityFrameworkCore;
 using RetroTrack.Api;
-using RetroTrack.Domain.OldCode;
+using RetroTrack.Domain.Database.Context;
+using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.Interfaces.Helpers;
 using Serilog;
-using System;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day))
@@ -32,6 +36,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
 
 #if DEBUG
 builder.Services.AddDbContext<PostgresqlContext>(options =>
@@ -73,13 +78,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var environmentalSettingHelper = app.Services.GetService<IEnvironmentalSettingHelper>()!;
+await environmentalSettingHelper.LoadEnvironmentalSettings();
 
 app.UseCors("AllowAnyOrigin");
 
@@ -100,8 +107,8 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
     {
         new BasicAuthAuthorizationUser
         {
-            Login = AppConfig.HFUsername,
-            PasswordClear = AppConfig.HFPassword
+            Login = environmentalSettingHelper.TryGetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername),
+            PasswordClear = environmentalSettingHelper.TryGetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfirePassword)
         }
     }
 })};
@@ -111,5 +118,10 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = auth
 }, JobStorage.Current);
 
+using (var scope = app.Services.CreateScope())
+{
+    var hangfireJobs = scope.ServiceProvider.GetRequiredService<HangfireJobServiceHelper>();
+    hangfireJobs.SetupHangfireJobs();
+}
 
 app.Run();

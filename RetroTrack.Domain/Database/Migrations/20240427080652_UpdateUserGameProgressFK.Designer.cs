@@ -5,14 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RetroTrack.Domain.Database.Context;
 using RetroTrack.Infrastructure.Database.Context;
 
 #nullable disable
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20240427080652_UpdateUserGameProgressFK")]
     partial class UpdateUserGameProgressFK
     {

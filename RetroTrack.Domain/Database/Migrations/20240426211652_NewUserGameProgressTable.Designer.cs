@@ -5,16 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RetroTrack.Domain.Database.Context;
 using RetroTrack.Infrastructure.Database.Context;
 
 #nullable disable
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20240427080652_UpdateUserGameProgressFK")]
-    partial class UpdateUserGameProgressFK
+    [DbContext(typeof(DatabaseContext))]
+    [Migration("20240426211652_NewUserGameProgressTable")]
+    partial class NewUserGameProgressTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -340,8 +339,6 @@ namespace RetroTrack.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("AchievementsGained")
                         .HasColumnType("integer");
 
@@ -354,8 +351,8 @@ namespace RetroTrack.Infrastructure.Migrations
                     b.Property<double>("GamePercentage")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("GamePercentageHardcore")
-                        .HasColumnType("double precision");
+                    b.Property<int>("HardcoreMode")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("HighestAwardDate")
                         .HasColumnType("timestamp with time zone");
@@ -368,8 +365,6 @@ namespace RetroTrack.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GameId");
 
                     b.HasIndex("Username");
 
@@ -499,7 +494,7 @@ namespace RetroTrack.Infrastructure.Migrations
                 {
                     b.HasOne("RetroTrack.Infrastructure.Database.Models.Games", "Game")
                         .WithMany()
-                        .HasForeignKey("GameId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

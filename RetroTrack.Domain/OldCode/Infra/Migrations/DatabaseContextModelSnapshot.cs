@@ -11,7 +11,7 @@ using RetroTrack.Infrastructure.Database.Context;
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

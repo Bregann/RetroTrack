@@ -12,7 +12,7 @@ using RetroTrack.Infrastructure.Database.Context;
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20240426215151_NewUserGameProgressTableColumns")]
     partial class NewUserGameProgressTableColumns
     {

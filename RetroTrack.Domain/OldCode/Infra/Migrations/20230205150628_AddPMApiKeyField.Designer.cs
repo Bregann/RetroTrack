@@ -12,7 +12,7 @@ using RetroTrack.Infrastructure.Database.Context;
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20230205150628_AddPMApiKeyField")]
     partial class AddPMApiKeyField
     {

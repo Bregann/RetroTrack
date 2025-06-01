@@ -12,7 +12,7 @@ using RetroTrack.Infrastructure.Database.Context;
 
 namespace RetroTrack.Infrastructure.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20221227102119_AddLastUpdateFieldToApiData")]
     partial class AddLastUpdateFieldToApiData
     {
