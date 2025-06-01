@@ -55,20 +55,20 @@ namespace RetroTrack.Domain
             using (var context = new DatabaseContext())
             {
                 //Check for any scheduled jobs that have not been updated within the last 2 minutes and reset them if nothing has happened to them
-                var requestsStuckAsScheduled = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.Scheduled && DateTime.UtcNow > x.LastUpdate.AddMinutes(2)).ToList();
+                //var requestsStuckAsScheduled = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.Scheduled && DateTime.UtcNow > x.LastUpdate.AddMinutes(2)).ToList();
 
-                if (requestsStuckAsScheduled.Count != 0)
-                {
-                    Log.Information($"[RetroAchievements] There are {requestsStuckAsScheduled.Count} stuck jobs");
+                //if (requestsStuckAsScheduled.Count != 0)
+                //{
+                //    Log.Information($"[RetroAchievements] There are {requestsStuckAsScheduled.Count} stuck jobs");
 
-                    foreach (var job in requestsStuckAsScheduled)
-                    {
-                        job.ProcessingStatus = ProcessingStatus.NotScheduled;
-                    }
+                //    foreach (var job in requestsStuckAsScheduled)
+                //    {
+                //        job.ProcessingStatus = ProcessingStatus.NotScheduled;
+                //    }
 
-                    context.UpdateRange(requestsStuckAsScheduled);
-                    context.SaveChanges();
-                }
+                //    context.UpdateRange(requestsStuckAsScheduled);
+                //    context.SaveChanges();
+                //}
 
                 var requestsToProcess = context.RetroAchievementsApiData.Where(x => x.ProcessingStatus == ProcessingStatus.NotScheduled).Count();
 

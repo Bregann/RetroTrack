@@ -105,6 +105,13 @@ namespace RetroTrack.Domain.Data.External
                         continue;
                     }
 
+                    // check if the data is already in the database, if it is then skip it
+                    if (context.RetroAchievementsApiData.Any(x => x.JsonData == response.Content && x.ApiRequestType == ApiRequestType.GetGameList && x.ProcessingStatus != ProcessingStatus.Errored))
+                    {
+                        Log.Information($"[RetroAchievements] Data is already been processed for console id {id} get game list");
+                        continue;
+                    }
+
                     //Add into the table to be picked up and processed later
                     context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
                     {
@@ -141,6 +148,13 @@ namespace RetroTrack.Domain.Data.External
                     if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
                     {
                         Log.Warning($"[RetroAchievements] Error getting extended game info for game ID {gameId}. Status code: {response.StatusCode}");
+                        continue;
+                    }
+
+                    // check if the data is already in the database, if it is then skip it
+                    if (context.RetroAchievementsApiData.Any(x => x.JsonData == response.Content && x.ApiRequestType == ApiRequestType.GetGameExtended && x.ProcessingStatus != ProcessingStatus.Errored))
+                    {
+                        Log.Information($"[RetroAchievements] Data is already been processed for game id {gameId} get game extended");
                         continue;
                     }
 
@@ -222,6 +236,13 @@ namespace RetroTrack.Domain.Data.External
                     if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
                     {
                         Log.Warning($"[RetroAchievements] Error getting extended game info for game ID {gameId}. Status code: {response.StatusCode}");
+                        continue;
+                    }
+
+                    // check if the data is already in the database, if it is then skip it
+                    if (context.RetroAchievementsApiData.Any(x => x.JsonData == response.Content && x.ApiRequestType == ApiRequestType.GetGameExtended && x.ProcessingStatus != ProcessingStatus.Errored))
+                    {
+                        Log.Information($"[RetroAchievements] Data is already been processed for game id {gameId} get game extended");
                         continue;
                     }
 
