@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RetroTrack.Infrastructure\RetroTrack.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="BreganUtils">
       <HintPath>..\Util\BreganUtils.dll</HintPath>
     </Reference>

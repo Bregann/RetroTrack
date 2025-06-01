@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data;
-using RetroTrack.Domain.Dtos;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.OldCode.Data;
+using RetroTrack.Domain.OldCode.Dtos;
+using RetroTrack.Domain.OldCode.Helpers;
 
 namespace RetroTrack.Api.Controllers.Games
 {
@@ -61,7 +61,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{consoleId}")]
         public ActionResult<PublicConsoleGamesDto> GetGamesForConsole([FromRoute] int consoleId)
         {
-            var games = Domain.Data.GamesData.GetGamesForConsole(consoleId);
+            var games = GamesData.GetGamesForConsole(consoleId);
 
             if (games == null)
             {

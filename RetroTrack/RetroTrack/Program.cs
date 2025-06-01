@@ -3,8 +3,9 @@ using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Dashboard.Dark;
 using Hangfire.PostgreSql;
 using RetroTrack.Api;
-using RetroTrack.Domain;
+using RetroTrack.Domain.OldCode;
 using Serilog;
+using System;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day))
@@ -13,9 +14,9 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Seq("http://192.168.1.20:5341")
     .CreateLogger();
 
-await Task.Delay(2000);
+Log.Information("Logger Setup");
 
-AppConfig.LoadConfigFromDatabase();
+await Task.Delay(2000);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,28 +32,46 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnString")));
+
+#if DEBUG
+builder.Services.AddDbContext<PostgresqlContext>(options =>
+    options.UseLazyLoadingProxies()
+           .UseNpgsql(Environment.GetEnvironmentVariable("RetroTrackConnStringTest")));
+
+builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
+
+GlobalConfiguration.Configuration.UseMemoryStorage();
 
 builder.Services.AddHangfire(configuration => configuration
-        .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
-        .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnString")))
-        .UseDarkDashboard()
+        .UseMemoryStorage()
         );
 
-builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+#else
+builder.Services.AddDbContext<PostgresqlContext>(options =>
+    options.UseLazyLoadingProxies()
+           .UseNpgsql(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")));
+builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
+GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")));
+
+builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")))
+        );
+#endif
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-
-HangfireJobs.SetupHangfireJobs();
 
 
 // Configure the HTTP request pipeline.
