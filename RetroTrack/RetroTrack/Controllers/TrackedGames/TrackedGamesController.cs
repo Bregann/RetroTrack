@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.OldCode.Data;
-using RetroTrack.Domain.OldCode.Dtos;
 using RetroTrack.Domain.OldCode.Helpers;
 
 namespace RetroTrack.Api.Controllers.TrackedGames

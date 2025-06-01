@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RetroTrack.Domain.OldCode.Dtos;
+using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Infrastructure.Database.Context;
 using RetroTrack.Infrastructure.Database.Models;
 

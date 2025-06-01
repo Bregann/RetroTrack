@@ -15,27 +15,6 @@ namespace RetroTrack.Domain.OldCode.Data.RetroAchievements
 {
     public class RetroAchievements
     {
-        public static async Task<bool> ValidateApiKey(string username, string raApiKey)
-        {
-            Log.Information($"[Register User] Request for user {username} received");
-
-            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
-            var request = new RestRequest($"API_GetConsoleIDs.php?z={username}&y={raApiKey}", Method.Get);
-
-            //Get the response and Deserialize
-            var response = await client.ExecuteAsync(request);
-
-            //Make sure it hasn't errored
-            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
-            {
-                Log.Warning($"[Register User] Error valding API key for user {username}. Status code was {response.StatusCode}");
-                return false;
-            }
-
-            Log.Information($"[Register User] API key matched for user {username}");
-            return true;
-        }
-
         public static async Task GetConsolesAndInsertToDatabase()
         {
             var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
@@ -281,76 +260,7 @@ namespace RetroTrack.Domain.OldCode.Data.RetroAchievements
             return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
 
-        public static async Task<GetGameExtended?> GetSpecificGameInfo(int gameId)
-        {
-            var client = new RestClient(AppConfig.RetroAchievementsApiBaseUrl);
-
-            //Get the response and deserialise
-            var request = new RestRequest($"API_GetGameExtended.php?z={AppConfig.RetroAchievementsApiUsername}&y={AppConfig.RetroAchievementsApiKey}&i={gameId}", Method.Get);
-            var response = await client.ExecuteAsync(request);
-
-            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
-            {
-                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}");
-
-                using (var context = new DatabaseContext())
-                {
-                    var gameFromDb = context.Games.Include(x => x.GameConsole).FirstOrDefault(x => x.Id == gameId);
-
-                    if (gameFromDb == null)
-                    {
-                        return null;
-                    }
-
-                    var achievements = context.Achievements.Where(x => x.GameId == gameId).ToDictionary(x => x.Id.ToString(), x => new Achievement
-                    {
-                        Id = x.Id,
-                        NumAwarded = 0,
-                        NumAwardedHardcore = 0,
-                        BadgeName = x.AchievementIcon,
-                        Description = x.AchievementDescription,
-                        DisplayOrder = x.DisplayOrder,
-                        Points = x.Points,
-                        Title = x.AchievementName
-                    });
-
-                    return new GetGameExtended
-                    {
-                        AchievementCount = achievements.Count,
-                        Achievements = achievements,
-                        ImageBoxArt = "",
-                        ImageTitle = "",
-                        ImageInGame = "",
-                        ConsoleId = gameFromDb.ConsoleID,
-                        ConsoleName = gameFromDb.GameConsole.ConsoleName,
-                        Genre = gameFromDb.GameGenre,
-                        Players = gameFromDb.Players.HasValue ? gameFromDb.Players.Value : 0,
-                        Id = gameId,
-                        Title = gameFromDb.Title,
-                    };
-                }
-            }
-
-            //if there's no achievements
-            if (response.Content.Contains("{\"Achievements\":[],") || response.Content.Contains("Achievements\":[]"))
-            {
-                return null;
-            }
-
-            //Deseralise the data
-            var data = JsonConvert.DeserializeObject<GetGameExtended>(response.Content);
-
-            //Update the player count as the values on the table are out of sync
-            using (var context = new DatabaseContext())
-            {
-                var game = context.Games.Where(x => x.Id == data.Id).First();
-                game.Players = data.Players;
-
-                context.SaveChanges();
-            }
-
-            return data;
-        }
+ 
 
         public static async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(int gameId, string username)
         {

@@ -4,6 +4,7 @@
     {
         HangfireUsername,
         HangfirePassword,
+        RetroAchievementsUsername,
         RetroAchievementsApiKey
     }
 }

@@ -7,8 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using RetroTrack.Api;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.Interfaces;
+using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
+using RetroTrack.Domain.Services;
+using RetroTrack.Domain.Services.Controllers;
+using RetroTrack.Domain.Services.Helpers;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -36,8 +40,6 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
-
 #if DEBUG
 builder.Services.AddDbContext<PostgresqlContext>(options =>
     options.UseLazyLoadingProxies()
@@ -71,6 +73,14 @@ builder.Services.AddHangfire(configuration => configuration
 #endif
 
 builder.Services.AddControllers();
+
+// Register our own services
+builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
+builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
+
+// Controller services
+builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();
+builder.Services.AddScoped<IGamesControllerDataService, GamesControllerDataService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

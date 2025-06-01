@@ -1,18 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Api.Dtos.Auth;
+using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.OldCode.Data;
 using RetroTrack.Domain.OldCode.Dtos;
 
-namespace RetroTrack.Api.Api.Controllers.Authenication
+namespace RetroTrack.Api.Controllers.Auth
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthControllerDataService authDataService) : ControllerBase
     {
         [HttpPost]
         public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = AuthData.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
+            var loginData = authDataService.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
 
             if (!loginData.Successful)
             {
@@ -25,13 +27,13 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         [HttpPost]
         public async Task<RegisterUserDto> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
         {
-            return await AuthData.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await AuthData.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpGet]
@@ -43,7 +45,7 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
             }
             else
             {
-                var data = await AuthData.ValidateSessionStatus(Request.Headers.Authorization!);
+                var data = await authDataService.ValidateSessionStatus(Request.Headers.Authorization!);
                 return data;
             }
         }
