@@ -3,7 +3,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RetroTrack.Infrastructure.Migrations
+namespace RetroTrack.Domain.Database.Migrations
 {
     /// <inheritdoc />
     public partial class DropOldUserGameProgressTable : Migration

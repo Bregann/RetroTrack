@@ -6,12 +6,7 @@ using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Helpers;
 using RetroTrack.Domain.OldCode.Models;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Services
 {

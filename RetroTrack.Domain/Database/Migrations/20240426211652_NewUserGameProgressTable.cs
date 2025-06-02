@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace RetroTrack.Infrastructure.Migrations
+namespace RetroTrack.Domain.Database.Migrations
 {
     /// <inheritdoc />
     public partial class NewUserGameProgressTable : Migration

@@ -3,11 +3,6 @@ using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.DTOs.Controllers.Navigation;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Services.Controllers
 {

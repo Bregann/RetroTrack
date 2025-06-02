@@ -2,11 +2,7 @@
 using Newtonsoft.Json;
 using RestSharp;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.OldCode.Helpers;
 using RetroTrack.Domain.OldCode.Models;
-using RetroTrack.Infrastructure.Database.Context;
-using RetroTrack.Infrastructure.Database.Enums;
-using RetroTrack.Infrastructure.Database.Models;
 using Serilog;
 using System.Diagnostics;
 using System.Net;
@@ -260,7 +256,7 @@ namespace RetroTrack.Domain.OldCode.Data.RetroAchievements
             return JsonConvert.DeserializeObject<GetUserSummary>(response.Content);
         }
 
- 
+
 
         public static async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(int gameId, string username)
         {

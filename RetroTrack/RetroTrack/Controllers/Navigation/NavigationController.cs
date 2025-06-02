@@ -2,7 +2,6 @@
 using RetroTrack.Domain.DTOs.Controllers.Navigation;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
-using RetroTrack.Domain.OldCode.Data;
 
 namespace RetroTrack.Api.Controllers.Navigation
 {

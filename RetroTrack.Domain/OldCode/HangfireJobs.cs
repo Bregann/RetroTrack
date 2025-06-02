@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.OldCode.Data.RetroAchievements;
-using RetroTrack.Infrastructure.Database.Context;
-using RetroTrack.Infrastructure.Database.Enums;
 using Serilog;
 
 namespace RetroTrack.Domain.OldCode

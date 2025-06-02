@@ -1,5 +1,4 @@
 ﻿using RetroTrack.Domain.Enums;
-using RetroTrack.Infrastructure.Database.Enums;
 
 namespace RetroTrack.Domain.DTOs.Controllers.Navigation
 {
@@ -13,7 +12,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Navigation
         public required long UserRank { get; set; }
         public required int TrackedGamesCount { get; set; }
         public required int InProgressGamesCount { get; set; }
-        public required ConsoleProgressData[] ConsoleProgressData { get; set;}
+        public required ConsoleProgressData[] ConsoleProgressData { get; set; }
     }
 
     public class ConsoleProgressData

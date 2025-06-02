@@ -2,7 +2,7 @@
 {
     public enum HighestAwardKind
     {
-        BeatenSoftcore, 
+        BeatenSoftcore,
         BeatenHardcore,
         Completed,
         Mastered,

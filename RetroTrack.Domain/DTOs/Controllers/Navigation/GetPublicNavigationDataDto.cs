@@ -1,5 +1,4 @@
 ﻿using RetroTrack.Domain.Enums;
-using RetroTrack.Infrastructure.Database.Enums;
 
 namespace RetroTrack.Domain.DTOs.Controllers.Navigation
 {

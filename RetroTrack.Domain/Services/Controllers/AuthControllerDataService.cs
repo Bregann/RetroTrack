@@ -5,7 +5,6 @@ using RetroTrack.Domain.DTOs.Controllers.Auth;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.OldCode.Data.RetroAchievements;
-using RetroTrack.Domain.OldCode.Dtos;
 using Serilog;
 
 namespace RetroTrack.Domain.Services.Controllers

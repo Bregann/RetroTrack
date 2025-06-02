@@ -2,8 +2,6 @@
 using RetroTrack.Api.Dtos.Auth;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
 using RetroTrack.Domain.Interfaces.Controllers;
-using RetroTrack.Domain.OldCode.Data;
-using RetroTrack.Domain.OldCode.Dtos;
 
 namespace RetroTrack.Api.Controllers.Auth
 {

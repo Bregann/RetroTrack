@@ -15,7 +15,7 @@ namespace RetroTrack.Domain.Database.Models
 
         [ForeignKey("GameId")]
         public virtual Games Game { get; set; } = null!;
-        public required int GameId {  get; set; }
+        public required int GameId { get; set; }
 
         [ForeignKey("ConsoleId")]
         public virtual GameConsoles Console { get; set; } = null!;

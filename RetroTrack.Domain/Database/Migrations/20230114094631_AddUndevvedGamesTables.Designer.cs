@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RetroTrack.Infrastructure.Database.Context;
+using RetroTrack.Domain.Database.Context;
 
 #nullable disable
 
-namespace RetroTrack.Infrastructure.Migrations
+namespace RetroTrack.Domain.Database.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20230114094631_AddUndevvedGamesTables")]
     partial class AddUndevvedGamesTables
     {

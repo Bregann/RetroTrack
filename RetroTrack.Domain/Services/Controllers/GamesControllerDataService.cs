@@ -7,13 +7,7 @@ using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.OldCode.Data.RetroAchievements;
-using RetroTrack.Domain.OldCode.Helpers;
 using RetroTrack.Domain.OldCode.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
@@ -98,7 +92,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 AchievementCount = data.AchievementCount,
                 Players = data.Players,
                 Title = data.Title,
-                Achievements = data.Achievements  == null ? [] : data.Achievements.Select(x => new Achievement
+                Achievements = data.Achievements == null ? [] : data.Achievements.Select(x => new Achievement
                 {
                     Id = x.Value.Id,
                     BadgeName = "https://media.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",

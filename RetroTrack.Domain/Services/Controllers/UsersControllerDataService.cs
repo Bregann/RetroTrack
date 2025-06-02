@@ -5,11 +5,6 @@ using RetroTrack.Domain.DTOs.Controllers.Users;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Services.Controllers
 {

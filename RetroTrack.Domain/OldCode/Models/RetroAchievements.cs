@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using RetroTrack.Infrastructure.Database.Enums;
 
 namespace RetroTrack.Domain.OldCode.Models
 {

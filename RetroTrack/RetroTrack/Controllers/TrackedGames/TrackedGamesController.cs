@@ -2,8 +2,6 @@
 using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
-using RetroTrack.Domain.OldCode.Data;
-using RetroTrack.Domain.OldCode.Helpers;
 
 namespace RetroTrack.Api.Controllers.TrackedGames
 {

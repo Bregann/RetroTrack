@@ -1,5 +1,4 @@
 ﻿using RetroTrack.Domain.Enums;
-using RetroTrack.Infrastructure.Database.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
