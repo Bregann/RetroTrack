@@ -1,6 +1,4 @@
-﻿using RetroTrack.Domain.DTOs.Controllers.Games;
-
-namespace RetroTrack.Domain.OldCode.Dtos
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Games
 {
     public class UserAchievementsForGameDto
     {

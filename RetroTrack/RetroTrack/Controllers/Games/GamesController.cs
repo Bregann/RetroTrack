@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.Interfaces.Controllers;
-using RetroTrack.Domain.OldCode.Data;
-using RetroTrack.Domain.OldCode.Dtos;
-using RetroTrack.Domain.OldCode.Helpers;
-using RetroTrack.Domain.Services.Controllers;
+using RetroTrack.Domain.Interfaces.Helpers;
 
 namespace RetroTrack.Api.Controllers.Games
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class GamesController(IGamesControllerDataService gamesControllerData) : ControllerBase
+    public class GamesController(IGamesControllerDataService gamesControllerData, IAuthHelperService authHelperService) : ControllerBase
     {
         [HttpGet]
         public List<DayListDto> GetRecentlyAddedAndUpdatedGames()
@@ -34,7 +31,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{gameId}")]
         public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
@@ -49,7 +46,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet]
         public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
@@ -77,7 +74,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{consoleId}")]
         public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
@@ -97,7 +94,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet]
         public ActionResult<List<UserGamesTableDto>> GetUserInProgressGames()
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {

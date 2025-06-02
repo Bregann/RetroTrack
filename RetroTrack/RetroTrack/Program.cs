@@ -78,10 +78,12 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
 builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
 builder.Services.AddScoped<ICachingService, CachingService>();
+builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
 
 // Controller services
 builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();
 builder.Services.AddScoped<IGamesControllerDataService, GamesControllerDataService>();
+builder.Services.AddScoped<INavigationControllerDataService, NavigationControllerDataService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

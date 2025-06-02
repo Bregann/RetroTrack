@@ -1,7 +1,7 @@
 ﻿using RetroTrack.Domain.Enums;
 using RetroTrack.Infrastructure.Database.Enums;
 
-namespace RetroTrack.Domain.OldCode.Dtos.Navigation
+namespace RetroTrack.Domain.DTOs.Controllers.Navigation
 {
     public class GetPublicNavigationDataDto
     {
