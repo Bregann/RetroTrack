@@ -1,4 +1,4 @@
-﻿namespace RetroTrack.Domain.OldCode.Dtos
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Users
 {
     public class UpdateUserGamesDto
     {

@@ -1,38 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.DTOs.Controllers.Users;
+using RetroTrack.Domain.Interfaces.Controllers;
+using RetroTrack.Domain.Interfaces.Helpers;
 using RetroTrack.Domain.OldCode.Data;
-using RetroTrack.Domain.OldCode.Dtos;
 using RetroTrack.Domain.OldCode.Helpers;
 
 namespace RetroTrack.Api.Controllers.Users
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController(IUsersControllerDataService usersControllerData, IAuthHelperService authHelper) : ControllerBase
     {
         [HttpPost]
         public ActionResult<UpdateUserGamesDto> UpdateUserGames()
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            return UserData.UpdateUserGames(user);
+            return usersControllerData.UpdateUserGames(user);
         }
 
         [HttpGet]
         public ActionResult<bool> CheckUserUpdateProcessingState()
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            return UserData.CheckUserUpdateCompleted(user);
+            return usersControllerData.CheckUserUpdateCompleted(user);
         }
     }
 }

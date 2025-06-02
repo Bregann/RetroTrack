@@ -84,6 +84,8 @@ builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
 builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();
 builder.Services.AddScoped<IGamesControllerDataService, GamesControllerDataService>();
 builder.Services.AddScoped<INavigationControllerDataService, NavigationControllerDataService>();
+builder.Services.AddScoped<ITrackedGamesControllerDataService, TrackedGamesControllerDataService>();
+builder.Services.AddScoped<IUsersControllerDataService, UsersControllerDataService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
