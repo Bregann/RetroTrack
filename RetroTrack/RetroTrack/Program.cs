@@ -77,6 +77,7 @@ builder.Services.AddControllers();
 // Register our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
 builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
+builder.Services.AddScoped<ICachingService, CachingService>();
 
 // Controller services
 builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();

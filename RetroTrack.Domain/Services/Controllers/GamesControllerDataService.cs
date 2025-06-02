@@ -9,7 +9,6 @@ using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.OldCode.Data.RetroAchievements;
 using RetroTrack.Domain.OldCode.Dtos;
 using RetroTrack.Domain.OldCode.Helpers;
-using RetroTrack.Domain.OldCode.Infra.Caching;
 using RetroTrack.Domain.OldCode.Models;
 using System;
 using System.Collections.Generic;
@@ -17,10 +16,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
+using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
-    public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService) : IGamesControllerDataService
+    public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService, ICachingService cachingService) : IGamesControllerDataService
     {
         public List<DayListDto> GetNewAndUpdatedGamesFromLast5Days()
         {
@@ -115,7 +115,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public PublicConsoleGamesDto? GetGamesForConsole(int consoleId)
         {
-            var cacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}");
+            var cacheData = cachingService.GetCacheItem($"GamesData-{consoleId}");
             var gameList = new List<Games>();
 
             if (cacheData != null)
@@ -133,29 +133,10 @@ namespace RetroTrack.Domain.Services.Controllers
                     gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
                 }
 
-                CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
-            //0 is used for all games
-            if (consoleId == 0)
-            {
-                return new PublicConsoleGamesDto
-                {
-                    ConsoleId = consoleId,
-                    ConsoleName = "All Games",
-                    Games = gameList.Select(x => new PublicGamesTableDto
-                    {
-                        AchievementCount = x.AchievementCount,
-                        GameGenre = x.GameGenre,
-                        GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
-                        GameId = x.Id,
-                        GameName = x.Title,
-                        Players = x.Players ?? 0
-                    }).ToList()
-                };
-            }
-
-            if (gameList.Count == 0)
+            if (gameList == null || gameList.Count == 0)
             {
                 return null;
             }
@@ -163,7 +144,7 @@ namespace RetroTrack.Domain.Services.Controllers
             return new PublicConsoleGamesDto
             {
                 ConsoleId = consoleId,
-                ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
                 Games = gameList.Select(x => new PublicGamesTableDto
                 {
                     AchievementCount = x.AchievementCount,
@@ -182,93 +163,88 @@ namespace RetroTrack.Domain.Services.Controllers
             var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, raUsername);
             var achievementList = new List<UserAchievement>();
 
-            using (var context = new DatabaseContext())
+            //If its null, grab the regular data so the popup will still work
+            if (data == null)
             {
-                //If its null, grab the regular data so the popup will still work
-                if (data == null)
+                var loggedOutData = await raApiService.GetSpecificGameInfo(gameId);
+
+                if (loggedOutData == null || loggedOutData.Achievements == null)
                 {
-                    var loggedOutData = await RetroAchievements.GetSpecificGameInfo(gameId);
-
-                    if (loggedOutData == null)
-                    {
-                        return null;
-                    }
-
-                    achievementList.AddRange(loggedOutData.Achievements.Select(achievement => new UserAchievement
-                    {
-                        BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
-                        DateEarned = null,
-                        Description = achievement.Value.Description,
-                        Id = achievement.Value.Id,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        Type = TypeEnum.Unknown // temp fix till rewrite todo: fix
-                    }));
-
-                    return new UserGameInfoDto
-                    {
-                        AchievementCount = loggedOutData.AchievementCount,
-                        Achievements = achievementList,
-                        ImageBoxArt = "https://media.retroachievements.org" + loggedOutData.ImageBoxArt,
-                        ImageTitle = "https://media.retroachievements.org" + loggedOutData.ImageTitle,
-                        ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
-                        NumAwardedToUser = 0,
-                        ConsoleId = loggedOutData.ConsoleId,
-                        ConsoleName = loggedOutData.ConsoleName,
-                        GameId = gameId,
-                        Genre = loggedOutData.Genre,
-                        Players = loggedOutData.Players,
-                        PointsEarned = 0,
-                        Title = loggedOutData.Title,
-                        TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
-                        UserCompletion = "Unable to fetch data",
-                        GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
-                    };
+                    return null;
                 }
 
-
-                context.Games.First(x => x.Id == gameId).Players = data.Players;
-                context.Users.First(x => x.Username == username).LastAchievementsUpdate = DateTime.UtcNow;
-                context.SaveChanges();
-
-
-
-                foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
+                achievementList.AddRange(loggedOutData.Achievements.Select(achievement => new UserAchievement
                 {
-                    achievementList.Add(new UserAchievement
-                    {
-                        Id = achievement.Value.Id,
-                        BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
-                        Description = achievement.Value.Description,
-                        NumAwarded = achievement.Value.NumAwarded,
-                        NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                        Points = achievement.Value.Points,
-                        Title = achievement.Value.Title,
-                        DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
-                        Type = achievement.Value.Type
-                    });
-                }
+                    BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
+                    DateEarned = null,
+                    Description = achievement.Value.Description,
+                    Id = achievement.Value.Id,
+                    Points = achievement.Value.Points,
+                    Title = achievement.Value.Title,
+                    Type = TypeEnum.Unknown // temp fix till rewrite todo: fix
+                }));
 
                 return new UserGameInfoDto
                 {
-                    GameId = data.Id,
-                    ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
-                    ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
-                    ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
-                    ConsoleId = data.ConsoleId,
-                    ConsoleName = data.ConsoleName,
-                    Genre = data.Genre,
-                    AchievementCount = data.AchievementCount,
-                    Players = data.Players,
-                    Title = data.Title,
-                    NumAwardedToUser = data.NumAwardedToUser,
-                    UserCompletion = data.UserCompletion,
+                    AchievementCount = loggedOutData.AchievementCount,
                     Achievements = achievementList,
-                    PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
-                    TotalPoints = data.Achievements.Sum(x => x.Value.Points),
+                    ImageBoxArt = "https://media.retroachievements.org" + loggedOutData.ImageBoxArt,
+                    ImageTitle = "https://media.retroachievements.org" + loggedOutData.ImageTitle,
+                    ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
+                    NumAwardedToUser = 0,
+                    ConsoleId = loggedOutData.ConsoleId,
+                    ConsoleName = loggedOutData.ConsoleName,
+                    GameId = gameId,
+                    Genre = loggedOutData.Genre,
+                    Players = loggedOutData.Players,
+                    PointsEarned = 0,
+                    Title = loggedOutData.Title,
+                    TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
+                    UserCompletion = "Unable to fetch data",
                     GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
                 };
             }
+
+
+            context.Games.First(x => x.Id == gameId).Players = data.Players;
+            context.Users.First(x => x.Username == username).LastAchievementsUpdate = DateTime.UtcNow;
+            context.SaveChanges();
+
+            foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
+            {
+                achievementList.Add(new UserAchievement
+                {
+                    Id = achievement.Value.Id,
+                    BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
+                    Description = achievement.Value.Description,
+                    NumAwarded = achievement.Value.NumAwarded,
+                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                    Points = achievement.Value.Points,
+                    Title = achievement.Value.Title,
+                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
+                    Type = achievement.Value.Type
+                });
+            }
+
+            return new UserGameInfoDto
+            {
+                GameId = data.Id,
+                ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
+                ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
+                ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
+                ConsoleId = data.ConsoleId,
+                ConsoleName = data.ConsoleName,
+                Genre = data.Genre,
+                AchievementCount = data.AchievementCount,
+                Players = data.Players,
+                Title = data.Title,
+                NumAwardedToUser = data.NumAwardedToUser,
+                UserCompletion = data.UserCompletion,
+                Achievements = achievementList,
+                PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
+                TotalPoints = data.Achievements.Sum(x => x.Value.Points),
+                GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
+            };
         }
 
         public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(string username, int gameId)
@@ -286,27 +262,24 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }
 
-            using (var context = new DatabaseContext())
+            context.Games.First(x => x.Id == gameId).Players = data.Players;
+            context.SaveChanges();
+
+            var user = context.Users.Where(x => x.Username == username).First();
+            var secondsDiff = (DateTime.UtcNow - user.LastAchievementsUpdate).TotalSeconds;
+
+            if (secondsDiff < 30)
             {
-                context.Games.First(x => x.Id == gameId).Players = data.Players;
-                context.SaveChanges();
-
-                var user = context.Users.Where(x => x.Username == username).First();
-                var secondsDiff = (DateTime.UtcNow - user.LastAchievementsUpdate).TotalSeconds;
-
-                if (secondsDiff < 30)
+                return new UserAchievementsForGameDto
                 {
-                    return new UserAchievementsForGameDto
-                    {
-                        Achievements = null,
-                        Success = false,
-                        Reason = $"Achievement update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
-                    };
-                }
-
-                user.LastAchievementsUpdate = DateTime.UtcNow;
-                context.SaveChanges();
+                    Achievements = null,
+                    Success = false,
+                    Reason = $"Achievement update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
+                };
             }
+
+            user.LastAchievementsUpdate = DateTime.UtcNow;
+            context.SaveChanges();
 
             var achievementList = new List<UserAchievement>();
 
@@ -342,130 +315,115 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public UserConsoleGamesDto? GetGamesAndUserProgressForConsole(string username, int consoleId)
         {
-            using (var context = new DatabaseContext())
+            var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game);
+            var consoleGames = new List<UserGamesTableDto>();
+
+            var cacheData = cachingService.GetCacheItem($"GamesData-{consoleId}");
+            var gameList = new List<Games>();
+
+            if (cacheData != null)
             {
-                var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game);
-                var consoleGames = new List<UserGamesTableDto>();
-
-                var cacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}");
-                var gameList = new List<Games>();
-
-                if (cacheData != null)
-                {
-                    gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
-                }
-                else
-                {
-                    if (consoleId == 0)
-                    {
-                        gameList = context.Games.ToList();
-                    }
-                    else
-                    {
-                        gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
-                    }
-
-                    CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
-                }
-
+                gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
+            }
+            else
+            {
                 if (consoleId == 0)
                 {
-                    //User progress is cached, check and return if needed
-                    var userAllGamesCacheData = CachingHelper.GetCacheItem($"GamesData-{consoleId}-User-{username}");
-
-                    if (userAllGamesCacheData != null)
-                    {
-                        return JsonConvert.DeserializeObject<UserConsoleGamesDto>(userAllGamesCacheData);
-                    }
-
-                    foreach (var game in gameList)
-                    {
-                        var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
-
-                        consoleGames.Add(new UserGamesTableDto
-                        {
-                            AchievementCount = game.AchievementCount,
-                            AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                            PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
-                            GameGenre = game.GameGenre,
-                            GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
-                            GameId = game.Id,
-                            GameName = game.Title,
-                            Players = game.Players ?? 0
-                        });
-                    }
-
-                    var allGamesUserProgress = new UserConsoleGamesDto
-                    {
-                        ConsoleId = consoleId,
-                        ConsoleName = "All Games",
-                        Games = consoleGames
-                    };
-
-                    CachingHelper.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{username}", JsonConvert.SerializeObject(allGamesUserProgress));
-                    return allGamesUserProgress;
+                    gameList = context.Games.ToList();
                 }
                 else
                 {
-                    foreach (var game in gameList)
-                    {
-                        var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
-
-                        consoleGames.Add(new UserGamesTableDto
-                        {
-                            AchievementCount = game.AchievementCount,
-                            AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                            PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
-                            GameGenre = game.GameGenre,
-                            GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
-                            GameId = game.Id,
-                            GameName = game.Title,
-                            Players = game.Players ?? 0
-                        });
-                    }
-
-                    return new UserConsoleGamesDto
-                    {
-                        ConsoleId = consoleId,
-                        ConsoleName = context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
-                        Games = consoleGames
-                    };
+                    gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
                 }
+
+                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
+
+            if (gameList == null || gameList.Count == 0)
+            {
+                return null;
+            }
+
+            if (consoleId == 0)
+            {
+                //User progress is cached, check and return if needed
+                var userAllGamesCacheData = cachingService.GetCacheItem($"GamesData-{consoleId}-User-{username}");
+
+                if (userAllGamesCacheData != null)
+                {
+                    return JsonConvert.DeserializeObject<UserConsoleGamesDto>(userAllGamesCacheData);
+                }
+
+                var allGamesUserProgress = new UserConsoleGamesDto
+                {
+                    ConsoleId = consoleId,
+                    ConsoleName = "All Games",
+                    Games = consoleGames
+                };
+
+                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{username}", JsonConvert.SerializeObject(allGamesUserProgress));
+                return allGamesUserProgress;
+            }
+
+            foreach (var game in gameList)
+            {
+                var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
+
+                consoleGames.Add(new UserGamesTableDto
+                {
+                    AchievementCount = game.AchievementCount,
+                    AchievementsGained = userProgress?.AchievementsGained ?? 0,
+                    PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                    GameGenre = game.GameGenre,
+                    GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
+                    GameId = game.Id,
+                    GameName = game.Title,
+                    Players = game.Players ?? 0
+                });
+            }
+
+            return new UserConsoleGamesDto
+            {
+                ConsoleId = consoleId,
+                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                Games = consoleGames
+            };
         }
 
         public List<UserGamesTableDto> GetInProgressGamesForUser(string username)
         {
-            using (var context = new DatabaseContext())
+            var gameList = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage != 1);
+            var progressGameList = new List<UserGamesTableDto>();
+
+            foreach (var game in gameList)
             {
-                var gameList = context.UserGameProgress.Include(x => x.Game).Include(x => x.Game.GameConsole).Where(x => x.User.Username == username && x.GamePercentage != 1);
-                var progressGameList = new List<UserGamesTableDto>();
-
-                foreach (var game in gameList)
+                if (game == null || game.Game == null)
                 {
-                    double gamePct = 0;
-
-                    if (game?.GamePercentage != null)
-                    {
-                        gamePct = Math.Round(game.GamePercentage * 100, 2);
-                    }
-
-                    progressGameList.Add(new UserGamesTableDto
-                    {
-                        AchievementCount = game.Game.AchievementCount,
-                        AchievementsGained = game?.AchievementsGained ?? 0,
-                        PercentageCompleted = gamePct,
-                        GameGenre = game.Game.GameGenre,
-                        GameIconUrl = "https://media.retroachievements.org" + game.Game.ImageIcon,
-                        GameId = game.Game.Id,
-                        GameName = game.Game.Title,
-                        Console = game.Game.GameConsole.ConsoleName,
-                        Players = game.Game.Players ?? 0
-                    });
+                    continue;
                 }
 
-                return progressGameList;
+                double gamePct = 0;
+
+                if (game?.GamePercentage != null)
+                {
+                    gamePct = Math.Round(game.GamePercentage * 100, 2);
+                }
+
+                progressGameList.Add(new UserGamesTableDto
+                {
+                    AchievementCount = game?.Game.AchievementCount ?? 0,
+                    AchievementsGained = game?.AchievementsGained ?? 0,
+                    PercentageCompleted = gamePct,
+                    GameGenre = game?.Game.GameGenre,
+                    GameIconUrl = "https://media.retroachievements.org" + game?.Game.ImageIcon,
+                    GameId = game?.Game.Id ?? 0,
+                    GameName = game?.Game.Title ?? "",
+                    Console = game?.Game.GameConsole.ConsoleName ?? "",
+                    Players = game?.Game.Players ?? 0
+                });
             }
+
+            return progressGameList;
         }
     }
 }
