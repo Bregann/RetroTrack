@@ -80,7 +80,8 @@ builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
 // RA processing services
 builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
 builder.Services.AddScoped<IRetroAchievementsSchedulerService, RetroAchievementsSchedulerService>();
-builder.Services.AddScoped<IRetroAchievementsJobDispatcherService, RetroAchievementsJobDispatcherService>();
+builder.Services.AddScoped<IRetroAchievementsJobManagerService, RetroAchievementsJobManagerService>();
+builder.Services.AddScoped<IRetroAchievementsJobProcessorService, RetroAchievementsJobProcessorService>();
 
 // Controller services
 builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();

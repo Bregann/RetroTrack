@@ -8,5 +8,6 @@ namespace RetroTrack.Domain.Interfaces
 {
     public interface IRetroAchievementsJobProcessorService
     {
+        Task ProcessGetGameListJob(int requestId);
     }
 }

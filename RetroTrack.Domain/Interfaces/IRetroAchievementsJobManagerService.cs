@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Interfaces
 {
-    public interface IRetroAchievementsJobDispatcherService
+    public interface IRetroAchievementsJobManagerService
     {
     }
 }

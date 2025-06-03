@@ -26,10 +26,16 @@ namespace RetroTrack.Domain.Database.Models
         public required DateTime LastModified { get; set; }
 
         [Required]
+        public required DateTime SetReleasedDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        [Required]
         public required int AchievementCount { get; set; }
 
         public string? GameGenre { get; set; }
         public int? Players { get; set; }
+
+        [Required]
+        public required bool HasAchievements { get; set; }
 
         [Required]
         public required bool ExtraDataProcessed { get; set; }

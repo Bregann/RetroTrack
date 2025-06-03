@@ -158,52 +158,10 @@ namespace RetroTrack.Domain.OldCode
             {
                 using (var context = new DatabaseContext())
                 {
-                    var dataToProcess = context.RetroAchievementsApiData.First(x => x.Id == id);
-                    var gameList = JsonConvert.DeserializeObject<List<GetGameList>>(dataToProcess.JsonData);
-                    var gameConsoles = context.GameConsoles;
-
-                    if (gameList == null)
-                    {
-                        Log.Information($"[RetroAchievements] No data to process for request ID {id}");
-                        dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-                        context.SaveChanges();
-                        return;
-                    }
-
-                    if (gameList.Count == 0)
-                    {
-                        Log.Information($"[RetroAchievements] No games in array for request ID {id}");
-                        dataToProcess.ProcessingStatus = ProcessingStatus.Processed;
-                        context.SaveChanges();
-                        return;
-                    }
-
-                    //Update the game count for the console
-                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().GameCount = gameList.Where(x => x.AchievementCount != 0).Count();
-                    gameConsoles.Where(x => x.ConsoleID == gameList.First().ConsoleId).First().NoAchievementsGameCount = gameList.Where(x => x.AchievementCount == 0).Count();
-
                     foreach (var game in gameList)
                     {
-                        //Check if there's achievements or not
-                        if (game.AchievementCount == 0)
-                        {
-                            if (!context.UndevvedGames.Any(x => x.Id == game.Id) && !context.Games.Any(x => x.Id == game.Id))
-                            {
-                                context.UndevvedGames.Add(new UndevvedGames
-                                {
-                                    Id = game.Id,
-                                    GameConsole = gameConsoles.First(x => x.ConsoleID == game.ConsoleId),
-                                    Title = game.Title
-                                });
-
-                                Log.Information($"[RetroAchievements] Game {game.Title} added to undevved games");
-                                continue;
-                            }
-                        }
                         else
                         {
-                            //Delete it from the undevved games if needed
-                            context.UndevvedGames.Where(x => x.Id == id).ExecuteDelete();
 
                             //Check if it exists in the database, if not then add it in
                             if (!context.Games.Any(x => x.Id == game.Id))

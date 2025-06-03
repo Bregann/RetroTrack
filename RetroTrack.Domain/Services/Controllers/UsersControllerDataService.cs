@@ -46,7 +46,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public bool CheckUserUpdateCompleted(string username)
         {
-            var updateStatus = context.RetroAchievementsApiData.Where(x => x.JsonData == username).OrderBy(x => x.Id).Last(x => x.JsonData == username);
+            var updateStatus = context.RetroAchievementsLogAndLoadData.Where(x => x.JsonData == username).OrderBy(x => x.Id).Last(x => x.JsonData == username);
 
             if (updateStatus.ProcessingStatus == ProcessingStatus.Processed)
             {
