@@ -1,7 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.OldCode.Data.RetroAchievements;
 using Serilog;
 
 namespace RetroTrack.Domain.OldCode
@@ -96,7 +95,7 @@ namespace RetroTrack.Domain.OldCode
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
                             break;
 
-                        case ApiRequestType.GetGameExtended:
+                        case ApiRequestType.GetInitialGameData:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
 

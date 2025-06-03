@@ -2,11 +2,12 @@
 using Newtonsoft.Json;
 using RestSharp;
 using RetroTrack.Domain.Database.Context;
+using RetroTrack.Domain.DTOs.RetroAchievementsApi;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Helpers;
-using RetroTrack.Domain.OldCode.Models;
 using Serilog;
 using System.Net;
+using Achievement = RetroTrack.Domain.DTOs.RetroAchievementsApi.Achievement;
 
 namespace RetroTrack.Domain.Services
 {
@@ -44,22 +45,29 @@ namespace RetroTrack.Domain.Services
         }
 
         /// <summary>
-        /// Gets the specific game information from the RetroAchievements API for a given game ID. If the API call fails or returns no data, it falls back to the database data.
+        /// Gets the specific game information from the RetroAchievements API for a given game ID. If the API call fails or returns no data, it falls back to the database data if true is passed.
         /// </summary>
         /// <param name="gameId"></param>
+        /// <param name="returnDatabaseData"></param>
         /// <returns></returns>
-        public async Task<GetGameExtended?> GetSpecificGameInfo(int gameId)
+        public async Task<GetGameExtended?> GetSpecificGameInfo(int gameId, bool returnDatabaseData = true)
         {
             var client = new RestClient(_baseUrl);
             var request = new RestRequest($"API_GetGameExtended.php?z={_apiUsername}&y={_apiKey}&i={gameId}", Method.Get);
 
-            //Get the response and deserialise
+            // Get the response and deserialise
             var response = await client.ExecuteAsync(request);
 
             // if it has failed to get the data from the api then fall back to the database data
             // there is a chance this is out of date but would get picked up on the next sync
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
             {
+                if (!returnDatabaseData)
+                {
+                    Log.Warning($"[RetroAchievements] Error getting game data for {gameId}. Status code {response.StatusCode}. Database data not returned.");
+                    return null;
+                }
+
                 Log.Warning($"[RetroAchievements] Error getting game data for {gameId}. Falling back to database data");
 
                 var gameFromDb = context.Games.FirstOrDefault(x => x.Id == gameId);
@@ -112,11 +120,124 @@ namespace RetroTrack.Domain.Services
                 return null;
             }
 
-            //Update the player count as the values on the table are out of sync
+            // Update the player count as the values on the table are out of sync
             context.Games.Where(x => x.Id == gameId)
                 .ExecuteUpdate(x => x.SetProperty(y => y.Players, data.Players));
 
             return data;
+        }
+
+        /// <summary>
+        /// Gets the list of console IDs and names from the RetroAchievements API.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ConsoleIDs>?> GetConsoleIds()
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetConsoleIDs.php?z={_apiUsername}&y={_apiKey}", Method.Get);
+
+            //Get the response and Deserialize
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting console data. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<List<ConsoleIDs>>(response.Content);
+        }
+
+        /// <summary>
+        /// Gets the list of games for a specific console ID from the RetroAchievements API.
+        /// </summary>
+        /// <param name="consoleId"></param>
+        /// <returns></returns>
+        public async Task<List<GetGameList>?> GetGameListFromConsoleId(int consoleId)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGameList.php?z={_apiUsername}&y={_apiKey}&i={consoleId}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting games for console ID {consoleId}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<List<GetGameList>>(response.Content);
+        }
+
+        /// <summary>
+        /// Gets the user profile information for a specific username from the RetroAchievements API.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task<GetUserProfile?> GetUserProfile(string username)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetUserProfile.php?z={_apiUsername}&y={_apiKey}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting user profile for {username}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetUserProfile>(response.Content);
+        }
+
+        /// <summary>
+        /// Gets the specific game information and user progress for a given username and game ID from the RetroAchievements API.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="gameId"></param>
+        /// <returns></returns>
+        public async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(string username, int gameId)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={_apiUsername}&y={_apiKey}&g={gameId}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting specifc game info and user progress for {username} and game id {gameId}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            var data = JsonConvert.DeserializeObject<GetGameInfoAndUserProgress>(response.Content);
+
+            if (data != null)
+            {
+                // Update the player count as the values on the table are out of sync
+                context.Games.Where(x => x.Id == gameId)
+                    .ExecuteUpdate(x => x.SetProperty(y => y.Players, data.Players));
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Gets the user completion progress for a specific username from the RetroAchievements API.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="skipAmount"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task<GetUserCompletionProgress?> GetUserCompletionProgress(string username, int skipAmount = 0, int count = 500)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetUserCompletionProgress.php?z={_apiUsername}&y={_apiKey}&u={username}&c={count}&o={skipAmount}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting user completion progress for {username}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetUserCompletionProgress>(response.Content);
         }
     }
 }

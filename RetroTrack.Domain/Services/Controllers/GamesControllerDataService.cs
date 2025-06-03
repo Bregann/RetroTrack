@@ -6,8 +6,7 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using RetroTrack.Domain.OldCode.Data.RetroAchievements;
-using RetroTrack.Domain.OldCode.Models;
+using RetroTrack.Domain.OldCode;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
@@ -174,7 +173,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     Id = achievement.Value.Id,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    Type = TypeEnum.Unknown // temp fix till rewrite todo: fix
+                    Type = AchievementTypeEnum.Unknown // temp fix till rewrite todo: fix
                 }));
 
                 return new UserGameInfoDto
