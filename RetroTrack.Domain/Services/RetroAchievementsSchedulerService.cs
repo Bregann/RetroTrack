@@ -8,7 +8,7 @@ using Serilog;
 
 namespace RetroTrack.Domain.Services
 {
-    public class RetroAchievementsProcessingService(AppDbContext context, IRetroAchievementsApiService raApiService) : IRetroAchievementsProcessingService
+    public class RetroAchievementsSchedulerService(AppDbContext context, IRetroAchievementsApiService raApiService) : IRetroAchievementsSchedulerService
     {
         /// <summary>
         /// Gets the list of consoles from the RetroAchievements API and inserts them into the database.
@@ -235,6 +235,22 @@ namespace RetroTrack.Domain.Services
 
                 await Task.Delay(1000); // To avoid hitting the API too fast
             }
+        }
+
+        public async Task QueueUserGameUpdate(string username)
+        {
+            await context.RetroAchievementsApiData.AddAsync(new RetroAchievementsApiData
+            {
+                ApiRequestType = ApiRequestType.UserUpdate,
+                JsonData = username,
+                FailedProcessingAttempts = 0,
+                ProcessingStatus = ProcessingStatus.NotScheduled,
+                LastUpdate = DateTime.UtcNow
+            });
+
+            await context.SaveChangesAsync();
+
+            Log.Information($"[RetroAchievements] User game update for {username} queued for processing.");
         }
     }
 }

@@ -74,10 +74,13 @@ builder.Services.AddControllers();
 
 // Register our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
-builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
-builder.Services.AddScoped<IRetroAchievementsProcessingService, RetroAchievementsProcessingService>();
 builder.Services.AddScoped<ICachingService, CachingService>();
 builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
+
+// RA processing services
+builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();
+builder.Services.AddScoped<IRetroAchievementsSchedulerService, RetroAchievementsSchedulerService>();
+builder.Services.AddScoped<IRetroAchievementsJobDispatcherService, RetroAchievementsJobDispatcherService>();
 
 // Controller services
 builder.Services.AddScoped<IAuthControllerDataService, AuthControllerDataService>();

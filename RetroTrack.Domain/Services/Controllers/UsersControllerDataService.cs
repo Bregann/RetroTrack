@@ -3,12 +3,13 @@ using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Users;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
-    public class UsersControllerDataService(AppDbContext context) : IUsersControllerDataService
+    public class UsersControllerDataService(AppDbContext context, IRetroAchievementsSchedulerService raScheduler) : IUsersControllerDataService
     {
         public void DeleteUserSession(string sessionId)
         {
@@ -31,14 +32,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }
 
-            context.RetroAchievementsApiData.Add(new RetroAchievementsApiData
-            {
-                ApiRequestType = ApiRequestType.UserUpdate,
-                JsonData = username,
-                FailedProcessingAttempts = 0,
-                ProcessingStatus = ProcessingStatus.NotScheduled,
-                LastUpdate = DateTime.UtcNow
-            });
+            raScheduler.QueueUserGameUpdate(username);
 
             user.LastUserUpdate = DateTime.UtcNow;
             context.SaveChanges();
