@@ -14,7 +14,8 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<TrackedGames> TrackedGames { get; set; }
         public DbSet<Sessions> Sessions { get; set; }
         public DbSet<Config> Config { get; set; }
-        public DbSet<RetroAchievementsApiData> RetroAchievementsApiData { get; set; }
+        public DbSet<RetroAchievementsLogAndLoadData> RetroAchievementsLogAndLoadData { get; set; }
+        public DbSet<RetroAchievementsLogAndLoadErrors> RetroAchievementsLogAndLoadErrors { get; set; }
         public DbSet<DataCaching> DataCaching { get; set; }
         public DbSet<DevWishlist> DevWishlist { get; set; }
         public DbSet<UndevvedGames> UndevvedGames { get; set; }

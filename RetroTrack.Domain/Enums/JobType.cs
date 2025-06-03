@@ -1,6 +1,6 @@
 ﻿namespace RetroTrack.Domain.Enums
 {
-    public enum ApiRequestType
+    public enum JobType
     {
         GetGameList,
         GetInitialGameData,

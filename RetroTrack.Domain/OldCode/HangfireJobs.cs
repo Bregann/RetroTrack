@@ -91,15 +91,15 @@ namespace RetroTrack.Domain.OldCode
                     //Check the api request type and send enqueue the right job
                     switch (id.ApiRequestType)
                     {
-                        case ApiRequestType.GetGameList:
+                        case JobType.GetGameList:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateGamesToDatabase(id.Id));
                             break;
 
-                        case ApiRequestType.GetInitialGameData:
+                        case JobType.GetInitialGameData:
                             BackgroundJob.Enqueue(() => RetroAchievements.AddOrUpdateExtraGameInfoToDatabase(id.Id));
                             break;
 
-                        case ApiRequestType.UserUpdate:
+                        case JobType.UserUpdate:
                             BackgroundJob.Enqueue(() => RetroAchievements.GetUserGames(id.JsonData, id.Id)); //this is the username
                             break;
                     }

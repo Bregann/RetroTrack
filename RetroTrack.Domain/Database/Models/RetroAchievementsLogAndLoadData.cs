@@ -1,10 +1,11 @@
-﻿using RetroTrack.Domain.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class RetroAchievementsApiData
+    public class RetroAchievementsLogAndLoadData
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -19,9 +20,12 @@ namespace RetroTrack.Domain.Database.Models
         public required int FailedProcessingAttempts { get; set; }
 
         [Required]
-        public required ApiRequestType ApiRequestType { get; set; }
+        public required JobType JobType { get; set; }
 
         [Required]
         public required DateTime LastUpdate { get; set; } = DateTime.UtcNow;
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<RetroAchievementsLogAndLoadErrors> Errors { get; set; } = null!;
     }
 }
