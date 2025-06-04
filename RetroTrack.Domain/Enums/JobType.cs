@@ -3,8 +3,7 @@
     public enum JobType
     {
         GetGameList,
-        GetInitialGameData,
-        GetRecentlyModifiedGameData,
+        GetExtendedGameData,
         UserUpdate
     }
 }

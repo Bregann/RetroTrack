@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RetroTrack.Domain.Services
 {
-    public class RetroAchievementsJobManagerService(AppDbContext context) : IRetroAchievementsJobManagerService
+    public class RetroAchievementsJobManagerService(AppDbContext context, IBackgroundJobClient backgroundJobClient) : IRetroAchievementsJobManagerService
     {
         // This service is responsible for dispatching jobs to be processed by the RetroAchievementsJobProcessorService
         // It will queue unscheduled jobs based on a limit and their processing status.
@@ -55,10 +56,10 @@ namespace RetroTrack.Domain.Services
                 switch (request.JobType)
                 {
                     case JobType.GetGameList:
+                        backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetGameListJob(request.Id));
                         break;
-                    case JobType.GetInitialGameData:
-                        break;
-                    case JobType.GetRecentlyModifiedGameData:
+                    case JobType.GetExtendedGameData:
+                        backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetExtendedGameDataJob(request.Id));
                         break;
                     case JobType.UserUpdate:
                         break;

@@ -189,8 +189,9 @@ namespace RetroTrack.Domain.Services
             // get all games that have been modified in the last 4 days
             // covers for any api downtime or issues
             // only get games that have not been processed yet as the unprocessed ones will be handled by the GetGameDataForUnprocessedGames method
+            // make sure the last extra data processing was more than 4 days ago too
             var modifiedGames = await context.Games
-                .Where(x => x.LastModified > DateTime.UtcNow.AddDays(-4) && x.ExtraDataProcessed)
+                .Where(x => x.LastModified > DateTime.UtcNow.AddDays(-4) && x.LastExtraDataProcessedDate < DateTime.UtcNow.AddDays(-4) && x.ExtraDataProcessed)
                 .Select(x => x.Id)
                 .ToArrayAsync();
 

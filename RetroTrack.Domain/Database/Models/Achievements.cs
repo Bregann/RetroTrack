@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using RetroTrack.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
@@ -10,10 +11,12 @@ namespace RetroTrack.Domain.Database.Models
         public required string AchievementIcon { get; set; }
         public required int Points { get; set; }
         public required int DisplayOrder { get; set; }
+        public AchievementType? AchievementType { get; set; }
+        public required long NumAwarded { get; set; }
+        public required long NumAwardedHardcore { get; set; }
 
-        public int GameId { get; set; }
-
-        [ForeignKey("GameId")]
-        public required Games Game { get; set; }
+        [ForeignKey(nameof(GameId))]
+        public required int GameId { get; set; }
+        public virtual Games Game { get; set; } = null!;
     }
 }

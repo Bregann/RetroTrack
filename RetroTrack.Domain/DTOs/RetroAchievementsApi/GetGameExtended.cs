@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RetroTrack.Domain.Enums;
 
 namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
 {
@@ -68,6 +69,6 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int DisplayOrder { get; set; }
 
         [JsonProperty("type")]
-        public AchievementTypeEnum? Type { get; set; }
+        public AchievementType? Type { get; set; }
     }
 }

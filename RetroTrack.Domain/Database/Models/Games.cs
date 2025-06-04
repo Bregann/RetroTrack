@@ -11,10 +11,10 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required string Title { get; set; }
 
-        public int ConsoleID { get; set; }
-
-        [ForeignKey("ConsoleID")]
-        public required GameConsoles GameConsole { get; set; }
+        [Required]
+        [ForeignKey(nameof(ConsoleID))]
+        public required int ConsoleID { get; set; }
+        public virtual GameConsoles GameConsole { get; set; } = null!;
 
         [Required]
         public required string ImageIcon { get; set; }
@@ -24,6 +24,8 @@ namespace RetroTrack.Domain.Database.Models
 
         [Required]
         public required DateTime LastModified { get; set; }
+
+        public DateTime? LastExtraDataProcessedDate { get; set; }
 
         [Required]
         public required DateTime SetReleasedDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
