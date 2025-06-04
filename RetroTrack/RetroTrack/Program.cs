@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RetroTrack.Api;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
@@ -141,5 +142,7 @@ using (var scope = app.Services.CreateScope())
     var hangfireJobs = scope.ServiceProvider.GetRequiredService<HangfireJobServiceHelper>();
     hangfireJobs.SetupHangfireJobs();
 }
+
+HangfireJobSetup.RegisterJobs();
 
 app.Run();

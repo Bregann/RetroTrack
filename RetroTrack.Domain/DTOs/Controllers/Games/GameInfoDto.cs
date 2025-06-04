@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.DTOs.Controllers.Games
+﻿using RetroTrack.Domain.Enums;
+
+namespace RetroTrack.Domain.DTOs.Controllers.Games
 {
     public class GameInfoDto
     {
@@ -24,6 +26,6 @@
         public string Description { get; set; }
         public long Points { get; set; }
         public string BadgeName { get; set; }
-        public AchievementTypeEnum? Type { get; set; }
+        public AchievementType? Type { get; set; }
     }
 }

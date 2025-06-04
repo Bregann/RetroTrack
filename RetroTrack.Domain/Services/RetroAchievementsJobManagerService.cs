@@ -15,6 +15,10 @@ namespace RetroTrack.Domain.Services
 
         private readonly int _queueLimit = 20;
 
+        /// <summary>
+        /// Queues unscheduled jobs to be processed by the RetroAchievementsJobProcessorService.
+        /// </summary>
+        /// <returns></returns>
         public async Task QueueUnscheduledJobs()
         {
             // check how many there are to process, if there are none, return
@@ -57,11 +61,47 @@ namespace RetroTrack.Domain.Services
                         backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetExtendedGameDataJob(request.Id));
                         break;
                     case JobType.UserUpdate:
+                        backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessUserUpdateJob(request.Id));
                         break;
                 }
 
                 request.ProcessingStatus = ProcessingStatus.Scheduled;
                 await context.SaveChangesAsync();
+            }
+        }
+
+        /// <summary>
+        /// Requeues errored jobs that have failed processing attempts less than 3.
+        /// </summary>
+        /// <returns></returns>
+        public async Task RequeueErroredJobs()
+        {
+            // get all the errored jobs that have failed processing attempts less than 3
+            var erroredJobs = await context.RetroAchievementsLogAndLoadData
+                .Where(x => x.ProcessingStatus == ProcessingStatus.Errored && x.FailedProcessingAttempts < 3)
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.ProcessingStatus, ProcessingStatus.NotScheduled));
+
+            if (erroredJobs != 0)
+            {
+                Log.Information($"[RetroAchievements] Requeued {erroredJobs} errored jobs for processing.");
+            }
+        }
+
+        /// <summary>
+        /// Cleans up completed jobs that are older than 1 day.
+        /// </summary>
+        /// <returns></returns>
+        public async Task CleanUpCompletedJobs()
+        {
+            // clean up completed jobs that are older than 1 day
+            var completedJobs = await context.RetroAchievementsLogAndLoadData
+                .Where(x => x.ProcessingStatus == ProcessingStatus.Processed && x.LastUpdate < DateTime.UtcNow.AddDays(-1))
+                .ExecuteDeleteAsync();
+
+            if (completedJobs != 0)
+            {
+                Log.Information($"[RetroAchievements] Cleaned up {completedJobs} completed jobs older than 1 day.");
             }
         }
     }

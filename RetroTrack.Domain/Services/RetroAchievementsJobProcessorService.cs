@@ -253,6 +253,11 @@ namespace RetroTrack.Domain.Services
             }
         }
 
+        /// <summary>
+        /// This method processes the UserUpdate job. It retrieves the user data from the RetroAchievements API, updates the user profile, and processes the user's game progress.
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
         public async Task ProcessUserUpdateJob(int requestId)
         {
             var request = await context.RetroAchievementsLogAndLoadData.FirstAsync(x => x.Id == requestId);
@@ -397,6 +402,13 @@ namespace RetroTrack.Domain.Services
             }
         }
 
+        /// <summary>
+        /// Handles exceptions that occur during job processing, logs the error, updates the request status, and records the error in the database.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="request"></param>
+        /// <param name="jobName"></param>
+        /// <returns></returns>
         private async Task HandleAndLogException(Exception ex, RetroAchievementsLogAndLoadData request, string jobName)
         {
             Log.Error(ex, $"[RetroAchievements] Error processing {jobName} job for request {request.Id}: {ex.Message}");
@@ -415,6 +427,12 @@ namespace RetroTrack.Domain.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Handles and logs an errored job, updates the request status, and records the error in the database.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="errorMessage"></param>
+        /// <returns></returns>
         private async Task HandleAndLogErroredJob(RetroAchievementsLogAndLoadData request, string errorMessage)
         {
             Log.Error($"[RetroAchievements] Error processing job {request.Id}: {errorMessage}");
@@ -432,6 +450,11 @@ namespace RetroTrack.Domain.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Converts the string representation of the highest award kind to the corresponding enum value.
+        /// </summary>
+        /// <param name="awardKind"></param>
+        /// <returns></returns>
         private static HighestAwardKind? ConvertHighestAwardKind(string? awardKind)
         {
             if (awardKind == null)

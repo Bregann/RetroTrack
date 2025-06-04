@@ -158,7 +158,7 @@ namespace RetroTrack.Domain.Services
                 var jsonData = JsonConvert.SerializeObject(response);
 
                 // make sure that the data does not already exist in the database
-                if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetInitialGameData && x.ProcessingStatus != ProcessingStatus.Errored))
+                if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetExtendedGameData && x.ProcessingStatus != ProcessingStatus.Errored))
                 {
                     Log.Information($"[RetroAchievements] Game data for game ID {gameId} already exists in the database. Skipping");
                     continue;
@@ -166,7 +166,7 @@ namespace RetroTrack.Domain.Services
 
                 await context.RetroAchievementsLogAndLoadData.AddAsync(new RetroAchievementsLogAndLoadData
                 {
-                    JobType = JobType.GetInitialGameData,
+                    JobType = JobType.GetExtendedGameData,
                     FailedProcessingAttempts = 0,
                     JsonData = jsonData,
                     LastUpdate = DateTime.UtcNow,
@@ -219,7 +219,7 @@ namespace RetroTrack.Domain.Services
 
                 // make sure that the data does not already exist in the database
                 // this'll also mean that if there are no changes to the game data, it won't be processed again
-                if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetInitialGameData && x.ProcessingStatus != ProcessingStatus.Errored))
+                if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetExtendedGameData && x.ProcessingStatus != ProcessingStatus.Errored))
                 {
                     Log.Information($"[RetroAchievements] Game data for game ID {gameId} already exists in the database. Skipping");
                     continue;
@@ -227,7 +227,7 @@ namespace RetroTrack.Domain.Services
 
                 await context.RetroAchievementsLogAndLoadData.AddAsync(new RetroAchievementsLogAndLoadData
                 {
-                    JobType = JobType.GetRecentlyModifiedGameData,
+                    JobType = JobType.GetExtendedGameData,
                     FailedProcessingAttempts = 0,
                     JsonData = jsonData,
                     LastUpdate = DateTime.UtcNow,

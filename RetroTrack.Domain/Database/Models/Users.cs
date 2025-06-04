@@ -15,7 +15,7 @@ namespace RetroTrack.Domain.Database.Models
         public required long UserPoints { get; set; }
 
         [Obsolete("No longer returned by the API")]
-        public required long UserRank { get; set; }
+        public long UserRank { get; set; }
         public virtual List<TrackedGames> TrackedGames { get; set; }
         public virtual List<DevWishlist> DevWishlist { get; set; }
         public virtual List<Sessions> Sessions { get; set; }

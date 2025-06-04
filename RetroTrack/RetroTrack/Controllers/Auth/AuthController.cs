@@ -56,7 +56,7 @@ namespace RetroTrack.Api.Controllers.Auth
                 return BadRequest();
             }
 
-            UserData.DeleteUserSession(Request.Headers.Authorization!);
+            authDataService.DeleteUserSession(Request.Headers.Authorization!);
             return Ok(true);
         }
     }

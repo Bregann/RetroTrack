@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using RetroTrack.Domain.OldCode;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
@@ -140,7 +140,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 Games = gameList.Select(x => new PublicGamesTableDto
                 {
                     AchievementCount = x.AchievementCount,
-                    GameGenre = x.GameGenre,
+                    Console = x.GameConsole.ConsoleName,
+                    GameGenre = x.GameGenre ?? "",
                     GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
                     GameId = x.Id,
                     GameName = x.Title,
@@ -151,8 +152,11 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<UserGameInfoDto?> GetUserGameInfo(string username, int gameId)
         {
-            var raUsername = RAHelper.GetRAUsernameFromLoginUsername(username);
-            var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, raUsername);
+            var raUsername = context.Users.Where(x => x.Username == username)
+                .Select(x => x.RAUsername)
+                .First();
+
+            var data = await raApiService.GetSpecificGameInfoAndUserProgress(raUsername, gameId);
             var achievementList = new List<UserAchievement>();
 
             //If its null, grab the regular data so the popup will still work
@@ -173,7 +177,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     Id = achievement.Value.Id,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    Type = AchievementTypeEnum.Unknown // temp fix till rewrite todo: fix
+                    Type = AchievementType.Unknown // temp fix till rewrite todo: fix
                 }));
 
                 return new UserGameInfoDto
@@ -241,8 +245,10 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(string username, int gameId)
         {
-            var raUsername = RAHelper.GetRAUsernameFromLoginUsername(username);
-            var data = await RetroAchievements.GetSpecificGameInfoAndUserProgress(gameId, raUsername);
+            var raUsername = context.Users.Where(x => x.Username == username)
+                .Select(x => x.RAUsername)
+                .First();
+            var data = await raApiService.GetSpecificGameInfoAndUserProgress(raUsername, gameId);
 
             if (data == null)
             {

@@ -4,7 +4,6 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using RetroTrack.Domain.OldCode;
 using Serilog;
 
 namespace RetroTrack.Domain.Services.Controllers
@@ -92,7 +91,17 @@ namespace RetroTrack.Domain.Services.Controllers
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 //Get the users details from the API
-                var userProfile = await RetroAchievements.GetUserProfile(username);
+                var userProfile = await raApiService.GetUserProfile(username);
+
+                if (userProfile == null)
+                {
+                    Log.Information($"[Register User] Error getting user profile for {username}");
+                    return new RegisterUserDto
+                    {
+                        Success = false,
+                        Reason = "There has been an error retrieving your user profile from RetroAchievements. Please try again"
+                    };
+                }
 
                 //Add the user into the database
                 context.Users.Add(new Users
@@ -105,7 +114,6 @@ namespace RetroTrack.Domain.Services.Controllers
                     LastAchievementsUpdate = DateTime.UtcNow,
                     UserPoints = userProfile.TotalPoints,
                     UserProfileUrl = "/UserPic/" + userProfile.User + ".png",
-                    UserRank = userProfile.Rank ?? 0
                 });
 
                 context.SaveChanges();
@@ -199,6 +207,13 @@ namespace RetroTrack.Domain.Services.Controllers
             session.ExpiryTime = DateTime.UtcNow.AddDays(30);
             await context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task DeleteUserSession(string sessionId)
+        {
+            await context.Sessions.Where(x => x.SessionId == sessionId).ExecuteDeleteAsync();
+
+            Log.Information($"[Logout User] Session {sessionId} deleted");
         }
     }
 }
