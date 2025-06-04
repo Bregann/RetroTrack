@@ -13,6 +13,8 @@ namespace RetroTrack.Domain.Database.Models
         public required DateTime LastAchievementsUpdate { get; set; }
         public required string UserProfileUrl { get; set; }
         public required long UserPoints { get; set; }
+
+        [Obsolete("No longer returned by the API")]
         public required long UserRank { get; set; }
         public virtual List<TrackedGames> TrackedGames { get; set; }
         public virtual List<DevWishlist> DevWishlist { get; set; }

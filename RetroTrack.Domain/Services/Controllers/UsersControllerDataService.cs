@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
-using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Users;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces;

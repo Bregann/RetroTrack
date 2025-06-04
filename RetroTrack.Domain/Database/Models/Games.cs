@@ -31,6 +31,9 @@ namespace RetroTrack.Domain.Database.Models
         public required DateTime SetReleasedDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         [Required]
+        public required DateTime LastAchievementCountChangeDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        [Required]
         public required int AchievementCount { get; set; }
 
         public string? GameGenre { get; set; }
