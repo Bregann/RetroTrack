@@ -28,8 +28,8 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required long UserPoints { get; set; }
 
-        public ICollection<TrackedGames> TrackedGames { get; set; } = null!;
-        public ICollection<Sessions> Sessions { get; set; } = null!;
-        public ICollection<UserGameProgress> UserGameProgress { get; set; } = null!;
+        public virtual ICollection<TrackedGames> TrackedGames { get; set; } = null!;
+        public virtual ICollection<Sessions> Sessions { get; set; } = null!;
+        public virtual ICollection<UserGameProgress> UserGameProgress { get; set; } = null!;
     }
 }

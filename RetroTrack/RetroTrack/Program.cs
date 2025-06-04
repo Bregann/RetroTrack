@@ -40,11 +40,9 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 #if DEBUG
-builder.Services.AddDbContext<PostgresqlContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies()
            .UseNpgsql(Environment.GetEnvironmentVariable("RetroTrackConnStringTest")));
-
-builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
 GlobalConfiguration.Configuration.UseMemoryStorage();
 
