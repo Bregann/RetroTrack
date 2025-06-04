@@ -44,7 +44,7 @@ namespace RetroTrack.Domain.Services.Controllers
             context.Sessions.Add(new Sessions
             {
                 SessionId = sessionId,
-                User = user,
+                Username = user.Username,
                 ExpiryTime = DateTime.UtcNow.AddDays(30),
             });
 

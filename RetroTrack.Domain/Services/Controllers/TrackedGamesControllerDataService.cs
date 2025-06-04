@@ -20,8 +20,8 @@ namespace RetroTrack.Domain.Services.Controllers
             context.TrackedGames.Add(new TrackedGames
             {
                 Id = $"{gameId}-{user.Username}",
-                Game = context.Games.Where(x => x.Id == gameId).First(),
-                User = user
+                GameId = gameId,
+                Username = user.Username
             });
 
             context.SaveChanges();

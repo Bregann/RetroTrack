@@ -8,9 +8,16 @@ namespace RetroTrack.Domain.Database.Models
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string CacheName { get; set; }
-        public string CacheData { get; set; }
-        public int MinutesToCacheFor { get; set; }
-        public DateTime LastUpdate { get; set; }
+        [Required]
+        public required string CacheName { get; set; }
+
+        [Required]
+        public required string CacheData { get; set; }
+
+        [Required]
+        public required int MinutesToCacheFor { get; set; }
+
+        [Required]
+        public required DateTime LastUpdate { get; set; }
     }
 }

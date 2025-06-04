@@ -52,7 +52,6 @@ namespace RetroTrack.Domain.Services.Controllers
                 RAName = user.RAUsername,
                 RAUserProfileUrl = "https://media.retroachievements.org" + user.UserProfileUrl,
                 UserPoints = user.UserPoints,
-                UserRank = user.UserRank,
                 GamesBeaten = consoleProgressData.Sum(x => x.GamesBeaten),
                 GamesMastered = consoleProgressData.Sum(x => x.GamesMastered),
                 TrackedGamesCount = trackedGameCount,

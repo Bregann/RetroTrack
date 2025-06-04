@@ -6,18 +6,30 @@ namespace RetroTrack.Domain.Database.Models
     {
         [Key]
         public required string Username { get; set; }
+
+        [Required]
         public required string RAUsername { get; set; }
+
+        [Required]
         public required string HashedPassword { get; set; }
+
+        [Required]
         public required DateTime LastActivity { get; set; }
+
+        [Required]
         public required DateTime LastUserUpdate { get; set; }
+
+        [Required]
         public required DateTime LastAchievementsUpdate { get; set; }
+
+        [Required]
         public required string UserProfileUrl { get; set; }
+
+        [Required]
         public required long UserPoints { get; set; }
 
-        [Obsolete("No longer returned by the API")]
-        public long UserRank { get; set; }
-        public virtual List<TrackedGames> TrackedGames { get; set; }
-        public virtual List<DevWishlist> DevWishlist { get; set; }
-        public virtual List<Sessions> Sessions { get; set; }
+        public ICollection<TrackedGames> TrackedGames { get; set; } = null!;
+        public ICollection<Sessions> Sessions { get; set; } = null!;
+        public ICollection<UserGameProgress> UserGameProgress { get; set; } = null!;
     }
 }

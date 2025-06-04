@@ -6,9 +6,12 @@ namespace RetroTrack.Domain.Database.Models
     public class Sessions
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
 
-        public required virtual Users User { get; set; }
+        [Required]
+        [ForeignKey(nameof(Username))]
+        public required string Username { get; set; }
+        public virtual Users User { get; set; } = null!;
 
         public required string SessionId { get; set; }
         public required DateTime ExpiryTime { get; set; }
