@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
@@ -28,10 +29,10 @@ namespace RetroTrack.Domain.Database.Models
         public DateTime? LastExtraDataProcessedDate { get; set; }
 
         [Required]
-        public required DateTime SetReleasedDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public required DateTime SetReleasedDate { get; set; } = new DateTime(0, DateTimeKind.Utc);
 
         [Required]
-        public required DateTime LastAchievementCountChangeDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public required DateTime LastAchievementCountChangeDate { get; set; } = new DateTime(0, DateTimeKind.Utc);
 
         [Required]
         public required int AchievementCount { get; set; }
@@ -50,5 +51,8 @@ namespace RetroTrack.Domain.Database.Models
 
         [Required]
         public required bool EmailMessageProcessed { get; set; }
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<Achievements> Achievements { get; set; } = [];
     }
 }

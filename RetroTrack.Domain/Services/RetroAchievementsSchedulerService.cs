@@ -241,12 +241,12 @@ namespace RetroTrack.Domain.Services
             }
         }
 
-        public async Task QueueUserGameUpdate(string username)
+        public async Task QueueUserGameUpdate(string username, int userId)
         {
             await context.RetroAchievementsLogAndLoadData.AddAsync(new RetroAchievementsLogAndLoadData
             {
                 JobType = JobType.UserUpdate,
-                JsonData = username,
+                JsonData = userId.ToString(),
                 FailedProcessingAttempts = 0,
                 ProcessingStatus = ProcessingStatus.NotScheduled,
                 LastUpdate = DateTime.UtcNow

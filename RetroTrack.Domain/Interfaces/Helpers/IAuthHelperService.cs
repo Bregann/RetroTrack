@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
+using RetroTrack.Domain.DTOs.Helpers;
 
 namespace RetroTrack.Domain.Interfaces.Helpers
 {
     public interface IAuthHelperService
     {
         string GetRAUsernameFromLoginUsername(string username);
-        string? ValidateSessionIdAndReturnUsername(IHeaderDictionary headers);
+        UserDataDto? ValidateSessionIdAndReturnUserData(IHeaderDictionary headers);
     }
 }

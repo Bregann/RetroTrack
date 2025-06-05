@@ -5,15 +5,15 @@ namespace RetroTrack.Domain.Database.Models
 {
     public class TrackedGames
     {
-        [Key]
-        public required string Id { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [ForeignKey(nameof(GameId))]
         public required int GameId { get; set; }
         public virtual Games Game { get; set; } = null!;
 
-        [ForeignKey(nameof(Username))]
-        public required string Username { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public required int UserId { get; set; }
         public virtual Users User { get; set; } = null!;
     }
 }

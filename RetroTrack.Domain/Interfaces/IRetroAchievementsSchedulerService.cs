@@ -6,6 +6,6 @@
         Task GetGameDataForRecentlyModifiedGames();
         Task GetGameDataForUnprocessedGames(bool processEntireDatabase = false);
         Task GetGamesFromConsoleIds();
-        Task QueueUserGameUpdate(string username);
+        Task QueueUserGameUpdate(string username, int userId);
     }
 }

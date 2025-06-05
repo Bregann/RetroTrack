@@ -1,32 +1,45 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
     public class Users
     {
-        [Key]
-        public required string Username { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [Required]
-        public required string RAUsername { get; set; }
+        public string LoginUsername { get; set; } = "";
 
         [Required]
-        public required string HashedPassword { get; set; }
+        public string RAUsername { get; set; } = "";
 
         [Required]
-        public required DateTime LastActivity { get; set; }
+        public string RAUserUlid { get; set; } = "";
 
         [Required]
-        public required DateTime LastUserUpdate { get; set; }
+        public string OldHashedPassword { get; set; } = "";
 
         [Required]
-        public required DateTime LastAchievementsUpdate { get; set; }
+        public string HashedPassword { get; set; } = "";
 
         [Required]
-        public required string UserProfileUrl { get; set; }
+        public bool HashedPasswordMigrated { get; set; }
 
         [Required]
-        public required long UserPoints { get; set; }
+        public DateTime LastActivity { get; set; }
+
+        [Required]
+        public DateTime LastUserUpdate { get; set; }
+
+        [Required]
+        public DateTime LastAchievementsUpdate { get; set; }
+
+        [Required]
+        public string UserProfileUrl { get; set; } = "";
+
+        [Required]
+        public long UserPoints { get; set; }
 
         public virtual ICollection<TrackedGames> TrackedGames { get; set; } = null!;
         public virtual ICollection<Sessions> Sessions { get; set; } = null!;

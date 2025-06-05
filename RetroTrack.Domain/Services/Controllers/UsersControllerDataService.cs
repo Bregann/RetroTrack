@@ -1,25 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.DTOs.Controllers.Users;
+using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using Serilog;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
     public class UsersControllerDataService(AppDbContext context, IRetroAchievementsSchedulerService raScheduler) : IUsersControllerDataService
     {
-        public void DeleteUserSession(string sessionId)
+        public async Task<UpdateUserGamesDto> UpdateUserGames(UserDataDto userData)
         {
-            context.Sessions.Where(x => x.SessionId == sessionId).ExecuteDelete();
-
-            Log.Information($"[Logout User] Session {sessionId} deleted");
-        }
-
-        public UpdateUserGamesDto UpdateUserGames(string username)
-        {
-            var user = context.Users.Where(x => x.Username == username).First();
+            var user = await context.Users.Where(x => x.Id == userData.UserId).FirstAsync();
             var secondsDiff = (DateTime.UtcNow - user.LastUserUpdate).TotalSeconds;
 
             if (secondsDiff < 60)
@@ -31,10 +24,10 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }
 
-            raScheduler.QueueUserGameUpdate(username);
+            await raScheduler.QueueUserGameUpdate(user.LoginUsername, user.Id);
 
             user.LastUserUpdate = DateTime.UtcNow;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return new UpdateUserGamesDto
             {
@@ -43,9 +36,9 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public bool CheckUserUpdateCompleted(string username)
+        public async Task<bool> CheckUserUpdateCompleted(UserDataDto userData)
         {
-            var updateStatus = context.RetroAchievementsLogAndLoadData.Where(x => x.JsonData == username).OrderBy(x => x.Id).Last(x => x.JsonData == username);
+            var updateStatus = await context.RetroAchievementsLogAndLoadData.Where(x => x.JsonData == userData.UserId.ToString()).OrderBy(x => x.Id).LastAsync(x => x.JsonData == userData.UserId.ToString());
 
             if (updateStatus.ProcessingStatus == ProcessingStatus.Processed)
             {

@@ -25,10 +25,10 @@ namespace RetroTrack.Domain.Services
         /// <param name="username"></param>
         /// <param name="raApiKey"></param>
         /// <returns></returns>
-        public async Task<bool> ValidateApiKey(string username, string raApiKey)
+        public async Task<(bool IsValidKey, string UsernameUlid)> ValidateApiKey(string username, string raApiKey)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetConsoleIDs.php?z={username}&y={raApiKey}", Method.Get);
+            var request = new RestRequest($"API_GetUserProfile.php?z={username}&y={raApiKey}&u={username}", Method.Get);
 
             //Get the response and Deserialize
             var response = await client.ExecuteAsync(request);
@@ -36,12 +36,20 @@ namespace RetroTrack.Domain.Services
             //Make sure it hasn't errored
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
             {
-                Log.Warning($"[Register User] Error valding API key for user {username}. Status code was {response.StatusCode}");
-                return false;
+                Log.Warning($"[API Key Validation] Error valding API key for user {username}. Status code was {response.StatusCode}");
+                return (false, "");
             }
 
-            Log.Information($"[Register User] API key matched for user {username}");
-            return true;
+            var data = JsonConvert.DeserializeObject<GetUserProfile>(response.Content);
+
+            if (data == null)
+            {
+                Log.Error($"[API Key Validation] Error deserialising user profile for {username}. Response content: {response.Content}");
+                return (false, "");
+            }
+
+            Log.Information($"[API Key Validation] API key matched for user {username}");
+            return (true, data.Ulid);
         }
 
         /// <summary>
@@ -173,10 +181,10 @@ namespace RetroTrack.Domain.Services
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        public async Task<GetUserProfile?> GetUserProfile(string username)
+        public async Task<GetUserProfile?> GetUserProfile(string username, string ulid)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetUserProfile.php?z={_apiUsername}&y={_apiKey}&u={username}", Method.Get);
+            var request = new RestRequest($"API_GetUserProfile.php?z={_apiUsername}&y={_apiKey}&i={ulid}", Method.Get);
             var response = await client.ExecuteAsync(request);
 
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
@@ -194,10 +202,10 @@ namespace RetroTrack.Domain.Services
         /// <param name="username"></param>
         /// <param name="gameId"></param>
         /// <returns></returns>
-        public async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(string username, int gameId)
+        public async Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(string username, string ulid, int gameId)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={_apiUsername}&y={_apiKey}&g={gameId}&u={username}", Method.Get);
+            var request = new RestRequest($"API_GetGameInfoAndUserProgress.php?z={_apiUsername}&y={_apiKey}&g={gameId}&u={ulid}", Method.Get);
             var response = await client.ExecuteAsync(request);
 
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
@@ -225,10 +233,10 @@ namespace RetroTrack.Domain.Services
         /// <param name="skipAmount"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public async Task<GetUserCompletionProgress?> GetUserCompletionProgress(string username, int skipAmount = 0, int count = 500)
+        public async Task<GetUserCompletionProgress?> GetUserCompletionProgress(string username, string ulid, int skipAmount = 0, int count = 500)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetUserCompletionProgress.php?z={_apiUsername}&y={_apiKey}&u={username}&c={count}&o={skipAmount}", Method.Get);
+            var request = new RestRequest($"API_GetUserCompletionProgress.php?z={_apiUsername}&y={_apiKey}&u={ulid}&c={count}&o={skipAmount}", Method.Get);
             var response = await client.ExecuteAsync(request);
 
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)

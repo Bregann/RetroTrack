@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.DTOs.Controllers.Navigation;
+using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces.Controllers;
 
@@ -23,13 +24,13 @@ namespace RetroTrack.Domain.Services.Controllers
                 .ToArrayAsync();
         }
 
-        public async Task<GetLoggedInNavigationDataDto> GetLoggedInNavigationData(string username)
+        public async Task<GetLoggedInNavigationDataDto> GetLoggedInNavigationData(UserDataDto userData)
         {
-            var trackedGameCount = await context.TrackedGames.CountAsync(x => x.User.Username == username);
-            var inProgressGameCount = await context.UserGameProgress.CountAsync(x => x.Username == username);
+            var trackedGameCount = await context.TrackedGames.CountAsync(x => x.UserId == userData.UserId);
+            var inProgressGameCount = await context.UserGameProgress.CountAsync(x => x.UserId == userData.UserId);
 
             var query = from gc in context.GameConsoles.Where(x => x.DisplayOnSite)
-                        join ugp in context.UserGameProgress.Where(x => x.Username.Equals(username))
+                        join ugp in context.UserGameProgress.Where(x => x.UserId.Equals(userData.UserId))
                             on gc.ConsoleID equals ugp.ConsoleId into grouping
                         select new ConsoleProgressData
                         {
@@ -43,7 +44,7 @@ namespace RetroTrack.Domain.Services.Controllers
                             PercentageMastered = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered || x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0
                         };
 
-            var user = await context.Users.FirstAsync(x => x.Username == username);
+            var user = await context.Users.FirstAsync(x => x.Id == userData.UserId);
 
             var consoleProgressData = await query.ToArrayAsync();
 

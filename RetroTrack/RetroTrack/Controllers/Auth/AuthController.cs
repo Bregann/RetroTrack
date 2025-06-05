@@ -10,9 +10,9 @@ namespace RetroTrack.Api.Controllers.Auth
     public class AuthController(IAuthControllerDataService authDataService) : ControllerBase
     {
         [HttpPost]
-        public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
+        public async Task<ActionResult<LoginUserDto>> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = authDataService.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
+            var loginData = await authDataService.ValidateUserLogin(dto.Username.ToLower().Trim(), dto.Password);
 
             if (!loginData.Successful)
             {
@@ -31,7 +31,7 @@ namespace RetroTrack.Api.Controllers.Auth
         [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.ResetUserPassword(dto.RaUsername.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpGet]
@@ -49,14 +49,14 @@ namespace RetroTrack.Api.Controllers.Auth
         }
 
         [HttpDelete]
-        public ActionResult DeleteUserSession()
+        public async Task<ActionResult> DeleteUserSession()
         {
             if (string.IsNullOrEmpty(Request.Headers.Authorization))
             {
                 return BadRequest();
             }
 
-            authDataService.DeleteUserSession(Request.Headers.Authorization!);
+            await authDataService.DeleteUserSession(Request.Headers.Authorization!);
             return Ok(true);
         }
     }

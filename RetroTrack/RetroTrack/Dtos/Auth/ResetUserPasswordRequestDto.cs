@@ -2,7 +2,7 @@
 {
     public class ResetUserPasswordRequestDto
     {
-        public required string Username { get; set; }
+        public required string RaUsername { get; set; }
         public required string Password { get; set; }
         public required string ApiKey { get; set; }
     }

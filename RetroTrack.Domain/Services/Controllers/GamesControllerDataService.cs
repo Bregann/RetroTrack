@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
@@ -14,7 +15,7 @@ namespace RetroTrack.Domain.Services.Controllers
 {
     public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService, ICachingService cachingService) : IGamesControllerDataService
     {
-        public List<DayListDto> GetNewAndUpdatedGamesFromLast5Days()
+        public async Task<List<DayListDto>> GetNewAndUpdatedGamesFromLast5Days()
         {
             var dayList = new List<DayListDto>();
 
@@ -22,13 +23,13 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (i == 0)
                 {
-                    var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).Include(x => x.GameConsole).ToList();
+                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).ToListAsync();
                     var gamesTable = new List<PublicGamesTableDto>();
 
                     gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
                     {
                         AchievementCount = games.AchievementCount,
-                        GameGenre = games.GameGenre,
+                        GameGenre = games.GameGenre ?? "",
                         GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                         Console = games.GameConsole.ConsoleName,
                         GameId = games.Id,
@@ -44,14 +45,14 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    var gamesFromDay = context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date).Include(x => x.GameConsole).ToList();
+                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date).ToListAsync();
 
                     var gamesTable = new List<PublicGamesTableDto>();
 
                     gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
                     {
                         AchievementCount = games.AchievementCount,
-                        GameGenre = games.GameGenre,
+                        GameGenre = games.GameGenre ?? "",
                         GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
                         Console = games.GameConsole.ConsoleName,
                         GameId = games.Id,
@@ -105,9 +106,9 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public PublicConsoleGamesDto? GetGamesForConsole(int consoleId)
+        public async Task<PublicConsoleGamesDto?> GetGamesForConsole(int consoleId)
         {
-            var cacheData = cachingService.GetCacheItem($"GamesData-{consoleId}");
+            var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
             var gameList = new List<Games>();
 
             if (cacheData != null)
@@ -118,14 +119,14 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (consoleId == 0)
                 {
-                    gameList = context.Games.ToList();
+                    gameList = await context.Games.ToListAsync();
                 }
                 else
                 {
-                    gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToListAsync();
                 }
 
-                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
             if (gameList == null || gameList.Count == 0)
@@ -150,13 +151,11 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<UserGameInfoDto?> GetUserGameInfo(string username, int gameId)
+        public async Task<UserGameInfoDto?> GetUserGameInfo(UserDataDto userData, int gameId)
         {
-            var raUsername = context.Users.Where(x => x.Username == username)
-                .Select(x => x.RAUsername)
-                .First();
+            var user = context.Users.Where(x => x.Id == userData.UserId).First();
 
-            var data = await raApiService.GetSpecificGameInfoAndUserProgress(raUsername, gameId);
+            var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, userData.RaUlid, gameId);
             var achievementList = new List<UserAchievement>();
 
             //If its null, grab the regular data so the popup will still work
@@ -197,14 +196,14 @@ namespace RetroTrack.Domain.Services.Controllers
                     Title = loggedOutData.Title,
                     TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
                     UserCompletion = "Unable to fetch data",
-                    GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
+                    GameTracked = context.TrackedGames.Any(x => x.UserId == userData.UserId && x.Game.Id == gameId)
                 };
             }
 
 
             context.Games.First(x => x.Id == gameId).Players = data.Players;
-            context.Users.First(x => x.Username == username).LastAchievementsUpdate = DateTime.UtcNow;
-            context.SaveChanges();
+            user.LastAchievementsUpdate = DateTime.UtcNow;
+            await context.SaveChangesAsync();
 
             foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
             {
@@ -239,16 +238,15 @@ namespace RetroTrack.Domain.Services.Controllers
                 Achievements = achievementList,
                 PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
                 TotalPoints = data.Achievements.Sum(x => x.Value.Points),
-                GameTracked = context.TrackedGames.Any(x => x.User.Username == username && x.Game.Id == gameId)
+                GameTracked = context.TrackedGames.Any(x => x.UserId == userData.UserId && x.Game.Id == gameId)
             };
         }
 
-        public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(string username, int gameId)
+        public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(UserDataDto userData, int gameId)
         {
-            var raUsername = context.Users.Where(x => x.Username == username)
-                .Select(x => x.RAUsername)
-                .First();
-            var data = await raApiService.GetSpecificGameInfoAndUserProgress(raUsername, gameId);
+            var user = context.Users.Where(x => x.Id == userData.UserId).First();
+
+            var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, gameId);
 
             if (data == null)
             {
@@ -261,9 +259,8 @@ namespace RetroTrack.Domain.Services.Controllers
             }
 
             context.Games.First(x => x.Id == gameId).Players = data.Players;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
-            var user = context.Users.Where(x => x.Username == username).First();
             var secondsDiff = (DateTime.UtcNow - user.LastAchievementsUpdate).TotalSeconds;
 
             if (secondsDiff < 30)
@@ -277,7 +274,7 @@ namespace RetroTrack.Domain.Services.Controllers
             }
 
             user.LastAchievementsUpdate = DateTime.UtcNow;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             var achievementList = new List<UserAchievement>();
 
@@ -311,12 +308,11 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public UserConsoleGamesDto? GetGamesAndUserProgressForConsole(string username, int consoleId)
+        public async Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(UserDataDto userData, int consoleId)
         {
-            var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game);
             var consoleGames = new List<UserGamesTableDto>();
 
-            var cacheData = cachingService.GetCacheItem($"GamesData-{consoleId}");
+            var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
             var gameList = new List<Games>();
 
             if (cacheData != null)
@@ -327,14 +323,14 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (consoleId == 0)
                 {
-                    gameList = context.Games.ToList();
+                    gameList = await context.Games.ToListAsync();
                 }
                 else
                 {
-                    gameList = context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToList();
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToListAsync();
                 }
 
-                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
             if (gameList == null || gameList.Count == 0)
@@ -345,7 +341,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (consoleId == 0)
             {
                 //User progress is cached, check and return if needed
-                var userAllGamesCacheData = cachingService.GetCacheItem($"GamesData-{consoleId}-User-{username}");
+                var userAllGamesCacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}-User-{userData.Username}");
 
                 if (userAllGamesCacheData != null)
                 {
@@ -359,13 +355,13 @@ namespace RetroTrack.Domain.Services.Controllers
                     Games = consoleGames
                 };
 
-                cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{username}", JsonConvert.SerializeObject(allGamesUserProgress));
+                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{userData.Username}", JsonConvert.SerializeObject(allGamesUserProgress));
                 return allGamesUserProgress;
             }
 
             foreach (var game in gameList)
             {
-                var userProgress = userGameProgress.FirstOrDefault(x => x.Game.Id == game.Id);
+                var userProgress = await context.UserGameProgress.Where(x => x.UserId == userData.UserId).FirstOrDefaultAsync(x => x.Game.Id == game.Id);
 
                 consoleGames.Add(new UserGamesTableDto
                 {
@@ -388,9 +384,9 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public List<UserGamesTableDto> GetInProgressGamesForUser(string username)
+        public async Task<List<UserGamesTableDto>> GetInProgressGamesForUser(UserDataDto userData)
         {
-            var gameList = context.UserGameProgress.Where(x => x.User.Username == username && x.GamePercentage != 1);
+            var gameList = await context.UserGameProgress.Where(x => x.UserId == userData.UserId && x.GamePercentage != 1).ToListAsync();
             var progressGameList = new List<UserGamesTableDto>();
 
             foreach (var game in gameList)

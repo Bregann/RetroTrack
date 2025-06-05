@@ -1,4 +1,5 @@
-﻿using RetroTrack.Domain.Database.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.Interfaces;
 using Serilog;
@@ -7,13 +8,13 @@ namespace RetroTrack.Domain.Services
 {
     public class CachingService(AppDbContext context) : ICachingService
     {
-        public void AddOrUpdateCacheItem(string cacheName, string jsonData, int minutesToCacheFor = 10)
+        public async Task AddOrUpdateCacheItem(string cacheName, string jsonData, int minutesToCacheFor = 10)
         {
-            var cachedItem = context.DataCaching.FirstOrDefault(x => x.CacheName == cacheName);
+            var cachedItem = await context.DataCaching.FirstOrDefaultAsync(x => x.CacheName == cacheName);
 
             if (cachedItem == null)
             {
-                context.Add(new DataCaching
+                await context.AddAsync(new DataCaching
                 {
                     CacheName = cacheName,
                     CacheData = jsonData,
@@ -21,7 +22,7 @@ namespace RetroTrack.Domain.Services
                     MinutesToCacheFor = minutesToCacheFor
                 });
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 Log.Information($"[Data Caching] Data caching added for {cacheName}. This expires in {minutesToCacheFor} minutes");
                 return;
             }
@@ -29,14 +30,14 @@ namespace RetroTrack.Domain.Services
             cachedItem.LastUpdate = DateTime.UtcNow;
             cachedItem.CacheData = jsonData;
             cachedItem.MinutesToCacheFor = minutesToCacheFor;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             Log.Information($"[Data Caching] Data caching updated for {cacheName}. This expires in {minutesToCacheFor} minutes");
         }
 
-        public string? GetCacheItem(string cacheName)
+        public async Task<string?> GetCacheItem(string cacheName)
         {
-            var cachedItem = context.DataCaching.FirstOrDefault(x => x.CacheName == cacheName);
+            var cachedItem = await context.DataCaching.FirstOrDefaultAsync(x => x.CacheName == cacheName);
 
             if (cachedItem == null)
             {

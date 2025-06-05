@@ -2,42 +2,42 @@
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
     public class TrackedGamesControllerDataService(AppDbContext context) : ITrackedGamesControllerDataService
     {
-        public bool AddNewTrackedGame(string username, int gameId)
+        public async Task<bool> AddNewTrackedGame(UserDataDto userData, int gameId)
         {
-            var user = context.Users.Where(x => x.Username == username).First();
+            var user = await context.Users.Where(x => x.Id == userData.UserId).FirstAsync();
 
-            if (context.TrackedGames.Any(x => x.Game.Id == gameId && x.User == user))
+            if (await context.TrackedGames.AnyAsync(x => x.Game.Id == gameId && x.User == user))
             {
                 return false;
             }
 
-            context.TrackedGames.Add(new TrackedGames
+            await context.TrackedGames.AddAsync(new TrackedGames
             {
-                Id = $"{gameId}-{user.Username}",
                 GameId = gameId,
-                Username = user.Username
+                UserId = user.Id
             });
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return true;
         }
 
-        public bool RemoveTrackedGame(string username, int gameId)
+        public async Task<bool> RemoveTrackedGame(UserDataDto userData, int gameId)
         {
-            context.TrackedGames.Where(x => x.Game.Id == gameId && x.User.Username == username).ExecuteDelete();
+            await context.TrackedGames.Where(x => x.Game.Id == gameId && x.UserId == userData.UserId).ExecuteDeleteAsync();
             return true;
         }
 
-        public List<UserGamesTableDto> GetTrackedGamesForUser(string username)
+        public async Task<List<UserGamesTableDto>> GetTrackedGamesForUser(UserDataDto userData)
         {
-            var gameList = context.TrackedGames.Where(x => x.User.Username == username).ToList();
-            var userGameProgress = context.UserGameProgress.Where(x => x.User.Username == username).Include(x => x.Game).ToList();
+            var gameList = await context.TrackedGames.Where(x => x.UserId == userData.UserId).ToListAsync();
+            var userGameProgress = await context.UserGameProgress.Where(x => x.UserId == userData.UserId).ToListAsync();
 
             var trackedGameList = new List<UserGamesTableDto>();
 

@@ -10,8 +10,8 @@ namespace RetroTrack.Domain.Database.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey(nameof(Username))]
-        public required string Username { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public required int UserId { get; set; }
         public virtual Users User { get; set; } = null!;
 
         [Required]

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
@@ -10,10 +11,12 @@ namespace RetroTrack.Domain.Services.Controllers
 {
     public class AuthControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService) : IAuthControllerDataService
     {
-        public LoginUserDto ValidateUserLogin(string username, string password)
+        private readonly PasswordHasher<Users> _passwordHasher = new();
+
+        public async Task<LoginUserDto> ValidateUserLogin(string username, string password)
         {
             //Get the user
-            var user = context.Users.FirstOrDefault(x => x.Username == username);
+            var user = await context.Users.FirstOrDefaultAsync(x => x.LoginUsername == username);
 
             if (user == null)
             {
@@ -25,8 +28,26 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }
 
-            //Validate if the password is correct
-            var isMatch = BCrypt.Net.BCrypt.Verify(password, user.HashedPassword);
+            var isMatch = false;
+
+            if (user.HashedPasswordMigrated)
+            {
+                isMatch = _passwordHasher.VerifyHashedPassword(user, user.HashedPassword, password) == PasswordVerificationResult.Success;
+            }
+            else
+            {
+                isMatch = BCrypt.Net.BCrypt.Verify(password, user.OldHashedPassword);
+
+                //If the old password is correct, migrate to the new password system
+                if (isMatch)
+                {
+                    user.HashedPassword = _passwordHasher.HashPassword(user, password);
+                    user.HashedPasswordMigrated = true;
+                    await context.SaveChangesAsync();
+
+                    Log.Information($"[User Login] Migrated user {username} to new password system");
+                }
+            }
 
             if (!isMatch)
             {
@@ -41,15 +62,18 @@ namespace RetroTrack.Domain.Services.Controllers
             var sessionId = $"D{DateTime.UtcNow.Ticks / 730}G{Guid.NewGuid()}";
 
             //Create a new session id and add it into the database
-            context.Sessions.Add(new Sessions
+            await context.Sessions.AddAsync(new Sessions
             {
                 SessionId = sessionId,
-                Username = user.Username,
+                UserId = user.Id,
                 ExpiryTime = DateTime.UtcNow.AddDays(30),
             });
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             Log.Information($"[User Login] Attempted login with username {username} successful");
+
+            user.LastActivity = DateTime.UtcNow;
+            await context.SaveChangesAsync();
 
             return new LoginUserDto
             {
@@ -66,7 +90,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 //Validate the API key to make sure that it's the correct username/api key combo
                 var validKey = await raApiService.ValidateApiKey(username, raApiKey);
 
-                if (!validKey)
+                if (!validKey.IsValidKey)
                 {
                     return new RegisterUserDto
                     {
@@ -76,7 +100,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
 
                 //Check if the user is actually registered
-                if (context.Users.Any(x => x.Username == username.ToLower()))
+                if (context.Users.Any(x => x.LoginUsername == username))
                 {
                     Log.Information($"[Register User] User {username} already exists");
 
@@ -87,11 +111,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     };
                 }
 
-                //hash the password and store it
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
                 //Get the users details from the API
-                var userProfile = await raApiService.GetUserProfile(username);
+                var userProfile = await raApiService.GetUserProfile(username, validKey.UsernameUlid);
 
                 if (userProfile == null)
                 {
@@ -104,11 +125,13 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
 
                 //Add the user into the database
-                context.Users.Add(new Users
+                await context.Users.AddAsync(new Users
                 {
-                    Username = username,
+                    LoginUsername = username,
                     RAUsername = userProfile.User,
-                    HashedPassword = hashedPassword,
+                    RAUserUlid = userProfile.Ulid,
+                    HashedPassword = _passwordHasher.HashPassword(new Users(), password),
+                    HashedPasswordMigrated = true,
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,
                     LastAchievementsUpdate = DateTime.UtcNow,
@@ -116,7 +139,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     UserProfileUrl = "/UserPic/" + userProfile.User + ".png",
                 });
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 Log.Information($"[Register User] {username} succesfully registered");
 
@@ -137,12 +160,12 @@ namespace RetroTrack.Domain.Services.Controllers
             }
         }
 
-        public async Task<ResetUserPasswordDto> ResetUserPassword(string username, string password, string raApiKey)
+        public async Task<ResetUserPasswordDto> ResetUserPassword(string raUsername, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo
-            var validKey = await raApiService.ValidateApiKey(username, raApiKey);
+            var response = await raApiService.ValidateApiKey(raUsername, raApiKey);
 
-            if (!validKey)
+            if (!response.IsValidKey)
             {
                 return new ResetUserPasswordDto
                 {
@@ -151,35 +174,29 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }
 
-            var trackedGames = context.Users.Where(x => x.Username == username).Select(x => x.TrackedGames);
-            var user = context.Users.FirstOrDefault(x => x.Username == username.ToLower());
+            // check if the ulid matches the user
+            var user = await context.Users.FirstOrDefaultAsync(x => x.RAUserUlid == response.UsernameUlid);
 
-            //Check if the user is actually registered
             if (user == null)
             {
-                Log.Information($"[Password Reset] User {username} doesn't exist");
+                Log.Information($"[Password Reset] User {raUsername} doesn't exist");
 
                 return new ResetUserPasswordDto
                 {
                     Success = false,
-                    Reason = "User does not exist. Please register using the register popup"
+                    Reason = "We couldn't verify your RA account. Please double check your username and API key."
                 };
             }
 
-            //hash the password and store it
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-            //Add the user into the database
+            // hash the password and store it
+            var hashedPassword = _passwordHasher.HashPassword(user, password);
             user.HashedPassword = hashedPassword;
+            user.HashedPasswordMigrated = true;
             user.LastActivity = DateTime.UtcNow;
 
-            //Delete any sessions
-            context.Sessions.Where(x => x.User.Username == username.ToLower()).ExecuteDelete();
+            await context.SaveChangesAsync();
 
-            context.SaveChanges();
-
-            Log.Information($"[Password Reset] {username} succesfully reset their password");
-
+            Log.Information($"[Password Reset] {raUsername} successfully reset their password");
             return new ResetUserPasswordDto
             {
                 Success = true,
@@ -189,7 +206,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<bool> ValidateSessionStatus(string sessionId)
         {
-            var session = context.Sessions.FirstOrDefault(x => x.SessionId == sessionId);
+            var session = await context.Sessions.FirstOrDefaultAsync(x => x.SessionId == sessionId);
 
             if (session == null)
             {

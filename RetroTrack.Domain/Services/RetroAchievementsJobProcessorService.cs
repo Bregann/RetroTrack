@@ -266,12 +266,14 @@ namespace RetroTrack.Domain.Services
             await context.SaveChangesAsync();
 
             Log.Information($"[RetroAchievements] Processing UserUpdate job for request {requestId}");
-            var user = request.JsonData; // this is just the username of the user to update
+
+            // get the user from the request, the json data should contain the user ID
+            var user = await context.Users.FirstAsync(x => x.Id == int.Parse(request.JsonData));
 
             try
             {
                 // get the user data from the RetroAchievements API
-                var userData = await raApiService.GetUserCompletionProgress(user);
+                var userData = await raApiService.GetUserCompletionProgress(user.LoginUsername, user.RAUserUlid);
 
                 if (userData == null)
                 {
@@ -289,7 +291,7 @@ namespace RetroTrack.Domain.Services
 
                     for (int i = 0; i < timesToProcess; i++)
                     {
-                        var extraData = await raApiService.GetUserCompletionProgress(user, skip);
+                        var extraData = await raApiService.GetUserCompletionProgress(user.LoginUsername, user.RAUserUlid, skip);
 
                         if (extraData == null || extraData.Results == null)
                         {
@@ -305,7 +307,7 @@ namespace RetroTrack.Domain.Services
                 Log.Information($"[RetroAchievements] User {user} has {gameList.Count} games to process.");
 
                 // grab the user profile from the api
-                var userProfile = await raApiService.GetUserProfile(user);
+                var userProfile = await raApiService.GetUserProfile(user.LoginUsername, user.RAUserUlid);
 
                 if (userProfile == null)
                 {
@@ -314,21 +316,20 @@ namespace RetroTrack.Domain.Services
                 }
 
                 // get the user from the database
-                var dbUser = await context.Users.FirstAsync(x => x.Username == user);
-                dbUser.UserProfileUrl = "/UserPic/" + userProfile.User + ".png";
-                dbUser.UserPoints = userProfile.TotalPoints;
-                dbUser.LastUserUpdate = DateTime.UtcNow;
+                user.UserProfileUrl = "/UserPic/" + userProfile.User + ".png";
+                user.UserPoints = userProfile.TotalPoints;
+                user.LastUserUpdate = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();
 
-                Log.Information($"[RetroAchievements] User {user} profile updated with points: {dbUser.UserPoints}, profile URL: {dbUser.UserProfileUrl}");
+                Log.Information($"[RetroAchievements] User {user} profile updated with points: {user.UserPoints}, profile URL: {user.UserProfileUrl}");
 
                 // process the game list
                 // firstly check if there are any games in the database that are not in the game list, if so, remove them
                 // they could have reset their progress
 
                 var existingGames = await context.UserGameProgress
-                    .Where(x => x.Username == user)
+                    .Where(x => x.UserId == user.Id)
                     .ToListAsync();
 
                 var gamesRemoved = 0;
@@ -350,7 +351,7 @@ namespace RetroTrack.Domain.Services
                 foreach (var game in gameList)
                 {
                     // check if the game already exists for the user
-                    var existingGame = await context.UserGameProgress.FirstOrDefaultAsync(x => x.GameId == game.GameId && x.Username == user);
+                    var existingGame = await context.UserGameProgress.FirstOrDefaultAsync(x => x.GameId == game.GameId && x.UserId == user.Id);
 
                     if (existingGame != null)
                     {
@@ -370,7 +371,7 @@ namespace RetroTrack.Domain.Services
                         // Add new game progress
                         var newUserGameProgress = new UserGameProgress
                         {
-                            Username = user,
+                            UserId = user.Id,
                             GameId = game.GameId,
                             ConsoleId = game.ConsoleId,
                             AchievementsGained = game.NumAwarded,

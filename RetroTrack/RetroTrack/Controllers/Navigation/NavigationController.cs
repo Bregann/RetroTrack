@@ -18,7 +18,7 @@ namespace RetroTrack.Api.Controllers.Navigation
         [HttpGet]
         public async Task<ActionResult<GetLoggedInNavigationDataDto>> GetLoggedInNavigationData()
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
