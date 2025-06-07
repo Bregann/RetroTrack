@@ -79,7 +79,6 @@ namespace RetroTrack.Domain.Services
                         existingGame.HasAchievements = game.AchievementCount > 0;
 
                         await context.SaveChangesAsync();
-                        Log.Information($"[RetroAchievements] Updated existing game: {existingGame.Id} - {existingGame.Title}");
                     }
                     else
                     {
@@ -457,6 +456,9 @@ namespace RetroTrack.Domain.Services
         private async Task HandleAndLogErroredJob(RetroAchievementsLogAndLoadData request, string errorMessage)
         {
             Log.Error($"[RetroAchievements] Error processing job {request.Id}: {errorMessage}");
+
+            // clear context to avoid tracking issues
+            context.ChangeTracker.Clear();
 
             request.ProcessingStatus = ProcessingStatus.Errored;
             request.LastUpdate = DateTime.UtcNow;
