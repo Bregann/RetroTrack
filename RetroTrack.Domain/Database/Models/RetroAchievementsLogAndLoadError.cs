@@ -9,8 +9,8 @@ namespace RetroTrack.Domain.Database.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey(nameof(LogAndLoadDataId))]
         public int LogAndLoadDataId { get; set; }
+        [ForeignKey(nameof(LogAndLoadDataId))]
         public virtual RetroAchievementsLogAndLoadData LogAndLoadData { get; set; } = null!;
 
         [Required]

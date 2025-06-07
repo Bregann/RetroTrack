@@ -41,7 +41,7 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int NumAwardedHardcore { get; set; }
 
         [JsonProperty("MostRecentAwardedDate")]
-        public DateTimeOffset MostRecentAwardedDate { get; set; }
+        public DateTimeOffset? MostRecentAwardedDate { get; set; }
 
         [JsonProperty("HighestAwardKind")]
         public string? HighestAwardKind { get; set; }

@@ -70,5 +70,14 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
 
         [JsonProperty("type")]
         public AchievementType? Type { get; set; }
+
+        [JsonProperty("Author")]
+        public string Author { get; set; } = "";
+
+        [JsonProperty("DateCreated")]
+        public DateTime DateCreated { get; set; }
+
+        [JsonProperty("DateModified")]
+        public DateTime DateModified { get; set; }
     }
 }

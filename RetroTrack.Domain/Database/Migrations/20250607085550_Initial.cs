@@ -185,6 +185,9 @@ namespace RetroTrack.Domain.Database.Migrations
                     AchievementType = table.Column<int>(type: "integer", nullable: true),
                     NumAwarded = table.Column<long>(type: "bigint", nullable: false),
                     NumAwardedHardcore = table.Column<long>(type: "bigint", nullable: false),
+                    LastModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Author = table.Column<string>(type: "text", nullable: false),
                     GameId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -237,6 +240,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     AchievementsGainedHardcore = table.Column<int>(type: "integer", nullable: false),
                     GamePercentage = table.Column<double>(type: "double precision", nullable: false),
                     GamePercentageHardcore = table.Column<double>(type: "double precision", nullable: false),
+                    MostRecentAwardedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     HighestAwardKind = table.Column<int>(type: "integer", nullable: true),
                     HighestAwardDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },

@@ -208,6 +208,9 @@ namespace RetroTrack.Domain.Services
                         existingAchievement.AchievementType = achievement.Value.Type;
                         existingAchievement.NumAwarded = achievement.Value.NumAwarded;
                         existingAchievement.NumAwardedHardcore = achievement.Value.NumAwardedHardcore;
+                        existingAchievement.Author = achievement.Value.Author;
+                        existingAchievement.DateCreated = DateTime.SpecifyKind(achievement.Value.DateCreated, DateTimeKind.Utc);
+                        existingAchievement.LastModified = DateTime.SpecifyKind(achievement.Value.DateModified, DateTimeKind.Utc);
                     }
                     else
                     {
@@ -222,7 +225,10 @@ namespace RetroTrack.Domain.Services
                             AchievementType = achievement.Value.Type,
                             NumAwarded = achievement.Value.NumAwarded,
                             NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                            GameId = game.Id
+                            GameId = game.Id,
+                            Author = achievement.Value.Author,
+                            DateCreated = DateTime.SpecifyKind(achievement.Value.DateCreated, DateTimeKind.Utc),
+                            LastModified = DateTime.SpecifyKind(achievement.Value.DateModified, DateTimeKind.Utc)
                         };
 
                         await context.Achievements.AddAsync(newAchievement);
@@ -362,6 +368,7 @@ namespace RetroTrack.Domain.Services
                         existingGame.GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100;
                         existingGame.HighestAwardKind = ConvertHighestAwardKind(game.HighestAwardKind);
                         existingGame.HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null;
+                        existingGame.MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null;
                         existingGame.ConsoleId = game.ConsoleId;
 
                         Log.Information($"[RetroAchievements] Updated existing game progress for {user} on game {game.GameId} ({game.Title})");
@@ -379,7 +386,8 @@ namespace RetroTrack.Domain.Services
                             GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100,
                             GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
                             HighestAwardKind = ConvertHighestAwardKind(game.HighestAwardKind),
-                            HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null
+                            HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null,
+                            MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null
                         };
 
                         await context.UserGameProgress.AddAsync(newUserGameProgress);

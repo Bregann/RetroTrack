@@ -151,6 +151,7 @@ namespace RetroTrack.Domain.Services
                 if (response == null)
                 {
                     Log.Error($"[RetroAchievements] No data found for game ID {gameId} in RetroAchievements API response.");
+                    await Task.Delay(2000); // To avoid hitting the API too fast
                     continue;
                 }
 
@@ -161,6 +162,7 @@ namespace RetroTrack.Domain.Services
                 if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetExtendedGameData && x.ProcessingStatus != ProcessingStatus.Errored))
                 {
                     Log.Information($"[RetroAchievements] Game data for game ID {gameId} already exists in the database. Skipping");
+                    await Task.Delay(2000); // To avoid hitting the API too fast
                     continue;
                 }
 
@@ -176,7 +178,7 @@ namespace RetroTrack.Domain.Services
                 await context.SaveChangesAsync();
                 Log.Information($"[RetroAchievements] Game data for game ID {gameId} added to the database for processing.");
 
-                await Task.Delay(1000); // To avoid hitting the API too fast
+                await Task.Delay(2000); // To avoid hitting the API too fast
             }
         }
 

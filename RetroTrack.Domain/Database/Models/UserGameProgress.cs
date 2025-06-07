@@ -10,18 +10,18 @@ namespace RetroTrack.Domain.Database.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey(nameof(UserId))]
         public required int UserId { get; set; }
+        [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
 
         [Required]
-        [ForeignKey(nameof(GameId))]
         public required int GameId { get; set; }
+        [ForeignKey(nameof(GameId))]
         public virtual Game Game { get; set; } = null!;
 
         [Required]
-        [ForeignKey(nameof(ConsoleId))]
         public required int ConsoleId { get; set; }
+        [ForeignKey(nameof(ConsoleId))]
         public virtual GameConsole Console { get; set; } = null!;
 
         [Required]
@@ -36,7 +36,10 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required double GamePercentageHardcore { get; set; }
 
+        public DateTime? MostRecentAwardedDate { get; set; }
+
         public HighestAwardKind? HighestAwardKind { get; set; }
+
         public DateTime? HighestAwardDate { get; set; }
     }
 }

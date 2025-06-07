@@ -12,7 +12,7 @@ using RetroTrack.Domain.Database.Context;
 namespace RetroTrack.Domain.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250607083211_Initial")]
+    [Migration("20250607085550_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -51,11 +51,21 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Property<int?>("AchievementType")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
 
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("NumAwarded")
                         .HasColumnType("bigint");
@@ -389,6 +399,9 @@ namespace RetroTrack.Domain.Database.Migrations
 
                     b.Property<int?>("HighestAwardKind")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("MostRecentAwardedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");

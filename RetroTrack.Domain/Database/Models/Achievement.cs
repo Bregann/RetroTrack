@@ -33,8 +33,18 @@ namespace RetroTrack.Domain.Database.Models
         public required long NumAwardedHardcore { get; set; }
 
         [Required]
-        [ForeignKey(nameof(GameId))]
+        public required DateTime LastModified { get; set; }
+
+        [Required]
+        public required DateTime DateCreated { get; set; }
+
+        [Required]
+        public required string Author { get; set; }
+
+        [Required]
         public required int GameId { get; set; }
+
+        [ForeignKey(nameof(GameId))]
         public virtual Game Game { get; set; } = null!;
     }
 }

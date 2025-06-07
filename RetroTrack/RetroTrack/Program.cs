@@ -1,21 +1,20 @@
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
-using Hangfire.MemoryStorage;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Interfaces.Controllers;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
+using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
-using RetroTrack.Domain.Services.Controllers;
 using RetroTrack.Domain.Services;
+using RetroTrack.Domain.Services.Controllers;
 using RetroTrack.Domain.Services.Helpers;
 using Serilog;
 using System.Text;
-using RetroTrack.Domain.Helpers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day))
