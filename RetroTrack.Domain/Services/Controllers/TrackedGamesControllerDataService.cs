@@ -49,7 +49,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 {
                     AchievementCount = game.Game.AchievementCount,
                     AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                    PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                    PercentageCompleted = userProgress?.GamePercentage ?? 0,
                     GameGenre = game.Game.GameGenre,
                     GameIconUrl = "https://media.retroachievements.org" + game.Game.ImageIcon,
                     GameId = game.Game.Id,

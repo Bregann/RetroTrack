@@ -282,7 +282,7 @@ namespace RetroTrack.Domain.Services
 
                 if (userData == null)
                 {
-                    await HandleAndLogErroredJob(request, $"User {user} not found or no data returned from API.");
+                    await HandleAndLogErroredJob(request, $"User {user.LoginUsername} not found or no data returned from API.");
                     return;
                 }
 
@@ -290,7 +290,7 @@ namespace RetroTrack.Domain.Services
 
                 if (userData.Total > 500)
                 {
-                    Log.Information($"[RetroAchievements] User {user} has more than 500 games, processing additional data in batches.");
+                    Log.Information($"[RetroAchievements] User {user.LoginUsername} has more than 500 games, processing additional data in batches.");
                     var timesToProcess = Math.Ceiling((decimal)userData.Total / 500) - 1;
                     var skip = 500;
 
@@ -316,7 +316,7 @@ namespace RetroTrack.Domain.Services
 
                 if (userProfile == null)
                 {
-                    await HandleAndLogErroredJob(request, $"User {user} profile not found or no data returned from API.");
+                    await HandleAndLogErroredJob(request, $"User {user.LoginUsername} profile not found or no data returned from API.");
                     return;
                 }
 
@@ -327,7 +327,7 @@ namespace RetroTrack.Domain.Services
 
                 await context.SaveChangesAsync();
 
-                Log.Information($"[RetroAchievements] User {user} profile updated with points: {user.UserPoints}, profile URL: {user.UserProfileUrl}");
+                Log.Information($"[RetroAchievements] User {user.LoginUsername} profile updated with points: {user.UserPoints}, profile URL: {user.UserProfileUrl}");
 
                 // process the game list
                 // firstly check if there are any games in the database that are not in the game list, if so, remove them
@@ -350,7 +350,7 @@ namespace RetroTrack.Domain.Services
 
                 await context.SaveChangesAsync();
 
-                Log.Information($"[RetroAchievements] Removed {gamesRemoved} games from user {user} that are no longer present in the game list.");
+                Log.Information($"[RetroAchievements] Removed {gamesRemoved} games from user {user.LoginUsername} that are no longer present in the game list.");
 
                 // now loop through the game list and update or add the games
                 foreach (var game in gameList)
@@ -370,7 +370,7 @@ namespace RetroTrack.Domain.Services
                         existingGame.MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null;
                         existingGame.ConsoleId = game.ConsoleId;
 
-                        Log.Information($"[RetroAchievements] Updated existing game progress for {user} on game {game.GameId} ({game.Title})");
+                        Log.Information($"[RetroAchievements] Updated existing game progress for {user.LoginUsername} on game {game.GameId} ({game.Title})");
                     }
                     else
                     {
@@ -390,12 +390,12 @@ namespace RetroTrack.Domain.Services
                         };
 
                         await context.UserGameProgress.AddAsync(newUserGameProgress);
-                        Log.Information($"[RetroAchievements] Added new game progress for {user} on game {game.GameId} ({game.Title})");
+                        Log.Information($"[RetroAchievements] Added new game progress for {user.LoginUsername} on game {game.GameId} ({game.Title})");
                     }
                 }
 
                 await context.SaveChangesAsync();
-                Log.Information($"[RetroAchievements] Successfully processed UserUpdate job for user {user} with {gameList.Count} games.");
+                Log.Information($"[RetroAchievements] Successfully processed UserUpdate job for user {user.LoginUsername} with {gameList.Count} games.");
 
                 // Update the request status to processed
                 request.ProcessingStatus = ProcessingStatus.Processed;

@@ -23,7 +23,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (i == 0)
                 {
-                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).ToListAsync();
+                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).Take(100).ToListAsync(); // the take 100 is temp lol
                     var gamesTable = new List<PublicGamesTableDto>();
 
                     gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
@@ -367,7 +367,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 {
                     AchievementCount = game.AchievementCount,
                     AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                    PercentageCompleted = userProgress?.GamePercentage * 100 ?? 0,
+                    PercentageCompleted = userProgress?.GamePercentage ?? 0,
                     GameGenre = game.GameGenre,
                     GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
                     GameId = game.Id,
@@ -386,7 +386,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<List<UserGamesTableDto>> GetInProgressGamesForUser(UserDataDto userData)
         {
-            var gameList = await context.UserGameProgress.Where(x => x.UserId == userData.UserId && x.GamePercentage != 1).ToListAsync();
+            var gameList = await context.UserGameProgress.Where(x => x.UserId == userData.UserId && x.GamePercentage != 100).ToListAsync();
             var progressGameList = new List<UserGamesTableDto>();
 
             foreach (var game in gameList)
@@ -400,7 +400,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 if (game?.GamePercentage != null)
                 {
-                    gamePct = Math.Round(game.GamePercentage * 100, 2);
+                    gamePct = Math.Round(game.GamePercentage, 2);
                 }
 
                 progressGameList.Add(new UserGamesTableDto

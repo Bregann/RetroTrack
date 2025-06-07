@@ -30,7 +30,7 @@ namespace RetroTrack.Domain.Services.Controllers
             var inProgressGameCount = await context.UserGameProgress.CountAsync(x => x.UserId == userData.UserId);
 
             var query = from gc in context.GameConsoles.Where(x => x.DisplayOnSite)
-                        join ugp in context.UserGameProgress.Where(x => x.UserId.Equals(userData.UserId))
+                        join ugp in context.UserGameProgress.Where(x => x.UserId == userData.UserId)
                             on gc.ConsoleId equals ugp.ConsoleId into grouping
                         select new ConsoleProgressData
                         {

@@ -184,7 +184,7 @@ namespace RetroTrack.Domain.Services
         public async Task<GetUserProfile?> GetUserProfile(string username, string ulid)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetUserProfile.php?z={_apiUsername}&y={_apiKey}&i={ulid}", Method.Get);
+            var request = new RestRequest($"API_GetUserProfile.php?z={_apiUsername}&y={_apiKey}&u={ulid}", Method.Get);
             var response = await client.ExecuteAsync(request);
 
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
