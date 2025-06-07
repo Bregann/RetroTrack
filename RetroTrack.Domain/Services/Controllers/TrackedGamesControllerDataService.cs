@@ -18,7 +18,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 return false;
             }
 
-            await context.TrackedGames.AddAsync(new TrackedGames
+            await context.TrackedGames.AddAsync(new TrackedGame
             {
                 GameId = gameId,
                 UserId = user.Id

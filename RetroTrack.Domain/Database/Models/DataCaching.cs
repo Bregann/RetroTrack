@@ -18,6 +18,6 @@ namespace RetroTrack.Domain.Database.Models
         public required int MinutesToCacheFor { get; set; }
 
         [Required]
-        public required DateTime LastUpdate { get; set; }
+        public required DateTime LastUpdate { get; set; } = DateTime.UtcNow;
     }
 }

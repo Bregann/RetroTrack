@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class Users
+    public class User
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -41,8 +41,8 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public long UserPoints { get; set; }
 
-        public virtual ICollection<TrackedGames> TrackedGames { get; set; } = null!;
-        public virtual ICollection<Sessions> Sessions { get; set; } = null!;
+        public virtual ICollection<TrackedGame> TrackedGames { get; set; } = null!;
+        public virtual ICollection<Session> Sessions { get; set; } = null!;
         public virtual ICollection<UserGameProgress> UserGameProgress { get; set; } = null!;
     }
 }

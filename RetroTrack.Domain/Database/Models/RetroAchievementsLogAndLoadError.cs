@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class RetroAchievementsLogAndLoadErrors
+    public class RetroAchievementsLogAndLoadError
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -17,6 +17,6 @@ namespace RetroTrack.Domain.Database.Models
         public required string ErrorMessage { get; set; }
 
         [Required]
-        public required DateTime ErrorTimestamp { get; set; }
+        public required DateTime ErrorTimestamp { get; set; } = DateTime.UtcNow;
     }
 }

@@ -3,17 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class TrackedGames
+    public class TrackedGame
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [ForeignKey(nameof(GameId))]
         public required int GameId { get; set; }
-        public virtual Games Game { get; set; } = null!;
+        public virtual Game Game { get; set; } = null!;
 
         [ForeignKey(nameof(UserId))]
         public required int UserId { get; set; }
-        public virtual Users User { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
     }
 }

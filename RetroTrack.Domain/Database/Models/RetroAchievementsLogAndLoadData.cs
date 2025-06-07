@@ -26,6 +26,6 @@ namespace RetroTrack.Domain.Database.Models
         public required DateTime LastUpdate { get; set; } = DateTime.UtcNow;
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<RetroAchievementsLogAndLoadErrors> Errors { get; set; } = null!;
+        public virtual ICollection<RetroAchievementsLogAndLoadError> Errors { get; set; } = null!;
     }
 }

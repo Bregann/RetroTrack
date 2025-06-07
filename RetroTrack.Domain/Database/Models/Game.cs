@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class Games
+    public class Game
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
@@ -13,9 +13,9 @@ namespace RetroTrack.Domain.Database.Models
         public required string Title { get; set; }
 
         [Required]
-        [ForeignKey(nameof(ConsoleID))]
-        public required int ConsoleID { get; set; }
-        public virtual GameConsoles GameConsole { get; set; } = null!;
+        public required int ConsoleId { get; set; }
+        [ForeignKey(nameof(ConsoleId))]
+        public virtual GameConsole GameConsole { get; set; } = null!;
 
         [Required]
         public required string ImageIcon { get; set; }
@@ -24,7 +24,7 @@ namespace RetroTrack.Domain.Database.Models
         public required int Points { get; set; }
 
         [Required]
-        public required DateTime LastModified { get; set; }
+        public required DateTime LastModified { get; set; } = new DateTime(0, DateTimeKind.Utc);
 
         public DateTime? LastExtraDataProcessedDate { get; set; }
 
@@ -53,6 +53,6 @@ namespace RetroTrack.Domain.Database.Models
         public required bool EmailMessageProcessed { get; set; }
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<Achievements> Achievements { get; set; } = [];
+        public virtual ICollection<Achievement> Achievements { get; set; } = [];
     }
 }

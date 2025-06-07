@@ -11,7 +11,7 @@ namespace RetroTrack.Domain.Services.Controllers
 {
     public class AuthControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService) : IAuthControllerDataService
     {
-        private readonly PasswordHasher<Users> _passwordHasher = new();
+        private readonly PasswordHasher<User> _passwordHasher = new();
 
         public async Task<LoginUserDto> ValidateUserLogin(string username, string password)
         {
@@ -62,7 +62,7 @@ namespace RetroTrack.Domain.Services.Controllers
             var sessionId = $"D{DateTime.UtcNow.Ticks / 730}G{Guid.NewGuid()}";
 
             //Create a new session id and add it into the database
-            await context.Sessions.AddAsync(new Sessions
+            await context.Sessions.AddAsync(new Session
             {
                 SessionId = sessionId,
                 UserId = user.Id,
@@ -125,12 +125,12 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
 
                 //Add the user into the database
-                await context.Users.AddAsync(new Users
+                await context.Users.AddAsync(new User
                 {
                     LoginUsername = username,
                     RAUsername = userProfile.User,
                     RAUserUlid = userProfile.Ulid,
-                    HashedPassword = _passwordHasher.HashPassword(new Users(), password),
+                    HashedPassword = _passwordHasher.HashPassword(new User(), password),
                     HashedPasswordMigrated = true,
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,

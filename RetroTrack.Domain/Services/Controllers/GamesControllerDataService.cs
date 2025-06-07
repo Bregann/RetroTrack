@@ -109,11 +109,11 @@ namespace RetroTrack.Domain.Services.Controllers
         public async Task<PublicConsoleGamesDto?> GetGamesForConsole(int consoleId)
         {
             var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
-            var gameList = new List<Games>();
+            var gameList = new List<Game>();
 
             if (cacheData != null)
             {
-                gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
+                gameList = JsonConvert.DeserializeObject<List<Game>>(cacheData);
             }
             else
             {
@@ -123,7 +123,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToListAsync();
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).ToListAsync();
                 }
 
                 await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
@@ -137,7 +137,7 @@ namespace RetroTrack.Domain.Services.Controllers
             return new PublicConsoleGamesDto
             {
                 ConsoleId = consoleId,
-                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == consoleId).First().ConsoleName,
                 Games = gameList.Select(x => new PublicGamesTableDto
                 {
                     AchievementCount = x.AchievementCount,
@@ -313,11 +313,11 @@ namespace RetroTrack.Domain.Services.Controllers
             var consoleGames = new List<UserGamesTableDto>();
 
             var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
-            var gameList = new List<Games>();
+            var gameList = new List<Game>();
 
             if (cacheData != null)
             {
-                gameList = JsonConvert.DeserializeObject<List<Games>>(cacheData);
+                gameList = JsonConvert.DeserializeObject<List<Game>>(cacheData);
             }
             else
             {
@@ -327,7 +327,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleID == consoleId).ToListAsync();
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).ToListAsync();
                 }
 
                 await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
@@ -379,7 +379,7 @@ namespace RetroTrack.Domain.Services.Controllers
             return new UserConsoleGamesDto
             {
                 ConsoleId = consoleId,
-                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleID == consoleId).First().ConsoleName,
+                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == consoleId).First().ConsoleName,
                 Games = consoleGames
             };
         }

@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class GameConsoles
+    public class GameConsole
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int ConsoleID { get; set; }
+        public int ConsoleId { get; set; }
 
         [Required]
         public required string ConsoleName { get; set; }
@@ -23,5 +23,7 @@ namespace RetroTrack.Domain.Database.Models
 
         [Required]
         public required bool DisplayOnSite { get; set; }
+
+        public virtual ICollection<Game> Games { get; set; } = null!;
     }
 }

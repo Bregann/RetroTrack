@@ -41,7 +41,7 @@ namespace RetroTrack.Domain.Services
 
                 // update the console game count
                 var consoleId = gameList.First().ConsoleId;
-                var console = await context.GameConsoles.FirstAsync(x => x.ConsoleID == consoleId);
+                var console = await context.GameConsoles.FirstAsync(x => x.ConsoleId == consoleId);
 
                 console.GameCount = gameList.Count;
                 console.NoAchievementsGameCount = gameList.Count(x => x.AchievementCount == 0);
@@ -71,11 +71,11 @@ namespace RetroTrack.Domain.Services
 
                         // Update existing game
                         existingGame.Title = game.Title;
-                        existingGame.ConsoleID = game.ConsoleId;
+                        existingGame.ConsoleId = game.ConsoleId;
                         existingGame.ImageIcon = game.ImageIcon;
                         existingGame.AchievementCount = game.AchievementCount;
                         existingGame.Points = game.Points;
-                        existingGame.LastModified = game.DateModified ?? DateTime.UtcNow;
+                        existingGame.LastModified = DateTime.SpecifyKind(game.DateModified ?? DateTime.UtcNow, DateTimeKind.Utc);
                         existingGame.HasAchievements = game.AchievementCount > 0;
 
                         await context.SaveChangesAsync();
@@ -86,15 +86,15 @@ namespace RetroTrack.Domain.Services
                         var hasAchievements = game.AchievementCount > 0;
 
                         // add in the new game
-                        var newGame = new Games
+                        var newGame = new Game
                         {
                             Id = game.Id,
                             Title = game.Title,
-                            ConsoleID = game.ConsoleId,
+                            ConsoleId = game.ConsoleId,
                             ImageIcon = game.ImageIcon,
                             AchievementCount = game.AchievementCount,
                             Points = game.Points,
-                            LastModified = game.DateModified ?? DateTime.UtcNow,
+                            LastModified = DateTime.SpecifyKind(game.DateModified ?? DateTime.UtcNow, DateTimeKind.Utc),
                             SetReleasedDate = hasAchievements ? DateTime.UtcNow : new DateTime(0, DateTimeKind.Utc),
                             LastAchievementCountChangeDate = hasAchievements ? DateTime.UtcNow : new DateTime(0, DateTimeKind.Utc),
                             GameGenre = null,
@@ -121,7 +121,7 @@ namespace RetroTrack.Domain.Services
             }
             catch (Exception ex)
             {
-                await HandleAndLogException(ex, request, "GetGameList");
+                await HandleAndLogException(ex, request.Id, "GetGameList");
             }
         }
 
@@ -155,7 +155,7 @@ namespace RetroTrack.Domain.Services
                 game.GameGenre = gameData.Genre;
                 game.Players = gameData.Players;
                 game.LastExtraDataProcessedDate = DateTime.UtcNow;
-                game.ConsoleID = gameData.ConsoleId;
+                game.ConsoleId = gameData.ConsoleId;
 
                 await context.SaveChangesAsync();
 
@@ -211,7 +211,7 @@ namespace RetroTrack.Domain.Services
                     }
                     else
                     {
-                        var newAchievement = new Achievements
+                        var newAchievement = new Database.Models.Achievement
                         {
                             Id = achievement.Value.Id,
                             AchievementName = achievement.Value.Title,
@@ -249,7 +249,7 @@ namespace RetroTrack.Domain.Services
             }
             catch (Exception ex)
             {
-                await HandleAndLogException(ex, request, "GetExtendedGameData");
+                await HandleAndLogException(ex, request.Id, "GetExtendedGameData");
             }
         }
 
@@ -399,7 +399,7 @@ namespace RetroTrack.Domain.Services
             }
             catch (Exception ex)
             {
-                await HandleAndLogException(ex, request, "UserUpdate");
+                await HandleAndLogException(ex, request.Id, "UserUpdate");
             }
         }
 
@@ -410,22 +410,34 @@ namespace RetroTrack.Domain.Services
         /// <param name="request"></param>
         /// <param name="jobName"></param>
         /// <returns></returns>
-        private async Task HandleAndLogException(Exception ex, RetroAchievementsLogAndLoadData request, string jobName)
+        private async Task HandleAndLogException(Exception ex, int requestId, string jobName)
         {
-            Log.Error(ex, $"[RetroAchievements] Error processing {jobName} job for request {request.Id}: {ex.Message}");
-
-            request.ProcessingStatus = ProcessingStatus.Errored;
-            request.LastUpdate = DateTime.UtcNow;
-            request.FailedProcessingAttempts++;
-
-            await context.RetroAchievementsLogAndLoadErrors.AddAsync(new RetroAchievementsLogAndLoadErrors
+            try
             {
-                LogAndLoadDataId = request.Id,
-                ErrorMessage = $"Error processing {jobName} job: {ex.Message}",
-                ErrorTimestamp = DateTime.UtcNow
-            });
+                Log.Error(ex, $"[RetroAchievements] Error processing {jobName} job for request {requestId}: {ex.Message}");
 
-            await context.SaveChangesAsync();
+                // clear context to avoid tracking issues
+                context.ChangeTracker.Clear();
+
+                var request = await context.RetroAchievementsLogAndLoadData.FirstAsync(x => x.Id == requestId);
+
+                request.ProcessingStatus = ProcessingStatus.Errored;
+                request.LastUpdate = DateTime.UtcNow;
+                request.FailedProcessingAttempts++;
+
+                await context.RetroAchievementsLogAndLoadErrors.AddAsync(new RetroAchievementsLogAndLoadError
+                {
+                    LogAndLoadDataId = request.Id,
+                    ErrorMessage = $"Error processing {jobName} job: {ex.Message}. {ex.InnerException}",
+                    ErrorTimestamp = DateTime.UtcNow
+                });
+
+                await context.SaveChangesAsync();
+            }
+            catch (Exception handleEx)
+            {
+                Log.Error(handleEx, $"[RetroAchievements] Error handling exception for {jobName} job for request {requestId}: {handleEx.Message}");
+            }
         }
 
         /// <summary>
@@ -442,7 +454,7 @@ namespace RetroTrack.Domain.Services
             request.LastUpdate = DateTime.UtcNow;
             request.FailedProcessingAttempts++;
 
-            await context.RetroAchievementsLogAndLoadErrors.AddAsync(new RetroAchievementsLogAndLoadErrors
+            await context.RetroAchievementsLogAndLoadErrors.AddAsync(new RetroAchievementsLogAndLoadError
             {
                 LogAndLoadDataId = request.Id,
                 ErrorMessage = errorMessage,

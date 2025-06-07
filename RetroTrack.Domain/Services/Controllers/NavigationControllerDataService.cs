@@ -15,7 +15,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 .Where(x => x.DisplayOnSite)
                 .Select(x => new GetPublicNavigationDataDto
                 {
-                    ConsoleId = x.ConsoleID,
+                    ConsoleId = x.ConsoleId,
                     ConsoleName = x.ConsoleName,
                     ConsoleType = x.ConsoleType,
                     GameCount = x.GameCount
@@ -31,10 +31,10 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var query = from gc in context.GameConsoles.Where(x => x.DisplayOnSite)
                         join ugp in context.UserGameProgress.Where(x => x.UserId.Equals(userData.UserId))
-                            on gc.ConsoleID equals ugp.ConsoleId into grouping
+                            on gc.ConsoleId equals ugp.ConsoleId into grouping
                         select new ConsoleProgressData
                         {
-                            ConsoleId = gc.ConsoleID,
+                            ConsoleId = gc.ConsoleId,
                             ConsoleName = gc.ConsoleName,
                             ConsoleType = gc.ConsoleType,
                             TotalGamesInConsole = gc.GameCount,

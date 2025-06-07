@@ -1,21 +1,24 @@
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.MemoryStorage;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using RetroTrack.Api;
+using Microsoft.IdentityModel.Tokens;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Helpers;
-using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
+using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Helpers;
-using RetroTrack.Domain.Services;
 using RetroTrack.Domain.Services.Controllers;
+using RetroTrack.Domain.Services;
 using RetroTrack.Domain.Services.Helpers;
 using Serilog;
+using System.Text;
+using RetroTrack.Domain.Helpers;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day))
+    .WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: null, rollingInterval: RollingInterval.Day))
     .WriteTo.Console()
     .Enrich.WithProperty("Application", "RetroTrack-Api" + (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? "-Test" : ""))
     .WriteTo.Seq("http://192.168.1.20:5341")
@@ -23,41 +26,64 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("Logger Setup");
 
-await Task.Delay(2000);
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpContextAccessor();
+
+// Add in our own services
+builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
+
+// Add in the auth
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = Environment.GetEnvironmentVariable("JwtValidIssuer"),
+            ValidAudience = Environment.GetEnvironmentVariable("JwtValidAudience"),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")!))
+        };
+    });
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "allowUrls",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000");
-            policy.WithHeaders("Content-Type");
-            policy.WithMethods("GET", "POST", "DELETE");
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
-// Add services to the container.
 #if DEBUG
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies()
            .UseNpgsql(Environment.GetEnvironmentVariable("RetroTrackConnStringTest")));
 
-GlobalConfiguration.Configuration.UseMemoryStorage();
+GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringTest")));
 
 builder.Services.AddHangfire(configuration => configuration
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
-        .UseMemoryStorage()
+        .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringTest")))
         );
 
 #else
-builder.Services.AddDbContext<PostgresqlContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies()
            .UseNpgsql(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")));
-builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
 GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")));
 
@@ -68,8 +94,6 @@ builder.Services.AddHangfire(configuration => configuration
         .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("RetroTrackConnStringLive")))
         );
 #endif
-
-builder.Services.AddControllers();
 
 // Register our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
@@ -89,29 +113,24 @@ builder.Services.AddScoped<INavigationControllerDataService, NavigationControlle
 builder.Services.AddScoped<ITrackedGamesControllerDataService, TrackedGamesControllerDataService>();
 builder.Services.AddScoped<IUsersControllerDataService, UsersControllerDataService>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// hangfire
+builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseCors("AllowAll");
 
 var environmentalSettingHelper = app.Services.GetService<IEnvironmentalSettingHelper>()!;
 await environmentalSettingHelper.LoadEnvironmentalSettings();
 
-app.UseCors("AllowAnyOrigin");
+// Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseApiAuthorizationMiddleware();
 
 app.MapControllers();
 
@@ -134,12 +153,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = auth
 }, JobStorage.Current);
-
-using (var scope = app.Services.CreateScope())
-{
-    var hangfireJobs = scope.ServiceProvider.GetRequiredService<HangfireJobServiceHelper>();
-    hangfireJobs.SetupHangfireJobs();
-}
 
 HangfireJobSetup.RegisterJobs();
 

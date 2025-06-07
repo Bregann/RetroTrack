@@ -36,7 +36,7 @@ namespace RetroTrack.Domain.Services
                 }
 
                 //Don't add it if it already exists
-                var existingConsole = await context.GameConsoles.FirstOrDefaultAsync(x => x.ConsoleID == console.Id);
+                var existingConsole = await context.GameConsoles.FirstOrDefaultAsync(x => x.ConsoleId == console.Id);
 
                 if (existingConsole != null)
                 {
@@ -46,9 +46,9 @@ namespace RetroTrack.Domain.Services
                     continue;
                 }
 
-                await context.GameConsoles.AddAsync(new GameConsoles
+                await context.GameConsoles.AddAsync(new GameConsole
                 {
-                    ConsoleID = console.Id,
+                    ConsoleId = console.Id,
                     ConsoleName = console.Name,
                     GameCount = 0,
                     NoAchievementsGameCount = 0,
@@ -68,7 +68,7 @@ namespace RetroTrack.Domain.Services
         /// <returns></returns>
         public async Task GetGamesFromConsoleIds()
         {
-            var consoleIds = await context.GameConsoles.Select(x => x.ConsoleID).ToArrayAsync();
+            var consoleIds = await context.GameConsoles.Select(x => x.ConsoleId).ToArrayAsync();
 
             if (consoleIds.Length == 0)
             {

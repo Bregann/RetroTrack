@@ -25,7 +25,7 @@ namespace RetroTrack.Domain.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Achievements", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Achievement", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -118,33 +118,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("EnvironmentalSettings");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.GameConsoles", b =>
-                {
-                    b.Property<int>("ConsoleID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConsoleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ConsoleType")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("DisplayOnSite")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("GameCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("NoAchievementsGameCount")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ConsoleID");
-
-                    b.ToTable("GameConsoles");
-                });
-
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Games", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Game", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
@@ -152,7 +126,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Property<int>("AchievementCount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ConsoleID")
+                    b.Property<int>("ConsoleId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("DiscordMessageProcessed")
@@ -163,9 +137,6 @@ namespace RetroTrack.Domain.Database.Migrations
 
                     b.Property<bool>("ExtraDataProcessed")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("GameConsoleConsoleID")
-                        .HasColumnType("integer");
 
                     b.Property<string>("GameGenre")
                         .HasColumnType("text");
@@ -201,9 +172,35 @@ namespace RetroTrack.Domain.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameConsoleConsoleID");
+                    b.HasIndex("ConsoleId");
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.GameConsole", b =>
+                {
+                    b.Property<int>("ConsoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConsoleName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ConsoleType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("DisplayOnSite")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("GameCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NoAchievementsGameCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ConsoleId");
+
+                    b.ToTable("GameConsoles");
                 });
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadData", b =>
@@ -235,7 +232,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("RetroAchievementsLogAndLoadData");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadErrors", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadError", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -260,7 +257,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("RetroAchievementsLogAndLoadErrors");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Sessions", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Session", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -283,7 +280,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("Sessions");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGames", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGame", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -306,53 +303,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("TrackedGames");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserGameProgress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AchievementsGained")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AchievementsGainedHardcore")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ConsoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("GamePercentage")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("GamePercentageHardcore")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("HighestAwardDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("HighestAwardKind")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConsoleId");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserGameProgress");
-                });
-
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Users", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -404,9 +355,55 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Achievements", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserGameProgress", b =>
                 {
-                    b.HasOne("RetroTrack.Domain.Database.Models.Games", "Game")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementsGained")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AchievementsGainedHardcore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConsoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("GamePercentage")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("GamePercentageHardcore")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("HighestAwardDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("HighestAwardKind")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsoleId");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserGameProgress");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Achievement", b =>
+                {
+                    b.HasOne("RetroTrack.Domain.Database.Models.Game", "Game")
                         .WithMany("Achievements")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -415,18 +412,18 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Games", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Game", b =>
                 {
-                    b.HasOne("RetroTrack.Domain.Database.Models.GameConsoles", "GameConsole")
-                        .WithMany()
-                        .HasForeignKey("GameConsoleConsoleID")
+                    b.HasOne("RetroTrack.Domain.Database.Models.GameConsole", "GameConsole")
+                        .WithMany("Games")
+                        .HasForeignKey("ConsoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("GameConsole");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadErrors", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadError", b =>
                 {
                     b.HasOne("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadData", "LogAndLoadData")
                         .WithMany("Errors")
@@ -437,9 +434,9 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("LogAndLoadData");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Sessions", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Session", b =>
                 {
-                    b.HasOne("RetroTrack.Domain.Database.Models.Users", "User")
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -448,15 +445,15 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGames", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGame", b =>
                 {
-                    b.HasOne("RetroTrack.Domain.Database.Models.Games", "Game")
+                    b.HasOne("RetroTrack.Domain.Database.Models.Game", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RetroTrack.Domain.Database.Models.Users", "User")
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
                         .WithMany("TrackedGames")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -469,19 +466,19 @@ namespace RetroTrack.Domain.Database.Migrations
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserGameProgress", b =>
                 {
-                    b.HasOne("RetroTrack.Domain.Database.Models.GameConsoles", "Console")
+                    b.HasOne("RetroTrack.Domain.Database.Models.GameConsole", "Console")
                         .WithMany()
                         .HasForeignKey("ConsoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RetroTrack.Domain.Database.Models.Games", "Game")
+                    b.HasOne("RetroTrack.Domain.Database.Models.Game", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RetroTrack.Domain.Database.Models.Users", "User")
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
                         .WithMany("UserGameProgress")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -494,9 +491,14 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Games", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Game", b =>
                 {
                     b.Navigation("Achievements");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.GameConsole", b =>
+                {
+                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.RetroAchievementsLogAndLoadData", b =>
@@ -504,7 +506,7 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("Errors");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Users", b =>
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.User", b =>
                 {
                     b.Navigation("Sessions");
 

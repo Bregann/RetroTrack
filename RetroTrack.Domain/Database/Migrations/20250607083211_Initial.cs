@@ -46,7 +46,7 @@ namespace RetroTrack.Domain.Database.Migrations
                 name: "GameConsoles",
                 columns: table => new
                 {
-                    ConsoleID = table.Column<int>(type: "integer", nullable: false),
+                    ConsoleId = table.Column<int>(type: "integer", nullable: false),
                     ConsoleName = table.Column<string>(type: "text", nullable: false),
                     GameCount = table.Column<int>(type: "integer", nullable: false),
                     NoAchievementsGameCount = table.Column<int>(type: "integer", nullable: false),
@@ -55,7 +55,7 @@ namespace RetroTrack.Domain.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameConsoles", x => x.ConsoleID);
+                    table.PrimaryKey("PK_GameConsoles", x => x.ConsoleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,8 +104,7 @@ namespace RetroTrack.Domain.Database.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
-                    ConsoleID = table.Column<int>(type: "integer", nullable: false),
-                    GameConsoleConsoleID = table.Column<int>(type: "integer", nullable: false),
+                    ConsoleId = table.Column<int>(type: "integer", nullable: false),
                     ImageIcon = table.Column<string>(type: "text", nullable: false),
                     Points = table.Column<int>(type: "integer", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -124,10 +123,10 @@ namespace RetroTrack.Domain.Database.Migrations
                 {
                     table.PrimaryKey("PK_Games", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Games_GameConsoles_GameConsoleConsoleID",
-                        column: x => x.GameConsoleConsoleID,
+                        name: "FK_Games_GameConsoles_ConsoleId",
+                        column: x => x.ConsoleId,
                         principalTable: "GameConsoles",
-                        principalColumn: "ConsoleID",
+                        principalColumn: "ConsoleId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -248,7 +247,7 @@ namespace RetroTrack.Domain.Database.Migrations
                         name: "FK_UserGameProgress_GameConsoles_ConsoleId",
                         column: x => x.ConsoleId,
                         principalTable: "GameConsoles",
-                        principalColumn: "ConsoleID",
+                        principalColumn: "ConsoleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserGameProgress_Games_GameId",
@@ -270,9 +269,9 @@ namespace RetroTrack.Domain.Database.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Games_GameConsoleConsoleID",
+                name: "IX_Games_ConsoleId",
                 table: "Games",
-                column: "GameConsoleConsoleID");
+                column: "ConsoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RetroAchievementsLogAndLoadErrors_LogAndLoadDataId",

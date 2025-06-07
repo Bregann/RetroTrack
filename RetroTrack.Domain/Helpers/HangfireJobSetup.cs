@@ -8,7 +8,7 @@ namespace RetroTrack.Domain.Helpers
     {
         public static void RegisterJobs()
         {
-            RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * *");
+            RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpCompletedJobs", service => service.CleanUpCompletedJobs(), "0 0 * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpStuckJobs", service => service.RequeueErroredJobs(), "* */1 * * *");
 

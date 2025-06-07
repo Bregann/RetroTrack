@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
 {
-    public class Achievements
+    public class Achievement
     {
         [Key]
         public required long Id { get; set; }
@@ -35,6 +35,6 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         [ForeignKey(nameof(GameId))]
         public required int GameId { get; set; }
-        public virtual Games Game { get; set; } = null!;
+        public virtual Game Game { get; set; } = null!;
     }
 }

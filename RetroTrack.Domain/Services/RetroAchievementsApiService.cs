@@ -104,7 +104,7 @@ namespace RetroTrack.Domain.Services
                     ImageBoxArt = "",
                     ImageTitle = "",
                     ImageInGame = "",
-                    ConsoleId = gameFromDb.ConsoleID,
+                    ConsoleId = gameFromDb.ConsoleId,
                     ConsoleName = gameFromDb.GameConsole.ConsoleName,
                     Genre = gameFromDb.GameGenre ?? "",
                     Players = gameFromDb.Players ?? 0,
