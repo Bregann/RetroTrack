@@ -309,7 +309,7 @@ namespace RetroTrack.Domain.Services
                     }
                 }
 
-                Log.Information($"[RetroAchievements] User {user} has {gameList.Count} games to process.");
+                Log.Information($"[RetroAchievements] User {user.LoginUsername} has {gameList.Count} games to process.");
 
                 // grab the user profile from the api
                 var userProfile = await raApiService.GetUserProfile(user.LoginUsername, user.RAUserUlid);

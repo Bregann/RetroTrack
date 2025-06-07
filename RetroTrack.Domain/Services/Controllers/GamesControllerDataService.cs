@@ -23,7 +23,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (i == 0)
                 {
-                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date).Take(100).ToListAsync(); // the take 100 is temp lol
+                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date && x.HasAchievements).Take(100).ToListAsync(); // the take 100 is temp lol
                     var gamesTable = new List<PublicGamesTableDto>();
 
                     gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
@@ -126,7 +126,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).ToListAsync();
                 }
 
-                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
             if (gameList == null || gameList.Count == 0)
@@ -327,10 +327,10 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).ToListAsync();
+                    gameList = await context.Games.Where(x => x.ConsoleId == consoleId).ToListAsync();
                 }
 
-                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
             if (gameList == null || gameList.Count == 0)
@@ -355,7 +355,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     Games = consoleGames
                 };
 
-                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{userData.Username}", JsonConvert.SerializeObject(allGamesUserProgress));
+                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{userData.Username}", JsonConvert.SerializeObject(allGamesUserProgress));
                 return allGamesUserProgress;
             }
 
