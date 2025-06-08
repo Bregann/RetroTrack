@@ -109,24 +109,42 @@ namespace RetroTrack.Domain.Services.Controllers
         public async Task<PublicConsoleGamesDto?> GetGamesForConsole(int consoleId)
         {
             var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
-            var gameList = new List<Game>();
+            var gameList = new List<PublicGamesTableDto>();
 
             if (cacheData != null)
             {
-                gameList = JsonConvert.DeserializeObject<List<Game>>(cacheData);
+                gameList = JsonConvert.DeserializeObject<List<PublicGamesTableDto>>(cacheData);
             }
             else
             {
                 if (consoleId == 0)
                 {
-                    gameList = await context.Games.ToListAsync();
+                    gameList = await context.Games.Select(x => new PublicGamesTableDto
+                    {
+                        AchievementCount = x.AchievementCount,
+                        GameGenre = x.GameGenre ?? "",
+                        GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
+                        Console = x.GameConsole.ConsoleName,
+                        GameId = x.Id,
+                        GameName = x.Title,
+                        Players = x.Players ?? 0
+                    }).ToListAsync();
                 }
                 else
                 {
-                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).ToListAsync();
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).Select(x => new PublicGamesTableDto
+                    {
+                        AchievementCount = x.AchievementCount,
+                        GameGenre = x.GameGenre ?? "",
+                        GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
+                        Console = x.GameConsole.ConsoleName,
+                        GameId = x.Id,
+                        GameName = x.Title,
+                        Players = x.Players ?? 0
+                    }).ToListAsync();
                 }
 
-                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
+                await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
             if (gameList == null || gameList.Count == 0)
@@ -138,16 +156,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 ConsoleId = consoleId,
                 ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == consoleId).First().ConsoleName,
-                Games = gameList.Select(x => new PublicGamesTableDto
-                {
-                    AchievementCount = x.AchievementCount,
-                    Console = x.GameConsole.ConsoleName,
-                    GameGenre = x.GameGenre ?? "",
-                    GameIconUrl = "https://media.retroachievements.org" + x.ImageIcon,
-                    GameId = x.Id,
-                    GameName = x.Title,
-                    Players = x.Players ?? 0
-                }).ToList()
+                Games = gameList
             };
         }
 

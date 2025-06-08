@@ -31,7 +31,7 @@ namespace RetroTrack.Api.Controllers.Auth
         [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await authDataService.ResetUserPassword(dto.RaUsername.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpGet]
