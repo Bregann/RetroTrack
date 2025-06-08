@@ -306,12 +306,14 @@ namespace RetroTrack.Domain.Services
 
                         gameList.AddRange(extraData.Results);
                         skip += 500;
+                        await Task.Delay(1000); // Delay to avoid hitting API rate limits
                     }
                 }
 
                 Log.Information($"[RetroAchievements] User {user.LoginUsername} has {gameList.Count} games to process.");
 
                 // grab the user profile from the api
+                await Task.Delay(1000); // Delay to avoid hitting API rate limits
                 var userProfile = await raApiService.GetUserProfile(user.LoginUsername, user.RAUserUlid);
 
                 if (userProfile == null)

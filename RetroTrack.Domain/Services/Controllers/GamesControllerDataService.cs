@@ -45,7 +45,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date).ToListAsync();
+                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date && x.HasAchievements).Take(100).ToListAsync();
 
                     var gamesTable = new List<PublicGamesTableDto>();
 

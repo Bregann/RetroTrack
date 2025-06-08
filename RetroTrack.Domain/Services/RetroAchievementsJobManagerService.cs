@@ -13,7 +13,7 @@ namespace RetroTrack.Domain.Services
         // It will queue unscheduled jobs based on a limit and their processing status.
         // It will also clean up any jobs that have been processed or are stuck in the scheduled state.
 
-        private readonly int _queueLimit = 5;
+        private readonly int _queueLimit = 20;
 
         /// <summary>
         /// Queues unscheduled jobs to be processed by the RetroAchievementsJobProcessorService.
