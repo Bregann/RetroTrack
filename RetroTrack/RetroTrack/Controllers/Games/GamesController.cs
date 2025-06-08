@@ -1,24 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data;
-using RetroTrack.Domain.Dtos;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.Interfaces.Controllers;
+using RetroTrack.Domain.Interfaces.Helpers;
 
 namespace RetroTrack.Api.Controllers.Games
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class GamesController : ControllerBase
+    public class GamesController(IGamesControllerDataService gamesControllerData, IAuthHelperService authHelperService) : ControllerBase
     {
         [HttpGet]
-        public List<DayListDto> GetRecentlyAddedAndUpdatedGames()
+        public async Task<List<DayListDto>> GetRecentlyAddedAndUpdatedGames()
         {
-            return GamesData.GetNewAndUpdatedGamesFromLast5Days();
+            return await gamesControllerData.GetNewAndUpdatedGamesFromLast5Days();
         }
 
         [HttpGet("{gameId}")]
         public async Task<ActionResult<GameInfoDto>> GetSpecificGameInfo([FromRoute] int gameId)
         {
-            var data = await GamesData.GetSpecificGameInfo(gameId);
+            var data = await gamesControllerData.GetSpecificGameInfo(gameId);
 
             if (data == null)
             {
@@ -31,14 +31,14 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{gameId}")]
         public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            var data = await GamesData.GetUserGameInfo(user, gameId);
+            var data = await gamesControllerData.GetUserGameInfo(user, gameId);
 
             return Ok(data);
         }
@@ -46,22 +46,22 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet]
         public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            var data = await GamesData.GetUserAchievementsForGame(user, gameId);
+            var data = await gamesControllerData.GetUserAchievementsForGame(user, gameId);
 
             return Ok(data);
         }
 
         [HttpGet("{consoleId}")]
-        public ActionResult<PublicConsoleGamesDto> GetGamesForConsole([FromRoute] int consoleId)
+        public async Task<ActionResult<PublicConsoleGamesDto>> GetGamesForConsole([FromRoute] int consoleId)
         {
-            var games = Domain.Data.GamesData.GetGamesForConsole(consoleId);
+            var games = await gamesControllerData.GetGamesForConsole(consoleId);
 
             if (games == null)
             {
@@ -72,16 +72,16 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
         [HttpGet("{consoleId}")]
-        public ActionResult<UserConsoleGamesDto> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
+        public async Task<ActionResult<UserConsoleGamesDto>> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            var games = GamesData.GetGamesAndUserProgressForConsole(user, consoleId);
+            var games = await gamesControllerData.GetGamesAndUserProgressForConsole(user, consoleId);
 
             if (games == null)
             {
@@ -92,16 +92,16 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
         [HttpGet]
-        public ActionResult<List<UserGamesTableDto>> GetUserInProgressGames()
+        public async Task<ActionResult<List<UserGamesTableDto>>> GetUserInProgressGames()
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            var trackedGames = GamesData.GetInProgressGamesForUser(user);
+            var trackedGames = await gamesControllerData.GetInProgressGamesForUser(user);
             return Ok(trackedGames);
         }
 

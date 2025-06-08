@@ -1,6 +1,4 @@
-﻿using RetroTrack.Domain;
-
-namespace RetroTrack.Api
+﻿namespace RetroTrack.Api
 {
     public class ApiAuthorisationMiddleware
     {
@@ -24,7 +22,7 @@ namespace RetroTrack.Api
             }
 
             // Check if the API key matches
-            if (!apiKeyFromRequest.Equals(AppConfig.ApiSecret, StringComparison.OrdinalIgnoreCase))
+            if (!apiKeyFromRequest.Equals(Environment.GetEnvironmentVariable("ApiSecret"), StringComparison.OrdinalIgnoreCase))
             {
                 // If API key doesn't match, respond with "Unauthorized"
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;

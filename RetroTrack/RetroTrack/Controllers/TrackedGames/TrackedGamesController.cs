@@ -1,25 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.Data;
-using RetroTrack.Domain.Dtos;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.Interfaces.Controllers;
+using RetroTrack.Domain.Interfaces.Helpers;
 
 namespace RetroTrack.Api.Controllers.TrackedGames
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class TrackedGamesController : ControllerBase
+    public class TrackedGamesController(ITrackedGamesControllerDataService trackedGamesControllerData, IAuthHelperService authHelper) : ControllerBase
     {
         [HttpPost("{gameId}")]
-        public ActionResult<bool> AddTrackedGame([FromRoute] int gameId)
+        public async Task<ActionResult<bool>> AddTrackedGame([FromRoute] int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            if (TrackedGamesData.AddNewTrackedGame(user, gameId))
+            if (await trackedGamesControllerData.AddNewTrackedGame(user, gameId))
             {
                 return Ok(true);
             }
@@ -30,16 +30,16 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         }
 
         [HttpDelete("{gameId}")]
-        public ActionResult DeleteTrackedGame([FromRoute] int gameId)
+        public async Task<ActionResult> DeleteTrackedGame([FromRoute] int gameId)
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            if (TrackedGamesData.RemoveTrackedGame(user, gameId))
+            if (await trackedGamesControllerData.RemoveTrackedGame(user, gameId))
             {
                 return Ok(true);
             }
@@ -50,21 +50,17 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         }
 
         [HttpGet]
-        public ActionResult<List<UserGamesTableDto>> GetTrackedGamesForUser()
+        public async Task<ActionResult<List<UserGamesTableDto>>> GetTrackedGamesForUser()
         {
-            var user = AuthHelper.ValidateSessionIdAndReturnUsername(Request.Headers);
+            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
 
             if (user == null)
             {
                 return Unauthorized(false);
             }
 
-            var trackedGames = TrackedGamesData.GetTrackedGamesForUser(user);
+            var trackedGames = await trackedGamesControllerData.GetTrackedGamesForUser(user);
             return Ok(trackedGames);
         }
-
-        //Get tracked dev list games
-        //Delete tracked dev list games
-        //Add tracked dev list games
     }
 }

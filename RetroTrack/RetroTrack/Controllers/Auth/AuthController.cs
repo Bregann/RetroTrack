@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Api.Dtos.Auth;
-using RetroTrack.Domain.Data;
-using RetroTrack.Domain.Dtos;
+using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.Interfaces.Controllers;
 
-namespace RetroTrack.Api.Api.Controllers.Authenication
+namespace RetroTrack.Api.Controllers.Auth
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthControllerDataService authDataService) : ControllerBase
     {
         [HttpPost]
-        public ActionResult<LoginUserDto> LoginUser([FromBody] LoginUserRequestDto dto)
+        public async Task<ActionResult<LoginUserDto>> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = AuthData.ValidateUserLogin(dto.Username.ToLower(), dto.Password);
+            var loginData = await authDataService.ValidateUserLogin(dto.Username.ToLower().Trim(), dto.Password);
 
             if (!loginData.Successful)
             {
@@ -25,13 +25,13 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
         [HttpPost]
         public async Task<RegisterUserDto> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
         {
-            return await AuthData.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpPost]
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await AuthData.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            return await authDataService.ResetUserPassword(dto.RaUsername.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
         }
 
         [HttpGet]
@@ -43,20 +43,20 @@ namespace RetroTrack.Api.Api.Controllers.Authenication
             }
             else
             {
-                var data = await AuthData.ValidateSessionStatus(Request.Headers.Authorization!);
+                var data = await authDataService.ValidateSessionStatus(Request.Headers.Authorization!);
                 return data;
             }
         }
 
         [HttpDelete]
-        public ActionResult DeleteUserSession()
+        public async Task<ActionResult> DeleteUserSession()
         {
             if (string.IsNullOrEmpty(Request.Headers.Authorization))
             {
                 return BadRequest();
             }
 
-            UserData.DeleteUserSession(Request.Headers.Authorization!);
+            await authDataService.DeleteUserSession(Request.Headers.Authorization!);
             return Ok(true);
         }
     }
