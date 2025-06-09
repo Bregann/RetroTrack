@@ -10,16 +10,34 @@ namespace RetroTrack.Api.Controllers.Auth
     public class AuthController(IAuthControllerDataService authDataService) : ControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult<LoginUserDto>> LoginUser([FromBody] LoginUserRequestDto dto)
+        public async Task<IActionResult> LoginUser([FromBody] LoginUserRequestDto dto)
         {
-            var loginData = await authDataService.ValidateUserLogin(dto.Username.ToLower().Trim(), dto.Password);
-
-            if (!loginData.Successful)
+            try
             {
-                return Unauthorized(false);
-            }
+                var loginData = await authDataService.LoginUser(dto.Username.ToLower().Trim(), dto.Password);
 
-            return Ok(loginData);
+                Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // ensure you're on HTTPS in prod
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
+
+                Response.Cookies.Append("refreshToken", loginData.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                });
+
+                return Ok();
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
+            {
+                return Unauthorized("Invalid username/password");
+            }
         }
 
         [HttpPost]
@@ -32,20 +50,6 @@ namespace RetroTrack.Api.Controllers.Auth
         public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
             return await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
-        }
-
-        [HttpGet]
-        public async Task<bool> ValidateSessionStatus()
-        {
-            if (string.IsNullOrEmpty(Request.Headers.Authorization))
-            {
-                return false;
-            }
-            else
-            {
-                var data = await authDataService.ValidateSessionStatus(Request.Headers.Authorization!);
-                return data;
-            }
         }
 
         [HttpDelete]

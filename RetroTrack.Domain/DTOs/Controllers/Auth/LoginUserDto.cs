@@ -2,8 +2,7 @@
 {
     public class LoginUserDto
     {
-        public required bool Successful { get; set; }
-        public string SessionId { get; set; } = "";
-        public string Username { get; set; } = "";
+        public required string AccessToken { get; set; }
+        public required string RefreshToken { get; set; }
     }
 }

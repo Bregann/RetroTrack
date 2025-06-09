@@ -58,11 +58,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontendLocalhost", builder =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        builder
+            .WithOrigins("http://localhost:3000")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -118,7 +120,7 @@ builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = 
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontendLocalhost");
 
 var environmentalSettingHelper = app.Services.GetService<IEnvironmentalSettingHelper>()!;
 await environmentalSettingHelper.LoadEnvironmentalSettings();

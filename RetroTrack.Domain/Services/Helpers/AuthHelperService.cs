@@ -9,32 +9,34 @@ namespace RetroTrack.Domain.Services.Helpers
     {
         public UserDataDto? ValidateSessionIdAndReturnUserData(IHeaderDictionary headers)
         {
-            var userSession = headers.Authorization.ToString();
-            var username = headers["RtUsername"].ToString();
+            return null; // This method is currently not implemented. Uncomment and implement the logic below if needed.
 
-            if (string.IsNullOrEmpty(userSession) || string.IsNullOrEmpty(username))
-            {
-                return null;
-            }
+            //var userSession = headers.Authorization.ToString();
+            //var username = headers["RtUsername"].ToString();
 
-            var user = context.Sessions
-                .Where(x => x.SessionId == userSession && x.User.LoginUsername == username)
-                .Select(x => x.User)
-                .FirstOrDefault();
+            //if (string.IsNullOrEmpty(userSession) || string.IsNullOrEmpty(username))
+            //{
+            //    return null;
+            //}
 
-            if (user == null)
-            {
-                return null;
-            }
-            else
-            {
-                return new UserDataDto
-                {
-                    UserId = user.Id,
-                    Username = user.LoginUsername,
-                    RaUlid = user.RAUserUlid
-                };
-            }
+            //var user = context.Sessions
+            //    .Where(x => x.SessionId == userSession && x.User.LoginUsername == username)
+            //    .Select(x => x.User)
+            //    .FirstOrDefault();
+
+            //if (user == null)
+            //{
+            //    return null;
+            //}
+            //else
+            //{
+            //    return new UserDataDto
+            //    {
+            //        UserId = user.Id,
+            //        Username = user.LoginUsername,
+            //        RaUlid = user.RAUserUlid
+            //    };
+            //}
         }
 
         public string GetRAUsernameFromLoginUsername(string username) => context.Users.First(x => x.LoginUsername == username).RAUsername;

@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
@@ -13,7 +18,7 @@ namespace RetroTrack.Domain.Services.Controllers
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public async Task<LoginUserDto> ValidateUserLogin(string username, string password)
+        public async Task<LoginUserDto> LoginUser(string username, string password)
         {
             //Get the user
             var user = await context.Users.FirstOrDefaultAsync(x => x.LoginUsername == username);
@@ -21,11 +26,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (user == null)
             {
                 Log.Information($"[User Login] Attempted login with username {username} failed due to user not existing");
-
-                return new LoginUserDto
-                {
-                    Successful = false
-                };
+                throw new KeyNotFoundException($"User with username {username} does not exist.");
             }
 
             var isMatch = false;
@@ -52,34 +53,20 @@ namespace RetroTrack.Domain.Services.Controllers
             if (!isMatch)
             {
                 Log.Information($"[User Login] Attempted login with username {username} failed due to incorrect password");
-
-                return new LoginUserDto
-                {
-                    Successful = false
-                };
+                throw new UnauthorizedAccessException("Incorrect password provided for user " + username);
             }
 
-            var sessionId = $"D{DateTime.UtcNow.Ticks / 730}G{Guid.NewGuid()}";
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-            //Create a new session id and add it into the database
-            await context.Sessions.AddAsync(new Session
-            {
-                SessionId = sessionId,
-                UserId = user.Id,
-                ExpiryTime = DateTime.UtcNow.AddDays(30),
-            });
+            await SaveRefreshToken(refreshToken, user.Id);
 
-            await context.SaveChangesAsync();
-            Log.Information($"[User Login] Attempted login with username {username} successful");
-
-            user.LastActivity = DateTime.UtcNow;
-            await context.SaveChangesAsync();
+            Log.Information($"User logged in {username}");
 
             return new LoginUserDto
             {
-                Successful = true,
-                SessionId = sessionId,
-                Username = username
+                AccessToken = token,
+                RefreshToken = refreshToken
             };
         }
 
@@ -204,33 +191,50 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<bool> ValidateSessionStatus(string sessionId)
+        public async Task DeleteUserSession(string token)
         {
-            var session = await context.Sessions.FirstOrDefaultAsync(x => x.SessionId == sessionId);
+            await context.UserRefreshTokens.Where(x => x.Token == token).ExecuteDeleteAsync();
 
-            if (session == null)
-            {
-                return false;
-            }
-
-            //Check if it has expired
-            if (session.ExpiryTime < DateTime.UtcNow)
-            {
-                context.Sessions.Remove(session);
-                await context.SaveChangesAsync();
-                return false;
-            }
-
-            session.ExpiryTime = DateTime.UtcNow.AddDays(30);
-            await context.SaveChangesAsync();
-            return true;
+            Log.Information($"[Logout User] Session {token} deleted");
         }
 
-        public async Task DeleteUserSession(string sessionId)
+        private static string GenerateJwtToken(User user)
         {
-            await context.Sessions.Where(x => x.SessionId == sessionId).ExecuteDeleteAsync();
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.LoginUsername),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
 
-            Log.Information($"[Logout User] Session {sessionId} deleted");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: Environment.GetEnvironmentVariable("JwtValidIssuer"),
+                audience: Environment.GetEnvironmentVariable("JwtValidAudience"),
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+        }
+
+        private async Task SaveRefreshToken(string token, int userId)
+        {
+            var refreshToken = new UserRefreshToken
+            {
+                Token = token,
+                UserId = userId,
+                ExpiresAt = DateTime.UtcNow.AddDays(30)
+            };
+
+            context.UserRefreshTokens.Add(refreshToken);
+            await context.SaveChangesAsync();
         }
     }
 }
