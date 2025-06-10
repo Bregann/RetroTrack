@@ -18,8 +18,8 @@ namespace RetroTrack.Api.Controllers.Auth
 
                 Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
                 {
-                    HttpOnly = true,
-                    Secure = true, // ensure you're on HTTPS in prod
+                    HttpOnly = false,
+                    Secure = true,
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
                 });
@@ -38,6 +38,12 @@ namespace RetroTrack.Api.Controllers.Auth
             {
                 return Unauthorized("Invalid username/password");
             }
+        }
+
+        [HttpPost]
+        public async Task RefreshToken()
+        {
+            var cookies = Request.Cookies;
         }
 
         [HttpPost]

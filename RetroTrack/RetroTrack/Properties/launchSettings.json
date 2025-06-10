@@ -6,12 +6,12 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JwtValidIssuer": "http://192.168.1.1:5053",
+        "JwtValidIssuer": "http://192.168.1.1:7248",
         "JwtValidAudience": "twitchbot",
         "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5053"
+      "applicationUrl": "http://localhost:7248"
     },
     "https": {
       "commandName": "Project",
@@ -19,7 +19,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JwtValidIssuer": "http://192.168.1.1:5053",
+        "JwtValidIssuer": "https://192.168.1.1:7248",
         "JwtValidAudience": "twitchbot",
         "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123",
         "ApiSecret": "supersecret"

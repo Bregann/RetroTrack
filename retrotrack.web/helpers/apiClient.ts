@@ -14,11 +14,11 @@ interface FetchResponse<T> {
 interface RequestOptions {
   headers?: HeadersInit
   body?: unknown
-  retry?: boolean
+  retry?: boolean,
+  accessToken?: string
 }
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localhost:7248/api'
-
 async function doRequest<T>(
   method: HttpMethod,
   endpoint: string,
@@ -30,11 +30,14 @@ async function doRequest<T>(
     retry = true,
   } = options
 
+  const accessToken = options.accessToken ?? (typeof window !== 'undefined' ? getAccessToken() : undefined)
+
   const res = await fetch(`${baseURL}${endpoint}`, {
     method,
     credentials: 'include', // cookies 🍪
     headers: {
       'Content-Type': 'application/json',
+      ...(accessToken !== null ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -81,6 +84,11 @@ async function doRequest<T>(
     ok: res.ok,
     raw: res,
   }
+}
+
+const getAccessToken = async (): Promise<string | null> => {
+  const match = document.cookie.match(/(^| )accessToken=([^;]+)/)
+  return match ? decodeURIComponent(match[2]) : null
 }
 
 export const doGet = <T>(endpoint: string, options?: RequestOptions) =>
