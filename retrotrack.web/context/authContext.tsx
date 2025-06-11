@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await doGet<User>('/api/auth/me') //TODO:: add the type for the response
+        const res = await doGet<User>('auth/me') //TODO:: add the type for the response
         if (res.status === 200) {
           setUser(res.data ?? null)
         }
@@ -40,10 +40,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   const login = async (username: string, password: string) => {
-    const res = await doPost('/api/auth/LoginUser', { body: { username, password } })
+    const res = await doPost('auth/LoginUser', { body: { username, password } })
     if (res.status === 200) {
       // after login, fetch the user data
-      const userRes = await doGet<User>('/api/auth/me')
+      const userRes = await doGet<User>('auth/me')
       if (userRes.status === 200) {
         setUser(userRes.data ?? null)
         return true

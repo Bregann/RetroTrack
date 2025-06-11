@@ -18,7 +18,7 @@ namespace RetroTrack.Api.Controllers.Auth
 
                 Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
                 {
-                    HttpOnly = false,
+                    HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
