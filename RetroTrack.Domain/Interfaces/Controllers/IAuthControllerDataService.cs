@@ -1,4 +1,5 @@
 ﻿using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.DTOs.Controllers.Auth.Responses;
 
 namespace RetroTrack.Domain.Interfaces.Controllers
 {

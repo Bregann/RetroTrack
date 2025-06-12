@@ -1,6 +1,6 @@
-﻿namespace RetroTrack.Domain.DTOs.Controllers.Auth
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Auth.Responses
 {
-    public class LoginUserDto
+    public class LoginUserResponseDto
     {
         public required string AccessToken { get; set; }
         public required string RefreshToken { get; set; }

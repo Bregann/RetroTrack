@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.DTOs.Controllers.Auth.Responses;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
