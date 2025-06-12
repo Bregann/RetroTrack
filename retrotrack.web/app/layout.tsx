@@ -1,7 +1,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core'
+import { ColorSchemeScript, MantineProvider, createTheme, mantineHtmlProps } from '@mantine/core'
 import { Navbar } from '@/components/navigation/Navbar'
 import FloatingButtons from '@/components/navigation/FloatingButtons'
 import { AuthProvider } from '@/context/authContext'
@@ -12,6 +12,23 @@ export const metadata = {
 }
 
 //override the background colour for mantine dark mode
+const theme = createTheme({
+  colors: {
+    dark: [
+      '#F3F4F6',
+      '#DFE2E6',
+      '#C3C7CD',
+      '#9BA1A9',
+      '#6E757E',
+      '#4A4F57',
+      '#2F333B',
+      '#23272E',
+      '#1D2026',
+      '#15171C'
+    ]
+  }
+})
+
 export default function RootLayout({
   children,
 }: {
@@ -23,7 +40,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto">
+        <MantineProvider defaultColorScheme="auto" theme={theme}>
           <AuthProvider>
             <div style={{ display: 'flex', minHeight: '100vh' }}>
               <Navbar />

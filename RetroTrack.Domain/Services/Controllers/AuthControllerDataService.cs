@@ -18,7 +18,7 @@ namespace RetroTrack.Domain.Services.Controllers
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public async Task<LoginUserDto> LoginUser(string username, string password)
+        public async Task<LoginUserResponseDto> LoginUser(string username, string password)
         {
             //Get the user
             var user = await context.Users.FirstOrDefaultAsync(x => x.LoginUsername == username);
@@ -63,7 +63,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
             Log.Information($"User logged in {username}");
 
-            return new LoginUserDto
+            return new LoginUserResponseDto
             {
                 AccessToken = token,
                 RefreshToken = refreshToken

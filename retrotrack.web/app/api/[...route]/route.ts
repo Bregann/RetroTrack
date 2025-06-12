@@ -1,99 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-const API_BASE = 'https://localhost:7248/api'
+// Use environment variables for configuration
+const API_BASE_URL = process.env.API_BASE_URL || 'https://localhost:7248/api'
+const API_SECRET_KEY = process.env.API_SECRET_KEY || 'supersecretkey'
+const ACCESS_TOKEN_COOKIE = 'accessToken'
+
+// Headers that should not be forwarded from the client to the backend
+const HOP_BY_HOP_HEADERS = [
+  'host',
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailers',
+  'transfer-encoding',
+  'upgrade',
+  'content-length', // Let fetch calculate this
+  'cookie', // We are handling auth via Authorization header
+]
 
 export async function handler(
   req: NextRequest,
-  context: { params: Promise<{ route: string[] }> }
+  // Corrected type for context params
+  context: { params: { route: string[] } }
 ) {
-  const { route } = await context.params
-  const url = `${API_BASE}/${route.join('/')}`
+  const { route } = context.params
+  const searchParams = req.nextUrl.search
 
-  // Extract access token from cookies
+  // 1. Correctly construct the full URL with query parameters
+  const url = `${API_BASE_URL}/${route.join('/')}${searchParams}`
+
   const cookieStore = await cookies()
-  const accessToken = cookieStore.get('accessToken')?.value
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
 
-  const contentType = req.headers.get('content-type') || ''
-  const headers: Record<string, string> = {}
-
-  // Copy headers from the request, excluding certain headers
+  // --- Request Headers ---
+  const headers = new Headers()
   req.headers.forEach((value, key) => {
-    const lowerKey = key.toLowerCase()
-    if (!['host', 'connection', 'content-length'].includes(lowerKey)) {
-      headers[key] = value
+    // 3. Improved header filtering
+    if (!HOP_BY_HOP_HEADERS.includes(key.toLowerCase())) {
+      headers.append(key, value)
     }
   })
 
-  // Add the access token to the Authorization header if it exists
   if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`
+    headers.set('Authorization', `Bearer ${accessToken}`)
   }
 
-  let body: BodyInit | undefined = undefined
+  headers.set('X-ApiSecretKey', API_SECRET_KEY)
 
-  // Handle body parsing based on method and content type
-  // Only parse body for non-GET/HEAD requests
-  if (!['GET', 'HEAD'].includes(req.method)) {
+  // --- Request Body (Prioritize Streaming) ---
+  let body: BodyInit | null = null
+  const contentType = headers.get('content-type')
 
-    // Handle different content types
-    if (contentType.includes('application/json')) {
-      const json = await req.json()
-      body = JSON.stringify(json)
-      headers['content-type'] = 'application/json'
-    }
-    // Handle text/plain
-    else if (contentType.includes('application/x-www-form-urlencoded')) {
-      const text = await req.text()
-      body = text
-      headers['content-type'] = 'application/x-www-form-urlencoded'
-    }
-    // Handle multipart/form-data separately
-    else if (contentType.includes('multipart/form-data')) {
-      const formData = await req.formData()
-      const newFormData = new FormData()
-
-      // Convert FormData to a new FormData instance with string values
-      for (const [key, value] of formData.entries()) {
-        if (typeof value === 'string') {
-          newFormData.append(key, value)
-        } else {
-          // It's a File
-          newFormData.append(key, value, value.name)
-        }
-      }
-
-      body = newFormData
-
-      // Remove the old content-type header so boundary gets auto-set
-      delete headers['content-type']
+  // 2. Stream the body for performance, except for specific cases
+  if (req.body && !['GET', 'HEAD'].includes(req.method)) {
+    // multipart/form-data cannot be streamed directly and must be reconstructed.
+    // Other content types can be streamed.
+    if (contentType?.includes('multipart/form-data')) {
+      body = await req.formData()
+      // Let fetch set the new Content-Type with the correct boundary
+      headers.delete('content-type')
     } else {
-      // Fallback for raw blobs or streams
-      body = await req.arrayBuffer()
+      // Stream the body directly for all other types
+      body = req.body
     }
   }
 
+  // --- Fetch from Backend ---
   const backendRes = await fetch(url, {
     method: req.method,
     headers,
     body,
   })
 
-  const setCookieHeader = backendRes.headers.getSetCookie?.()
-  ?? backendRes.headers.get('set-cookie') // fallback just in case
+  // --- Response Handling ---
+  const responseHeaders = new Headers(backendRes.headers)
+
+  // Handle Set-Cookie header separately
+  const setCookie = backendRes.headers.get('set-cookie')
+  responseHeaders.delete('set-cookie')
 
   const response = new NextResponse(backendRes.body, {
     status: backendRes.status,
-    headers: Object.fromEntries(backendRes.headers.entries()),
+    statusText: backendRes.statusText,
+    headers: responseHeaders,
   })
 
-  if (setCookieHeader) {
-  // If there are multiple Set-Cookie headers, they need to be set one-by-one
-    const cookies = Array.isArray(setCookieHeader)
-      ? setCookieHeader
-      : [setCookieHeader]
-
-    for (const cookie of cookies) {
+  // Re-apply Set-Cookie headers one by one
+  if (setCookie) {
+    // getSetCookie() is available in newer environments and is preferred
+    const setCookieHeaders = backendRes.headers.getSetCookie?.() ?? [setCookie]
+    for (const cookie of setCookieHeaders) {
       response.headers.append('set-cookie', cookie)
     }
   }

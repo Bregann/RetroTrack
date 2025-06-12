@@ -131,7 +131,7 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-//app.UseApiAuthorizationMiddleware();
+app.UseApiAuthorizationMiddleware();
 
 app.UseAuthentication();
 app.UseAuthorization();

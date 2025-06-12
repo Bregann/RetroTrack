@@ -1,18 +1,11 @@
 ﻿namespace RetroTrack.Api
 {
-    public class ApiAuthorisationMiddleware
+    public class ApiAuthorisationMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public ApiAuthorisationMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
-
         public async Task InvokeAsync(HttpContext context)
         {
             // Get the API key from the request headers or query string
-            var apiKeyFromRequest = context.Request.Headers["ApiSecret"].ToString();
+            var apiKeyFromRequest = context.Request.Headers["X-ApiSecretKey"].ToString();
 
             if (string.IsNullOrEmpty(apiKeyFromRequest))
             {
@@ -22,7 +15,7 @@
             }
 
             // Check if the API key matches
-            if (!apiKeyFromRequest.Equals(Environment.GetEnvironmentVariable("ApiSecret"), StringComparison.OrdinalIgnoreCase))
+            if (!apiKeyFromRequest.Equals(Environment.GetEnvironmentVariable("ApiSecret")))
             {
                 // If API key doesn't match, respond with "Unauthorized"
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -30,7 +23,7 @@
             }
 
             // If API key is valid, proceed to the next middleware
-            await _next(context);
+            await next(context);
         }
     }
 

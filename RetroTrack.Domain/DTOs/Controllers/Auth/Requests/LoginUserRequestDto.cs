@@ -1,4 +1,4 @@
-﻿namespace RetroTrack.Api.Dtos.Auth
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Auth.Requests
 {
     public class LoginUserRequestDto
     {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Api.Dtos.Auth;
 using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.DTOs.Controllers.Auth.Requests;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Api.Controllers.Auth
