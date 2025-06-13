@@ -1,8 +1,8 @@
 .navbar {
-  background-color: light-dark(var(--mantine-color-white), #263042);
+  background-color: light-dark(var(--mantine-color-light-4), #263042);
   height: 100vh;
-  width: 250px;
-  padding: var(--mantine-spacing-md);
+  width: 270px;
+  padding: var(--mantine-spacing-sm);
   padding-bottom: 0;
   display: flex;
   flex-direction: column;
