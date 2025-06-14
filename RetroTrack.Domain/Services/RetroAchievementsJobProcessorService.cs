@@ -55,7 +55,7 @@ namespace RetroTrack.Domain.Services
                     if (existingGame != null)
                     {
                         // check the last modified date, if in the last 6 hours and achievement count is different, set ExtraDataProcessed to false
-                        if (existingGame.LastModified > DateTime.UtcNow.AddHours(-6) && existingGame.AchievementCount != game.AchievementCount)
+                        if (game.DateModified > DateTime.UtcNow.AddHours(-7) && existingGame.AchievementCount != game.AchievementCount)
                         {
                             // check the achievement count, if the new game has achievements and the existing game does not, set ExtraDataProcessed to false & update the set released date
                             if (game.AchievementCount > 0 && existingGame.AchievementCount == 0)
@@ -66,6 +66,7 @@ namespace RetroTrack.Domain.Services
 
                             existingGame.LastAchievementCountChangeDate = DateTime.UtcNow;
                             existingGame.ExtraDataProcessed = false;
+
                             Log.Information($"[RetroAchievements] Game {existingGame.Id} ({existingGame.Title}) has been updated with new achievements, setting ExtraDataProcessed to false.");
                         }
 
