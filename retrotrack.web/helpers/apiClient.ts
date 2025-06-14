@@ -28,7 +28,7 @@ async function doRequest<T>(
     retry = true,
   } = options
 
-  const res = await fetch(`http://localhost:3000/api/${endpoint}`, {
+  const res = await fetch(`http://localhost:3000${endpoint}`, {
     method,
     credentials: 'include', // cookies 🍪
     headers: {

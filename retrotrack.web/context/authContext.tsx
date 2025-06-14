@@ -6,7 +6,6 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 type User = {
   username: string
-  // add more user props like email, role, etc
 }
 
 type AuthContextType = {
@@ -23,24 +22,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await doGet<User>('auth/me') //TODO:: add the type for the response
-        if (res.status === 200) {
-          setUser(res.data ?? null)
-        }
-      } catch {
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
-    }
+    const tokenRow = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('accessToken='))
+    const token = tokenRow ? tokenRow.split('=')[1] : undefined
 
-    fetchUser()
+    if (token !== undefined) {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const user = {
+        username: payload.username,
+      }
+      setUser(user)
+    }
+    setLoading(false)
   }, [])
 
   const login = async (username: string, password: string) => {
-    const res = await doPost('auth/LoginUser', { body: { username, password } })
+    const res = await doPost('/api/auth/LoginUser', { body: { username, password } })
     if (res.status === 200) {
       // after login, fetch the user data
       const userRes = await doGet<User>('auth/me')

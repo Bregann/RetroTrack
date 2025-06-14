@@ -1,11 +1,12 @@
-﻿using BreganUtils;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
@@ -15,60 +16,52 @@ namespace RetroTrack.Domain.Services.Controllers
 {
     public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService, ICachingService cachingService) : IGamesControllerDataService
     {
-        public async Task<List<DayListDto>> GetNewAndUpdatedGamesFromLast5Days()
+        public async Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames()
         {
-            var dayList = new List<DayListDto>();
+            var days = new List<DayData>();
 
+            // get the last 5 days of data
             for (int i = 0; i < 5; i++)
             {
-                if (i == 0)
+                var date = DateTime.UtcNow.AddDays(-i);
+                var newSets = await context.Games
+                    .Where(x => x.SetReleasedDate.Date == date.Date && x.HasAchievements)
+                    .Select(x => new GameData
+                    {
+                        GameId = x.Id.ToString(),
+                        Title = x.Title,
+                        GameIcon = x.ImageIcon,
+                        ConsoleName = x.GameConsole.ConsoleName,
+                        ConsoleType = x.GameConsole.ConsoleType,
+                        AchievementCount = x.AchievementCount.ToString(),
+                        Points = x.Points.ToString()
+                    }).ToArrayAsync();
+
+                var updatedSets = await context.Games
+                    .Where(x => x.LastModified.Date == date.Date && x.SetReleasedDate != date.Date && x.HasAchievements)
+                    .Select(x => new GameData
+                    {
+                        GameId = x.Id.ToString(),
+                        Title = x.Title,
+                        GameIcon = x.ImageIcon,
+                        ConsoleName = x.GameConsole.ConsoleName,
+                        ConsoleType = x.GameConsole.ConsoleType,
+                        AchievementCount = x.AchievementCount.ToString(),
+                        Points = x.Points.ToString()
+                    }).ToArrayAsync();
+
+                days.Add(new DayData
                 {
-                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.Date && x.HasAchievements).Take(100).ToListAsync(); // the take 100 is temp lol
-                    var gamesTable = new List<PublicGamesTableDto>();
-
-                    gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
-                    {
-                        AchievementCount = games.AchievementCount,
-                        GameGenre = games.GameGenre ?? "",
-                        GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
-                        Console = games.GameConsole.ConsoleName,
-                        GameId = games.Id,
-                        GameName = games.Title,
-                        Players = games.Players ?? 0
-                    }));
-
-                    dayList.Add(new DayListDto
-                    {
-                        Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date),
-                        GamesTable = gamesTable
-                    });
-                }
-                else
-                {
-                    var gamesFromDay = await context.Games.Where(x => x.ExtraDataProcessed && x.LastModified.Date == DateTime.UtcNow.AddDays(i * -1).Date && x.HasAchievements).Take(100).ToListAsync();
-
-                    var gamesTable = new List<PublicGamesTableDto>();
-
-                    gamesTable.AddRange(gamesFromDay.Select(games => new PublicGamesTableDto
-                    {
-                        AchievementCount = games.AchievementCount,
-                        GameGenre = games.GameGenre ?? "",
-                        GameIconUrl = "https://media.retroachievements.org" + games.ImageIcon,
-                        Console = games.GameConsole.ConsoleName,
-                        GameId = games.Id,
-                        GameName = games.Title,
-                        Players = games.Players ?? 0
-                    }));
-
-                    dayList.Add(new DayListDto
-                    {
-                        Date = DateTimeHelper.HumanizeDateTime(DateTime.UtcNow.Date.AddDays(i * -1)),
-                        GamesTable = gamesTable
-                    });
-                }
+                    Date = DateTimeHelper.HumanizeDateTime(date),
+                    NewSets = newSets, 
+                    UpdatedSets = updatedSets 
+                });
             }
 
-            return dayList;
+            return new GetRecentlyAddedAndUpdatedGamesResponse
+            {
+                Days = days
+            };
         }
 
         public async Task<GameInfoDto?> GetSpecificGameInfo(int gameId)

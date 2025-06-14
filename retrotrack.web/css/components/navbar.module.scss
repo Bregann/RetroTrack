@@ -1,4 +1,8 @@
 .navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 100;
   background-color: light-dark(var(--mantine-color-light-4), #263042);
   height: 100vh;
   width: 270px;
@@ -7,5 +11,5 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-  flex-shrink: 0; // Prevent shrinking
+  flex-shrink: 0;
 }

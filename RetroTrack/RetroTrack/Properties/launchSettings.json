@@ -8,7 +8,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JwtValidIssuer": "http://192.168.1.1:7248",
         "JwtValidAudience": "twitchbot",
-        "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123"
+        "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123",
+        "ApiSecret": "supersecret"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:7248"

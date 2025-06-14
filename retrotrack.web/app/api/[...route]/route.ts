@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 
 // Use environment variables for configuration
 const API_BASE_URL = process.env.API_BASE_URL || 'https://localhost:7248/api'
-const API_SECRET_KEY = process.env.API_SECRET_KEY || 'supersecretkey'
+const API_SECRET_KEY = process.env.API_SECRET_KEY || 'supersecret'
 const ACCESS_TOKEN_COOKIE = 'accessToken'
 
 // Headers that should not be forwarded from the client to the backend
@@ -26,7 +26,7 @@ export async function handler(
   // Corrected type for context params
   context: { params: { route: string[] } }
 ) {
-  const { route } = context.params
+  const { route } = await context.params
   const searchParams = req.nextUrl.search
 
   // 1. Correctly construct the full URL with query parameters
@@ -69,11 +69,14 @@ export async function handler(
   }
 
   // --- Fetch from Backend ---
-  const backendRes = await fetch(url, {
+  const reqInit: RequestInit & { duplex: 'half' } = {
     method: req.method,
     headers,
     body,
-  })
+    duplex: 'half', // The duplex field is now required for streaming bodies, but not yet reflected anywhere in docs or types. @see https://github.com/nodejs/node/issues/46221
+  }
+
+  const backendRes = await fetch(url, reqInit)
 
   // --- Response Handling ---
   const responseHeaders = new Headers(backendRes.headers)

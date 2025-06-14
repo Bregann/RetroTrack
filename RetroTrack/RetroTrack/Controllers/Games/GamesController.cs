@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 
@@ -10,9 +11,9 @@ namespace RetroTrack.Api.Controllers.Games
     public class GamesController(IGamesControllerDataService gamesControllerData, IAuthHelperService authHelperService) : ControllerBase
     {
         [HttpGet]
-        public async Task<List<DayListDto>> GetRecentlyAddedAndUpdatedGames()
+        public async Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames()
         {
-            return await gamesControllerData.GetNewAndUpdatedGamesFromLast5Days();
+            return await gamesControllerData.GetRecentlyAddedAndUpdatedGames();
         }
 
         [HttpGet("{gameId}")]
