@@ -4,9 +4,9 @@ export default class ConsoleHelper {
   static getConsoleColour(consoleType: ConsoleType): string {
     switch (consoleType) {
       case ConsoleType.Nintendo:
-        return '#E60012' // Nintendo Red
+        return '#e7484a' // Nintendo Red
       case ConsoleType.Sony:
-        return '#003791' // Sony Blue
+        return '#2559af' // Sony Blue
       case ConsoleType.Atari:
         return '#F68026' // Atari Orange
       case ConsoleType.Sega:
@@ -16,7 +16,7 @@ export default class ConsoleHelper {
       case ConsoleType.SNK:
         return '#000000' // SNK Black
       case ConsoleType.Other:
-        return '#808080' // Other Grey
+        return '#836d6d' // Other grey ish
       case ConsoleType.NotSet:
         return '#FFFFFF' // Not Set White
       default:

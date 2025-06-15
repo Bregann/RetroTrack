@@ -2,9 +2,8 @@ import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
 import { ColorSchemeScript, MantineProvider, createTheme, mantineHtmlProps } from '@mantine/core'
-import { Navbar } from '@/components/navigation/Navbar'
-import FloatingButtons from '@/components/navigation/FloatingButtons'
 import { AuthProvider } from '@/context/authContext'
+import { Navbar } from '@/components/navigation/Navbar'
 
 export const metadata = {
   title: 'My Mantine app',
@@ -43,11 +42,7 @@ export default function RootLayout({
         <MantineProvider defaultColorScheme="auto" theme={theme}>
           <AuthProvider>
             <div style={{ display: 'flex', minHeight: '100vh' }}>
-              <Navbar />
-              <div style={{ flex: 1, padding: 'var(--mantine-spacing-md)' }}>
-                <FloatingButtons />
-                {children}
-              </div>
+              <Navbar>{children}</Navbar>
             </div>
           </AuthProvider>
         </MantineProvider>

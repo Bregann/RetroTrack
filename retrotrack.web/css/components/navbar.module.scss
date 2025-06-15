@@ -1,15 +1,9 @@
 .navbar {
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 100;
   background-color: light-dark(var(--mantine-color-light-4), #263042);
-  height: 100vh;
-  width: 270px;
-  padding: var(--mantine-spacing-sm);
-  padding-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-  flex-shrink: 0;
+  padding: 5px
+}
+
+.searchInput {
+  background-color: light-dark(var(--mantine-color-light-4),(var(--mantine-color-dark-5)));
+  border: '1px solid #2e3b4e';
 }

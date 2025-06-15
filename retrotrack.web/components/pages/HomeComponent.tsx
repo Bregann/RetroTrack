@@ -50,7 +50,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="light" size="md">
+                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
                                   {set.consoleName}
                                 </Badge>
                               </Group>
@@ -100,7 +100,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="light" size="md">
+                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
                                   {set.consoleName}
                                 </Badge>
                               </Group>
