@@ -1,9 +1,9 @@
-export default function Page(){
-  return(
-    <main>
-      <h1>All Games</h1>
-      <p>This page will list all games.</p>
-      {/* Future implementation will go here */}
-    </main>
+import AllPagesComponent from '@/components/pages/AllGamesComponent'
+import PaginatedTable, { Column } from '@/components/shared/PaginatedTable'
+import { Badge, Container } from '@mantine/core'
+
+export default function Page() {
+  return (
+    <AllPagesComponent />
   )
 }

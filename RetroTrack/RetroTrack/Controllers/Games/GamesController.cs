@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Games;
+using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
@@ -14,6 +15,12 @@ namespace RetroTrack.Api.Controllers.Games
         public async Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames()
         {
             return await gamesControllerData.GetRecentlyAddedAndUpdatedGames();
+        }
+
+        [HttpGet]
+        public async Task<GetGamesForConsoleResponse> GetGamesForConsole([FromQuery] GetGamesForConsoleRequest request)
+        {
+            return await gamesControllerData.GetGamesForConsole(request);
         }
 
         [HttpGet("{gameId}")]
@@ -59,18 +66,6 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-        [HttpGet("{consoleId}")]
-        public async Task<ActionResult<PublicConsoleGamesDto>> GetGamesForConsole([FromRoute] int consoleId)
-        {
-            var games = await gamesControllerData.GetGamesForConsole(consoleId);
-
-            if (games == null)
-            {
-                return BadRequest();
-            }
-
-            return Ok(games);
-        }
 
         [HttpGet("{consoleId}")]
         public async Task<ActionResult<UserConsoleGamesDto>> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
