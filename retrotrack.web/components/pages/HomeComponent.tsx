@@ -2,10 +2,11 @@
 
 import ConsoleHelper from '@/helpers/ConsoleHelper'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/Api/Games/GetRecentlyAddedAndUpdatedGamesResponse'
-import { Badge, Card, Container, Grid, Group, Stack, Text } from '@mantine/core'
+import { Badge, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconStar, IconTrophy } from '@tabler/icons-react'
 import Image from 'next/image'
+import styles from '@/css/pages/home.module.scss'
 
 export interface HomeComponentProps {
   pageData: GetRecentlyAddedAndUpdatedGamesResponse
@@ -19,27 +20,42 @@ export default function HomeComponent(props: HomeComponentProps) {
   return (
     <>
       <Container size="95%">
-        <h1>Welcome to RetroTrack</h1>
+        <h1 style={{ textAlign: 'center' }}>Welcome to RetroTrack</h1>
+        <p style={{ textAlign: 'center', marginTop: -10 }}>
+          What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!
+        </p>
         {props.pageData.days.map((day, index) => {
           return (
             <div key={index}>
-              <h1>{day.date}</h1>
+              <Divider
+                label={day.date}
+                labelPosition="center"
+                classNames={{
+                  label: styles.mainDividerText,
+                }}
+              />
               <Grid gutter={'5%'}>
                 <Grid.Col span={{ base: 12, sm: 6 }}>
-                  <h2>New Sets</h2>
+                  <Divider
+                    label='New Sets'
+                    labelPosition="center"
+                    classNames={{
+                      label: styles.subDividerText,
+                    }}
+                  />
                   <Grid>
                     {day.newSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span}key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" withBorder>
+                          <Card padding="md" radius="md" shadow="md" className={styles.newSetCardBorder}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >
                                 <Image
                                   src={`https://media.retroachievements.org${set.gameIcon}`}
                                   alt={`${set.title} achievement icon`}
-                                  width={64}
-                                  height={64}
-                                  style={{ flexShrink: 0 }}
+                                  width={72}
+                                  height={72}
+                                  className={styles.roundedImage}
                                 />
                                 <Text
                                   fw={700}
@@ -50,7 +66,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
+                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
                                   {set.consoleName}
                                 </Badge>
                               </Group>
@@ -76,20 +92,26 @@ export default function HomeComponent(props: HomeComponentProps) {
                   </Grid>
                 </Grid.Col>
                 <Grid.Col span={6}>
-                  <h2>Updated Sets</h2>
+                  <Divider
+                    label='Updated Sets'
+                    labelPosition="center"
+                    classNames={{
+                      label: styles.subDividerText,
+                    }}
+                  />
                   <Grid>
                     {day.updatedSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span}key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" withBorder>
+                          <Card padding="md" radius="md" shadow="md" className={styles.updatedSetCardBorder}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >
                                 <Image
                                   src={`https://media.retroachievements.org${set.gameIcon}`}
                                   alt={`${set.title} achievement icon`}
-                                  width={64}
-                                  height={64}
-                                  style={{ flexShrink: 0 }}
+                                  width={72}
+                                  height={72}
+                                  className={styles.roundedImage}
                                 />
                                 <Text
                                   fw={700}
@@ -100,7 +122,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
+                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
                                   {set.consoleName}
                                 </Badge>
                               </Group>

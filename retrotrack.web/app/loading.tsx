@@ -8,10 +8,11 @@ export default function Loading() {
   return (
     <div
       style={{
-        minHeight: '100vh',
         display: 'flex',
+        width: '85vw',
+        height: '85vh',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
       }}
     >
       <Stack align="center" gap="md">
