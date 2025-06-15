@@ -119,7 +119,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 if (consoleId == 0)
                 {
-                    gameList = await context.Games.Select(x => new PublicGamesTableDto
+                    gameList = await context.Games.Where(x => x.HasAchievements).Select(x => new PublicGamesTableDto
                     {
                         AchievementCount = x.AchievementCount,
                         GameGenre = x.GameGenre ?? "",
@@ -132,7 +132,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
                 else
                 {
-                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId).Select(x => new PublicGamesTableDto
+                    gameList = await context.Games.Where(x => x.GameConsole.ConsoleId == consoleId && x.HasAchievements).Select(x => new PublicGamesTableDto
                     {
                         AchievementCount = x.AchievementCount,
                         GameGenre = x.GameGenre ?? "",
