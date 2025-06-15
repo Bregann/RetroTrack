@@ -16,7 +16,7 @@ import {
   Divider,
   useMantineColorScheme,
 } from '@mantine/core'
-import { IconMoonStars } from '@tabler/icons-react'
+import { IconDeviceGamepad3, IconHome2, IconMoonStars } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -30,6 +30,7 @@ const pressStart2P = Press_Start_2P({
 export function Navbar({ children }: { children: React.ReactNode }) {
   const [opened, setOpened] = useState(false)
   const { setColorScheme, colorScheme } = useMantineColorScheme()
+  const [currentPage, setCurrentPage] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
 
   return (
     <AppShell
@@ -88,6 +89,27 @@ export function Navbar({ children }: { children: React.ReactNode }) {
       {/* Navbar content */}
       <AppShell.Navbar className={styles.navbar}>
         <ScrollArea style={{ height: '100%' }}>
+          <NavLink
+            label="Home"
+            component={Link}
+            href="/home"
+            active={currentPage === '/home'}
+            py="xs"
+            leftSection={<IconHome2 size={20} stroke={1.5} />}
+            onClick={() => setCurrentPage('/home')}
+            style={{ borderRadius: '10px' }}
+          />
+          <NavLink
+            label="All Games"
+            component={Link}
+            href="/console/allgames"
+            active={currentPage === '/console/allgames'}
+            py="xs"
+            leftSection={<IconDeviceGamepad3 size={20} stroke={1.5} />}
+            onClick={() => setCurrentPage('/console/allgames')}
+            style={{ borderRadius: '10px' }}
+          />
+
           <NavLink
             label="Nintendo"
             py="xs"
