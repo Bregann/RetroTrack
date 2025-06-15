@@ -1,0 +1,10 @@
+.paper{
+    background-color: light-dark(var(--mantine-color-light-5),(var(--mantine-color-dark-7)));
+    border-radius: 5px;
+    border: 2px solid #1590e2;
+}
+
+.roundedImage {
+  border-radius: 5px;
+  flex-shrink: 0;
+}

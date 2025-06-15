@@ -49,9 +49,7 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
             <AuthProvider>
-              <div style={{ display: 'flex', minHeight: '100vh' }}>
-                <Navbar>{children}</Navbar>
-              </div>
+              <Navbar>{children}</Navbar>
             </AuthProvider>
           </MantineProvider>
         </QueryClientProvider>

@@ -2,61 +2,95 @@
 
 import React, { ReactNode } from 'react'
 import { Table, Pagination } from '@mantine/core'
+import { IconArrowDown, IconArrowUp, IconLineDashed } from '@tabler/icons-react'
 
 // Column definition: title shown in header; render for custom cell; key for default cell accessor
 export interface Column<T> {
   title: string
   key?: keyof T
   render?: (item: T, index: number) => ReactNode
+  sortable?: boolean
 }
+
+export type SortDirection = 'asc' | 'desc'
+export interface SortOption<T> {
+  key: keyof T
+  direction: SortDirection
+}
+
 
 export interface PaginatedTableProps<T> {
   data: T[]
   columns: Column<T>[]
-  RowComponent?: React.ComponentType<{ item: T; index: number }>
   page: number
   total: number
   onPageChange: (page: number) => void
+  onSortChange?: (option: SortOption<T>) => void
+  sortOption?: SortOption<T>
+  styles?: React.CSSProperties
 }
 
 export function PaginatedTable<T>({
   data,
   columns,
-  RowComponent,
   page,
   total,
   onPageChange,
+  onSortChange,
+  sortOption,
+  styles
 }: PaginatedTableProps<T>) {
-  const rows = data.map((item, index) => {
-    if (RowComponent) {
-      return <RowComponent key={index} item={item} index={index} />
-    }
-    return (
-      <Table.Tr key={index}>
-        {columns.map((col, colIndex) => (
-          <Table.Td key={colIndex}>
-            {col.render
-              ? col.render(item, index)
-              : String(item[col.key!] as ReactNode)}
-          </Table.Td>
-        ))}
-      </Table.Tr>
-    )
-  })
+  const currentKey = sortOption?.key
+  const currentDir = sortOption?.direction || 'asc'
+
+  const handleHeaderClick = (colKey?: keyof T) => {
+    if (!colKey || !onSortChange) return
+    // toggle direction if same key, else default to asc
+    const direction: SortDirection =
+      currentKey === colKey && currentDir === 'asc' ? 'desc' : 'asc'
+    onSortChange({ key: colKey, direction })
+  }
+
+  const rows = data.map((item, index) => (
+    <Table.Tr key={index}>
+      {columns.map((col, colIndex) => (
+        <Table.Td key={colIndex}>
+          {col.render
+            ? col.render(item, index)
+            : String(item[col.key!] as ReactNode)}
+        </Table.Td>
+      ))}
+    </Table.Tr>
+  ))
 
   return (
     <>
-      <Table striped highlightOnHover>
+      <Table striped highlightOnHover style={styles}>
         <Table.Thead>
           <Table.Tr>
-            {columns.map((col, colIndex) => (
-              <Table.Th key={colIndex}>{col.title}</Table.Th>
-            ))}
+            {columns.map((col, colIndex) => {
+              const isSorted = col.key === currentKey
+              const canSort = Boolean(col.sortable && onSortChange)
+
+              return (
+                <Table.Th
+                  key={colIndex}
+                  style={{ cursor: canSort ? 'pointer' : undefined }}
+                  onClick={() => canSort && handleHeaderClick(col.key)}
+                >
+                  {col.title}
+                  {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }}/> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }}/>)}
+                  {canSort && !isSorted && (
+                    <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }}/>
+                  )}
+                </Table.Th>
+              )
+            })}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
-      <Pagination value={page} total={total} onChange={(number) => { onPageChange(number) }} />
+      <Pagination value={page} total={total} onChange={onPageChange} />
     </>
   )
 }
