@@ -3,8 +3,7 @@ import { doGet } from '@/helpers/apiClient'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/Api/Games/GetRecentlyAddedAndUpdatedGamesResponse'
 
 export default async function Home() {
-  const homePageData = await doGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames')
-  console.log('Home page data:', homePageData.ok)
+  const homePageData = await doGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames', { next: { revalidate: 60 } })
   return (
     <main>
       {homePageData.status !== 200 &&

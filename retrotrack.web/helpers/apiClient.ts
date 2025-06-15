@@ -1,3 +1,5 @@
+// import next from 'next' // Removed: not needed and causes conflict
+
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 }
@@ -15,6 +17,7 @@ interface RequestOptions {
   headers?: HeadersInit
   body?: unknown
   retry?: boolean,
+  next?: { revalidate?: number; }
 }
 
 async function doRequest<T>(
@@ -26,16 +29,20 @@ async function doRequest<T>(
     body,
     headers = {},
     retry = true,
+    next: nextFetchOptions, // get 'next' from options
   } = options
 
   const res = await fetch(`http://localhost:3000${endpoint}`, {
     method,
-    credentials: 'include', // cookies 🍪
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...headers,
     },
+    // only JSON-ify if you passed a body
     body: body ? JSON.stringify(body) : undefined,
+    // sprinkle in Next.js fetch options
+    ...(nextFetchOptions && { next: nextFetchOptions }),
   })
 
   // 🛑 Unauthorized? Time to refresh & retry ONCE
