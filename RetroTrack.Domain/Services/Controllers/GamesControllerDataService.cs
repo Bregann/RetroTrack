@@ -72,12 +72,12 @@ namespace RetroTrack.Domain.Services.Controllers
 
             if (request.ConsoleId == -1)
             {
-                gameQuery = context.Games.Where(x => x.HasAchievements)
+                gameQuery = context.Games.Where(x => x.HasAchievements).OrderBy(x => x.Id)
                 .AsQueryable();
             }
             else
             {
-                gameQuery = context.Games.Where(x => x.ConsoleId == request.ConsoleId && x.HasAchievements);
+                gameQuery = context.Games.Where(x => x.ConsoleId == request.ConsoleId && x.HasAchievements).OrderBy(x => x.Id);
             }
 
             if (request.SearchTerm != null && request.SearchType != null)
@@ -105,6 +105,12 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? gameQuery.OrderBy(x => x.Title)
                     : gameQuery.OrderByDescending(x => x.Title);
             }
+            else if (request.SortByAchievementCount != null)
+            {
+                gameQuery = request.SortByAchievementCount == true
+                    ? gameQuery.OrderBy(x => x.AchievementCount)
+                    : gameQuery.OrderByDescending(x => x.AchievementCount);
+            }
             else if (request.SortByPlayerCount != null)
             {
                 gameQuery = request.SortByPlayerCount == true
@@ -118,19 +124,19 @@ namespace RetroTrack.Domain.Services.Controllers
                     : gameQuery.OrderByDescending(x => x.GameGenre);
             }
 
-            var games = await gameQuery
-                .Skip(request.Skip)
-                .Take(request.Take)
-                .Select(x => new ConsoleGames
-                {
-                    GameId = x.Id,
-                    AchievementCount = x.AchievementCount,
-                    GameGenre = x.GameGenre ?? "Not Set",
-                    GameImageUrl =  x.ImageIcon,
-                    GameTitle = x.Title,
-                    PlayerCount = x.Players ?? 0,
-                })
-                .ToArrayAsync();
+                var games = await gameQuery
+                    .Skip(request.Skip)
+                    .Take(request.Take)
+                    .Select(x => new ConsoleGames
+                    {
+                        GameId = x.Id,
+                        AchievementCount = x.AchievementCount,
+                        GameGenre = x.GameGenre ?? "Not Set",
+                        GameImageUrl = x.ImageIcon,
+                        GameTitle = x.Title,
+                        PlayerCount = x.Players ?? 0,
+                    })
+                    .ToArrayAsync();
 
             var totalCount = await gameQuery.CountAsync();
 

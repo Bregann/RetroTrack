@@ -1,12 +1,12 @@
 'use client'
-
-import { Game, GetGamesForConsoleResponse } from '@/interfaces/Api/Games/GetGamesForConsoleResponse'
+import { useState, useMemo } from 'react'
 import { Container, Paper } from '@mantine/core'
-import { useState } from 'react'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import { PublicGameTableColumns } from '@/interfaces/Pages/PublicGameTableColumns'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
+import { usePublicPaginatedTableQuery } from '@/hooks/Consoles/usePublicPaginatedTableQuery'
+import type { Game, GetGamesForConsoleResponse } from '@/interfaces/Api/Games/GetGamesForConsoleResponse'
 
 interface AllPagesComponentProps {
   pageData: GetGamesForConsoleResponse
@@ -51,36 +51,55 @@ const columns: Column<PublicGameTableColumns>[] = [
 ]
 
 export default function AllPagesComponent(props: AllPagesComponentProps) {
-  const [pageData, setPageData] = useState<GetGamesForConsoleResponse>(props.pageData)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(pageData.totalPages)
-
+  const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<Game>>({
     key: 'gameTitle',
     direction: 'asc',
   })
+
+  const queryString = useMemo(() => {
+    const skip = (page - 1) * 100
+    const take = 100
+    const sortKeyMap: Record<string,string> = {
+      gameTitle: 'SortByName',
+      gameGenre: 'SortByGenre',
+      achievementCount: 'SortByAchievementCount',
+      playerCount: 'SortByPlayerCount'
+    }
+    const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
+    const sortValue = sortOption.direction === 'asc'
+    return `ConsoleId=-1&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
+  }, [page, sortOption])
+
+  const isFirstLoad = queryString === 'ConsoleId=-1&Skip=0&Take=100&SortByName=true'
+
+
+  const { data, isLoading, isError, error } = usePublicPaginatedTableQuery(
+    queryString,
+    isFirstLoad ? props.pageData : undefined
+  )
+
+  const totalPages = data?.totalPages ?? 0
+
+  if (isLoading) return <p>Loading page {page}… ⏳</p>
+  if (isError) return <p>Oops: {error.message}</p>
 
   return (
     <Container size="95%">
       <h1>All Games</h1>
       <Paper className={styles.paper}>
         <PaginatedTable
-          data={pageData.games}
+          data={data?.games ?? []}
           columns={columns}
-          page={currentPage}
+          page={page}
           total={totalPages}
           sortOption={sortOption}
           onSortChange={(option) => {
-          // Here you would typically sort the data based on the selected option
-          // For this example, we will just log the sort option
+            setPage(1) // reset to first page on sort
             setSortOption(option)
-            console.log(`Sorting by ${option.key} in ${option.direction} order`)
           }}
-          onPageChange={(page) => {
-            setCurrentPage(page)
-            // Here you would typically fetch new data based on the page number
-            // For this example, we will just log the page number
-            console.log(`Fetching data for page ${page}`)
+          onPageChange={(newPage) => {
+            setPage(newPage)
           }}
         />
       </Paper>
