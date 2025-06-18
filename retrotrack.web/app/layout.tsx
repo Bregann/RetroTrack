@@ -34,7 +34,7 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body>
+      <body style={{ marginBottom: 20 }}>
         <Providers>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
             <AuthProvider>

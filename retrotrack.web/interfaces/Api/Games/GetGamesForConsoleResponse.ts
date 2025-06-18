@@ -2,6 +2,7 @@ export interface GetGamesForConsoleResponse {
     totalCount: number
     totalPages: number
     games: Game[]
+    consoleName: string
 }
 
 export interface Game {
@@ -11,4 +12,6 @@ export interface Game {
     achievementCount: number
     playerCount: number
     gameImageUrl: string
+    points: number
+    consoleName?: string // Optional, only present if consoleId is -1
 }

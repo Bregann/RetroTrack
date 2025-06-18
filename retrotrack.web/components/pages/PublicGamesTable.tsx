@@ -1,6 +1,7 @@
+
 'use client'
 import { useState, useMemo } from 'react'
-import { Button, Container, Group, Input, Paper, Select } from '@mantine/core'
+import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import { PublicGameTableColumns } from '@/interfaces/Pages/PublicGameTableColumns'
 import Image from 'next/image'
@@ -9,8 +10,11 @@ import { usePublicPaginatedTableQuery } from '@/hooks/Consoles/usePublicPaginate
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/Api/Games/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 
-interface AllPagesComponentProps {
+interface PublicGamesTableProps {
   pageData: GetGamesForConsoleResponse
+  consoleId: number
+  consoleName: string
+  totalGames: number
 }
 
 const columns: Column<PublicGameTableColumns>[] = [
@@ -45,13 +49,27 @@ const columns: Column<PublicGameTableColumns>[] = [
     sortable: true
   },
   {
+    title: 'Points',
+    key: 'points',
+    sortable: true,
+  },
+  {
     title: 'Players',
     key: 'playerCount',
     sortable: true
   }
 ]
 
-export default function AllPagesComponent(props: AllPagesComponentProps) {
+export default function PublicGamesTable(props: PublicGamesTableProps) {
+  if (columns.find(c => c.key === 'consoleName') === undefined) {
+    columns.push({
+      title: 'Console',
+      key: 'consoleName',
+      sortable: props.consoleId === -1, // Only show if consoleId is -1
+      show: props.consoleId === -1
+    })
+  }
+
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<Game>>({
     key: 'gameTitle',
@@ -69,7 +87,9 @@ export default function AllPagesComponent(props: AllPagesComponentProps) {
       gameTitle: 'SortByName',
       gameGenre: 'SortByGenre',
       achievementCount: 'SortByAchievementCount',
-      playerCount: 'SortByPlayerCount'
+      playerCount: 'SortByPlayerCount',
+      points: 'SortByPoints',
+      consoleName: 'SortByConsole'
     }
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
@@ -96,12 +116,13 @@ export default function AllPagesComponent(props: AllPagesComponentProps) {
 
   const totalPages = data?.totalPages ?? 0
 
-  if (isLoading) return <p>Loading page {page}… ⏳</p>
-  if (isError) return <p>Oops: {error.message}</p>
-
   return (
     <Container size="95%">
-      <h1>All Games</h1>
+      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+        <h1 style={{ marginBottom: '0.3rem' }}>{props.consoleName}</h1>
+        <p style={{ marginTop: 0, fontStyle: 'italic' }}>There are a total of {props.totalGames} games!</p>
+      </div>
+
       <Paper className={styles.paper}>
         <Group
           justify="center"
@@ -112,12 +133,19 @@ export default function AllPagesComponent(props: AllPagesComponentProps) {
           style={{ width: '100%' }}
         >
           <Input
-            placeholder="Search"
+            placeholder="Search..."
             style={{
               flex: 1,
               minWidth: 0,
             }}
-            onChange={(e) => setSearchInput(e.currentTarget.value)}
+            onChange={(e) =>{
+              if(e.currentTarget.value.trim() === '') {
+                setSearchTerm(null)
+                setSearchInput(null)
+              }
+              setSearchInput(e.currentTarget.value)
+            }
+            }
           />
           <Select
             data={searchDropdownOptions}
@@ -127,6 +155,7 @@ export default function AllPagesComponent(props: AllPagesComponentProps) {
             }}
             clearable
             defaultValue={searchDropdownValue}
+            onChange={(value) => setSearchDropdownValue(value ?? '0')}
           />
           <Button style={{ flex: '0 0 auto', ml: 10 }}
             onClick={() => {setSearchTerm(searchInput)}}
@@ -136,20 +165,27 @@ export default function AllPagesComponent(props: AllPagesComponentProps) {
           </Button>
         </Group>
 
-        <PaginatedTable
-          data={data?.games ?? []}
-          columns={columns}
-          page={page}
-          total={totalPages}
-          sortOption={sortOption}
-          onSortChange={(option) => {
-            setPage(1) // reset to first page on sort
-            setSortOption(option)
-          }}
-          onPageChange={(newPage) => {
-            setPage(newPage)
-          }}
-        />
+        {isLoading ? (
+          <Center style={{ padding: '2rem' }}>
+            <Loader variant="dots" size="lg" />{/* or variant="bars", "oval"—choose your vibe */}
+            <p style={{ marginLeft: 10 }}>Loading games...</p>
+          </Center>
+        ) : isError ? (
+          <p style={{ color: 'red' }}>Oops: {error.message}</p>
+        ) : (
+          <PaginatedTable
+            data={data!.games}
+            columns={columns}
+            page={page}
+            total={totalPages}
+            sortOption={sortOption}
+            onSortChange={(opt) => {
+              setPage(1)
+              setSortOption(opt)
+            }}
+            onPageChange={setPage}
+          />
+        )}
       </Paper>
     </Container>
   )

@@ -4,12 +4,12 @@ import React, { ReactNode } from 'react'
 import { Table, Pagination } from '@mantine/core'
 import { IconArrowDown, IconArrowUp, IconLineDashed } from '@tabler/icons-react'
 
-// Column definition: title shown in header; render for custom cell; key for default cell accessor
 export interface Column<T> {
   title: string
   key?: keyof T
   render?: (item: T, index: number) => ReactNode
   sortable?: boolean
+  show?: boolean
 }
 
 export type SortDirection = 'asc' | 'desc'
@@ -53,7 +53,7 @@ export function PaginatedTable<T>({
 
   const rows = data.map((item, index) => (
     <Table.Tr key={index}>
-      {columns.map((col, colIndex) => (
+      {columns.filter(x => x.show !== false).map((col, colIndex) => (
         <Table.Td key={colIndex}>
           {col.render
             ? col.render(item, index)
@@ -68,7 +68,7 @@ export function PaginatedTable<T>({
       <Table striped highlightOnHover style={styles}>
         <Table.Thead>
           <Table.Tr>
-            {columns.map((col, colIndex) => {
+            {columns.filter(x => x.show !== false).map((col, colIndex) => {
               const isSorted = col.key === currentKey
               const canSort = Boolean(col.sortable && onSortChange)
 

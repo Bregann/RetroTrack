@@ -10,7 +10,6 @@ using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using System.Security.Cryptography.X509Certificates;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
@@ -105,6 +104,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? gameQuery.OrderBy(x => x.Title)
                     : gameQuery.OrderByDescending(x => x.Title);
             }
+            else if (request.SortByConsole != null)
+            {
+                gameQuery = request.SortByConsole == true
+                    ? gameQuery.OrderBy(x => x.GameConsole.ConsoleName)
+                    : gameQuery.OrderByDescending(x => x.GameConsole.ConsoleName);
+            }
+            else if (request.SortByPoints != null)
+            {
+                gameQuery = request.SortByPoints == true
+                    ? gameQuery.OrderBy(x => x.Points)
+                    : gameQuery.OrderByDescending(x => x.Points);
+            }
             else if (request.SortByAchievementCount != null)
             {
                 gameQuery = request.SortByAchievementCount == true
@@ -135,6 +146,8 @@ namespace RetroTrack.Domain.Services.Controllers
                         GameImageUrl = x.ImageIcon,
                         GameTitle = x.Title,
                         PlayerCount = x.Players ?? 0,
+                        Points = x.Points,
+                        ConsoleName = request.ConsoleId == -1 ? x.GameConsole.ConsoleName : null
                     })
                     .ToArrayAsync();
 
@@ -144,7 +157,8 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 Games = games,
                 TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling((double)totalCount / request.Take)
+                TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
+                ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
         }
 

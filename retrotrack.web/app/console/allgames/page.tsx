@@ -1,4 +1,4 @@
-import AllPagesComponent from '@/components/pages/AllGamesComponent'
+import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetGamesForConsoleResponse } from '@/interfaces/Api/Games/GetGamesForConsoleResponse'
 
@@ -13,7 +13,12 @@ export default async function Page() {
         </div>
       }
       {pageData.ok && pageData.data !== undefined &&
-        <AllPagesComponent pageData={pageData.data} />
+        <PublicGamesTable
+          pageData={pageData.data}
+          consoleId={-1}
+          consoleName={pageData.data.consoleName}
+          totalGames={pageData.data.totalCount}
+        />
       }
     </main>
   )

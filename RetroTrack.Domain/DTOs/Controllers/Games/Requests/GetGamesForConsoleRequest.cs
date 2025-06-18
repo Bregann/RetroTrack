@@ -16,6 +16,8 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Requests
         public bool? SortByPlayerCount { get; set; } = null;
         public bool? SortByAchievementCount { get; set; } = null;
         public bool? SortByGenre { get; set; } = null;
+        public bool? SortByPoints { get; set; } = null;
+        public bool? SortByConsole { get; set; } = null;
         public string? SearchTerm { get; set; } = null;
         public ConsoleTableSearchType? SearchType { get; set; } = null;
     }
