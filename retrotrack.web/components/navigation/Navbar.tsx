@@ -20,6 +20,7 @@ import { IconDeviceGamepad3, IconHome2, IconMoonStars } from '@tabler/icons-reac
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
+import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -27,7 +28,12 @@ const pressStart2P = Press_Start_2P({
   display: 'swap',
 })
 
-export function Navbar({ children }: { children: React.ReactNode }) {
+interface NavbarProps {
+  children: React.ReactNode,
+  publicNavigationData: GetPublicNavigationDataResponse | null
+}
+
+export function Navbar(props: NavbarProps) {
   const [opened, setOpened] = useState(false)
   const { setColorScheme, colorScheme } = useMantineColorScheme()
   const [currentPage, setCurrentPage] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
@@ -156,7 +162,7 @@ export function Navbar({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <AppShell.Main>
-        {children}
+        {props.children}
       </AppShell.Main>
     </AppShell>
   )

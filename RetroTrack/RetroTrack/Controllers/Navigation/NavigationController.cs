@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Navigation;
+using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 
@@ -10,7 +11,7 @@ namespace RetroTrack.Api.Controllers.Navigation
     public class NavigationController(INavigationControllerDataService navigationControllerData, IAuthHelperService authHelperService) : ControllerBase
     {
         [HttpGet]
-        public async Task<GetPublicNavigationDataDto[]> GetPublicNavigationData()
+        public async Task<GetPublicNavigationDataResponse[]> GetPublicNavigationData()
         {
             return await navigationControllerData.GetPublicNavigationData();
         }

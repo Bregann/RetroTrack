@@ -5,6 +5,9 @@ import { ColorSchemeScript, MantineProvider, createTheme, mantineHtmlProps } fro
 import { AuthProvider } from '@/context/authContext'
 import { Navbar } from '@/components/navigation/Navbar'
 import Providers from './providers'
+import { cookies } from 'next/headers'
+import { doGet } from '@/helpers/apiClient'
+import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -24,11 +27,30 @@ const theme = createTheme({
   }
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
+  const cookieStore = await cookies()
+  let data: GetPublicNavigationDataResponse | null = null
+  // get the navigation data depending on whether the user is logged in or not
+  // if the user is logged in, we will get the navigation data for the logged in user
+  if(!cookieStore.has('accessToken')) {
+    // data = await doGet('')
+
+  } else {
+    const result = await doGet<GetPublicNavigationDataResponse>('/api/navigation/GetPublicNavigationData')
+    if (result.status !== 200 || result.data === undefined) {
+      console.error('Failed to load public navigation data:', result.status)
+      data = null
+    }
+    else {
+      data = result.data
+    }
+  }
+
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
@@ -38,7 +60,7 @@ export default function RootLayout({
         <Providers>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
             <AuthProvider>
-              <Navbar>{children}</Navbar>
+              <Navbar publicNavigationData={data}>{children}</Navbar>
             </AuthProvider>
           </MantineProvider>
         </Providers>

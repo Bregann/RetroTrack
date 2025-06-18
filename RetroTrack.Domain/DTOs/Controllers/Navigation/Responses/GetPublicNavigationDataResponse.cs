@@ -1,8 +1,8 @@
 ﻿using RetroTrack.Domain.Enums;
 
-namespace RetroTrack.Domain.DTOs.Controllers.Navigation
+namespace RetroTrack.Domain.DTOs.Controllers.Navigation.Responses
 {
-    public class GetPublicNavigationDataDto
+    public class GetPublicNavigationDataResponse
     {
         public required int ConsoleId { get; set; }
         public required string ConsoleName { get; set; }

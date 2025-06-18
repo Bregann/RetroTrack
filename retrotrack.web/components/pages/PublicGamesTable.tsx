@@ -3,11 +3,11 @@
 import { useState, useMemo } from 'react'
 import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
-import { PublicGameTableColumns } from '@/interfaces/Pages/PublicGameTableColumns'
+import { PublicGameTableColumns } from '@/interfaces/pages/PublicGameTableColumns'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import { usePublicPaginatedTableQuery } from '@/hooks/Consoles/usePublicPaginatedTableQuery'
-import type { Game, GetGamesForConsoleResponse } from '@/interfaces/Api/Games/GetGamesForConsoleResponse'
+import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 
 interface PublicGamesTableProps {
@@ -119,8 +119,8 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   return (
     <Container size="95%">
       <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ marginBottom: '0.3rem' }}>{props.consoleName}</h1>
-        <p style={{ marginTop: 0, fontStyle: 'italic' }}>There are a total of {props.totalGames} games!</p>
+        <h1 style={{ marginBottom: '0rem' }}>{props.consoleName}</h1>
+        <p style={{ marginTop: 0 }}>There are a total of {props.totalGames} games!</p>
       </div>
 
       <Paper className={styles.paper}>

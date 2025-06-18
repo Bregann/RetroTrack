@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.DTOs.Controllers.Navigation;
+using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces.Controllers;
@@ -9,11 +10,11 @@ namespace RetroTrack.Domain.Services.Controllers
 {
     public class NavigationControllerDataService(AppDbContext context) : INavigationControllerDataService
     {
-        public async Task<GetPublicNavigationDataDto[]> GetPublicNavigationData()
+        public async Task<GetPublicNavigationDataResponse[]> GetPublicNavigationData()
         {
             return await context.GameConsoles
                 .Where(x => x.DisplayOnSite)
-                .Select(x => new GetPublicNavigationDataDto
+                .Select(x => new GetPublicNavigationDataResponse
                 {
                     ConsoleId = x.ConsoleId,
                     ConsoleName = x.ConsoleName,
