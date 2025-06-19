@@ -23,3 +23,11 @@ export const GameModalProvider = ({ children }: { children: React.ReactNode }) =
     </GameModalContext.Provider>
   )
 }
+
+export const useGameModal = () => {
+  const context = useContext(GameModalContext)
+  if (!context) {
+    throw new Error('useGameModal must be used within a GameModalProvider')
+  }
+  return context
+}

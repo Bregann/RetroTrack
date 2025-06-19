@@ -1,12 +1,13 @@
 'use client'
 
 import ConsoleHelper from '@/helpers/ConsoleHelper'
-import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/Api/Games/GetRecentlyAddedAndUpdatedGamesResponse'
-import { Badge, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
+import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
+import { Badge, Button, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconStar, IconTrophy } from '@tabler/icons-react'
 import Image from 'next/image'
 import styles from '@/css/pages/home.module.scss'
+import { useGameModal } from '@/context/gameModalContext'
 
 export interface HomeComponentProps {
   pageData: GetRecentlyAddedAndUpdatedGamesResponse
@@ -17,9 +18,12 @@ export default function HomeComponent(props: HomeComponentProps) {
   const isXl = useMediaQuery('(min-width: 2440px)')
   const span = isXl ? 4 : isLg ? 6 : 12
 
+  const gameModal = useGameModal()
+
   return (
     <>
       <Container size="95%">
+        <Button onClick={() => {gameModal.showModal(1)}}>test</Button>
         <h1 style={{ textAlign: 'center' }}>Welcome to RetroTrack</h1>
         <p style={{ textAlign: 'center', marginTop: -10 }}>
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!

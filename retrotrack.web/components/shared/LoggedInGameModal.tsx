@@ -1,7 +1,6 @@
 'use client'
 
 // components/GameModal.tsx
-import React, { useState } from 'react'
 import {
   Modal,
   Group,
@@ -24,18 +23,21 @@ import {
   IconCheck,
 } from '@tabler/icons-react'
 
+interface LoggedInGameModalProps {
+  gameId?: number
+  onClose: () => void
+}
 
-export function LoggedInGameModal() {
-  const [opened, setOpened] = useState(true)
+export function LoggedInGameModal(props: LoggedInGameModalProps) {
 
   return (
     <Modal
-      opened={opened}
-      onClose={() => setOpened(false)}
+      opened={props.gameId !== undefined}
+      onClose={() => props.onClose()}
       size={'75%'}
       padding="md"
       radius="md"
-      title={<Text size="xl" fw={700}>Captain Commando</Text>}
+      title={<Text size="xl" fw={700}>Captain Commando - {props.gameId}</Text>}
     >
       {/* Screenshots */}
       <Group grow gap="md" mb="md">

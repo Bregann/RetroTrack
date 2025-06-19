@@ -8,6 +8,7 @@ import Providers from './providers'
 import { cookies } from 'next/headers'
 import { doGet } from '@/helpers/apiClient'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
+import { GameModalProvider } from '@/context/gameModalContext'
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -60,7 +61,9 @@ export default async function RootLayout({
         <Providers>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
             <AuthProvider>
-              <Navbar publicNavigationData={data}>{children}</Navbar>
+              <GameModalProvider>
+                <Navbar publicNavigationData={data}>{children}</Navbar>
+              </GameModalProvider>
             </AuthProvider>
           </MantineProvider>
         </Providers>
