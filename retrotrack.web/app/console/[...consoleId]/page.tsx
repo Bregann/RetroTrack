@@ -1,6 +1,6 @@
 import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'
-import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
+import { GetGamesForConsoleResponse } from '@/interfaces/apii/gamess/GetGamesForConsoleResponse'
 
 export default async function Page({
   params,

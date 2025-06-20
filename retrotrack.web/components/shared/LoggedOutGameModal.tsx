@@ -32,7 +32,7 @@ interface LoggedInGameModalProps {
   onClose: () => void
 }
 
-export function LoggedInGameModal(props: LoggedInGameModalProps) {
+export function LoggedOutGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
 
   return (
@@ -85,33 +85,22 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
 
       <Divider my="sm" label="Summary" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
 
-      <SimpleGrid cols={isSmall ? 2 : 4} mb="md">
+      <SimpleGrid cols={isSmall ? 2 : 3} mb="md">
         <Card withBorder>
-          <Stack align="center" gap={6}>
+          <Stack align="center" justify="center" h="100%" style={{ minHeight: 120 }}>
             <ThemeIcon size="xl" radius="md" color="yellow">
               <IconTrophy size={24} />
             </ThemeIcon>
-            <Text fw={700} ta={'center'}>48/73 Achievements</Text>
-            <Stack gap="xs" justify="center" ta={'center'}>
-              <Text size="sm" c="dimmed">73.73% complete</Text>
-              <Text size="sm" c="cyan">Softcore: 18</Text>
-              <Text size="sm" c="orange">Hardcore: 30</Text>
-              <Text size="sm" c="grey">Locked: 30</Text>
-            </Stack>
+            <Text fw={700} ta="center">73 Achievements</Text>
           </Stack>
         </Card>
 
         <Card withBorder>
-          <Stack align="center" gap={6}>
+          <Stack align="center" justify="center" h="100%" style={{ minHeight: 120 }}>
             <ThemeIcon size="xl" radius="md" color="teal">
               <IconStar size={24} />
             </ThemeIcon>
-            <Text fw={700} ta={'center'}>520/730 Points</Text>
-            <Stack gap="xs" justify="center" ta={'center'}>
-              <Text size="sm" c="dimmed">73.73% complete</Text>
-              <Text size="sm" c="cyan">Softcore: 180</Text>
-              <Text size="sm" c="orange">Hardcore: 300</Text>
-            </Stack>
+            <Text fw={700} ta={'center'}>730 Points</Text>
           </Stack>
         </Card>
 
@@ -128,40 +117,10 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
             </Stack>
           </Stack>
         </Card>
-
-        <Card withBorder>
-          <Stack align="center" gap={6}>
-            <ThemeIcon size="xl" radius="md" color="teal">
-              <IconCheck size={24} />
-            </ThemeIcon>
-            <Text fw={700} ta={'center'}>Completion State</Text>
-            <Stack gap={4}>
-              <Group gap="6"><IconDeviceGamepad size={16} /> <Text>Date Beaten:</Text></Group>
-              <Text size="sm" c="dimmed" ta={'center'}>2023-10-01</Text>
-
-              <Group gap="6"><IconDeviceGamepad size={16} /> <Text>Date Mastered:</Text></Group>
-              <Text size="sm" c="dimmed" ta={'center'}>2023-10-01</Text>
-            </Stack>
-          </Stack>
-        </Card>
       </SimpleGrid>
 
       <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
-      <Progress.Root size={20} className={styles.progressBar}>
-        <Progress.Section value={50} color="orange">
-          <Progress.Label>hardcore</Progress.Label>
-        </Progress.Section>
-        <Progress.Section value={30} color="cyan">
-          <Progress.Label>softcore</Progress.Label>
-        </Progress.Section>
-        <Progress.Section value={20} color="grey">
-          <Progress.Label>locked</Progress.Label>
-        </Progress.Section>
-      </Progress.Root>
       <Group>
-        <Checkbox
-          label="Hide Unlocked Achievements"
-        />
         <Checkbox
           label="Show Progression Achievements Only"
         />
@@ -169,6 +128,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           label="Show Missable Achievements Only"
         />
       </Group>
+
 
 
       <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
@@ -223,11 +183,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               <Text size="sm" c="dimmed">
                 Achievement Description 1
               </Text>
-              <Text size="xs" c="dimmed" mt={5}>
-                Unlocked on: 2023-10-01 12:34:56
-              </Text>
             </Stack>
-
             <Text fw={600} size="lg" c="yellow" mb={20}>
               10
             </Text>
@@ -284,29 +240,10 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
         </Card>
       </SimpleGrid>
 
-      {/* Notes Section */}
-      <Stack gap="xs" mb="md">
-        <Text fw={500}>Your Notes</Text>
-        <Textarea
-          placeholder="Write your notes here..."
-          minRows={3}
-          autosize
-        />
-        <Group justify="right">
-          <Button>Save Notes</Button>
-        </Group>
-      </Stack>
-
       {/* Action Buttons */}
       <Group justify="apart">
-        <Button variant="outline">Update</Button>
-        <Group gap="sm">
-          <Button variant="gradient" gradient={{ from: 'cyan', to: 'blue' }}>
-            Track Game
-          </Button>
-          <Button>Details</Button>
-          <Button>RA Page</Button>
-        </Group>
+        <Button>Details</Button>
+        <Button>RA Page</Button>
       </Group>
     </Modal >
   )
