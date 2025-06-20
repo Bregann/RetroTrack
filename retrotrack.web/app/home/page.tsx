@@ -1,6 +1,6 @@
 import HomeComponent from '@/components/pages/HomeComponent'
 import { doGet } from '@/helpers/apiClient'
-import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/apii/gamess/GetRecentlyAddedAndUpdatedGamesResponse'
+import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/gamess/GetRecentlyAddedAndUpdatedGamesResponse'
 
 export default async function Home() {
   const homePageData = await doGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames', { next: { revalidate: 60 } })

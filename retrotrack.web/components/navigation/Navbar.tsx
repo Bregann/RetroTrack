@@ -20,7 +20,7 @@ import { IconDeviceGamepad3, IconHome2, IconMoonStars } from '@tabler/icons-reac
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
-import { GetPublicNavigationDataResponse } from '@/interfaces/apii/navigationn/GetPublicNavigationDataResponse'
+import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigationn/GetPublicNavigationDataResponse'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',

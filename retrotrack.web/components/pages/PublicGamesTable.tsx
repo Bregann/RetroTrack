@@ -6,8 +6,8 @@ import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import { PublicGameTableColumns } from '@/interfaces/pages/PublicGameTableColumns'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
-import { usePublicPaginatedTableQuery } from '@/hooks/Consoles/usePublicPaginatedTableQuery'
-import type { Game, GetGamesForConsoleResponse } from '@/interfaces/apii/gamess/GetGamesForConsoleResponse'
+import { usePublicPaginatedTableQuery } from '@/hooks/consoles/usePublicPaginatedTableQuery'
+import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/gamess/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 
 interface PublicGamesTableProps {

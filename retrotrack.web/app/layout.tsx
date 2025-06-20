@@ -7,7 +7,7 @@ import { Navbar } from '@/components/navigation/Navbar'
 import Providers from './providers'
 import { cookies } from 'next/headers'
 import { doGet } from '@/helpers/apiClient'
-import { GetPublicNavigationDataResponse } from '@/interfaces/apii/navigationn/GetPublicNavigationDataResponse'
+import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigationn/GetPublicNavigationDataResponse'
 import { GameModalProvider } from '@/context/gameModalContext'
 
 //override the background colour for mantine dark mode

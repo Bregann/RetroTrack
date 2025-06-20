@@ -1,7 +1,7 @@
 'use client'
 
 import ConsoleHelper from '@/helpers/ConsoleHelper'
-import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/apii/gamess/GetRecentlyAddedAndUpdatedGamesResponse'
+import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/gamess/GetRecentlyAddedAndUpdatedGamesResponse'
 import { Badge, Button, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconStar, IconTrophy } from '@tabler/icons-react'
