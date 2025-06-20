@@ -1,5 +1,5 @@
 import { doGet } from '@/helpers/apiClient'
-import { GetGamesForConsoleResponse } from '@/interfaces/api/gamess/GetGamesForConsoleResponse'
+import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useQuery, UseQueryResult } from '@tanstack/react-query'
 
 export const usePublicPaginatedTableQuery = (query: string, initialData?: GetGamesForConsoleResponse): UseQueryResult<GetGamesForConsoleResponse, Error> => {

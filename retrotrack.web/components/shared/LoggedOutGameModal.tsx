@@ -9,10 +9,8 @@ import {
   Image,
   ThemeIcon,
   SimpleGrid,
-  Textarea,
   Button,
   Divider,
-  Progress,
   Box,
   Checkbox,
 } from '@mantine/core'
@@ -22,7 +20,6 @@ import {
   IconStar,
   IconDeviceGamepad,
   IconUsers,
-  IconCheck,
   IconAward,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'

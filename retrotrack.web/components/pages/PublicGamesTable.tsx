@@ -7,7 +7,7 @@ import { PublicGameTableColumns } from '@/interfaces/pages/PublicGameTableColumn
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import { usePublicPaginatedTableQuery } from '@/hooks/consoles/usePublicPaginatedTableQuery'
-import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/gamess/GetGamesForConsoleResponse'
+import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 
 interface PublicGamesTableProps {
