@@ -43,7 +43,7 @@ namespace RetroTrack.Domain.Services
                 var consoleId = gameList.First().ConsoleId;
                 var console = await context.GameConsoles.FirstAsync(x => x.ConsoleId == consoleId);
 
-                console.GameCount = gameList.Count;
+                console.GameCount = gameList.Count(x => x.AchievementCount != 0);
                 console.NoAchievementsGameCount = gameList.Count(x => x.AchievementCount == 0);
                 await context.SaveChangesAsync();
 
