@@ -9,7 +9,7 @@ export interface Day {
 }
 
 export interface Set {
-  gameId: string
+  gameId: number
   title: string
   gameIcon: string
   consoleName: string

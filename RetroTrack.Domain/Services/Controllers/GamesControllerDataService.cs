@@ -29,7 +29,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     .Where(x => x.SetReleasedDate.Date == date.Date && x.HasAchievements)
                     .Select(x => new GameData
                     {
-                        GameId = x.Id.ToString(),
+                        GameId = x.Id,
                         Title = x.Title,
                         GameIcon = x.ImageIcon,
                         ConsoleName = x.GameConsole.ConsoleName,
@@ -42,7 +42,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     .Where(x => x.LastModified.Date == date.Date && x.SetReleasedDate != date.Date && x.HasAchievements)
                     .Select(x => new GameData
                     {
-                        GameId = x.Id.ToString(),
+                        GameId = x.Id,
                         Title = x.Title,
                         GameIcon = x.ImageIcon,
                         ConsoleName = x.GameConsole.ConsoleName,

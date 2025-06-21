@@ -21,7 +21,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
 
     public class GameData
     {
-        public required string GameId { get; set; }
+        public required int GameId { get; set; }
         public required string Title { get; set; }
         public required string GameIcon { get; set; }
         public required string ConsoleName { get; set; }

@@ -10,9 +10,7 @@ import {
   Button,
   ActionIcon,
   Group,
-  Stack,
   Text,
-  Badge,
   Divider,
   useMantineColorScheme,
 } from '@mantine/core'
@@ -21,6 +19,7 @@ import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
+import { ConsoleType } from '@/enums/consoleType'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -30,13 +29,15 @@ const pressStart2P = Press_Start_2P({
 
 interface NavbarProps {
   children: React.ReactNode,
-  publicNavigationData: GetPublicNavigationDataResponse | null
+  publicNavigationData: GetPublicNavigationDataResponse[] | null
 }
 
 export function Navbar(props: NavbarProps) {
   const [opened, setOpened] = useState(false)
   const { setColorScheme, colorScheme } = useMantineColorScheme()
   const [currentPage, setCurrentPage] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
+
+  const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
   return (
     <AppShell
@@ -116,47 +117,33 @@ export function Navbar(props: NavbarProps) {
             style={{ borderRadius: '10px' }}
           />
 
-          <NavLink
-            label="Nintendo"
-            py="xs"
-          >
-            <NavLink
-              label="Game Boy"
-              py="xs"
-              description={
-                <Stack gap="xs" mt="xs">
-                  <Text size="sm" c="dimmed">
-                    1104 games
-                  </Text>
-                  <Group gap="xs">
-                    <Badge color="teal" variant="light" size="sm">
-                      beaten
-                    </Badge>
-                    <Text size="sm">1444/1104 (0.36%)</Text>
-                  </Group>
-                  <Group gap="xs">
-                    <Badge color="cyan" variant="light" size="sm">
-                      softcore
-                    </Badge>
-                    <Text size="sm">1444/1104 (0.36%)</Text>
-                  </Group>
-                  <Group gap="xs">
-                    <Badge color="orange" variant="light" size="sm">
-                      completed
-                    </Badge>
-                    <Text size="sm">1344/1104 (0.27%)</Text>
-                  </Group>
-                  <Group gap="xs">
-                    <Badge color="yellow" variant="light" size="sm">
-                      mastered
-                    </Badge>
-                    <Text size="sm">1344/1104 (0.27%)</Text>
-                  </Group>
-                </Stack>
-              }
-            />
-            <Divider mt="xs" />
-          </NavLink>
+          {consoleTypes.map((type) => {
+            return (
+              <NavLink label={ConsoleType[type]} key={type}>
+                {props.publicNavigationData !== null && props.publicNavigationData.filter(x => x.consoleType === type).map((navItem) => {
+                  return (
+                    <div key={navItem.consoleId}>
+                      <NavLink
+                        label={navItem.consoleName}
+                        py="xs"
+                        description={
+                          <Text size="sm" c="dimmed">{navItem.gameCount} games</Text>
+                        }
+                        component={Link}
+                        href={`/console/${navItem.consoleId}`}
+                        onClick={() => setCurrentPage(`/console/${navItem.consoleId}`)}
+                        active={currentPage === `/console/${navItem.consoleId}`}
+                        style={{ borderRadius: '10px' }}
+                      />
+                      <Divider mt={5} mb={5}/>
+                    </div>
+                  )
+                })}
+              </NavLink>
+            )
+          })}
+
+
         </ScrollArea>
       </AppShell.Navbar>
 

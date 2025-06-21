@@ -2,7 +2,7 @@
 
 import ConsoleHelper from '@/helpers/ConsoleHelper'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
-import { Badge, Button, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
+import { Badge, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconStar, IconTrophy } from '@tabler/icons-react'
 import Image from 'next/image'
@@ -23,7 +23,6 @@ export default function HomeComponent(props: HomeComponentProps) {
   return (
     <>
       <Container size="95%">
-        <Button onClick={() => {gameModal.showModal(2)}}>test</Button>
         <h1 style={{ textAlign: 'center' }}>Welcome to RetroTrack</h1>
         <p style={{ textAlign: 'center', marginTop: -10 }}>
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!
@@ -51,7 +50,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                     {day.newSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span}key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" className={styles.newSetCardBorder}>
+                          <Card padding="md" radius="md" shadow="md" className={styles.newSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >
                                 <Image
@@ -107,7 +106,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                     {day.updatedSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span}key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" className={styles.updatedSetCardBorder}>
+                          <Card padding="md" radius="md" shadow="md" className={styles.updatedSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >
                                 <Image

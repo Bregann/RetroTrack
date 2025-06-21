@@ -26,6 +26,7 @@ export interface PaginatedTableProps<T> {
   total: number
   onPageChange: (page: number) => void
   onSortChange?: (option: SortOption<T>) => void
+  onRowClick?: (item: T, index: number) => void
   sortOption?: SortOption<T>
   styles?: React.CSSProperties
 }
@@ -37,6 +38,7 @@ export function PaginatedTable<T>({
   total,
   onPageChange,
   onSortChange,
+  onRowClick,
   sortOption,
   styles
 }: PaginatedTableProps<T>) {
@@ -52,7 +54,7 @@ export function PaginatedTable<T>({
   }
 
   const rows = data.map((item, index) => (
-    <Table.Tr key={index}>
+    <Table.Tr key={index} onClick={() => onRowClick && onRowClick(item, index)} style={{ cursor: onRowClick ? 'pointer' : 'default' }}>
       {columns.filter(x => x.show !== false).map((col, colIndex) => (
         <Table.Td key={colIndex}>
           {col.render

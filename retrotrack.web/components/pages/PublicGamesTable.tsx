@@ -1,5 +1,6 @@
 
 'use client'
+
 import { useState, useMemo } from 'react'
 import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
@@ -9,6 +10,7 @@ import styles from '@/css/components/publicGamesTable.module.scss'
 import { usePublicPaginatedTableQuery } from '@/hooks/consoles/usePublicPaginatedTableQuery'
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
+import { useGameModal } from '@/context/gameModalContext'
 
 interface PublicGamesTableProps {
   pageData: GetGamesForConsoleResponse
@@ -93,19 +95,21 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     }
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
-    let query = `ConsoleId=-1&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
+    let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
     if (searchTerm !== null && searchTerm !== '') {
       query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
     return query
-  }, [page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
+  }, [page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
-  const isFirstLoad = queryString === 'ConsoleId=-1&Skip=0&Take=100&SortByName=true'
+  const isFirstLoad = queryString === `ConsoleId=${props.consoleId}&Skip=0&Take=100&SortByName=true`
 
   const { data, isLoading, isError, error } = usePublicPaginatedTableQuery(
     queryString,
     isFirstLoad ? props.pageData : undefined
   )
+
+  const gameModal = useGameModal()
 
   const searchDropdownOptions = [
     { value: '0', label: 'Game Title' },
@@ -184,6 +188,9 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               setSortOption(opt)
             }}
             onPageChange={setPage}
+            onRowClick={(item) => {
+              gameModal.showModal(item.gameId)
+            }}
           />
         )}
       </Paper>

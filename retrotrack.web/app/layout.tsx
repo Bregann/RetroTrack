@@ -35,19 +35,20 @@ export default async function RootLayout({
 }) {
 
   const cookieStore = await cookies()
-  let data: GetPublicNavigationDataResponse | null = null
+  let data: GetPublicNavigationDataResponse[] | null = null
   // get the navigation data depending on whether the user is logged in or not
   // if the user is logged in, we will get the navigation data for the logged in user
-  if(!cookieStore.has('accessToken')) {
+  if(cookieStore.has('accessToken')) {
     // data = await doGet('')
 
   } else {
-    const result = await doGet<GetPublicNavigationDataResponse>('/api/navigation/GetPublicNavigationData')
+    const result = await doGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData')
     if (result.status !== 200 || result.data === undefined) {
       console.error('Failed to load public navigation data:', result.status)
       data = null
     }
     else {
+      console.log('Public navigation data loaded successfully:', result.data)
       data = result.data
     }
   }
