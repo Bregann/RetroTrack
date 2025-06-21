@@ -10,15 +10,15 @@ namespace RetroTrack.Api.Controllers.Auth
     public class AuthController(IAuthControllerDataService authDataService) : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> LoginUser([FromBody] LoginUserRequestDto dto)
+        public async Task<IActionResult> LoginUser([FromBody] LoginUserRequest request)
         {
             try
             {
-                var loginData = await authDataService.LoginUser(dto.Username.ToLower().Trim(), dto.Password);
+                var loginData = await authDataService.LoginUser(request.Username.ToLower().Trim(), request.Password);
 
                 Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
                 {
-                    HttpOnly = true,
+                    HttpOnly = false,
                     Secure = true,
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
@@ -47,11 +47,11 @@ namespace RetroTrack.Api.Controllers.Auth
         }
 
         [HttpPost]
-        public async Task<ActionResult> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
+        public async Task<ActionResult> RegisterNewUser([FromBody] RegisterNewUserRequest request)
         {
             try
             {
-                await authDataService.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+                await authDataService.RegisterUser(request.Username.ToLower().Trim(), request.Password, request.ApiKey.Trim());
                 return Ok();
             }
             catch (UnauthorizedAccessException ex)
@@ -61,11 +61,11 @@ namespace RetroTrack.Api.Controllers.Auth
         }
 
         [HttpPost]
-        public async Task<ActionResult> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
+        public async Task<ActionResult> ResetUserPassword([FromBody] ResetUserPasswordRequest request)
         {
             try
             {
-                await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+                await authDataService.ResetUserPassword(request.Username.ToLower().Trim(), request.Password, request.ApiKey.Trim());
                 return Ok();
             }
             catch (UnauthorizedAccessException ex)
@@ -74,15 +74,10 @@ namespace RetroTrack.Api.Controllers.Auth
             }
         }
 
-        [HttpDelete]
-        public async Task<ActionResult> DeleteUserSession()
+        [HttpPost]
+        public async Task<ActionResult> DeleteUserSession([FromBody] DeleteUserSessionRequest refreshToken)
         {
-            if (string.IsNullOrEmpty(Request.Headers.Authorization))
-            {
-                return BadRequest();
-            }
-
-            await authDataService.DeleteUserSession(Request.Headers.Authorization!);
+            await authDataService.DeleteUserSession(refreshToken.RefreshToken);
             return Ok(true);
         }
     }

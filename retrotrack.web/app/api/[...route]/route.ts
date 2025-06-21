@@ -62,7 +62,12 @@ export async function handler(
       body = await req.formData()
       // Let fetch set the new Content-Type with the correct boundary
       headers.delete('content-type')
-    } else {
+    } else if(url === `${API_BASE_URL}/auth/DeleteUserSession`){
+      // set the body to be the refresh token for the logout request
+      body = JSON.stringify({ refreshToken: cookieStore.get('refreshToken')?.value })
+      cookieStore.delete('refreshToken') // Clear the refresh token cookie
+    }
+    else {
       // Stream the body directly for all other types
       body = req.body
     }

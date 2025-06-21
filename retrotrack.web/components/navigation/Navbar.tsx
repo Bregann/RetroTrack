@@ -22,6 +22,7 @@ import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/Get
 import { ConsoleType } from '@/enums/consoleType'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
+import { useAuth } from '@/context/authContext'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -41,6 +42,7 @@ export function Navbar(props: NavbarProps) {
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
 
+  const auth = useAuth()
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
   return (
@@ -80,12 +82,25 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           />
           <Group gap="xs">
-            <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
+            {auth.user === null &&
+            <>
+              <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
               Login
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
               Register
-            </Button>
+              </Button>
+            </>
+            }
+
+            {auth.user !== null &&
+            <>
+              <Button onClick={() => { auth.logout() }} variant="filled" size="sm">
+                Logout
+              </Button>
+            </>
+            }
+
             <ActionIcon
               variant="outline"
               size="lg"

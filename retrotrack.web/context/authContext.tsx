@@ -2,6 +2,7 @@
 'use client'
 
 import { doGet, doPost } from '@/helpers/apiClient'
+import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, useEffect } from 'react'
 
 type User = {
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     //TODO: refresh the access token here and clear the cookie if it has expired and set the user to null
@@ -27,13 +29,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .split('; ')
       .find(row => row.startsWith('accessToken='))
     const token = tokenRow ? tokenRow.split('=')[1] : undefined
-
+    console.log('Token found:', tokenRow)
+    console.log(document.cookie)
     if (token !== undefined) {
       const payload = JSON.parse(atob(token.split('.')[1]))
+      const username = payload[
+        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+      ]
       const user = {
-        username: payload.username,
+        username,
       }
       setUser(user)
+      console.log('User loaded from token:', user)
     }
     setLoading(false)
   }, [])
@@ -41,19 +48,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (username: string, password: string) => {
     const res = await doPost('/api/auth/LoginUser', { body: { username, password } })
     if (res.status === 200) {
-      // after login, fetch the user data
-      const userRes = await doGet<User>('auth/me')
-      if (userRes.status === 200) {
-        setUser(userRes.data ?? null)
-
-        return true
-      }
+      router.refresh()
+      setUser({ username })
+      return true
     }
     return false
   }
 
   const logout = async () => {
-    await doPost('/api/auth/LogoutUser', {})
+    await doPost('/api/auth/DeleteUserSession', {})
+    document.cookie = 'accessToken=; Max-Age=0; path=/'
     setUser(null)
   }
 
