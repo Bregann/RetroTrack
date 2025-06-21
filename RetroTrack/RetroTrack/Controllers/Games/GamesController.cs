@@ -24,9 +24,9 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
         [HttpGet("{gameId}")]
-        public async Task<ActionResult<GameInfoDto>> GetSpecificGameInfo([FromRoute] int gameId)
+        public async Task<ActionResult<GetPublicSpecificGameInfoResponse>> GetPublicSpecificGameInfo([FromRoute] int gameId)
         {
-            var data = await gamesControllerData.GetSpecificGameInfo(gameId);
+            var data = await gamesControllerData.GetPublicSpecificGameInfoResponse(gameId);
 
             if (data == null)
             {

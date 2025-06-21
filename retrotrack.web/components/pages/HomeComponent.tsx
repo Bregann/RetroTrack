@@ -23,7 +23,7 @@ export default function HomeComponent(props: HomeComponentProps) {
   return (
     <>
       <Container size="95%">
-        <Button onClick={() => {gameModal.showModal(1)}}>test</Button>
+        <Button onClick={() => {gameModal.showModal(2)}}>test</Button>
         <h1 style={{ textAlign: 'center' }}>Welcome to RetroTrack</h1>
         <p style={{ textAlign: 'center', marginTop: -10 }}>
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!

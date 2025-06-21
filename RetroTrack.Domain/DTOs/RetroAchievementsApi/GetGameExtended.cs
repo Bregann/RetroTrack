@@ -16,6 +16,8 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
 
         [JsonProperty("ConsoleName")]
         public string ConsoleName { get; set; } = "";
+        [JsonProperty("ImageIcon")]
+        public string ImageIcon { get; set; } = "";
 
         [JsonProperty("ImageIngame")]
         public string ImageInGame { get; set; } = "";
@@ -25,6 +27,12 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
 
         [JsonProperty("ImageBoxArt")]
         public string ImageBoxArt { get; set; } = "";
+
+        [JsonProperty("Publisher")]
+        public string Publisher { get; set; } = "";
+
+        [JsonProperty("Developer")]
+        public string Developer { get; set; } = "";
 
         [JsonProperty("Genre")]
         public string Genre { get; set; } = "";

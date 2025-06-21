@@ -24,6 +24,8 @@ import {
   IconUsers,
   IconCheck,
   IconAward,
+  IconBuilding,
+  IconTools,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
 
@@ -34,7 +36,6 @@ interface LoggedInGameModalProps {
 
 export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
-
   return (
     <Modal
       opened={props.gameId !== undefined}
@@ -115,16 +116,37 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           </Stack>
         </Card>
 
-        <Card withBorder>
-          <Stack gap={6} align="center">
+        <Card withBorder radius="md">
+          <Stack align="center" gap="sm">
             <ThemeIcon size="xl" radius="md" color="violet">
               <IconDeviceGamepad size={24} />
             </ThemeIcon>
-            <Text fw={700} ta={'center'}>Game Info</Text>
-            <Stack gap={4}>
-              <Group gap="6"><IconDeviceGamepad size={16} /> <Text>PlayStation</Text></Group>
-              <Group gap="6"><IconStar size={16} /> <Text>Run &amp; Gun</Text></Group>
-              <Group gap="6"><IconUsers size={16} /> <Text>4 Players</Text></Group>
+            <Text fw={700}>Game Info</Text>
+            <Stack gap="xs">
+              <Group gap="lg" >
+                <Group gap="xs">
+                  <IconDeviceGamepad size={16} />
+                  <Text size="sm">PlayStation</Text>
+                </Group>
+                <Group gap="xs">
+                  <IconBuilding size={16} />
+                  <Text size="sm">Publisher: Sega</Text>
+                </Group>
+              </Group>
+              <Group gap="lg" >
+                <Group gap="xs">
+                  <IconStar size={16} />
+                  <Text size="sm">Run &amp; Gun</Text>
+                </Group>
+                <Group gap="xs">
+                  <IconTools size={16} />
+                  <Text size="sm">Developer: Sonic Team</Text>
+                </Group>
+              </Group>
+              <Group gap="xs" >
+                <IconUsers size={16} />
+                <Text size="sm">4 Players</Text>
+              </Group>
             </Stack>
           </Stack>
         </Card>

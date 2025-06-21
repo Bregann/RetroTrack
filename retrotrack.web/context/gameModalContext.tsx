@@ -1,6 +1,7 @@
 'use client'
 
 import { LoggedInGameModal } from '@/components/shared/LoggedInGameModal'
+import { LoggedOutGameModal } from '@/components/shared/LoggedOutGameModal'
 import { createContext, useContext, useState } from 'react'
 
 type GameModalContextType = {
@@ -19,7 +20,7 @@ export const GameModalProvider = ({ children }: { children: React.ReactNode }) =
   return (
     <GameModalContext.Provider value={{ showModal }}>
       {children}
-      {gameId !== null && <LoggedInGameModal gameId={gameId} onClose={() => setGameId(null)} />}
+      {gameId !== null && <LoggedOutGameModal gameId={gameId} onClose={() => setGameId(null)} />}
     </GameModalContext.Provider>
   )
 }

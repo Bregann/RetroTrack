@@ -10,7 +10,7 @@ using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
-using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Achievement;
+using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Responses.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
 
 namespace RetroTrack.Domain.Services.Controllers
@@ -162,7 +162,7 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<GameInfoDto?> GetSpecificGameInfo(int gameId)
+        public async Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfoResponse(int gameId)
         {
             var data = await raApiService.GetSpecificGameInfo(gameId);
 
@@ -171,25 +171,26 @@ namespace RetroTrack.Domain.Services.Controllers
                 return null;
             }
 
-            return new GameInfoDto
+            return new GetPublicSpecificGameInfoResponse
             {
                 GameId = data.Id,
-                ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
-                ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
-                ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
+                ImageBoxArt = data.ImageBoxArt,
+                ImageTitle = data.ImageTitle,
+                ImageInGame = data.ImageInGame,
+                GameImage = data.ImageIcon,
+                Publisher = data.Publisher,
+                Developer = data.Developer,
                 ConsoleId = data.ConsoleId,
                 ConsoleName = data.ConsoleName,
                 Genre = data.Genre,
                 AchievementCount = data.AchievementCount,
                 Players = data.Players,
                 Title = data.Title,
-                Achievements = data.Achievements == null ? [] : data.Achievements.Select(x => new Achievement
+                Achievements = data.Achievements == null ? [] : data.Achievements.OrderBy(x => x.Value.DisplayOrder).Select(x => new Achievement
                 {
                     Id = x.Value.Id,
-                    BadgeName = "https://media.retroachievements.org/Badge/" + x.Value.BadgeName + ".png",
+                    BadgeName = x.Value.BadgeName + ".png",
                     Description = x.Value.Description,
-                    NumAwarded = x.Value.NumAwarded,
-                    NumAwardedHardcore = x.Value.NumAwardedHardcore,
                     Points = x.Value.Points,
                     Title = x.Value.Title,
                     Type = x.Value.Type,
