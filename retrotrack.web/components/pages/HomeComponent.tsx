@@ -1,6 +1,5 @@
 'use client'
 
-import ConsoleHelper from '@/helpers/ConsoleHelper'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
 import { Badge, Card, Container, Divider, Grid, Group, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -8,6 +7,7 @@ import { IconStar, IconTrophy } from '@tabler/icons-react'
 import Image from 'next/image'
 import styles from '@/css/pages/home.module.scss'
 import { useGameModal } from '@/context/gameModalContext'
+import consoleHelper from '@/helpers/consoleHelper'
 
 export interface HomeComponentProps {
   pageData: GetRecentlyAddedAndUpdatedGamesResponse
@@ -69,7 +69,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
+                                <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
                                   {set.consoleName}
                                 </Badge>
                               </Group>
@@ -125,7 +125,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                                 </Text>
                               </Group>
                               <Group align='center' justify='center'>
-                                <Badge color={ConsoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
+                                <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
                                   {set.consoleName}
                                 </Badge>
                               </Group>

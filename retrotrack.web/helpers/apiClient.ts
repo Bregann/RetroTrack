@@ -1,5 +1,3 @@
-// import next from 'next' // Removed: not needed and causes conflict
-
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 }
@@ -47,7 +45,7 @@ async function doRequest<T>(
 
   // 🛑 Unauthorized? Time to refresh & retry ONCE
   if (res.status === 401 && retry) {
-    console.warn('😬 401 detected. Attempting refresh...')
+    console.warn('401 detected. Attempting refresh...')
 
     const refreshRes = await fetch('http://localhost:3000/api/auth/RefreshToken', {
       method: 'POST',
@@ -55,14 +53,14 @@ async function doRequest<T>(
     })
 
     if (refreshRes.ok) {
-      console.log('✨ Refresh successful! Retrying request...')
+      console.log('Refresh successful! Retrying request...')
       return doRequest<T>(method, endpoint, {
         body,
         headers,
         retry: false,
       })
     } else {
-      console.error('❌ Refresh failed. You shall not pass.')
+      console.error('Refresh failed. You shall not pass.')
       return {
         data: undefined,
         status: res.status,

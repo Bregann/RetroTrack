@@ -20,6 +20,8 @@ import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 import { ConsoleType } from '@/enums/consoleType'
+import LoginModal from './LoginModal'
+import RegisterModal from './RegisterModal'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -36,6 +38,8 @@ export function Navbar(props: NavbarProps) {
   const [opened, setOpened] = useState(false)
   const { setColorScheme, colorScheme } = useMantineColorScheme()
   const [currentPage, setCurrentPage] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [registerModalOpen, setRegisterModalOpen] = useState(false)
 
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
@@ -76,10 +80,10 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           />
           <Group gap="xs">
-            <Button variant="filled" size="sm">
+            <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
               Login
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
               Register
             </Button>
             <ActionIcon
@@ -146,10 +150,18 @@ export function Navbar(props: NavbarProps) {
 
         </ScrollArea>
       </AppShell.Navbar>
-
-      {/* Main content */}
       <AppShell.Main>
         {props.children}
+        <LoginModal
+          onClose={() => setLoginModalOpen(false)}
+          openedState={loginModalOpen}
+        />
+
+        <RegisterModal
+          onClose={() => setRegisterModalOpen(false)}
+          openedState={registerModalOpen}
+        />
+
       </AppShell.Main>
     </AppShell>
   )

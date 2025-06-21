@@ -48,7 +48,6 @@ export default async function RootLayout({
       data = null
     }
     else {
-      console.log('Public navigation data loaded successfully:', result.data)
       data = result.data
     }
   }

@@ -71,7 +71,7 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<RegisterUserDto> RegisterUser(string username, string password, string raApiKey)
+        public async Task RegisterUser(string username, string password, string raApiKey)
         {
             try
             {
@@ -80,11 +80,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 if (!validKey.IsValidKey)
                 {
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
-                    };
+                    throw new UnauthorizedAccessException("Error validating API key. Please double check your username and RetroAchievements API key and try again");
                 }
 
                 //Check if the user is actually registered
@@ -92,11 +88,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 {
                     Log.Information($"[Register User] User {username} already exists");
 
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "User already registered. Forgot your password? Use the forgot password link on the login form"
-                    };
+                    throw new UnauthorizedAccessException("User already registered. Forgot your password? Use the forgot password link on the login form");
                 }
 
                 //Get the users details from the API
@@ -104,12 +96,8 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 if (userProfile == null)
                 {
-                    Log.Information($"[Register User] Error getting user profile for {username}");
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "There has been an error retrieving your user profile from RetroAchievements. Please try again"
-                    };
+                    Log.Warning($"[Register User] Error getting user profile for {username}");
+                    throw new UnauthorizedAccessException("There has been an error retrieving your user profile from RetroAchievements. Please try again");
                 }
 
                 //Add the user into the database
@@ -130,36 +118,22 @@ namespace RetroTrack.Domain.Services.Controllers
                 await context.SaveChangesAsync();
 
                 Log.Information($"[Register User] {username} succesfully registered");
-
-                return new RegisterUserDto
-                {
-                    Success = true,
-                    Reason = null
-                };
             }
             catch (Exception ex)
             {
                 Log.Fatal($"[Register User] Error registering user - {ex}");
-                return new RegisterUserDto
-                {
-                    Success = false,
-                    Reason = "There has been an unknown error trying to register your account. Please try again"
-                };
+                throw new UnauthorizedAccessException("There has been an error trying to register your account. Please try again", ex);
             }
         }
 
-        public async Task<ResetUserPasswordDto> ResetUserPassword(string raUsername, string password, string raApiKey)
+        public async Task ResetUserPassword(string raUsername, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo
             var response = await raApiService.ValidateApiKey(raUsername, raApiKey);
 
             if (!response.IsValidKey)
             {
-                return new ResetUserPasswordDto
-                {
-                    Success = false,
-                    Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
-                };
+                throw new UnauthorizedAccessException("Error validating API key. Please double check your username and RetroAchievements API key and try again");
             }
 
             // check if the ulid matches the user
@@ -168,12 +142,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (user == null)
             {
                 Log.Information($"[Password Reset] User {raUsername} doesn't exist");
-
-                return new ResetUserPasswordDto
-                {
-                    Success = false,
-                    Reason = "We couldn't verify your RA account. Please double check your username and API key."
-                };
+                throw new UnauthorizedAccessException("We couldn't verify your RA account. Please double check your username and API key.");
             }
 
             // hash the password and store it
@@ -185,11 +154,6 @@ namespace RetroTrack.Domain.Services.Controllers
             await context.SaveChangesAsync();
 
             Log.Information($"[Password Reset] {raUsername} successfully reset their password");
-            return new ResetUserPasswordDto
-            {
-                Success = true,
-                Reason = null
-            };
         }
 
         public async Task DeleteUserSession(string token)

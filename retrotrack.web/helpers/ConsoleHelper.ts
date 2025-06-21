@@ -1,6 +1,6 @@
 import { ConsoleType } from '@/enums/consoleType'
 
-export default class ConsoleHelper {
+export default class consoleHelper {
   static getConsoleColour(consoleType: ConsoleType): string {
     switch (consoleType) {
       case ConsoleType.Nintendo:

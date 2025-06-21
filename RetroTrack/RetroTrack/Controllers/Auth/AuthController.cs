@@ -47,15 +47,31 @@ namespace RetroTrack.Api.Controllers.Auth
         }
 
         [HttpPost]
-        public async Task<RegisterUserDto> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
+        public async Task<ActionResult> RegisterNewUser([FromBody] RegisterNewUserRequestDto dto)
         {
-            return await authDataService.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            try
+            {
+                await authDataService.RegisterUser(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+                return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<ResetUserPasswordDto> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
+        public async Task<ActionResult> ResetUserPassword([FromBody] ResetUserPasswordRequestDto dto)
         {
-            return await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+            try
+            {
+                await authDataService.ResetUserPassword(dto.Username.ToLower().Trim(), dto.Password, dto.ApiKey.Trim());
+                return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete]

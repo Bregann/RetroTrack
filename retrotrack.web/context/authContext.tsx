@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    //TODO: refresh the access token here and clear the cookie if it has expired and set the user to null
     const tokenRow = document.cookie
       .split('; ')
       .find(row => row.startsWith('accessToken='))
@@ -44,6 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userRes = await doGet<User>('auth/me')
       if (userRes.status === 200) {
         setUser(userRes.data ?? null)
+
         return true
       }
     }
