@@ -23,10 +23,9 @@ const HOP_BY_HOP_HEADERS = [
 
 export async function handler(
   req: NextRequest,
-  // Corrected type for context params
   context: { params: { route: string[] } }
 ) {
-  const { route } = await context.params
+  const { route } = context.params
   const searchParams = req.nextUrl.search
 
   // 1. Correctly construct the full URL with query parameters
@@ -34,6 +33,9 @@ export async function handler(
 
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
+
+  const a = cookieStore.getAll()
+  // Debugging: Log cookies for verification
 
   // --- Request Headers ---
   const headers = new Headers()

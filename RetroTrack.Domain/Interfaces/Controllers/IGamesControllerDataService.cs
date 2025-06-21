@@ -1,7 +1,6 @@
 ﻿using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
-using RetroTrack.Domain.DTOs.Helpers;
 
 namespace RetroTrack.Domain.Interfaces.Controllers
 {
@@ -12,9 +11,9 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfoResponse(int gameId);
 
 
-        Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(UserDataDto userData, int consoleId);
-        Task<List<UserGamesTableDto>> GetInProgressGamesForUser(UserDataDto userData);
-        Task<UserAchievementsForGameDto> GetUserAchievementsForGame(UserDataDto userData, int gameId);
-        Task<UserGameInfoDto?> GetUserGameInfo(UserDataDto userData, int gameId);
+        Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(int userId, string username, int consoleId);
+        Task<List<UserGamesTableDto>> GetInProgressGamesForUser(int userId);
+        Task<UserAchievementsForGameDto> GetUserAchievementsForGame(int userId, int gameId);
+        Task<UserGameInfoDto?> GetUserGameInfo(int userId, int gameId);
     }
 }

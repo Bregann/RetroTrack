@@ -7,17 +7,12 @@ namespace RetroTrack.Api.Controllers.TrackedGames
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class TrackedGamesController(ITrackedGamesControllerDataService trackedGamesControllerData, IAuthHelperService authHelper) : ControllerBase
+    public class TrackedGamesController(ITrackedGamesControllerDataService trackedGamesControllerData, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpPost("{gameId}")]
         public async Task<ActionResult<bool>> AddTrackedGame([FromRoute] int gameId)
         {
-            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             if (await trackedGamesControllerData.AddNewTrackedGame(user, gameId))
             {
@@ -32,12 +27,7 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         [HttpDelete("{gameId}")]
         public async Task<ActionResult> DeleteTrackedGame([FromRoute] int gameId)
         {
-            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             if (await trackedGamesControllerData.RemoveTrackedGame(user, gameId))
             {
@@ -52,12 +42,7 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         [HttpGet]
         public async Task<ActionResult<List<UserGamesTableDto>>> GetTrackedGamesForUser()
         {
-            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             var trackedGames = await trackedGamesControllerData.GetTrackedGamesForUser(user);
             return Ok(trackedGames);

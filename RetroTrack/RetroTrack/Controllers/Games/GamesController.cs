@@ -9,7 +9,7 @@ namespace RetroTrack.Api.Controllers.Games
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class GamesController(IGamesControllerDataService gamesControllerData, IAuthHelperService authHelperService) : ControllerBase
+    public class GamesController(IGamesControllerDataService gamesControllerData, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpGet]
         public async Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames()
@@ -39,12 +39,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{gameId}")]
         public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             var data = await gamesControllerData.GetUserGameInfo(user, gameId);
 
@@ -54,12 +49,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet]
         public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             var data = await gamesControllerData.GetUserAchievementsForGame(user, gameId);
 
@@ -70,14 +60,10 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{consoleId}")]
         public async Task<ActionResult<UserConsoleGamesDto>> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
+            var user = userContextHelper.GetUserId();
+            var username = userContextHelper.GetUsername();
 
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
-
-            var games = await gamesControllerData.GetGamesAndUserProgressForConsole(user, consoleId);
+            var games = await gamesControllerData.GetGamesAndUserProgressForConsole(user, username, consoleId);
 
             if (games == null)
             {
@@ -90,17 +76,10 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet]
         public async Task<ActionResult<List<UserGamesTableDto>>> GetUserInProgressGames()
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             var trackedGames = await gamesControllerData.GetInProgressGamesForUser(user);
             return Ok(trackedGames);
         }
-
-        //Get undevved games
     }
 }

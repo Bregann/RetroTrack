@@ -100,7 +100,7 @@ builder.Services.AddHangfire(configuration => configuration
 // Register our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
 builder.Services.AddScoped<ICachingService, CachingService>();
-builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
+builder.Services.AddScoped<IUserContextHelper, UserContextHelper>();
 
 // RA processing services
 builder.Services.AddScoped<IRetroAchievementsApiService, RetroAchievementsApiService>();

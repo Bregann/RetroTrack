@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.DTOs.Controllers.Navigation;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
@@ -8,7 +8,7 @@ namespace RetroTrack.Api.Controllers.Navigation
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class NavigationController(INavigationControllerDataService navigationControllerData, IAuthHelperService authHelperService) : ControllerBase
+    public class NavigationController(INavigationControllerDataService navigationControllerData, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpGet]
         public async Task<GetPublicNavigationDataResponse[]> GetPublicNavigationData()
@@ -17,15 +17,10 @@ namespace RetroTrack.Api.Controllers.Navigation
         }
 
         [HttpGet]
-        public async Task<ActionResult<GetLoggedInNavigationDataDto>> GetLoggedInNavigationData()
+        [Authorize]
+        public async Task<ActionResult<GetLoggedInNavigationDataResponse>> GetLoggedInNavigationData()
         {
-            var user = authHelperService.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
-
+            var user = userContextHelper.GetUserId();
             return Ok(await navigationControllerData.GetLoggedInNavigationData(user));
         }
     }

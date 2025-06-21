@@ -7,17 +7,12 @@ namespace RetroTrack.Api.Controllers.Users
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class UsersController(IUsersControllerDataService usersControllerData, IAuthHelperService authHelper) : ControllerBase
+    public class UsersController(IUsersControllerDataService usersControllerData, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpPost]
         public async Task<ActionResult<UpdateUserGamesDto>> UpdateUserGames()
         {
-            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             return await usersControllerData.UpdateUserGames(user);
         }
@@ -25,12 +20,7 @@ namespace RetroTrack.Api.Controllers.Users
         [HttpGet]
         public async Task<ActionResult<bool>> CheckUserUpdateProcessingState()
         {
-            var user = authHelper.ValidateSessionIdAndReturnUserData(Request.Headers);
-
-            if (user == null)
-            {
-                return Unauthorized(false);
-            }
+            var user = userContextHelper.GetUserId();
 
             return await usersControllerData.CheckUserUpdateCompleted(user);
         }

@@ -23,6 +23,7 @@ import { ConsoleType } from '@/enums/consoleType'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { useAuth } from '@/context/authContext'
+import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -33,6 +34,7 @@ const pressStart2P = Press_Start_2P({
 interface NavbarProps {
   children: React.ReactNode,
   publicNavigationData: GetPublicNavigationDataResponse[] | null
+  loggedInNavigationData?: GetLoggedInNavigationDataResponse | null
 }
 
 export function Navbar(props: NavbarProps) {

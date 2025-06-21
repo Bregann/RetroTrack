@@ -5,7 +5,6 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
-using RetroTrack.Domain.DTOs.Helpers;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
@@ -198,11 +197,11 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<UserGameInfoDto?> GetUserGameInfo(UserDataDto userData, int gameId)
+        public async Task<UserGameInfoDto?> GetUserGameInfo(int userId, int gameId)
         {
-            var user = context.Users.Where(x => x.Id == userData.UserId).First();
+            var user = context.Users.Where(x => x.Id == userId).First();
 
-            var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, userData.RaUlid, gameId);
+            var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, gameId);
             var achievementList = new List<UserAchievement>();
 
             //If its null, grab the regular data so the popup will still work
@@ -243,7 +242,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     Title = loggedOutData.Title,
                     TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
                     UserCompletion = "Unable to fetch data",
-                    GameTracked = context.TrackedGames.Any(x => x.UserId == userData.UserId && x.Game.Id == gameId)
+                    GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.Game.Id == gameId)
                 };
             }
 
@@ -285,13 +284,13 @@ namespace RetroTrack.Domain.Services.Controllers
                 Achievements = achievementList,
                 PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
                 TotalPoints = data.Achievements.Sum(x => x.Value.Points),
-                GameTracked = context.TrackedGames.Any(x => x.UserId == userData.UserId && x.Game.Id == gameId)
+                GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.Game.Id == gameId)
             };
         }
 
-        public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(UserDataDto userData, int gameId)
+        public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(int userId, int gameId)
         {
-            var user = context.Users.Where(x => x.Id == userData.UserId).First();
+            var user = context.Users.Where(x => x.Id == userId).First();
 
             var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, gameId);
 
@@ -355,7 +354,7 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(UserDataDto userData, int consoleId)
+        public async Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(int userId, string username, int consoleId)
         {
             var consoleGames = new List<UserGamesTableDto>();
 
@@ -388,7 +387,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (consoleId == 0)
             {
                 //User progress is cached, check and return if needed
-                var userAllGamesCacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}-User-{userData.Username}");
+                var userAllGamesCacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}-User-{username}");
 
                 if (userAllGamesCacheData != null)
                 {
@@ -408,7 +407,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
             foreach (var game in gameList)
             {
-                var userProgress = await context.UserGameProgress.Where(x => x.UserId == userData.UserId).FirstOrDefaultAsync(x => x.Game.Id == game.Id);
+                var userProgress = await context.UserGameProgress.Where(x => x.UserId == userId).FirstOrDefaultAsync(x => x.Game.Id == game.Id);
 
                 consoleGames.Add(new UserGamesTableDto
                 {
@@ -431,9 +430,9 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<List<UserGamesTableDto>> GetInProgressGamesForUser(UserDataDto userData)
+        public async Task<List<UserGamesTableDto>> GetInProgressGamesForUser(int userId)
         {
-            var gameList = await context.UserGameProgress.Where(x => x.UserId == userData.UserId && x.GamePercentage != 100).ToListAsync();
+            var gameList = await context.UserGameProgress.Where(x => x.UserId == userId && x.GamePercentage != 100).ToListAsync();
             var progressGameList = new List<UserGamesTableDto>();
 
             foreach (var game in gameList)
