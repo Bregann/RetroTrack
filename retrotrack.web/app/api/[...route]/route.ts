@@ -20,7 +20,6 @@ const HOP_BY_HOP_HEADERS = [
   'transfer-encoding',
   'upgrade',
   'content-length', // Let fetch calculate this
-  'cookie', // We are handling auth via Authorization header
 ]
 
 export async function handler(

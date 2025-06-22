@@ -25,12 +25,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     //TODO: refresh the access token here and clear the cookie if it has expired and set the user to null
+    doPost('/api/auth/RefreshToken', {})
+
     const tokenRow = document.cookie
       .split('; ')
       .find(row => row.startsWith('accessToken='))
     const token = tokenRow ? tokenRow.split('=')[1] : undefined
-    console.log('Token found:', tokenRow)
-    console.log(document.cookie)
+
     if (token !== undefined) {
       const payload = JSON.parse(atob(token.split('.')[1]))
       const username = payload[

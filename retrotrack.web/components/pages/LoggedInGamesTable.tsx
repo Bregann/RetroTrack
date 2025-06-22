@@ -128,12 +128,16 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
       achievementsUnlocked: 'SortByAchievementsUnlocked',
       percentageComplete: 'SortByPercentageComplete'
     }
+
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
+
     let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
+
     if (searchTerm !== null && searchTerm !== '') {
       query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
+
     return query
   }, [page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 

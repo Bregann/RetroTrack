@@ -41,9 +41,35 @@ namespace RetroTrack.Api.Controllers.Auth
         }
 
         [HttpPost]
-        public async Task RefreshToken()
+        public async Task<IActionResult> RefreshToken()
         {
-            var cookies = Request.Cookies;
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
+                return Unauthorized("No refresh token provided");
+            }
+
+            try
+            {
+                var newAccessToken = await authDataService.RefreshToken(refreshToken);
+                Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
+                return Ok();
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
+            {
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
+                return Unauthorized(ex.Message);
+            }
         }
 
         [HttpPost]
