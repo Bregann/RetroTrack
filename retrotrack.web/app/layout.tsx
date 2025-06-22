@@ -38,10 +38,21 @@ export default async function RootLayout({
   const cookieStore = await cookies()
   let data: GetPublicNavigationDataResponse[] | null = null
   let loggedInData: GetLoggedInNavigationDataResponse | null = null
+
   // get the navigation data depending on whether the user is logged in or not
   // if the user is logged in, we will get the navigation data for the logged in user
   if(cookieStore.has('accessToken')) {
-    const result = await doGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData')
+
+    // As it is a server-side request, we need to pass the cookies manually
+    // because Next.js does not automatically forward cookies in server-side requests
+    // server side to server side requests do not have access to the cookies directly
+    const cookieHeader = cookieStore
+      .getAll()
+      .map(c => `${c.name}=${c.value}`)
+      .join('; ')
+
+    const result = await doGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData', { cookieHeader })
+
     if (result.status !== 200 || result.data === undefined) {
       console.error('Failed to load logged in navigation data:', result.status)
       loggedInData = null
@@ -49,6 +60,7 @@ export default async function RootLayout({
       loggedInData = result.data
     }
   } else {
+
     const result = await doGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData')
     if (result.status !== 200 || result.data === undefined) {
       console.error('Failed to load public navigation data:', result.status)

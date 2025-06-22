@@ -13,6 +13,8 @@ import {
   Text,
   Divider,
   useMantineColorScheme,
+  Badge,
+  Stack,
 } from '@mantine/core'
 import { IconDeviceGamepad3, IconHome2, IconMoonStars } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
@@ -158,6 +160,39 @@ export function Navbar(props: NavbarProps) {
                       />
                       <Divider mt={5} mb={5}/>
                     </div>
+                  )
+                })}
+                {props.loggedInNavigationData !== null && props.loggedInNavigationData?.consoleProgressData.filter(x => x.consoleType === type).map((navItem) => {
+                  return(
+                    <div key={navItem.consoleId}>
+                      <NavLink
+                        label={navItem.consoleName}
+                        py="xs"
+                        description={
+                          <Stack gap="xs" >
+                            <Text size="sm" c="dimmed">{navItem.totalGamesInConsole} games</Text>
+                            {navItem.gamesBeatenHardcore !== 0 && <Group gap="xs">
+                              <Badge color="teal" variant="light" size="sm">beaten</Badge>
+                              <Text size="sm">{navItem.gamesBeatenHardcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenHardcore}%)</Text>
+                            </Group>}
+                            {navItem.gamesBeatenSoftcore !== 0 && <Group gap="xs">
+                              <Badge color="cyan" variant="light" size="sm">softcore</Badge>
+                              <Text size="sm">{navItem.gamesBeatenSoftcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenSoftcore}%)</Text>
+                            </Group>}
+                            {navItem.gamesCompleted !== 0 && <Group gap="xs">
+                              <Badge color="orange" variant="light" size="sm">completed</Badge>
+                              <Text size="sm">{navItem.gamesCompleted}/{navItem.totalGamesInConsole} ({navItem.percentageCompleted}%)</Text>
+                            </Group>}
+                            {navItem.gamesMastered !== 0 && <Group gap="xs">
+                              <Badge color="yellow" variant="light" size="sm">mastered</Badge>
+                              <Text size="sm">{navItem.gamesMastered}/{navItem.totalGamesInConsole} ({navItem.gamesMastered}%)</Text>
+                            </Group>}
+                          </Stack>
+                        }
+                      />
+                      <Divider mt={5} mb={5}/>
+                    </div>
+
                   )
                 })}
               </NavLink>

@@ -16,6 +16,7 @@ interface RequestOptions {
   body?: unknown
   retry?: boolean,
   next?: { revalidate?: number; }
+  cookieHeader?: string
 }
 
 async function doRequest<T>(
@@ -28,6 +29,7 @@ async function doRequest<T>(
     headers = {},
     retry = true,
     next: nextFetchOptions, // get 'next' from options
+    cookieHeader, // for passing cookies manually - needed for server-side requests
   } = options
 
   const res = await fetch(`http://localhost:3000${endpoint}`, {
@@ -35,6 +37,7 @@ async function doRequest<T>(
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       ...headers,
     },
     // only JSON-ify if you passed a body

@@ -1,3 +1,5 @@
+'use server'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
@@ -25,7 +27,7 @@ export async function handler(
   req: NextRequest,
   context: { params: { route: string[] } }
 ) {
-  const { route } = context.params
+  const { route } = await context.params
   const searchParams = req.nextUrl.search
 
   // 1. Correctly construct the full URL with query parameters
@@ -33,9 +35,6 @@ export async function handler(
 
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
-
-  const a = cookieStore.getAll()
-  // Debugging: Log cookies for verification
 
   // --- Request Headers ---
   const headers = new Headers()
