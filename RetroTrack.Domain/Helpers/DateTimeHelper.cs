@@ -21,7 +21,7 @@ namespace RetroTrack.Domain.Helpers
                 return null;
             }
 
-            return dt.Value.ToString("dddd") + " " + dt.Value.ToString("dd").Replace("0", "") + GetDaySuffix(dt.Value.Day) + " " + dt.Value.ToString("MMMM") + " " + dt.Value.ToString("yyyy") + " @ " + dt.Value.ToString("HH:mm:ss zzz");
+            return dt.Value.ToString("dd").Replace("0", "") + GetDaySuffix(dt.Value.Day) + " " + dt.Value.ToString("MMMM") + " " + dt.Value.ToString("yyyy") + " @ " + dt.Value.ToString("HH:mm:ss");
         }
 
         private static string GetDaySuffix(int day)

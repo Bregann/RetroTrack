@@ -36,8 +36,6 @@ namespace RetroTrack.Api.Controllers.Games
             return Ok(data);
         }
 
-
-
         [HttpGet("{gameId}")]
         public async Task<ActionResult<GetLoggedInSpecificGameInfoResponse>> GetGameInfoForUser([FromRoute] int gameId)
         {
