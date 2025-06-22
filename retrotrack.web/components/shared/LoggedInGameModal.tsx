@@ -116,38 +116,41 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           </Stack>
         </Card>
 
-        <Card withBorder radius="md">
+        <Card withBorder radius="md" p="md">
           <Stack align="center" gap="sm">
             <ThemeIcon size="xl" radius="md" color="violet">
               <IconDeviceGamepad size={24} />
             </ThemeIcon>
             <Text fw={700}>Game Info</Text>
-            <Stack gap="xs">
-              <Group gap="lg" >
+
+            <Group gap="xl" align="flex-start" justify="center" style={{ width: '100%' }}>
+              <Stack gap="4">
                 <Group gap="xs">
                   <IconDeviceGamepad size={16} />
-                  <Text size="sm">PlayStation</Text>
+                  <Text size="sm">aa</Text>
                 </Group>
-                <Group gap="xs">
-                  <IconBuilding size={16} />
-                  <Text size="sm">Publisher: Sega</Text>
-                </Group>
-              </Group>
-              <Group gap="lg" >
                 <Group gap="xs">
                   <IconStar size={16} />
-                  <Text size="sm">Run &amp; Gun</Text>
+                  <Text size="sm">aa</Text>
+                </Group>
+              </Stack>
+
+              <Stack gap="4">
+                <Group gap="xs">
+                  <IconBuilding size={16} />
+                  <Text size="sm">Publisher: aa</Text>
                 </Group>
                 <Group gap="xs">
                   <IconTools size={16} />
-                  <Text size="sm">Developer: Sonic Team</Text>
+                  <Text size="sm">Developer: aa</Text>
                 </Group>
-              </Group>
-              <Group gap="xs" >
-                <IconUsers size={16} />
-                <Text size="sm">4 Players</Text>
-              </Group>
-            </Stack>
+              </Stack>
+            </Group>
+
+            <Group gap="xs">
+              <IconUsers size={16} />
+              <Text size="sm">aa Players</Text>
+            </Group>
           </Stack>
         </Card>
 

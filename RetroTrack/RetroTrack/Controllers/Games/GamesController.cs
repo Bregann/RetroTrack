@@ -26,7 +26,7 @@ namespace RetroTrack.Api.Controllers.Games
         [HttpGet("{gameId}")]
         public async Task<ActionResult<GetPublicSpecificGameInfoResponse>> GetPublicSpecificGameInfo([FromRoute] int gameId)
         {
-            var data = await gamesControllerData.GetPublicSpecificGameInfoResponse(gameId);
+            var data = await gamesControllerData.GetPublicSpecificGameInfo(gameId);
 
             if (data == null)
             {
@@ -39,25 +39,14 @@ namespace RetroTrack.Api.Controllers.Games
 
 
         [HttpGet("{gameId}")]
-        public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
+        public async Task<ActionResult<GetLoggedInSpecificGameInfoResponse>> GetGameInfoForUser([FromRoute] int gameId)
         {
             var user = userContextHelper.GetUserId();
 
-            var data = await gamesControllerData.GetUserGameInfo(user, gameId);
+            var data = await gamesControllerData.GetLoggedInSpecificGameInfo(user, gameId);
 
             return Ok(data);
         }
-
-        [HttpGet]
-        public async Task<ActionResult<UserAchievementsForGameDto>> GetUserAchievementsForGame(int gameId)
-        {
-            var user = userContextHelper.GetUserId();
-
-            var data = await gamesControllerData.GetUserAchievementsForGame(user, gameId);
-
-            return Ok(data);
-        }
-
 
         [HttpGet]
         public async Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole([FromQuery] GetUserProgressForConsoleRequest request)

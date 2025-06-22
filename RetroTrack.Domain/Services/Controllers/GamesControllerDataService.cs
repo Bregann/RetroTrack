@@ -10,7 +10,7 @@ using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Responses.Achievement;
-using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement;
+using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.Responses.UserAchievement;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
@@ -166,7 +166,7 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfoResponse(int gameId)
+        public async Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfo(int gameId)
         {
             var data = await raApiService.GetSpecificGameInfo(gameId);
 
@@ -202,7 +202,7 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<UserGameInfoDto?> GetUserGameInfo(int userId, int gameId)
+        public async Task<GetLoggedInSpecificGameInfoResponse?> GetLoggedInSpecificGameInfo(int userId, int gameId)
         {
             var user = context.Users.Where(x => x.Id == userId).First();
 
@@ -222,35 +222,41 @@ namespace RetroTrack.Domain.Services.Controllers
                 achievementList.AddRange(loggedOutData.Achievements.Select(achievement => new UserAchievement
                 {
                     BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
-                    DateEarned = null,
+                    DateEarnedSoftcore = null,
                     Description = achievement.Value.Description,
                     Id = achievement.Value.Id,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    Type = AchievementType.Unknown // temp fix till rewrite todo: fix
+                    Type = achievement.Value.Type,
+                    DateEarnedHardcore = null
                 }));
 
-                return new UserGameInfoDto
+                return new GetLoggedInSpecificGameInfoResponse
                 {
                     AchievementCount = loggedOutData.AchievementCount,
                     Achievements = achievementList,
-                    ImageBoxArt = "https://media.retroachievements.org" + loggedOutData.ImageBoxArt,
-                    ImageTitle = "https://media.retroachievements.org" + loggedOutData.ImageTitle,
-                    ImageInGame = "https://media.retroachievements.org" + loggedOutData.ImageInGame,
-                    NumAwardedToUser = 0,
+                    ImageBoxArt = loggedOutData.ImageBoxArt,
+                    ImageTitle = loggedOutData.ImageTitle,
+                    ImageInGame = loggedOutData.ImageInGame,
                     ConsoleId = loggedOutData.ConsoleId,
                     ConsoleName = loggedOutData.ConsoleName,
                     GameId = gameId,
                     Genre = loggedOutData.Genre,
                     Players = loggedOutData.Players,
-                    PointsEarned = 0,
                     Title = loggedOutData.Title,
-                    TotalPoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
-                    UserCompletion = "Unable to fetch data",
-                    GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.Game.Id == gameId)
+                    Developer = loggedOutData.Developer,
+                    GameImage = loggedOutData.ImageIcon,
+                    Publisher = loggedOutData.Publisher,
+                    AchievementsAwardedHardcore = 0,
+                    AchievementsAwardedSoftcore = 0,
+                    AchievementsAwardedTotal = 0,
+                    PointsAwardedHardcore = 0,
+                    PointsAwardedSoftcore = 0,
+                    PointsAwardedTotal = 0,
+                    TotalGamePoints = loggedOutData.Achievements.Sum(x => x.Value.Points)
+
                 };
             }
-
 
             context.Games.First(x => x.Id == gameId).Players = data.Players;
             user.LastAchievementsUpdate = DateTime.UtcNow;
@@ -261,101 +267,39 @@ namespace RetroTrack.Domain.Services.Controllers
                 achievementList.Add(new UserAchievement
                 {
                     Id = achievement.Value.Id,
-                    BadgeName = "https://media.retroachievements.org/Badge/" + (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
+                    BadgeName = (achievement.Value.DateEarned != null ? achievement.Value.BadgeName : achievement.Value.BadgeName + "_lock") + ".png",
                     Description = achievement.Value.Description,
-                    NumAwarded = achievement.Value.NumAwarded,
-                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
+                    DateEarnedSoftcore = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
+                    DateEarnedHardcore = achievement.Value.DateEarnedHardcore != null ? DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarnedHardcore) : null,
                     Type = achievement.Value.Type
                 });
             }
 
-            return new UserGameInfoDto
+            return new GetLoggedInSpecificGameInfoResponse
             {
                 GameId = data.Id,
-                ImageBoxArt = "https://media.retroachievements.org" + data.ImageBoxArt,
-                ImageTitle = "https://media.retroachievements.org" + data.ImageTitle,
-                ImageInGame = "https://media.retroachievements.org" + data.ImageInGame,
+                ImageBoxArt = data.ImageBoxArt,
+                ImageTitle = data.ImageTitle,
+                ImageInGame = data.ImageInGame,
                 ConsoleId = data.ConsoleId,
                 ConsoleName = data.ConsoleName,
                 Genre = data.Genre,
                 AchievementCount = data.AchievementCount,
                 Players = data.Players,
                 Title = data.Title,
-                NumAwardedToUser = data.NumAwardedToUser,
-                UserCompletion = data.UserCompletion,
                 Achievements = achievementList,
-                PointsEarned = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
-                TotalPoints = data.Achievements.Sum(x => x.Value.Points),
-                GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.Game.Id == gameId)
-            };
-        }
-
-        public async Task<UserAchievementsForGameDto> GetUserAchievementsForGame(int userId, int gameId)
-        {
-            var user = context.Users.Where(x => x.Id == userId).First();
-
-            var data = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, gameId);
-
-            if (data == null)
-            {
-                return new UserAchievementsForGameDto
-                {
-                    Achievements = null,
-                    Success = false,
-                    Reason = "Error getting data"
-                };
-            }
-
-            context.Games.First(x => x.Id == gameId).Players = data.Players;
-            await context.SaveChangesAsync();
-
-            var secondsDiff = (DateTime.UtcNow - user.LastAchievementsUpdate).TotalSeconds;
-
-            if (secondsDiff < 30)
-            {
-                return new UserAchievementsForGameDto
-                {
-                    Achievements = null,
-                    Success = false,
-                    Reason = $"Achievement update is on cooldown! You can next update in {30 - Math.Round(secondsDiff)} seconds time"
-                };
-            }
-
-            user.LastAchievementsUpdate = DateTime.UtcNow;
-            await context.SaveChangesAsync();
-
-            var achievementList = new List<UserAchievement>();
-
-            foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
-            {
-                var userAchievement = new UserAchievement
-                {
-                    Id = achievement.Value.Id,
-                    BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
-                    Description = achievement.Value.Description,
-                    NumAwarded = achievement.Value.NumAwarded,
-                    NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
-                    Points = achievement.Value.Points,
-                    Title = achievement.Value.Title,
-                    DateEarned = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
-                    Type = achievement.Value.Type
-                };
-
-                if (achievement.Value.DateEarned == null)
-                {
-                    userAchievement.BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + "_lock.png";
-                }
-
-                achievementList.Add(userAchievement);
-            }
-
-            return new UserAchievementsForGameDto
-            {
-                Success = true,
-                Achievements = achievementList
+                Developer = data.Developer,
+                Publisher = data.Publisher,
+                GameImage = data.ImageIcon,
+                AchievementsAwardedSoftcore = data.Achievements.Where(x => x.Value.DateEarned != null).Count(),
+                AchievementsAwardedHardcore = data.Achievements.Where(x => x.Value.DateEarnedHardcore != null).Count(),
+                AchievementsAwardedTotal = data.Achievements.Where(x => x.Value.DateEarned != null).Count(),
+                PointsAwardedSoftcore = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
+                PointsAwardedHardcore = data.Achievements.Where(x => x.Value.DateEarnedHardcore != null).Sum(x => x.Value.Points),
+                PointsAwardedTotal = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
+                TotalGamePoints = data.Achievements.Sum(x => x.Value.Points)
             };
         }
 

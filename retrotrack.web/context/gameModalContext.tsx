@@ -3,6 +3,7 @@
 import { LoggedInGameModal } from '@/components/shared/LoggedInGameModal'
 import { LoggedOutGameModal } from '@/components/shared/LoggedOutGameModal'
 import { createContext, useContext, useState } from 'react'
+import { useAuth } from './authContext'
 
 type GameModalContextType = {
   showModal: (gameId: number) => void
@@ -12,6 +13,7 @@ const GameModalContext = createContext<GameModalContextType | undefined>(undefin
 
 export const GameModalProvider = ({ children }: { children: React.ReactNode }) => {
   const [gameId, setGameId] = useState<number | null>(null)
+  const auth = useAuth()
 
   const showModal = (id: number) => {
     setGameId(id)
@@ -20,7 +22,8 @@ export const GameModalProvider = ({ children }: { children: React.ReactNode }) =
   return (
     <GameModalContext.Provider value={{ showModal }}>
       {children}
-      {gameId !== null && <LoggedOutGameModal gameId={gameId} onClose={() => setGameId(null)} />}
+      {gameId !== null && auth.user == null && <LoggedOutGameModal gameId={gameId} onClose={() => setGameId(null)} />}
+      {gameId !== null && auth.user != null && <LoggedInGameModal gameId={gameId} onClose={() => setGameId(null)} />}
     </GameModalContext.Provider>
   )
 }
