@@ -41,7 +41,7 @@ export default async function RootLayout({
 
   // get the navigation data depending on whether the user is logged in or not
   // if the user is logged in, we will get the navigation data for the logged in user
-  if(cookieStore.has('accessToken')) {
+  if (cookieStore.has('accessToken')) {
 
     // As it is a server-side request, we need to pass the cookies manually
     // because Next.js does not automatically forward cookies in server-side requests

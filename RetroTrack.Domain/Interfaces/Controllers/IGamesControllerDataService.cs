@@ -9,9 +9,9 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames();
         Task<GetGamesForConsoleResponse> GetGamesForConsole(GetGamesForConsoleRequest request);
         Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfoResponse(int gameId);
+        Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole(int userId, GetUserProgressForConsoleRequest request);
 
 
-        Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(int userId, string username, int consoleId);
         Task<List<UserGamesTableDto>> GetInProgressGamesForUser(int userId);
         Task<UserAchievementsForGameDto> GetUserAchievementsForGame(int userId, int gameId);
         Task<UserGameInfoDto?> GetUserGameInfo(int userId, int gameId);

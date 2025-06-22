@@ -14,7 +14,7 @@ using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.UserAchievement
 
 namespace RetroTrack.Domain.Services.Controllers
 {
-    public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService, ICachingService cachingService) : IGamesControllerDataService
+    public class GamesControllerDataService(AppDbContext context, IRetroAchievementsApiService raApiService) : IGamesControllerDataService
     {
         public async Task<GetRecentlyAddedAndUpdatedGamesResponse> GetRecentlyAddedAndUpdatedGames()
         {
@@ -53,8 +53,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 days.Add(new DayData
                 {
                     Date = DateTimeHelper.HumanizeDateTime(date),
-                    NewSets = newSets, 
-                    UpdatedSets = updatedSets 
+                    NewSets = newSets,
+                    UpdatedSets = updatedSets
                 });
             }
 
@@ -70,12 +70,17 @@ namespace RetroTrack.Domain.Services.Controllers
 
             if (request.ConsoleId == -1)
             {
-                gameQuery = context.Games.Where(x => x.HasAchievements).OrderBy(x => x.Id)
-                .AsQueryable();
+                gameQuery = context.Games
+                    .Where(x => x.HasAchievements)
+                    .OrderBy(x => x.Id)
+                    .AsQueryable();
             }
             else
             {
-                gameQuery = context.Games.Where(x => x.ConsoleId == request.ConsoleId && x.HasAchievements).OrderBy(x => x.Id);
+                gameQuery = context.Games
+                    .Where(x => x.ConsoleId == request.ConsoleId && x.HasAchievements)
+                    .OrderBy(x => x.Id)
+                    .AsQueryable();
             }
 
             if (request.SearchTerm != null && request.SearchType != null)
@@ -134,21 +139,21 @@ namespace RetroTrack.Domain.Services.Controllers
                     : gameQuery.OrderByDescending(x => x.GameGenre);
             }
 
-                var games = await gameQuery
-                    .Skip(request.Skip)
-                    .Take(request.Take)
-                    .Select(x => new ConsoleGames
-                    {
-                        GameId = x.Id,
-                        AchievementCount = x.AchievementCount,
-                        GameGenre = x.GameGenre ?? "Not Set",
-                        GameImageUrl = x.ImageIcon,
-                        GameTitle = x.Title,
-                        PlayerCount = x.Players ?? 0,
-                        Points = x.Points,
-                        ConsoleName = request.ConsoleId == -1 ? x.GameConsole.ConsoleName : null
-                    })
-                    .ToArrayAsync();
+            var games = await gameQuery
+                .Skip(request.Skip)
+                .Take(request.Take)
+                .Select(x => new ConsoleGames
+                {
+                    GameId = x.Id,
+                    AchievementCount = x.AchievementCount,
+                    GameGenre = x.GameGenre ?? "Not Set",
+                    GameImageUrl = x.ImageIcon,
+                    GameTitle = x.Title,
+                    PlayerCount = x.Players ?? 0,
+                    Points = x.Points,
+                    ConsoleName = request.ConsoleId == -1 ? x.GameConsole.ConsoleName : null
+                })
+                .ToArrayAsync();
 
             var totalCount = await gameQuery.CountAsync();
 
@@ -354,79 +359,130 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task<UserConsoleGamesDto?> GetGamesAndUserProgressForConsole(int userId, string username, int consoleId)
+        public async Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole(int userId, GetUserProgressForConsoleRequest request)
         {
-            var consoleGames = new List<UserGamesTableDto>();
+            var baseGames = context.Games
+                .Where(x => x.HasAchievements
+                            && (request.ConsoleId == -1 || x.ConsoleId == request.ConsoleId))
+                .OrderBy(x => x.Id);
 
-            var cacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}");
-            var gameList = new List<Game>();
+            var gameQuery = from g in baseGames
+                        join ugp in context.UserGameProgress
+                            .Where(ugp => ugp.UserId == userId)
+                            on g.Id equals ugp.GameId into progGroup
+                        from prog in progGroup.DefaultIfEmpty()
+                        select new
+                        {
+                            Game = g,
+                            Progress = prog,
+                            AchievementsGained = prog != null ? prog.AchievementsGained : 0,
+                            GamePercentage = prog != null ? prog.GamePercentage : 0
+                        };
 
-            if (cacheData != null)
+            if (request.HideInProgressGames == true)
             {
-                gameList = JsonConvert.DeserializeObject<List<Game>>(cacheData);
+                gameQuery = gameQuery.Where(x => x.AchievementsGained == 0);
             }
-            else
+
+            if (request.HideCompletedGames == true)
             {
-                if (consoleId == 0)
+                gameQuery = gameQuery.Where(x => x.GamePercentage != 100);
+            }
+
+            if (request.SearchTerm != null && request.SearchType != null)
+            {
+                switch (request.SearchType)
                 {
-                    gameList = await context.Games.ToListAsync();
+                    case ConsoleTableSearchType.GameTitle:
+                        gameQuery = gameQuery.Where(x => x.Game.Title.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                    case ConsoleTableSearchType.GameGenre:
+                        gameQuery = gameQuery.Where(x => x.Game.GameGenre != null && x.Game.GameGenre.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                    case ConsoleTableSearchType.AchievementName:
+                        gameQuery = gameQuery.Where(x => x.Game.Achievements.Any(x => x.AchievementName.ToLower().Contains(request.SearchTerm.ToLower())));
+                        break;
+                    case ConsoleTableSearchType.AchievementDescription:
+                        gameQuery = gameQuery.Where(x => x.Game.Achievements.Any(x => x.AchievementDescription.ToLower().Contains(request.SearchTerm.ToLower())));
+                        break;
                 }
-                else
-                {
-                    gameList = await context.Games.Where(x => x.ConsoleId == consoleId).ToListAsync();
-                }
-
-                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}", JsonConvert.SerializeObject(gameList));
             }
 
-            if (gameList == null || gameList.Count == 0)
+            if (request.SortByPercentageComplete != null)
             {
-                return null;
+                gameQuery = request.SortByPercentageComplete == true
+                    ? gameQuery.OrderBy(x => x.GamePercentage)
+                    : gameQuery.OrderByDescending(x => x.GamePercentage);
+            }
+            else if (request.SortByAchievementsUnlocked != null)
+            {
+                gameQuery = request.SortByAchievementsUnlocked == true
+                    ? gameQuery.OrderBy(x => x.AchievementsGained)
+                    : gameQuery.OrderByDescending(x => x.AchievementsGained);
+            }
+            else if (request.SortByName != null)
+            {
+                gameQuery = request.SortByName == true
+                    ? gameQuery.OrderBy(x => x.Game.Title)
+                    : gameQuery.OrderByDescending(x => x.Game.Title);
+            }
+            else if (request.SortByConsole != null)
+            {
+                gameQuery = request.SortByConsole == true
+                    ? gameQuery.OrderBy(x => x.Game.GameConsole.ConsoleName)
+                    : gameQuery.OrderByDescending(x => x.Game.GameConsole.ConsoleName);
+            }
+            else if (request.SortByPoints != null)
+            {
+                gameQuery = request.SortByPoints == true
+                    ? gameQuery.OrderBy(x => x.Game.Points)
+                    : gameQuery.OrderByDescending(x => x.Game.Points);
+            }
+            else if (request.SortByAchievementCount != null)
+            {
+                gameQuery = request.SortByAchievementCount == true
+                    ? gameQuery.OrderBy(x => x.Game.AchievementCount)
+                    : gameQuery.OrderByDescending(x => x.Game.AchievementCount);
+            }
+            else if (request.SortByPlayerCount != null)
+            {
+                gameQuery = request.SortByPlayerCount == true
+                    ? gameQuery.OrderBy(x => x.Game.Players)
+                    : gameQuery.OrderByDescending(x => x.Game.Players);
+            }
+            else if (request.SortByGenre != null)
+            {
+                gameQuery = request.SortByGenre == true
+                    ? gameQuery.OrderBy(x => x.Game.GameGenre)
+                    : gameQuery.OrderByDescending(x => x.Game.GameGenre);
             }
 
-            if (consoleId == 0)
-            {
-                //User progress is cached, check and return if needed
-                var userAllGamesCacheData = await cachingService.GetCacheItem($"GamesData-{consoleId}-User-{username}");
-
-                if (userAllGamesCacheData != null)
+            var games = await gameQuery
+                .Skip(request.Skip)
+                .Take(request.Take)
+                .Select(x => new LoggedInConsoleGames
                 {
-                    return JsonConvert.DeserializeObject<UserConsoleGamesDto>(userAllGamesCacheData);
-                }
+                    GameId = x.Game.Id,
+                    AchievementCount = x.Game.AchievementCount,
+                    AchievementsUnlocked = x.AchievementsGained,
+                    PercentageComplete = Math.Round(x.GamePercentage, 2),
+                    GameGenre = x.Game.GameGenre ?? "Not Set",
+                    GameImageUrl = x.Game.ImageIcon,
+                    GameTitle = x.Game.Title,
+                    PlayerCount = x.Game.Players ?? 0,
+                    Points = x.Game.Points,
+                    ConsoleName = request.ConsoleId == -1 ? x.Game.GameConsole.ConsoleName : null
+                })
+                .ToArrayAsync();
 
-                var allGamesUserProgress = new UserConsoleGamesDto
-                {
-                    ConsoleId = consoleId,
-                    ConsoleName = "All Games",
-                    Games = consoleGames
-                };
+            var totalCount = await gameQuery.CountAsync();
 
-                //await cachingService.AddOrUpdateCacheItem($"GamesData-{consoleId}-User-{userData.Username}", JsonConvert.SerializeObject(allGamesUserProgress));
-                return allGamesUserProgress;
-            }
-
-            foreach (var game in gameList)
+            return new GetUserProgressForConsoleResponse
             {
-                var userProgress = await context.UserGameProgress.Where(x => x.UserId == userId).FirstOrDefaultAsync(x => x.Game.Id == game.Id);
-
-                consoleGames.Add(new UserGamesTableDto
-                {
-                    AchievementCount = game.AchievementCount,
-                    AchievementsGained = userProgress?.AchievementsGained ?? 0,
-                    PercentageCompleted = userProgress?.GamePercentage ?? 0,
-                    GameGenre = game.GameGenre,
-                    GameIconUrl = "https://media.retroachievements.org" + game.ImageIcon,
-                    GameId = game.Id,
-                    GameName = game.Title,
-                    Players = game.Players ?? 0
-                });
-            }
-
-            return new UserConsoleGamesDto
-            {
-                ConsoleId = consoleId,
-                ConsoleName = consoleId == 0 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == consoleId).First().ConsoleName,
-                Games = consoleGames
+                Games = games,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
+                ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
         }
 

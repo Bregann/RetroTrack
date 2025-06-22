@@ -6,19 +6,19 @@ import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
-import { usePublicPaginatedTableQuery } from '@/hooks/consoles/usePublicPaginatedTableQuery'
-import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
+import { useLoggedInPaginatedTableQuery } from '@/hooks/consoles/useLoggedInPaginatedTableQuery'
+import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 
-interface PublicGamesTableProps {
-  pageData: GetGamesForConsoleResponse
+interface LoggedInGamesTableProps {
+  pageData: GetUserProgressForConsoleResponse
   consoleId: number
   consoleName: string
   totalGames: number
 }
 
-const columns: Column<Game>[] = [
+const columns: Column<LoggedInGame>[] = [
   {
     title: '',
     key: 'gameImageUrl',
@@ -58,10 +58,23 @@ const columns: Column<Game>[] = [
     title: 'Players',
     key: 'playerCount',
     sortable: true
+  },
+  {
+    title: 'Achievements Unlocked',
+    key: 'achievementsUnlocked',
+    sortable: true
+  },
+  {
+    title: 'Percent Complete',
+    key: 'percentageComplete',
+    sortable: true,
+    render: (item) => {
+      return `${item.percentageComplete}%`
+    }
   }
 ]
 
-export default function PublicGamesTable(props: PublicGamesTableProps) {
+export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   if (columns.find(c => c.key === 'consoleName') === undefined) {
     columns.push({
       title: 'Console',
@@ -72,7 +85,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   }
 
   const [page, setPage] = useState(1)
-  const [sortOption, setSortOption] = useState<SortOption<Game>>({
+  const [sortOption, setSortOption] = useState<SortOption<LoggedInGame>>({
     key: 'gameTitle',
     direction: 'asc',
   })
@@ -90,7 +103,9 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
       achievementCount: 'SortByAchievementCount',
       playerCount: 'SortByPlayerCount',
       points: 'SortByPoints',
-      consoleName: 'SortByConsole'
+      consoleName: 'SortByConsole',
+      achievementsUnlocked: 'SortByAchievementsUnlocked',
+      percentageComplete: 'SortByPercentageComplete'
     }
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
@@ -103,7 +118,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
 
   const isFirstLoad = queryString === `ConsoleId=${props.consoleId}&Skip=0&Take=100&SortByName=true`
 
-  const { data, isLoading, isError, error } = usePublicPaginatedTableQuery(
+  const { data, isLoading, isError, error } = useLoggedInPaginatedTableQuery(
     queryString,
     isFirstLoad ? props.pageData : undefined
   )

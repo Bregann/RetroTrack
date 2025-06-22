@@ -49,7 +49,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var user = await context.Users.FirstAsync(x => x.Id == userId);
 
-            var consoleProgressData = await query.ToArrayAsync();
+            var consoleProgressData = await query.OrderBy(x => x.ConsoleName).ToArrayAsync();
 
             return new GetLoggedInNavigationDataResponse
             {

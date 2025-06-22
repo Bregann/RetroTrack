@@ -30,11 +30,13 @@ namespace RetroTrack.Api.Controllers.Games
 
             if (data == null)
             {
-                return Unauthorized(false);
+                return BadRequest(false);
             }
 
             return Ok(data);
         }
+
+
 
         [HttpGet("{gameId}")]
         public async Task<ActionResult<UserGameInfoDto>> GetGameInfoForUser([FromRoute] int gameId)
@@ -57,20 +59,12 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
 
-        [HttpGet("{consoleId}")]
-        public async Task<ActionResult<UserConsoleGamesDto>> GetGamesAndUserProgressForConsole([FromRoute] int consoleId)
+        [HttpGet]
+        public async Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole([FromQuery] GetUserProgressForConsoleRequest request)
         {
             var user = userContextHelper.GetUserId();
-            var username = userContextHelper.GetUsername();
 
-            var games = await gamesControllerData.GetGamesAndUserProgressForConsole(user, username, consoleId);
-
-            if (games == null)
-            {
-                return BadRequest();
-            }
-
-            return Ok(games);
+            return await gamesControllerData.GetUserProgressForConsole(user, request);
         }
 
         [HttpGet]

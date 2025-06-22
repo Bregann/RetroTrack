@@ -16,7 +16,7 @@ import {
   Badge,
   Stack,
 } from '@mantine/core'
-import { IconDeviceGamepad3, IconHome2, IconMoonStars } from '@tabler/icons-react'
+import { IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -140,6 +140,32 @@ export function Navbar(props: NavbarProps) {
             style={{ borderRadius: '10px' }}
           />
 
+          {auth.user !== null &&
+          <>
+            <NavLink
+              label="Tracked Games"
+              component={Link}
+              href="/trackedgames"
+              active={currentPage === '/trackedgames'}
+              py="xs"
+              leftSection={<IconPin size={20} stroke={1.5} />}
+              onClick={() => setCurrentPage('/trackedgames')}
+              style={{ borderRadius: '10px' }}
+            />
+            <NavLink
+              label="In Progress Games"
+              component={Link}
+              href="/trackedgames"
+              active={currentPage === '/inprogressgames'}
+              py="xs"
+              leftSection={<IconProgress size={20} stroke={1.5} />}
+              onClick={() => setCurrentPage('/inprogressgames')}
+              style={{ borderRadius: '10px' }}
+            />
+          </>
+
+          }
+
           {consoleTypes.map((type) => {
             return (
               <NavLink label={ConsoleType[type]} key={type}>
@@ -168,6 +194,11 @@ export function Navbar(props: NavbarProps) {
                       <NavLink
                         label={navItem.consoleName}
                         py="xs"
+                        component={Link}
+                        href={`/console/${navItem.consoleId}`}
+                        onClick={() => setCurrentPage(`/console/${navItem.consoleId}`)}
+                        active={currentPage === `/console/${navItem.consoleId}`}
+                        style={{ borderRadius: '10px' }}
                         description={
                           <Stack gap="xs" >
                             <Text size="sm" c="dimmed">{navItem.totalGamesInConsole} games</Text>
