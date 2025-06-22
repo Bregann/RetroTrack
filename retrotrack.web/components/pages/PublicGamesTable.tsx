@@ -47,17 +47,20 @@ const columns: Column<Game>[] = [
   {
     title: 'Achievements',
     key: 'achievementCount',
-    sortable: true
+    sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Points',
     key: 'points',
     sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Players',
     key: 'playerCount',
-    sortable: true
+    sortable: true,
+    toggleDescFirst: true
   }
 ]
 

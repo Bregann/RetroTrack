@@ -1,7 +1,7 @@
 // context/AuthContext.tsx
 'use client'
 
-import { doGet, doPost } from '@/helpers/apiClient'
+import { doPost } from '@/helpers/apiClient'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, useEffect } from 'react'
 
@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
 
   useEffect(() => {
-    //TODO: refresh the access token here and clear the cookie if it has expired and set the user to null
     doPost('/api/auth/RefreshToken', {})
 
     const tokenRow = document.cookie

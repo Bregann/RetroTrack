@@ -10,6 +10,7 @@ export interface Column<T> {
   render?: (item: T, index: number) => ReactNode
   sortable?: boolean
   show?: boolean
+  toggleDescFirst?: boolean // if true, will always sort desc first
 }
 
 export type SortDirection = 'asc' | 'desc'
@@ -17,7 +18,6 @@ export interface SortOption<T> {
   key: keyof T
   direction: SortDirection
 }
-
 
 export interface PaginatedTableProps<T> {
   data: T[]
@@ -45,12 +45,21 @@ export function PaginatedTable<T>({
   const currentKey = sortOption?.key
   const currentDir = sortOption?.direction || 'asc'
 
-  const handleHeaderClick = (colKey?: keyof T) => {
-    if (!colKey || !onSortChange) return
-    // toggle direction if same key, else default to asc
-    const direction: SortDirection =
-      currentKey === colKey && currentDir === 'asc' ? 'desc' : 'asc'
-    onSortChange({ key: colKey, direction })
+  const handleHeaderClick = (column?: Column<T>) => {
+    if (!column?.key || !onSortChange) return
+
+    const isSameColumn = currentKey === column.key
+    let direction: SortDirection
+
+    if (!isSameColumn) {
+    // first-ever click on this column
+      direction = column.toggleDescFirst ? 'desc' : 'asc'
+    } else {
+    // already sorted, so just flip it
+      direction = currentDir === 'asc' ? 'desc' : 'asc'
+    }
+
+    onSortChange({ key: column.key, direction })
   }
 
   const rows = data.map((item, index) => (
@@ -78,7 +87,7 @@ export function PaginatedTable<T>({
                 <Table.Th
                   key={colIndex}
                   style={{ cursor: canSort ? 'pointer' : undefined }}
-                  onClick={() => canSort && handleHeaderClick(col.key)}
+                  onClick={() => canSort && handleHeaderClick(col)}
                 >
                   {col.title}
                   {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }}/> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }}/>)}

@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -48,22 +48,26 @@ const columns: Column<LoggedInGame>[] = [
   {
     title: 'Achievements',
     key: 'achievementCount',
-    sortable: true
+    sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Points',
     key: 'points',
     sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Players',
     key: 'playerCount',
-    sortable: true
+    sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Achievements Unlocked',
     key: 'achievementsUnlocked',
-    sortable: true
+    sortable: true,
+    toggleDescFirst: true
   },
   {
     title: 'Percent Complete',
@@ -71,7 +75,8 @@ const columns: Column<LoggedInGame>[] = [
     sortable: true,
     render: (item) => {
       return `${item.percentageComplete}%`
-    }
+    },
+    toggleDescFirst: true
   },
   {
     title: 'Highest Award',
@@ -114,6 +119,9 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   const [searchInput, setSearchInput] = useDebouncedState<string | null>(null, 200)
   const [searchTerm, setSearchTerm] = useState<string | null>(null)
   const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
+  const [hideInProgressGames, setHideInProgressGames] = useState(false)
+  const [hideBeatenGames, setHideBeatenGames] = useState(false)
+  const [hideCompletedGames, setHideCompletedGames] = useState(false)
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * 100
@@ -132,14 +140,14 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
 
-    let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
+    let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}${hideCompletedGames ? '&HideCompletedGames=true' : ''}${hideInProgressGames ? '&HideInProgressGames=true' : ''}`
 
     if (searchTerm !== null && searchTerm !== '') {
       query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
 
     return query
-  }, [page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
+  }, [hideBeatenGames, hideCompletedGames, hideInProgressGames, page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
   const isFirstLoad = queryString === `ConsoleId=${props.consoleId}&Skip=0&Take=100&SortByName=true`
 
@@ -167,47 +175,6 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
       </div>
 
       <Paper className={styles.paper}>
-        <Group
-          justify="center"
-          mt={10}
-          mb={10}
-          pr={20}
-          pl={20}
-          style={{ width: '100%' }}
-        >
-          <Input
-            placeholder="Search..."
-            style={{
-              flex: 1,
-              minWidth: 0,
-            }}
-            onChange={(e) =>{
-              if(e.currentTarget.value.trim() === '') {
-                setSearchTerm(null)
-                setSearchInput(null)
-              }
-              setSearchInput(e.currentTarget.value)
-            }
-            }
-          />
-          <Select
-            data={searchDropdownOptions}
-            style={{
-              flex: '0 0 150px',
-              minWidth: 0,
-            }}
-            clearable
-            defaultValue={searchDropdownValue}
-            onChange={(value) => setSearchDropdownValue(value ?? '0')}
-          />
-          <Button style={{ flex: '0 0 auto', ml: 10 }}
-            onClick={() => {setSearchTerm(searchInput)}}
-            disabled={!searchInput || searchInput.trim() === ''}
-          >
-    Search
-          </Button>
-        </Group>
-
         {isLoading ? (
           <Center style={{ padding: '2rem' }}>
             <Loader variant="dots" size="lg" />{/* or variant="bars", "oval"—choose your vibe */}
@@ -216,21 +183,69 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
         ) : isError ? (
           <p style={{ color: 'red' }}>Oops: {error.message}</p>
         ) : (
-          <PaginatedTable
-            data={data!.games}
-            columns={columns}
-            page={page}
-            total={totalPages}
-            sortOption={sortOption}
-            onSortChange={(opt) => {
-              setPage(1)
-              setSortOption(opt)
-            }}
-            onPageChange={setPage}
-            onRowClick={(item) => {
-              gameModal.showModal(item.gameId)
-            }}
-          />
+          <>
+            <Group
+              justify="center"
+              mt={10}
+              mb={10}
+              pr={20}
+              pl={20}
+              style={{ width: '100%' }}
+            >
+              <Input
+                placeholder="Search..."
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                }}
+                onChange={(e) =>{
+                  if(e.currentTarget.value.trim() === '') {
+                    setSearchTerm(null)
+                    setSearchInput(null)
+                  }
+                  setSearchInput(e.currentTarget.value)
+                }
+                }
+              />
+              <Select
+                data={searchDropdownOptions}
+                style={{
+                  flex: '0 0 150px',
+                  minWidth: 0,
+                }}
+                clearable
+                defaultValue={searchDropdownValue}
+                onChange={(value) => setSearchDropdownValue(value ?? '0')}
+              />
+              <Button style={{ flex: '0 0 auto', ml: 10 }}
+                onClick={() => {setSearchTerm(searchInput)}}
+                disabled={!searchInput || searchInput.trim() === ''}
+              >
+                Search
+              </Button>
+            </Group>
+            <Group ml={20}>
+              <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }}/>
+              <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }}/>
+              <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }}/>
+            </Group>
+            <PaginatedTable
+              data={data!.games}
+              columns={columns}
+              page={page}
+              total={totalPages}
+              sortOption={sortOption}
+              onSortChange={(opt) => {
+                setPage(1)
+                setSortOption(opt)
+              }}
+              onPageChange={setPage}
+              onRowClick={(item) => {
+                gameModal.showModal(item.gameId)
+              }}
+            />
+          </>
+
         )}
       </Paper>
     </Container>
