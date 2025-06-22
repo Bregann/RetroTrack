@@ -376,7 +376,8 @@ namespace RetroTrack.Domain.Services.Controllers
                             Game = g,
                             Progress = prog,
                             AchievementsGained = prog != null ? prog.AchievementsGained : 0,
-                            GamePercentage = prog != null ? prog.GamePercentage : 0
+                            GamePercentage = prog != null ? prog.GamePercentage : 0,
+                            HighestAward = prog.HighestAwardKind
                         };
 
             if (request.HideInProgressGames == true)
@@ -471,7 +472,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     GameTitle = x.Game.Title,
                     PlayerCount = x.Game.Players ?? 0,
                     Points = x.Game.Points,
-                    ConsoleName = request.ConsoleId == -1 ? x.Game.GameConsole.ConsoleName : null
+                    ConsoleName = request.ConsoleId == -1 ? x.Game.GameConsole.ConsoleName : null,
+                    HighestAward = x.HighestAward
                 })
                 .ToArrayAsync();
 

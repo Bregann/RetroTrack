@@ -1,3 +1,5 @@
+import { HighestAwardKind } from '@/enums/highestAwardKind'
+
 export interface GetUserProgressForConsoleResponse {
     totalCount: number
     totalPages: number
@@ -16,4 +18,5 @@ export interface LoggedInGame {
     gameImageUrl: string
     points: number
     consoleName: string | null // Optional, can be null if consoleId is -1
+    highestAward: HighestAwardKind
 }

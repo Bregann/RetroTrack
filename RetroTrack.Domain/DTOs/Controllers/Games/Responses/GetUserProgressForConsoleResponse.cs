@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RetroTrack.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,5 +27,6 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required string GameImageUrl { get; set; }
         public required long Points { get; set; }
         public string? ConsoleName { get; set; }
+        public HighestAwardKind? HighestAward { get; set; }
     }
 }

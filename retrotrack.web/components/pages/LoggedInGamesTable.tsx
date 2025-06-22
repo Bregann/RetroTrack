@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
+import { Badge, Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -10,6 +10,7 @@ import { useLoggedInPaginatedTableQuery } from '@/hooks/consoles/useLoggedInPagi
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
+import { HighestAwardKind } from '@/enums/highestAwardKind'
 
 interface LoggedInGamesTableProps {
   pageData: GetUserProgressForConsoleResponse
@@ -70,6 +71,26 @@ const columns: Column<LoggedInGame>[] = [
     sortable: true,
     render: (item) => {
       return `${item.percentageComplete}%`
+    }
+  },
+  {
+    title: 'Highest Award',
+    key: 'highestAward',
+    render: (item) => {
+      switch (item.highestAward){
+        case HighestAwardKind.BeatenSoftcore:
+          return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
+        case HighestAwardKind.BeatenHardcore:
+          return <Badge color="cyan" variant="light">Beaten (Hardcore)</Badge>
+        case HighestAwardKind.Completed:
+          return <Badge color="orange" variant="light">Completed</Badge>
+        case HighestAwardKind.Mastered:
+          return <Badge color="yellow" variant="filled" style={{ whiteSpace: 'normal', overflow: 'visible' }}>Mastered</Badge>
+        case HighestAwardKind.Unknown:
+          return ''
+        default:
+          return ''
+      }
     }
   }
 ]
