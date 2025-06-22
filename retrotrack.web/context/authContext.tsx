@@ -24,8 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
 
   useEffect(() => {
-    doPost('/api/auth/RefreshToken', {})
-
     const tokenRow = document.cookie
       .split('; ')
       .find(row => row.startsWith('accessToken='))
