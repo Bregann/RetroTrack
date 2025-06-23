@@ -10,6 +10,7 @@ import { doGet } from '@/helpers/apiClient'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 import { GameModalProvider } from '@/context/gameModalContext'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
+import { Notifications } from '@mantine/notifications'
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -79,6 +80,7 @@ export default async function RootLayout({
       <body style={{ marginBottom: 20 }}>
         <Providers>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
+            <Notifications />
             <AuthProvider>
               <GameModalProvider>
                 <Navbar publicNavigationData={data} loggedInNavigationData={loggedInData}>{children}</Navbar>

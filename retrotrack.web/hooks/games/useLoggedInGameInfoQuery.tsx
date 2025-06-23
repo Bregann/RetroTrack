@@ -4,10 +4,10 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query'
 
 export const useLoggedInGameInfoQuery = (gameId: number): UseQueryResult<GetLoggedInSpecificGameInfoResponse, Error> => {
   return useQuery({
-    queryKey: ['getPublicSpecificGameInfo', gameId],
+    queryKey: ['getGameInfoForUser', gameId],
     refetchOnMount: true,
     queryFn: async () => {
-      const response = await doGet<GetLoggedInSpecificGameInfoResponse>(`/api/games/getPublicSpecificGameInfo/${gameId}`)
+      const response = await doGet<GetLoggedInSpecificGameInfoResponse>(`/api/games/GetGameInfoForUser/${gameId}`)
       if (!response.ok) {
         throw new Error('Failed to fetch game info')
       }

@@ -219,7 +219,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     return null;
                 }
 
-                achievementList.AddRange(loggedOutData.Achievements.Select(achievement => new UserAchievement
+                achievementList.AddRange(loggedOutData.Achievements.OrderBy(x => x.Value.Id).Select(achievement => new UserAchievement
                 {
                     BadgeName = "https://media.retroachievements.org/Badge/" + achievement.Value.BadgeName + ".png",
                     DateEarnedSoftcore = null,
@@ -262,7 +262,7 @@ namespace RetroTrack.Domain.Services.Controllers
             user.LastAchievementsUpdate = DateTime.UtcNow;
             await context.SaveChangesAsync();
 
-            foreach (var achievement in data.Achievements.OrderByDescending(x => x.Value.DateEarned))
+            foreach (var achievement in data.Achievements.OrderBy(x => x.Value.Id))
             {
                 achievementList.Add(new UserAchievement
                 {
@@ -275,6 +275,45 @@ namespace RetroTrack.Domain.Services.Controllers
                     DateEarnedHardcore = achievement.Value.DateEarnedHardcore != null ? DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarnedHardcore) : null,
                     Type = achievement.Value.Type
                 });
+            }
+
+            // games can have multiple win condition achievements, so we need to check if any of them are completed
+            var winConditionAchievement = data.Achievements
+                .Where(x => x.Value.Type == AchievementType.Win_Condition)
+                .ToList();
+
+            string? gameBeatenDateSoftcore = null;
+            string? gameBeatenDateHardcore = null;
+
+            if (winConditionAchievement.Count != 0)
+            {
+                gameBeatenDateSoftcore = DateTimeHelper.HumanizeDateTimeWithTime(winConditionAchievement
+                    .Where(x => x.Value.DateEarned != null)
+                    .Select(x => x.Value.DateEarned)
+                    .FirstOrDefault());
+
+                gameBeatenDateHardcore = DateTimeHelper.HumanizeDateTimeWithTime(winConditionAchievement
+                    .Where(x => x.Value.DateEarnedHardcore != null)
+                    .Select(x => x.Value.DateEarnedHardcore)
+                    .FirstOrDefault());
+            }
+
+            string? gameCompletedDate = null;
+            string? gameMasteredDate = null;
+
+            if (data.NumAwardedToUser == data.AchievementCount)
+            {
+                var lastAchievement = data.Achievements
+                    .OrderByDescending(x => x.Value.DateEarned)
+                    .FirstOrDefault();
+
+                gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
+
+                var lastAchievementHardcore = data.Achievements
+                    .OrderByDescending(x => x.Value.DateEarnedHardcore)
+                    .FirstOrDefault();
+
+                gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
             }
 
             return new GetLoggedInSpecificGameInfoResponse
@@ -299,7 +338,11 @@ namespace RetroTrack.Domain.Services.Controllers
                 PointsAwardedSoftcore = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
                 PointsAwardedHardcore = data.Achievements.Where(x => x.Value.DateEarnedHardcore != null).Sum(x => x.Value.Points),
                 PointsAwardedTotal = data.Achievements.Where(x => x.Value.DateEarned != null).Sum(x => x.Value.Points),
-                TotalGamePoints = data.Achievements.Sum(x => x.Value.Points)
+                TotalGamePoints = data.Achievements.Sum(x => x.Value.Points),
+                DateBeatenSoftcore = gameBeatenDateSoftcore,
+                DateBeatenHardcore = gameBeatenDateHardcore,
+                DateCompleted = gameCompletedDate,
+                DateMastered = gameMasteredDate
             };
         }
 
@@ -311,18 +354,18 @@ namespace RetroTrack.Domain.Services.Controllers
                 .OrderBy(x => x.Id);
 
             var gameQuery = from g in baseGames
-                        join ugp in context.UserGameProgress
-                            .Where(ugp => ugp.UserId == userId)
-                            on g.Id equals ugp.GameId into progGroup
-                        from prog in progGroup.DefaultIfEmpty()
-                        select new
-                        {
-                            Game = g,
-                            Progress = prog,
-                            AchievementsGained = prog != null ? prog.AchievementsGained : 0,
-                            GamePercentage = prog != null ? prog.GamePercentage : 0,
-                            HighestAward = prog.HighestAwardKind
-                        };
+                            join ugp in context.UserGameProgress
+                                .Where(ugp => ugp.UserId == userId)
+                                on g.Id equals ugp.GameId into progGroup
+                            from prog in progGroup.DefaultIfEmpty()
+                            select new
+                            {
+                                Game = g,
+                                Progress = prog,
+                                AchievementsGained = prog != null ? prog.AchievementsGained : 0,
+                                GamePercentage = prog != null ? prog.GamePercentage : 0,
+                                HighestAward = prog.HighestAwardKind
+                            };
 
             if (request.HideInProgressGames == true)
             {

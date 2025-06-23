@@ -16,6 +16,7 @@ import {
   Box,
   Checkbox,
   Tooltip,
+  Paper,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
@@ -32,7 +33,8 @@ import {
 import styles from '@/css/components/gameModal.module.scss'
 import { useLoggedInGameInfoQuery } from '@/hooks/games/useLoggedInGameInfoQuery'
 import { AchievementType } from '@/enums/achievementType'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import notificationHelper from '@/helpers/notificationHelper'
 
 interface LoggedInGameModalProps {
   gameId: number
@@ -43,8 +45,46 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
   const gameQuery = useLoggedInGameInfoQuery(props.gameId)
 
+  const [hideUnlockedAchievements, setHideUnlockedAchievements] = useState(false)
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
   const [showMissableOnly, setShowMissableOnly] = useState(false)
+  const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
+  const [disabled, setDisabled] = useState(false)
+  const gameAutoUpdateTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const gameUpdateButtonTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleGameUpdate = async () => {
+    setDisabled(true)
+    await gameQuery.refetch()
+    notificationHelper.showSuccessNotification('Game Updated', 'Game information has been updated', 3000, <IconCheck />)
+    gameUpdateButtonTimerRef.current = setTimeout(() => {
+      setDisabled(false)
+    }, 30000)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (gameUpdateButtonTimerRef.current !== null) {
+        clearTimeout(gameUpdateButtonTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (autoUpdateChecked) {
+      notificationHelper.showSuccessNotification('Enabled', 'Achievement auto updates enabled', 3000, <IconCheck />)
+      console.log('Setting up interval for game updates')
+      gameAutoUpdateTimerRef.current = setInterval(async () => {
+        await gameQuery.refetch()
+      }, 60000)
+    }
+    if (!autoUpdateChecked && gameAutoUpdateTimerRef.current !== null) {
+      clearInterval(gameAutoUpdateTimerRef.current)
+      gameAutoUpdateTimerRef.current = null
+      notificationHelper.showSuccessNotification('Disabled', 'Achievement auto updates disabled', 3000, <IconCheck />)
+    }
+
+  }, [autoUpdateChecked, gameQuery])
 
   return (
     <Modal
@@ -123,7 +163,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               <Text fw={700} ta={'center'}>{gameQuery.data.achievementsAwardedTotal}/{gameQuery.data.achievementCount} Achievements</Text>
               <Stack gap="xs" justify="center" ta={'center'}>
                 <Text size="sm" c="dimmed">73.73% complete</Text>
-                {gameQuery.data.achievementsAwardedSoftcore !== 0 && <Text size="sm" c="cyan">Softcore: {gameQuery.data.achievementsAwardedSoftcore}</Text>}
+                {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.achievementsAwardedSoftcore}</Text>}
                 {gameQuery.data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {gameQuery.data.achievementsAwardedHardcore}</Text>}
                 <Text size="sm" c="grey">Locked: {gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal}</Text>
               </Stack>
@@ -138,7 +178,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               <Text fw={700} ta={'center'}>{gameQuery.data.pointsAwardedTotal}/{gameQuery.data.totalGamePoints} Points</Text>
               <Stack gap="xs" justify="center" ta={'center'}>
                 <Text size="sm" c="dimmed">73.73% complete</Text>
-                {gameQuery.data.pointsAwardedSoftcore !== 0 && <Text size="sm" c="cyan">Softcore: {gameQuery.data.pointsAwardedSoftcore}</Text>}
+                {gameQuery.data.pointsAwardedSoftcore !== gameQuery.data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.pointsAwardedSoftcore}</Text>}
                 {gameQuery.data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {gameQuery.data.pointsAwardedHardcore}</Text>}
               </Stack>
             </Stack>
@@ -189,22 +229,37 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               </ThemeIcon>
               <Text fw={700} ta={'center'}>Completion State</Text>
               <Stack gap={4}>
-                <Group gap="6"><IconDeviceGamepad size={16} /> <Text>Date Beaten:</Text></Group>
-                <Text size="sm" c="dimmed" ta={'center'}>2023-10-01</Text>
+                <Group gap="6" justify='center'>
+                  <IconDeviceGamepad size={16} />
+                  <Text>Date Beaten:</Text>
+                </Group>
 
-                <Group gap="6"><IconDeviceGamepad size={16} /> <Text>Date Mastered:</Text></Group>
-                <Text size="sm" c="dimmed" ta={'center'}>2023-10-01</Text>
+                <Text size="sm" c="dimmed" ta={'center'}>
+                  {gameQuery.data.dateBeatenHardcore === null && gameQuery.data.dateBeatenSoftcore === null
+                    ? 'N/A'
+                    : gameQuery.data.dateBeatenHardcore ?? gameQuery.data.dateBeatenSoftcore}
+                </Text>
+
+                <Group gap="6" justify='center' mt={10}>
+                  <IconDeviceGamepad size={16} />
+                  <Text>Date Completed/Mastered:</Text>
+                </Group>
+                <Text size="sm" c="dimmed" ta={'center'}>
+                  {gameQuery.data.dateMastered === null && gameQuery.data.dateCompleted === null
+                    ? 'N/A'
+                    : gameQuery.data.dateMastered ?? gameQuery.data.dateCompleted}
+                </Text>
               </Stack>
             </Stack>
           </Card>
         </SimpleGrid>
 
-        <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
+        <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }}/>
         <Progress.Root size={20} className={styles.progressBar}>
           {gameQuery.data.achievementsAwardedHardcore != 0 && <Progress.Section value={gameQuery.data.achievementsAwardedHardcore} color="orange">
             <Progress.Label>Hardcore ({gameQuery.data.achievementsAwardedHardcore})</Progress.Label>
           </Progress.Section>}
-          {gameQuery.data.achievementsAwardedSoftcore != 0 && <Progress.Section value={gameQuery.data.achievementsAwardedSoftcore} color="orange">
+          {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Progress.Section value={gameQuery.data.achievementsAwardedSoftcore} color="cyan">
             <Progress.Label>Softcore ({gameQuery.data.achievementsAwardedSoftcore})</Progress.Label>
           </Progress.Section>}
           <Progress.Section value={gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal} color="grey">
@@ -214,17 +269,29 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
         <Group>
           <Checkbox
             label="Hide Unlocked Achievements"
+            checked={hideUnlockedAchievements}
+            onChange={(e) => setHideUnlockedAchievements(e.currentTarget.checked)}
           />
           <Checkbox
             label="Show Progression Achievements Only"
+            checked={showProgressionOnly}
+            onChange={(e) => setShowProgressionOnly(e.currentTarget.checked)}
           />
           <Checkbox
             label="Show Missable Achievements Only"
+            checked={showMissableOnly}
+            onChange={(e) => setShowMissableOnly(e.currentTarget.checked)}
           />
         </Group>
 
         <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
           {gameQuery.data.achievements
+            .filter((x) => {
+              if (hideUnlockedAchievements) {
+                return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
+              }
+              return true
+            })
             .filter((x) => {
               if (showProgressionOnly && showMissableOnly) {
                 return (
@@ -279,7 +346,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                     <Stack gap={2} style={{ flex: 1 }}>
                       <Text fw={500}>{achievement.title}</Text>
                       <Text size="sm" c="dimmed">{achievement.description}</Text>
-                      {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>{achievement.dateEarnedSoftcore}</Text>}
+                      {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
                     </Stack>
 
                     <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
@@ -326,122 +393,8 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           }
         </SimpleGrid>
 
-
-        <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
-          <Card withBorder radius="sm" p="sm" style={{ position: 'relative' }}>
-            <Group align="center" gap="md">
-              <Box className={styles.iconBox}>
-                <Image
-                  src="https://media.retroachievements.org/Badge/451988.png"
-                  alt="Achv 1"
-                  width={64}
-                  height={64}
-                  radius="sm"
-                  style={{ objectFit: 'contain' }}
-                />
-              </Box>
-
-              <Stack gap={2} style={{ flex: 1 }}>
-                <Text fw={500}>Achievement Title 1</Text>
-                <Text size="sm" c="dimmed">
-                Achievement Description 1
-                </Text>
-              </Stack>
-
-              <Text fw={600} size="lg" c="yellow" mb={20}>
-              10
-              </Text>
-            </Group>
-
-            {/* Optional badge icon in bottom right */}
-            <Box className={styles.achievementIconTypeBox}>
-              {/* e.g. progression icon */}
-              <ThemeIcon color="cyan" size="sm" radius="xl">
-                <IconAward size={16} />
-              </ThemeIcon>
-            </Box>
-          </Card>
-          <Card withBorder radius="sm" p="sm" style={{ position: 'relative' }}>
-            <Group align="center" gap="md">
-              <Box style={{ width: 64, height: 64, flexShrink: 0 }}>
-                <Image
-                  src="https://media.retroachievements.org/Badge/451988.png"
-                  alt="Achv 1"
-                  width={64}
-                  height={64}
-                  radius="sm"
-                  style={{ objectFit: 'contain' }}
-                />
-              </Box>
-
-              <Stack gap={2} style={{ flex: 1 }}>
-                <Text fw={500}>Achievement Title 1</Text>
-                <Text size="sm" c="dimmed">
-                Achievement Description 1
-                </Text>
-                <Text size="xs" c="dimmed" mt={5}>
-                Unlocked on: 2023-10-01 12:34:56
-                </Text>
-              </Stack>
-
-              <Text fw={600} size="lg" c="yellow" mb={20}>
-              10
-              </Text>
-            </Group>
-
-            <Box
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 8,
-              }}
-            >
-              <ThemeIcon color="cyan" size="sm" radius="xl">
-                <IconAward size={16} />
-              </ThemeIcon>
-            </Box>
-          </Card>
-          <Card withBorder radius="sm" p="sm" style={{ position: 'relative' }}>
-            <Group align="center" gap="md">
-              <Box style={{ width: 64, height: 64, flexShrink: 0 }}>
-                <Image
-                  src="https://media.retroachievements.org/Badge/451988.png"
-                  alt="Achv 1"
-                  width={64}
-                  height={64}
-                  radius="sm"
-                  style={{ objectFit: 'contain' }}
-                />
-              </Box>
-
-              <Stack gap={2} style={{ flex: 1 }}>
-                <Text fw={500}>Achievement Title 1</Text>
-                <Text size="sm" c="dimmed">
-                Achievement Description 1
-                </Text>
-              </Stack>
-
-              <Text fw={600} size="lg" c="yellow" mb={20}>
-              10
-              </Text>
-            </Group>
-
-            <Box
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 8,
-              }}
-            >
-              <ThemeIcon color="cyan" size="sm" radius="xl">
-                <IconAward size={16} />
-              </ThemeIcon>
-            </Box>
-          </Card>
-        </SimpleGrid>
-
         {/* Notes Section */}
-        <Stack gap="xs" mb="md">
+        {/* <Stack gap="xs" mb="md">
           <Text fw={500}>Your Notes</Text>
           <Textarea
             placeholder="Write your notes here..."
@@ -451,21 +404,27 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           <Group justify="right">
             <Button>Save Notes</Button>
           </Group>
-        </Stack>
-
-        {/* Action Buttons */}
-        <Group justify="apart">
-          <Button variant="outline">Update</Button>
-          <Group gap="sm">
-            <Button variant="gradient" gradient={{ from: 'cyan', to: 'blue' }}>
+        </Stack> */}
+        <Paper className={styles.footer}>
+          <Group justify="apart">
+            <Button onClick={async () => { await handleGameUpdate() }} disabled={disabled}>Update Game</Button>
+            <Group gap="sm">
+              <Button>
             Track Game
-            </Button>
-            <Button>Details</Button>
-            <Button>RA Page</Button>
+              </Button>
+              <Button>Game Page</Button>
+              <Button>RA Page</Button>
+              <Checkbox
+                label="Auto Update Achievements"
+                checked={autoUpdateChecked}
+                onChange={(e) => setAutoUpdateChecked(e.currentTarget.checked)}
+              />
+            </Group>
           </Group>
-        </Group>
+        </Paper>
+
       </>
       }
-    </Modal >
+    </Modal>
   )
 }

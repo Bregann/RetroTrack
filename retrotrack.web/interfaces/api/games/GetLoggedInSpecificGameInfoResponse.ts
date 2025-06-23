@@ -20,6 +20,10 @@ export interface GetLoggedInSpecificGameInfoResponse {
     pointsAwardedHardcore: number
     pointsAwardedTotal: number
     totalGamePoints: number
+    dateBeatenSoftcore: string | null
+    dateBeatenHardcore: string | null
+    dateCompleted: string | null
+    dateMastered: string | null
 }
 
 export interface UserAchievement {

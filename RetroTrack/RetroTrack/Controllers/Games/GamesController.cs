@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
@@ -37,6 +38,7 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
         [HttpGet("{gameId}")]
+        [Authorize]
         public async Task<ActionResult<GetLoggedInSpecificGameInfoResponse>> GetGameInfoForUser([FromRoute] int gameId)
         {
             var user = userContextHelper.GetUserId();
@@ -47,6 +49,7 @@ namespace RetroTrack.Api.Controllers.Games
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole([FromQuery] GetUserProgressForConsoleRequest request)
         {
             var user = userContextHelper.GetUserId();

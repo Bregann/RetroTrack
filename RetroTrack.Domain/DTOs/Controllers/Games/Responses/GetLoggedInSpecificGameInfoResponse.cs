@@ -26,6 +26,11 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required int PointsAwardedHardcore { get; set; }
         public required int PointsAwardedTotal { get; set; }
         public required int TotalGamePoints { get; set; }
+
+        public string? DateBeatenSoftcore { get; set; }
+        public string? DateBeatenHardcore { get; set; }
+        public string? DateCompleted { get; set; }
+        public string? DateMastered { get; set; }
     }
 
     public class UserAchievement
