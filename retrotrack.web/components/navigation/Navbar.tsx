@@ -155,7 +155,7 @@ export function Navbar(props: NavbarProps) {
             <NavLink
               label="In Progress Games"
               component={Link}
-              href="/trackedgames"
+              href="/inprogressgames"
               active={currentPage === '/inprogressgames'}
               py="xs"
               leftSection={<IconProgress size={20} stroke={1.5} />}

@@ -372,6 +372,11 @@ namespace RetroTrack.Domain.Services.Controllers
                 gameQuery = gameQuery.Where(x => x.AchievementsGained == 0 || x.HighestAward != null);
             }
 
+            if(request.HideUnstartedGames == true)
+            {
+                gameQuery = gameQuery.Where(x => x.AchievementsGained > 0 || x.HighestAward != null);
+            }
+
             if (request.HideBeatenGames == true)
             {
                 gameQuery = gameQuery.Where(x => x.HighestAward != HighestAwardKind.BeatenSoftcore && x.HighestAward != HighestAwardKind.BeatenHardcore);
