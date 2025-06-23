@@ -15,6 +15,7 @@ import {
   useMantineColorScheme,
   Badge,
   Stack,
+  Box,
 } from '@mantine/core'
 import { IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
@@ -26,6 +27,7 @@ import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { useAuth } from '@/context/authContext'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
+import Image from 'next/image'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -76,7 +78,7 @@ export function Navbar(props: NavbarProps) {
             </Text>
           </Link>
 
-          <TextInput
+          {/* <TextInput
             classNames={{
               input: styles.searchInput,
             }}
@@ -84,25 +86,25 @@ export function Navbar(props: NavbarProps) {
             radius="xl"
             size="md"
             style={{ flex: 1, maxWidth: 400 }}
-          />
+          /> */}
           <Group gap="xs">
             {auth.user === null &&
-            <>
-              <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
-              Login
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
-              Register
-              </Button>
-            </>
+              <>
+                <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
+                  Login
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
+                  Register
+                </Button>
+              </>
             }
 
             {auth.user !== null &&
-            <>
-              <Button onClick={() => { auth.logout() }} variant="filled" size="sm">
-                Logout
-              </Button>
-            </>
+              <>
+                <Button onClick={() => { auth.logout() }} variant="filled" size="sm">
+                  Logout
+                </Button>
+              </>
             }
 
             <ActionIcon
@@ -141,28 +143,28 @@ export function Navbar(props: NavbarProps) {
           />
 
           {auth.user !== null &&
-          <>
-            <NavLink
-              label="Tracked Games"
-              component={Link}
-              href="/trackedgames"
-              active={currentPage === '/trackedgames'}
-              py="xs"
-              leftSection={<IconPin size={20} stroke={1.5} />}
-              onClick={() => setCurrentPage('/trackedgames')}
-              style={{ borderRadius: '10px' }}
-            />
-            <NavLink
-              label="In Progress Games"
-              component={Link}
-              href="/inprogressgames"
-              active={currentPage === '/inprogressgames'}
-              py="xs"
-              leftSection={<IconProgress size={20} stroke={1.5} />}
-              onClick={() => setCurrentPage('/inprogressgames')}
-              style={{ borderRadius: '10px' }}
-            />
-          </>
+            <>
+              <NavLink
+                label="Tracked Games"
+                component={Link}
+                href="/trackedgames"
+                active={currentPage === '/trackedgames'}
+                py="xs"
+                leftSection={<IconPin size={20} stroke={1.5} />}
+                onClick={() => setCurrentPage('/trackedgames')}
+                style={{ borderRadius: '10px' }}
+              />
+              <NavLink
+                label="In Progress Games"
+                component={Link}
+                href="/inprogressgames"
+                active={currentPage === '/inprogressgames'}
+                py="xs"
+                leftSection={<IconProgress size={20} stroke={1.5} />}
+                onClick={() => setCurrentPage('/inprogressgames')}
+                style={{ borderRadius: '10px' }}
+              />
+            </>
 
           }
 
@@ -184,12 +186,12 @@ export function Navbar(props: NavbarProps) {
                         active={currentPage === `/console/${navItem.consoleId}`}
                         style={{ borderRadius: '10px' }}
                       />
-                      <Divider mt={5} mb={5}/>
+                      <Divider mt={5} mb={5} />
                     </div>
                   )
                 })}
                 {props.loggedInNavigationData !== null && props.loggedInNavigationData?.consoleProgressData.filter(x => x.consoleType === type).map((navItem) => {
-                  return(
+                  return (
                     <div key={navItem.consoleId}>
                       <NavLink
                         label={navItem.consoleName}
@@ -221,7 +223,7 @@ export function Navbar(props: NavbarProps) {
                           </Stack>
                         }
                       />
-                      <Divider mt={5} mb={5}/>
+                      <Divider mt={5} mb={5} />
                     </div>
 
                   )
@@ -230,8 +232,44 @@ export function Navbar(props: NavbarProps) {
             )
           })}
 
-
         </ScrollArea>
+
+        {props.loggedInNavigationData !== undefined && props.loggedInNavigationData !== null &&
+          <Box p="xs" className={styles.profileBox}>
+            <Group gap="sm" mb="xs" align="center">
+              {/* Placeholder avatar */}
+              <Image
+                alt='User avatar'
+                src={`https://media.retroachievements.org${props.loggedInNavigationData.raUserProfileUrl}`}
+                width={55}
+                height={55}
+                style={{ borderRadius: '8px' }}
+              />
+              <Text fw={600} size="sm">{props.loggedInNavigationData.raName}</Text>
+            </Group>
+
+            <Stack gap={4} mb="xs">
+              {props.loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="sm">Games Beaten (SC): {props.loggedInNavigationData.gamesBeatenSoftcore}</Text>}
+              {props.loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="sm">Games Beaten (HC): {props.loggedInNavigationData.gamesBeatenHardcore}</Text>}
+              {props.loggedInNavigationData.totalAchievementsSoftcore !== props.loggedInNavigationData.totalAchievementsHardcore && <Text size="sm">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore - props.loggedInNavigationData.totalAchievementsSoftcore}</Text>}
+              {props.loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="sm">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore}</Text>}
+              {props.loggedInNavigationData.gamesCompleted !== 0 && <Text size="sm">Completed: {props.loggedInNavigationData.gamesCompleted}</Text>}
+              {props.loggedInNavigationData.gamesMastered !== 0 && <Text size="sm">Mastered: {props.loggedInNavigationData.gamesMastered}</Text>}
+            </Stack>
+
+            {/* Profile link */}
+            {/* <Button
+            component="a"
+            href="/profile"
+            variant="subtle"
+            size="xs"
+            fullWidth
+          >
+    View Profile
+          </Button> */}
+          </Box>
+        }
+
       </AppShell.Navbar>
       <AppShell.Main>
         {props.children}

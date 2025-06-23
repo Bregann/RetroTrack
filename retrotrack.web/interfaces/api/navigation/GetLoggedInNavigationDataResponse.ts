@@ -3,6 +3,8 @@ export interface GetLoggedInNavigationDataResponse {
     raUserProfileUrl: string
     gamesBeatenHardcore: number
     gamesBeatenSoftcore: number
+    totalAchievementsSoftcore: number
+    totalAchievementsHardcore: number
     gamesCompleted: number
     gamesMastered: number
     userPoints: number

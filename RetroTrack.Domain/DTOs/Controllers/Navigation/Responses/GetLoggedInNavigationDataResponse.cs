@@ -11,6 +11,8 @@ namespace RetroTrack.Domain.DTOs.Controllers.Navigation.Responses
         public required int GamesCompleted { get; set; }
         public required int GamesMastered { get; set; }
         public required long UserPoints { get; set; }
+        public required long TotalAchievementsSoftcore { get; set; }
+        public required long TotalAchievementsHardcore { get; set; }
         public required int TrackedGamesCount { get; set; }
         public required int InProgressGamesCount { get; set; }
         public required ConsoleProgressData[] ConsoleProgressData { get; set; }
