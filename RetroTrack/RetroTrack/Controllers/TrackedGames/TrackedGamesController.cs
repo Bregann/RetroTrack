@@ -45,7 +45,7 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         }
 
         [HttpGet]
-        public async Task<GetUserTrackedGamesResponse> GetTrackedGamesForUser([FromRoute] GetUserTrackedGamesRequest request)
+        public async Task<GetUserTrackedGamesResponse> GetTrackedGamesForUser([FromQuery] GetUserTrackedGamesRequest request)
         {
             var user = userContextHelper.GetUserId();
 

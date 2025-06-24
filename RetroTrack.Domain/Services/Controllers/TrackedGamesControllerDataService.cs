@@ -41,20 +41,46 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<GetUserTrackedGamesResponse> GetTrackedGamesForUser(int userId, GetUserTrackedGamesRequest request)
         {
-            var gameQuery = from tg in context.TrackedGames
-                            where tg.UserId == userId
-                            join upg in context.UserGameProgress
-                                on tg.GameId equals upg.GameId
-                                into upgGroup
-                            from upg in upgGroup.DefaultIfEmpty()
-                            select new
-                            {
-                                Game = tg.Game,
-                                User = tg.User,
-                                GamePercentage = upg != null ? (double)upg.AchievementsGained / tg.Game.AchievementCount * 100 : 0,
-                                AchievementsUnlocked = upg != null ? upg.AchievementsGained : 0,
-                                HighestAward = upg != null ? upg.HighestAwardKind : null
-                            };
+            var userProgress = context.UserGameProgress
+                                    .Where(upg => upg.UserId == userId);
+
+            var gameQuery =
+              from tg in context.TrackedGames
+              where tg.UserId == userId
+              join upgEntry in userProgress
+                  on tg.GameId equals upgEntry.GameId
+                  into upgGroup
+              let upg = upgGroup.FirstOrDefault()
+              select new
+              {
+                  Game = tg.Game,
+                  User = tg.User,
+                  GamePercentage = upg != null && upg.AchievementsGained != 0
+                                        ? (double)upg.AchievementsGained / tg.Game.AchievementCount * 100
+                                        : 0,
+                  AchievementsUnlocked = upg != null ? upg.AchievementsGained : 0,
+                  HighestAward = upg != null ? upg.HighestAwardKind : null
+              };
+
+            if (request.HideInProgressGames == true)
+            {
+                gameQuery = gameQuery.Where(x => x.AchievementsUnlocked == 0 || x.HighestAward != null);
+            }
+
+            if (request.HideUnstartedGames == true)
+            {
+                gameQuery = gameQuery.Where(x => x.AchievementsUnlocked > 0 || x.HighestAward != null);
+            }
+
+            if (request.HideBeatenGames == true)
+            {
+                gameQuery = gameQuery.Where(x => x.HighestAward != HighestAwardKind.BeatenSoftcore && x.HighestAward != HighestAwardKind.BeatenHardcore);
+            }
+
+            if (request.HideCompletedGames == true)
+            {
+                gameQuery = gameQuery.Where(x => x.GamePercentage != 100);
+            }
 
             if (request.SearchTerm != null && request.SearchType != null)
             {
@@ -75,7 +101,19 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
             }
 
-            if (request.SortByName != null)
+            if (request.SortByPercentageComplete != null)
+            {
+                gameQuery = request.SortByPercentageComplete == true
+                    ? gameQuery.OrderBy(x => x.GamePercentage)
+                    : gameQuery.OrderByDescending(x => x.GamePercentage);
+            }
+            else if (request.SortByAchievementsUnlocked != null)
+            {
+                gameQuery = request.SortByAchievementsUnlocked == true
+                    ? gameQuery.OrderBy(x => x.AchievementsUnlocked)
+                    : gameQuery.OrderByDescending(x => x.AchievementsUnlocked);
+            }
+            else if (request.SortByName != null)
             {
                 gameQuery = request.SortByName == true
                     ? gameQuery.OrderBy(x => x.Game.Title)
@@ -119,14 +157,15 @@ namespace RetroTrack.Domain.Services.Controllers
                 {
                     GameId = x.Game.Id,
                     AchievementCount = x.Game.AchievementCount,
-                    AchievementsUnlocked = x.User.UserGameProgress.First(x => x.GameId == x.GameId).AchievementsGained,
+                    AchievementsUnlocked = x.AchievementsUnlocked,
                     PercentageComplete = Math.Round(x.GamePercentage, 2),
                     GameGenre = x.Game.GameGenre ?? "Not Set",
                     GameImageUrl = x.Game.ImageIcon,
                     GameTitle = x.Game.Title,
                     PlayerCount = x.Game.Players ?? 0,
                     Points = x.Game.Points,
-                    HighestAward = x.HighestAward
+                    HighestAward = x.HighestAward,
+                    ConsoleName = x.Game.GameConsole.ConsoleName
                 })
                 .ToArrayAsync();
 

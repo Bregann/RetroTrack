@@ -18,7 +18,7 @@ export default async function Page() {
       .map(c => `${c.name}=${c.value}`)
       .join('; ')
 
-    const result = await doGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?', { next: { revalidate: 60 }, cookieHeader })
+    const result = await doGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=100&SortByName=true', { cookieHeader })
     if (result.status !== 200 || result.data === undefined) {
       console.error('Failed to load logged in navigation data:', result.status)
       loggedInData = null

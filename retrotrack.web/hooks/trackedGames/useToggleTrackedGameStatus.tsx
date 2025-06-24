@@ -1,8 +1,8 @@
-import { doDelete, doPost } from "@/helpers/apiClient"
-import notificationHelper from "@/helpers/notificationHelper"
-import { GetLoggedInSpecificGameInfoResponse } from "@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse"
-import { IconExclamationCircle } from "@tabler/icons-react"
-import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query"
+import { doDelete, doPost } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
+import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'
+import { IconExclamationCircle } from '@tabler/icons-react'
+import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 
 export type ToggleTrackedGameStatus = {
   gameId: number
@@ -45,13 +45,18 @@ export const useToggleTrackedGameStatus = ():
         )
       }
     },
-    onError: (_err, { gameId }, context: any) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['getGameInfoForUser', gameId], context.previous)
+    onError: (
+      _err,
+      { gameId },
+      context: unknown
+    ) => {
+      const safeContext = context as { previous?: GetLoggedInSpecificGameInfoResponse; gameId: number } | undefined
+      if (safeContext?.previous) {
+        queryClient.setQueryData(['getGameInfoForUser', gameId], safeContext.previous)
       }
       notificationHelper.showErrorNotification(
-        "Error",
-        "Failed to toggle game tracking status",
+        'Error',
+        'Failed to toggle game tracking status',
         3000,
         <IconExclamationCircle size={16} />
       )

@@ -145,7 +145,7 @@ export default function TrackedGames(props: TrackedGamesProps) {
     return query
   }, [hideBeatenGames, hideCompletedGames, hideInProgressGames, page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
-  const isFirstLoad = queryString === `Skip=0&Take=100&SortByName=true`
+  const isFirstLoad = queryString === 'Skip=0&Take=100&SortByName=true'
 
   const { data, isLoading, isError, error } = useUserTrackedGamesQuery(
     queryString,

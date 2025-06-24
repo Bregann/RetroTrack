@@ -414,7 +414,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               <Button
                 onClick={async () => await trackedGameMutation.mutateAsync({
                   gameId: props.gameId,
-                  newStatus: gameQuery.data.gameTracked
+                  newStatus: !gameQuery.data.gameTracked
                 })}
                 color={gameQuery.data.gameTracked ? 'red' : 'blue'}
               >
