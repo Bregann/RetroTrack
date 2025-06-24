@@ -9,7 +9,6 @@ import {
   Image,
   ThemeIcon,
   SimpleGrid,
-  Textarea,
   Button,
   Divider,
   Progress,

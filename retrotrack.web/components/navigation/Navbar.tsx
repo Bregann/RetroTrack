@@ -6,7 +6,6 @@ import {
   Burger,
   ScrollArea,
   NavLink,
-  TextInput,
   Button,
   ActionIcon,
   Group,

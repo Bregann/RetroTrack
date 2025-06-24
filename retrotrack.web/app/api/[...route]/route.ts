@@ -22,16 +22,20 @@ const HOP_BY_HOP_HEADERS = [
   'content-length', // Let fetch calculate this
 ]
 
-export async function handler(
+async function handler(
   req: NextRequest,
-  context: { params: { route: string[] } }
+  { params }: { params: Promise<{ route: string[] }> }
 ) {
-  const { route } = await context.params
-  const searchParams = req.nextUrl.search
+  // 1) pull out your path segments
+  const { route } = await params
+  const segments = route // e.g. ['foo','bar']
 
-  // 1. Correctly construct the full URL with query parameters
-  const url = `${API_BASE_URL}/${route.join('/')}${searchParams}`
+  // 2) build the query string
+  const qs = req.nextUrl.searchParams.toString() // e.g. 'a=1&b=2'
 
+  // 3) assemble the full URL
+  //    only add '?' if there was any search
+  const url = `${API_BASE_URL}/${segments.join('/')}${qs ? `?${qs}` : ''}`
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
 
