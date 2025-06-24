@@ -1,6 +1,6 @@
 import TrackedGames from '@/components/pages/TrackedGames'
 import { doGet } from '@/helpers/apiClient'
-import { GetUserTrackedGamesResponse } from '@/interfaces/trackedGames/GetUserTrackedGamesResponse'
+import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
 import { cookies } from 'next/headers'
 
 export default async function Page() {

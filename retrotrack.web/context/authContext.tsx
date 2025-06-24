@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         username,
       }
       setUser(user)
-      console.log('User loaded from token:', user)
     }
     setLoading(false)
   }, [])
@@ -57,6 +56,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await doPost('/api/auth/DeleteUserSession', {})
     document.cookie = 'accessToken=; Max-Age=0; path=/'
     setUser(null)
+
+    router.refresh()
   }
 
   return (

@@ -75,7 +75,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
   useEffect(() => {
     if (autoUpdateChecked) {
       notificationHelper.showSuccessNotification('Enabled', 'Achievement auto updates enabled', 3000, <IconCheck />)
-      console.log('Setting up interval for game updates')
       gameAutoUpdateTimerRef.current = setInterval(async () => {
         await gameQuery.refetch()
       }, 60000)
@@ -421,7 +420,16 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 {gameQuery.data.gameTracked ? 'Untrack Game' : 'Track Game'}
               </Button>
               <Button>Game Page</Button>
-              <Button>RA Page</Button>
+              <Button
+                component="a"
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'cyan' }}
+                target="_blank"
+                style={{ ':hover': { color: 'white' } }}
+                href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
+              >
+              RA Page
+              </Button>
               <Checkbox
                 label="Auto Update Achievements"
                 checked={autoUpdateChecked}

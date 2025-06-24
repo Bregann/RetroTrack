@@ -33,27 +33,25 @@
 }
 
 .progressBar {
-  display: flex;               /* make it a flex‐row */
-  align-items: center;         /* vertically center the labels */
+  display: flex;
+  align-items: center;
   width: 90%;
-  margin: 1rem auto;           /* shorthand for top/bottom + center */
+  margin: 1rem auto;
   background-color: light-dark(var(--mantine-color-light-5), var(--mantine-color-dark-7));
 }
 
-/* Make each segment grow to its value and position its label */
 .progressBar > * {
-  flex-grow: 1;                /* so each section scales to its percentage */
-  position: relative;          /* for absolutely positioned label */
+  flex-grow: 1;
+  position: relative;
 }
 
-/* Center the label inside its segment */
 .progressBar .ProgressLabel {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  pointer-events: none;        /* clicks pass through */
-  white-space: nowrap;         /* never wrap the label text */
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .achievementIconTypeBox {

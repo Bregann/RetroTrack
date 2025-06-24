@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AppShell,
   Burger,
@@ -17,7 +17,7 @@ import {
   Stack,
   Box,
 } from '@mantine/core'
-import { IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
+import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -28,6 +28,10 @@ import RegisterModal from './RegisterModal'
 import { useAuth } from '@/context/authContext'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 import Image from 'next/image'
+import notificationHelper from '@/helpers/notificationHelper'
+import { doGet, doPost } from '@/helpers/apiClient'
+import { RequestUserGameUpdateResponse } from '@/interfaces/api/users/RequestUserGameUpdateResponse'
+import { useRouter } from 'next/navigation'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -48,8 +52,62 @@ export function Navbar(props: NavbarProps) {
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
 
+  const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false)
+  const [userUpdateRequested, setUserUpdateRequested] = useState(false)
+  const gameUpdateInterval = useRef<NodeJS.Timeout | null>(null)
+
   const auth = useAuth()
+  const router = useRouter()
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
+
+  // Used for checking the status of a user update
+  useEffect(() => {
+    if (gameUpdateInterval !== null) {
+      if (userUpdateRequested && gameUpdateInterval.current == null) {
+        gameUpdateInterval.current = setInterval(async () => {
+          const res = await doGet<boolean>('/api/users/CheckUserUpdateProcessingState')
+
+          if (res.ok) {
+            const processed: boolean = res.data ?? false
+
+            if (processed) {
+              router.refresh()
+              setUserUpdateRequested(false)
+              notificationHelper.showSuccessNotification('Success', 'User update successful', 4000, <IconCheck />)
+            }
+          }
+        }, 3000)
+      }
+
+      if (!userUpdateRequested && gameUpdateInterval.current !== null) {
+        clearInterval(gameUpdateInterval.current)
+        gameUpdateInterval.current = null
+      }
+    }
+  }, [router, userUpdateRequested])
+
+  const requestGamesUpdate = async (): Promise<void> => {
+    setUpdateGamesButtonLoading(true)
+    const updateRes = await doPost<RequestUserGameUpdateResponse>('/api/users/UpdateUserGames')
+
+    if (!updateRes.ok || updateRes.data === undefined) {
+      notificationHelper.showErrorNotification('Error', 'There has been an error requesting to update your games. Please try again', 5000, <IconCrossFilled />)
+      setUpdateGamesButtonLoading(false)
+      return
+    }
+
+    const resData: RequestUserGameUpdateResponse = updateRes.data
+
+    if (!resData.success) {
+      notificationHelper.showErrorNotification('Error', resData.reason, 5000, <IconCrossFilled />)
+      setUpdateGamesButtonLoading(false)
+      return
+    }
+
+    notificationHelper.showSuccessNotification('Success', 'A game update has been requested. A notification will appear when this has completed', 5000, <IconCheck />)
+    setUserUpdateRequested(true)
+    setUpdateGamesButtonLoading(false)
+  }
 
   return (
     <AppShell
@@ -101,7 +159,10 @@ export function Navbar(props: NavbarProps) {
 
             {auth.user !== null &&
               <>
-                <Button onClick={() => { auth.logout() }} variant="filled" size="sm">
+                <Button onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading}>
+                  Update Profile
+                </Button>
+                <Button onClick={() => { auth.logout(); router.refresh() }} variant="filled" size="sm" color="red">
                   Logout
                 </Button>
               </>

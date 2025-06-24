@@ -10,7 +10,7 @@ import type { LoggedInGame } from '@/interfaces/api/games/GetUserProgressForCons
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
-import { GetUserTrackedGamesResponse } from '@/interfaces/trackedGames/GetUserTrackedGamesResponse'
+import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
 import { useUserTrackedGamesQuery } from '@/hooks/trackedGames/useUserTrackedGamesQuery'
 
 interface TrackedGamesProps {

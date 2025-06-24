@@ -1,5 +1,5 @@
 import { doGet } from '@/helpers/apiClient'
-import { GetUserTrackedGamesResponse } from '@/interfaces/trackedGames/GetUserTrackedGamesResponse'
+import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
 import { useQuery, UseQueryResult } from '@tanstack/react-query'
 
 export const useUserTrackedGamesQuery = (query: string, initialData?: GetUserTrackedGamesResponse): UseQueryResult<GetUserTrackedGamesResponse, Error> => {

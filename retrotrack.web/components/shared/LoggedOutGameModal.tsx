@@ -290,7 +290,16 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
           {/* Action Buttons */}
           <Group justify="apart">
             <Button>Details</Button>
-            <Button>RA Page</Button>
+            <Button
+              component="a"
+              variant="gradient"
+              gradient={{ from: 'indigo', to: 'cyan' }}
+              target="_blank"
+              style={{ ':hover': { color: 'white' } }}
+              href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
+            >
+              RA Page
+            </Button>
           </Group>
         </>
       }
