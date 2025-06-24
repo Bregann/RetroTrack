@@ -39,13 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RetroTrack.Domain\RetroTrack.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="BreganUtils">
-      <HintPath>..\..\Util\BreganUtils.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\RetroTrack.Domain\RetroTrack.Domain.csproj" />
   </ItemGroup>
 
 </Project>
