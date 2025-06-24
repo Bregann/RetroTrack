@@ -41,7 +41,7 @@ const RegisterModal = (props: RegisterModalProps) => {
     }
 
     setRegisterButtonLoading(true)
-    const res = await doPost('/auth/RegisterUser', { body: values })
+    const res = await doPost('/api/auth/RegisterNewUser', { body: values })
 
     // Check if there's any error
     if (res.status === 400) {

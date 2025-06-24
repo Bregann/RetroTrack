@@ -5,7 +5,6 @@ import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
-import { useLoggedInPaginatedTableQuery } from '@/hooks/consoles/useLoggedInPaginatedTableQuery'
 import type { LoggedInGame } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
