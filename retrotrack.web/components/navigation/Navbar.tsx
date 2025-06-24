@@ -16,6 +16,7 @@ import {
   Badge,
   Stack,
   Box,
+  Modal,
 } from '@mantine/core'
 import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
@@ -51,6 +52,7 @@ export function Navbar(props: NavbarProps) {
   const [currentPage, setCurrentPage] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
+  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false)
 
   const [updateGamesButtonLoading, setUpdateGamesButtonLoading] = useState(false)
   const [userUpdateRequested, setUserUpdateRequested] = useState(false)
@@ -146,6 +148,8 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
+            <Button onClick={() => { setShowUpdateInfoModal(true) }}>V4 Update + Support Info</Button>
+
             {auth.user === null &&
               <>
                 <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
@@ -343,6 +347,25 @@ export function Navbar(props: NavbarProps) {
           onClose={() => setRegisterModalOpen(false)}
           openedState={registerModalOpen}
         />
+
+        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack v4.0 Update">
+          <Text mb="md">RetroTrack v4.0 has been released! Here are some of the new features:</Text>
+          <ul>
+            <li>New user interface with a fresh design</li>
+            <li>Bug fixes and performance improvements</li>
+          </ul>
+          <Text mt="md">Thank you for using RetroTrack!</Text>
+          <Text mt="md">If you are having issues with the new version, please try clearing your browser cache and cookies.</Text>
+
+          <Text fw={'bold'} mt="md" size='xl'>Next Update plan:</Text>
+          <ul>
+            <li>Fixing any bugs that may have been introduced in the new version</li>
+            <li>Dedicated game pages to go alongside modals</li>
+          </ul>
+
+          <Text fw={'bold'} mt="md" size='xl'>Need help?</Text>
+          <Text mt="xs">If you have any feedback or suggestions or bug reports, please let me know on either Discord (my username is <b>guinea.</b>), GitHub <a href='https://github.com/Bregann/RetroTrack' target='_blank'>here</a> or on RetroAchievements <a href='https://retroachievements.org/user/guinea' target='_blank'>here</a>!</Text>
+        </Modal>
 
       </AppShell.Main>
     </AppShell>
