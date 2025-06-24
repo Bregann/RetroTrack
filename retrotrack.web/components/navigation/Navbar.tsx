@@ -18,7 +18,7 @@ import {
   Box,
   Modal,
 } from '@mantine/core'
-import { IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -178,6 +178,16 @@ export function Navbar(props: NavbarProps) {
               onClick={() => { setColorScheme(colorScheme === 'dark' ? 'light' : 'dark') }}
             >
               <IconMoonStars />
+            </ActionIcon>
+
+            <ActionIcon
+              variant="outline"
+              size="lg"
+              component="a"
+              href="https://github.com/Bregann/RetroTrack"
+              target="_blank"
+            >
+              <IconBrandGithub />
             </ActionIcon>
           </Group>
         </Group>
