@@ -54,6 +54,7 @@ export default async function Page() {
           consoleName={publicData.consoleName}
           totalGames={publicData.totalCount}
           pageData={publicData}
+          showConsoleColumn={true}
         />
       }
 
@@ -63,6 +64,7 @@ export default async function Page() {
           consoleName={loggedInData.consoleName}
           totalGames={loggedInData.totalCount}
           pageData={loggedInData}
+          showConsoleColumn={true}
         />
       }
     </main>

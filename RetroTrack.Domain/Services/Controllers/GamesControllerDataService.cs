@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
-using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Enums;
@@ -253,8 +251,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     PointsAwardedHardcore = 0,
                     PointsAwardedSoftcore = 0,
                     PointsAwardedTotal = 0,
-                    TotalGamePoints = loggedOutData.Achievements.Sum(x => x.Value.Points)
-
+                    TotalGamePoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
+                    GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId)
                 };
             }
 
@@ -342,7 +340,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 DateBeatenSoftcore = gameBeatenDateSoftcore,
                 DateBeatenHardcore = gameBeatenDateHardcore,
                 DateCompleted = gameCompletedDate,
-                DateMastered = gameMasteredDate
+                DateMastered = gameMasteredDate,
+                GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId)
             };
         }
 
@@ -372,7 +371,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 gameQuery = gameQuery.Where(x => x.AchievementsGained == 0 || x.HighestAward != null);
             }
 
-            if(request.HideUnstartedGames == true)
+            if (request.HideUnstartedGames == true)
             {
                 gameQuery = gameQuery.Where(x => x.AchievementsGained > 0 || x.HighestAward != null);
             }
@@ -483,42 +482,6 @@ namespace RetroTrack.Domain.Services.Controllers
                 TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
                 ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
-        }
-
-        public async Task<List<UserGamesTableDto>> GetInProgressGamesForUser(int userId)
-        {
-            var gameList = await context.UserGameProgress.Where(x => x.UserId == userId && x.GamePercentage != 100).ToListAsync();
-            var progressGameList = new List<UserGamesTableDto>();
-
-            foreach (var game in gameList)
-            {
-                if (game == null || game.Game == null)
-                {
-                    continue;
-                }
-
-                double gamePct = 0;
-
-                if (game?.GamePercentage != null)
-                {
-                    gamePct = Math.Round(game.GamePercentage, 2);
-                }
-
-                progressGameList.Add(new UserGamesTableDto
-                {
-                    AchievementCount = game?.Game.AchievementCount ?? 0,
-                    AchievementsGained = game?.AchievementsGained ?? 0,
-                    PercentageCompleted = gamePct,
-                    GameGenre = game?.Game.GameGenre,
-                    GameIconUrl = "https://media.retroachievements.org" + game?.Game.ImageIcon,
-                    GameId = game?.Game.Id ?? 0,
-                    GameName = game?.Game.Title ?? "",
-                    Console = game?.Game.GameConsole.ConsoleName ?? "",
-                    Players = game?.Game.Players ?? 0
-                });
-            }
-
-            return progressGameList;
         }
     }
 }

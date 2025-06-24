@@ -12,6 +12,7 @@ export interface GetLoggedInSpecificGameInfoResponse {
     genre: string
     achievementCount: number
     players: number
+    gameTracked: boolean
     achievements: UserAchievement[]
     achievementsAwardedSoftcore: number
     achievementsAwardedHardcore: number

@@ -35,6 +35,7 @@ import { useLoggedInGameInfoQuery } from '@/hooks/games/useLoggedInGameInfoQuery
 import { AchievementType } from '@/enums/achievementType'
 import { useEffect, useRef, useState } from 'react'
 import notificationHelper from '@/helpers/notificationHelper'
+import { useToggleTrackedGameStatus } from '@/hooks/trackedGames/useToggleTrackedGameStatus'
 
 interface LoggedInGameModalProps {
   gameId: number
@@ -44,6 +45,7 @@ interface LoggedInGameModalProps {
 export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
   const gameQuery = useLoggedInGameInfoQuery(props.gameId)
+  const trackedGameMutation = useToggleTrackedGameStatus()
 
   const [hideUnlockedAchievements, setHideUnlockedAchievements] = useState(false)
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
@@ -409,8 +411,14 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           <Group justify="apart">
             <Button onClick={async () => { await handleGameUpdate() }} disabled={disabled}>Update Game</Button>
             <Group gap="sm">
-              <Button>
-            Track Game
+              <Button
+                onClick={async () => await trackedGameMutation.mutateAsync({
+                  gameId: props.gameId,
+                  newStatus: gameQuery.data.gameTracked
+                })}
+                color={gameQuery.data.gameTracked ? 'red' : 'blue'}
+              >
+                {gameQuery.data.gameTracked ? 'Untrack Game' : 'Track Game'}
               </Button>
               <Button>Game Page</Button>
               <Button>RA Page</Button>

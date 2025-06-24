@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -17,6 +16,7 @@ interface LoggedInGamesTableProps {
   consoleId: number
   consoleName: string
   totalGames: number
+  showConsoleColumn?: boolean
 }
 
 const columns: Column<LoggedInGame>[] = [
@@ -101,7 +101,7 @@ const columns: Column<LoggedInGame>[] = [
 ]
 
 export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
-  if (columns.find(c => c.key === 'consoleName') === undefined) {
+  if (props.showConsoleColumn === true) {
     columns.push({
       title: 'Console',
       key: 'consoleName',

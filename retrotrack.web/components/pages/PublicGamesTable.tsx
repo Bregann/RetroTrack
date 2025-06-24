@@ -16,6 +16,7 @@ interface PublicGamesTableProps {
   consoleId: number
   consoleName: string
   totalGames: number
+  showConsoleColumn?: boolean
 }
 
 const columns: Column<Game>[] = [
@@ -65,7 +66,7 @@ const columns: Column<Game>[] = [
 ]
 
 export default function PublicGamesTable(props: PublicGamesTableProps) {
-  if (columns.find(c => c.key === 'consoleName') === undefined) {
+  if (props.showConsoleColumn === true) {
     columns.push({
       title: 'Console',
       key: 'consoleName',

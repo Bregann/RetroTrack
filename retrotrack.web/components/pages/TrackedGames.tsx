@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -7,13 +6,15 @@ import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import { useLoggedInPaginatedTableQuery } from '@/hooks/consoles/useLoggedInPaginatedTableQuery'
-import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
+import type { LoggedInGame } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
+import { GetUserTrackedGamesResponse } from '@/interfaces/trackedGames/GetUserTrackedGamesResponse'
+import { useUserTrackedGamesQuery } from '@/hooks/trackedGames/useUserTrackedGamesQuery'
 
-interface InProgressGamesTableProps {
-  pageData: GetUserProgressForConsoleResponse
+interface TrackedGamesProps {
+  pageData: GetUserTrackedGamesResponse
   totalGames: number
 }
 
@@ -95,10 +96,16 @@ const columns: Column<LoggedInGame>[] = [
           return ''
       }
     }
+  },
+  {
+    title: 'Console',
+    key: 'consoleName',
+    sortable: true,
+    show: true
   }
 ]
 
-export default function InProgressGamesTable(props: InProgressGamesTableProps) {
+export default function TrackedGames(props: TrackedGamesProps) {
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<LoggedInGame>>({
     key: 'gameTitle',
@@ -108,7 +115,9 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
   const [searchInput, setSearchInput] = useDebouncedState<string | null>(null, 200)
   const [searchTerm, setSearchTerm] = useState<string | null>(null)
   const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
+  const [hideInProgressGames, setHideInProgressGames] = useState(false)
   const [hideBeatenGames, setHideBeatenGames] = useState(false)
+  const [hideCompletedGames, setHideCompletedGames] = useState(false)
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * 100
@@ -127,18 +136,18 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
     const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
     const sortValue = sortOption.direction === 'asc'
 
-    let query = `ConsoleId=-1&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}&HideUnstartedGames=true&HideCompletedGames=true`
+    let query = `Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}${hideCompletedGames ? '&HideCompletedGames=true' : ''}${hideInProgressGames ? '&HideInProgressGames=true' : ''}`
 
     if (searchTerm !== null && searchTerm !== '') {
       query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
 
     return query
-  }, [hideBeatenGames, page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
+  }, [hideBeatenGames, hideCompletedGames, hideInProgressGames, page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
-  const isFirstLoad = queryString === 'ConsoleId=-1&Skip=0&Take=100&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true'
+  const isFirstLoad = queryString === `Skip=0&Take=100&SortByName=true`
 
-  const { data, isLoading, isError, error } = useLoggedInPaginatedTableQuery(
+  const { data, isLoading, isError, error } = useUserTrackedGamesQuery(
     queryString,
     isFirstLoad ? props.pageData : undefined
   )
@@ -157,14 +166,14 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
   return (
     <Container size="95%">
       <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ marginBottom: '0rem' }}>In Progress Games</h1>
-        <p style={{ marginTop: 0 }}>There are a total of {props.totalGames} in progress games!</p>
+        <h1 style={{ marginBottom: '0rem' }}>Tracked Games</h1>
+        <p style={{ marginTop: 0 }}>There are a total of {props.totalGames} tracked games!</p>
       </div>
 
       <Paper className={styles.paper}>
         {isLoading ? (
           <Center style={{ padding: '2rem' }}>
-            <Loader variant="dots" size="lg" />
+            <Loader variant="dots" size="lg" />{/* or variant="bars", "oval"—choose your vibe */}
             <p style={{ marginLeft: 10 }}>Loading games...</p>
           </Center>
         ) : isError ? (
@@ -212,7 +221,9 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
               </Button>
             </Group>
             <Group ml={20}>
+              <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }}/>
               <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }}/>
+              <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }}/>
             </Group>
             <PaginatedTable
               data={data!.games}
@@ -230,7 +241,6 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
               }}
             />
           </>
-
         )}
       </Paper>
     </Container>

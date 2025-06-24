@@ -17,6 +17,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required string Genre { get; set; }
         public required int AchievementCount { get; set; }
         public required int Players { get; set; }
+        public required bool GameTracked { get; set; }
 
         public required List<UserAchievement> Achievements { get; set; }
         public required int AchievementsAwardedSoftcore { get; set; }

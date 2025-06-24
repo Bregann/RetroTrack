@@ -20,16 +20,16 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int GameId { get; set; }
 
         [JsonProperty("Title")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [JsonProperty("ImageIcon")]
-        public string ImageIcon { get; set; }
+        public string ImageIcon { get; set; } = string.Empty;
 
         [JsonProperty("ConsoleID")]
         public int ConsoleId { get; set; }
 
         [JsonProperty("ConsoleName")]
-        public string ConsoleName { get; set; }
+        public string ConsoleName { get; set; } = string.Empty;
 
         [JsonProperty("MaxPossible")]
         public int MaxPossible { get; set; }

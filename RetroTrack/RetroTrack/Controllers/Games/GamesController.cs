@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.DTOs.Controllers.Games;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
@@ -55,15 +54,6 @@ namespace RetroTrack.Api.Controllers.Games
             var user = userContextHelper.GetUserId();
 
             return await gamesControllerData.GetUserProgressForConsole(user, request);
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<List<UserGamesTableDto>>> GetUserInProgressGames()
-        {
-            var user = userContextHelper.GetUserId();
-
-            var trackedGames = await gamesControllerData.GetInProgressGamesForUser(user);
-            return Ok(trackedGames);
         }
     }
 }

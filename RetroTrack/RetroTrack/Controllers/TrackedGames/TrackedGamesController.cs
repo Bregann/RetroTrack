@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RetroTrack.Domain.DTOs.Controllers.Games;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Requests;
+using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 
@@ -7,20 +9,22 @@ namespace RetroTrack.Api.Controllers.TrackedGames
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class TrackedGamesController(ITrackedGamesControllerDataService trackedGamesControllerData, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpPost("{gameId}")]
-        public async Task<ActionResult<bool>> AddTrackedGame([FromRoute] int gameId)
+        public async Task<ActionResult> AddTrackedGame([FromRoute] int gameId)
         {
             var user = userContextHelper.GetUserId();
 
-            if (await trackedGamesControllerData.AddNewTrackedGame(user, gameId))
+            try
             {
-                return Ok(true);
+                await trackedGamesControllerData.AddNewTrackedGame(user, gameId);
+                return Ok();
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(false);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -29,23 +33,24 @@ namespace RetroTrack.Api.Controllers.TrackedGames
         {
             var user = userContextHelper.GetUserId();
 
-            if (await trackedGamesControllerData.RemoveTrackedGame(user, gameId))
+            try
             {
-                return Ok(true);
+                await trackedGamesControllerData.RemoveTrackedGame(user, gameId);
+                return Ok();
             }
-            else
+            catch (KeyNotFoundException ex)
             {
-                return BadRequest(false);
+                return NotFound(ex.Message);
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserGamesTableDto>>> GetTrackedGamesForUser()
+        public async Task<GetUserTrackedGamesResponse> GetTrackedGamesForUser([FromRoute] GetUserTrackedGamesRequest request)
         {
             var user = userContextHelper.GetUserId();
 
-            var trackedGames = await trackedGamesControllerData.GetTrackedGamesForUser(user);
-            return Ok(trackedGames);
+            var trackedGames = await trackedGamesControllerData.GetTrackedGamesForUser(user, request);
+            return trackedGames;
         }
     }
 }

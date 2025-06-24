@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using RetroTrack.Domain.Database.Models;
+﻿using RetroTrack.Domain.Database.Models;
 
 namespace RetroTrack.Domain.Interfaces.Helpers
 {
