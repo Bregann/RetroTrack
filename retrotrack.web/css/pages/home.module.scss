@@ -1,0 +1,31 @@
+.mainDividerText {
+  color: light-dark(#263042, #ffffff);
+  font-size: 25px;
+  font-weight: 600;
+  margin-top: 25px;
+}
+
+.subDividerText {
+  color: light-dark(#263042, #ffffff);
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.newSetCardBorder {
+  border: 2px solid;
+  border-color: #1590e2;
+
+}
+
+.updatedSetCardBorder {
+  border: 2px solid;
+  border-color: #da59da;
+
+}
+
+.roundedImage {
+  border-radius: 5px;
+  flex-shrink: 0;
+}

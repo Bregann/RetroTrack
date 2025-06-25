@@ -12,7 +12,7 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<Game> Games { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TrackedGame> TrackedGames { get; set; }
-        public DbSet<Session> Sessions { get; set; }
+        public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
         public DbSet<RetroAchievementsLogAndLoadData> RetroAchievementsLogAndLoadData { get; set; }
         public DbSet<RetroAchievementsLogAndLoadError> RetroAchievementsLogAndLoadErrors { get; set; }
         public DbSet<DataCaching> DataCaching { get; set; }

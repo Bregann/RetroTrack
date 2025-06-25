@@ -267,29 +267,6 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("RetroAchievementsLogAndLoadErrors");
                 });
 
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Session", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ExpiryTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Sessions");
-                });
-
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGame", b =>
                 {
                     b.Property<int>("Id")
@@ -414,6 +391,34 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("UserGameProgress");
                 });
 
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserRefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRefreshTokens");
+                });
+
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.Achievement", b =>
                 {
                     b.HasOne("RetroTrack.Domain.Database.Models.Game", "Game")
@@ -445,17 +450,6 @@ namespace RetroTrack.Domain.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("LogAndLoadData");
-                });
-
-            modelBuilder.Entity("RetroTrack.Domain.Database.Models.Session", b =>
-                {
-                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.TrackedGame", b =>
@@ -504,6 +498,17 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserRefreshToken", b =>
+                {
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.Game", b =>
                 {
                     b.Navigation("Achievements");
@@ -521,7 +526,7 @@ namespace RetroTrack.Domain.Database.Migrations
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.User", b =>
                 {
-                    b.Navigation("Sessions");
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("TrackedGames");
 

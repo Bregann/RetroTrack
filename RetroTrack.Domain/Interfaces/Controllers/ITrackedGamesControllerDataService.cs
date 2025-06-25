@@ -1,12 +1,12 @@
-﻿using RetroTrack.Domain.DTOs.Controllers.Games;
-using RetroTrack.Domain.DTOs.Helpers;
+﻿using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Requests;
+using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Responses;
 
 namespace RetroTrack.Domain.Interfaces.Controllers
 {
     public interface ITrackedGamesControllerDataService
     {
-        Task<bool> AddNewTrackedGame(UserDataDto userData, int gameId);
-        Task<List<UserGamesTableDto>> GetTrackedGamesForUser(UserDataDto userData);
-        Task<bool> RemoveTrackedGame(UserDataDto userData, int gameId);
+        Task AddNewTrackedGame(int userId, int gameId);
+        Task<GetUserTrackedGamesResponse> GetTrackedGamesForUser(int userId, GetUserTrackedGamesRequest request);
+        Task RemoveTrackedGame(int userId, int gameId);
     }
 }

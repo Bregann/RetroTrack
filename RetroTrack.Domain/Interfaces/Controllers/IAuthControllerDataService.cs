@@ -1,13 +1,13 @@
-﻿using RetroTrack.Domain.DTOs.Controllers.Auth;
+﻿using RetroTrack.Domain.DTOs.Controllers.Auth.Responses;
 
 namespace RetroTrack.Domain.Interfaces.Controllers
 {
     public interface IAuthControllerDataService
     {
-        Task<ResetUserPasswordDto> ResetUserPassword(string raUsername, string password, string raApiKey);
-        Task<bool> ValidateSessionStatus(string sessionId);
-        Task<LoginUserDto> ValidateUserLogin(string username, string password);
-        Task<RegisterUserDto> RegisterUser(string username, string password, string raApiKey);
+        Task ResetUserPassword(string raUsername, string password, string raApiKey);
+        Task<LoginUserResponseDto> LoginUser(string username, string password);
+        Task<string> RefreshToken(string token);
+        Task RegisterUser(string username, string password, string raApiKey);
         Task DeleteUserSession(string sessionId);
     }
 }

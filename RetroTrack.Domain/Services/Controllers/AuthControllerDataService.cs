@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
-using RetroTrack.Domain.DTOs.Controllers.Auth;
+using RetroTrack.Domain.DTOs.Controllers.Auth.Responses;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
@@ -13,7 +18,7 @@ namespace RetroTrack.Domain.Services.Controllers
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public async Task<LoginUserDto> ValidateUserLogin(string username, string password)
+        public async Task<LoginUserResponseDto> LoginUser(string username, string password)
         {
             //Get the user
             var user = await context.Users.FirstOrDefaultAsync(x => x.LoginUsername == username);
@@ -21,11 +26,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (user == null)
             {
                 Log.Information($"[User Login] Attempted login with username {username} failed due to user not existing");
-
-                return new LoginUserDto
-                {
-                    Successful = false
-                };
+                throw new KeyNotFoundException($"User with username {username} does not exist.");
             }
 
             var isMatch = false;
@@ -52,38 +53,24 @@ namespace RetroTrack.Domain.Services.Controllers
             if (!isMatch)
             {
                 Log.Information($"[User Login] Attempted login with username {username} failed due to incorrect password");
-
-                return new LoginUserDto
-                {
-                    Successful = false
-                };
+                throw new UnauthorizedAccessException("Incorrect password provided for user " + username);
             }
 
-            var sessionId = $"D{DateTime.UtcNow.Ticks / 730}G{Guid.NewGuid()}";
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-            //Create a new session id and add it into the database
-            await context.Sessions.AddAsync(new Session
+            await SaveRefreshToken(refreshToken, user.Id);
+
+            Log.Information($"User logged in {username}");
+
+            return new LoginUserResponseDto
             {
-                SessionId = sessionId,
-                UserId = user.Id,
-                ExpiryTime = DateTime.UtcNow.AddDays(30),
-            });
-
-            await context.SaveChangesAsync();
-            Log.Information($"[User Login] Attempted login with username {username} successful");
-
-            user.LastActivity = DateTime.UtcNow;
-            await context.SaveChangesAsync();
-
-            return new LoginUserDto
-            {
-                Successful = true,
-                SessionId = sessionId,
-                Username = username
+                AccessToken = token,
+                RefreshToken = refreshToken
             };
         }
 
-        public async Task<RegisterUserDto> RegisterUser(string username, string password, string raApiKey)
+        public async Task RegisterUser(string username, string password, string raApiKey)
         {
             try
             {
@@ -92,11 +79,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 if (!validKey.IsValidKey)
                 {
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
-                    };
+                    throw new UnauthorizedAccessException("Error validating API key. Please double check your username and RetroAchievements API key and try again");
                 }
 
                 //Check if the user is actually registered
@@ -104,11 +87,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 {
                     Log.Information($"[Register User] User {username} already exists");
 
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "User already registered. Forgot your password? Use the forgot password link on the login form"
-                    };
+                    throw new UnauthorizedAccessException("User already registered. Forgot your password? Use the forgot password link on the login form");
                 }
 
                 //Get the users details from the API
@@ -116,12 +95,8 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 if (userProfile == null)
                 {
-                    Log.Information($"[Register User] Error getting user profile for {username}");
-                    return new RegisterUserDto
-                    {
-                        Success = false,
-                        Reason = "There has been an error retrieving your user profile from RetroAchievements. Please try again"
-                    };
+                    Log.Warning($"[Register User] Error getting user profile for {username}");
+                    throw new UnauthorizedAccessException("There has been an error retrieving your user profile from RetroAchievements. Please try again");
                 }
 
                 //Add the user into the database
@@ -142,36 +117,49 @@ namespace RetroTrack.Domain.Services.Controllers
                 await context.SaveChangesAsync();
 
                 Log.Information($"[Register User] {username} succesfully registered");
-
-                return new RegisterUserDto
-                {
-                    Success = true,
-                    Reason = null
-                };
             }
             catch (Exception ex)
             {
                 Log.Fatal($"[Register User] Error registering user - {ex}");
-                return new RegisterUserDto
-                {
-                    Success = false,
-                    Reason = "There has been an unknown error trying to register your account. Please try again"
-                };
+                throw new UnauthorizedAccessException("There has been an error trying to register your account. Please try again", ex);
             }
         }
 
-        public async Task<ResetUserPasswordDto> ResetUserPassword(string raUsername, string password, string raApiKey)
+        public async Task<string> RefreshToken(string token)
+        {
+            var refreshToken = await context.UserRefreshTokens.FirstOrDefaultAsync(x => x.Token == token && x.ExpiresAt > DateTime.UtcNow);
+            if (refreshToken == null)
+            {
+                Log.Information($"[Refresh Token] Invalid or expired refresh token {token}");
+                throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+            }
+
+            var user = await context.Users.FindAsync(refreshToken.UserId);
+
+            if (user == null)
+            {
+                Log.Information($"[Refresh Token] User not found for refresh token {token}");
+                throw new KeyNotFoundException("User not found for the provided refresh token.");
+            }
+
+            // Generate a new JWT token
+            var newJwtToken = GenerateJwtToken(user);
+
+            refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(30);
+            await context.SaveChangesAsync();
+
+            Log.Information($"[Refresh Token] Refresh token {token} refreshed successfully");
+            return newJwtToken;
+        }
+
+        public async Task ResetUserPassword(string raUsername, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo
             var response = await raApiService.ValidateApiKey(raUsername, raApiKey);
 
             if (!response.IsValidKey)
             {
-                return new ResetUserPasswordDto
-                {
-                    Success = false,
-                    Reason = "Error validating API key. Please double check your username and RetroAchievements API key and try again"
-                };
+                throw new UnauthorizedAccessException("Error validating API key. Please double check your username and RetroAchievements API key and try again");
             }
 
             // check if the ulid matches the user
@@ -180,12 +168,7 @@ namespace RetroTrack.Domain.Services.Controllers
             if (user == null)
             {
                 Log.Information($"[Password Reset] User {raUsername} doesn't exist");
-
-                return new ResetUserPasswordDto
-                {
-                    Success = false,
-                    Reason = "We couldn't verify your RA account. Please double check your username and API key."
-                };
+                throw new UnauthorizedAccessException("We couldn't verify your RA account. Please double check your username and API key.");
             }
 
             // hash the password and store it
@@ -197,40 +180,52 @@ namespace RetroTrack.Domain.Services.Controllers
             await context.SaveChangesAsync();
 
             Log.Information($"[Password Reset] {raUsername} successfully reset their password");
-            return new ResetUserPasswordDto
+        }
+
+        public async Task DeleteUserSession(string token)
+        {
+            await context.UserRefreshTokens.Where(x => x.Token == token).ExecuteDeleteAsync();
+
+            Log.Information($"[Logout User] Session {token} deleted");
+        }
+
+        private static string GenerateJwtToken(User user)
+        {
+            var claims = new[]
             {
-                Success = true,
-                Reason = null
+                new Claim(ClaimTypes.Name, user.LoginUsername),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: Environment.GetEnvironmentVariable("JwtValidIssuer"),
+                audience: Environment.GetEnvironmentVariable("JwtValidAudience"),
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<bool> ValidateSessionStatus(string sessionId)
+        private static string GenerateRefreshToken()
         {
-            var session = await context.Sessions.FirstOrDefaultAsync(x => x.SessionId == sessionId);
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+        }
 
-            if (session == null)
+        private async Task SaveRefreshToken(string token, int userId)
+        {
+            var refreshToken = new UserRefreshToken
             {
-                return false;
-            }
+                Token = token,
+                UserId = userId,
+                ExpiresAt = DateTime.UtcNow.AddDays(30)
+            };
 
-            //Check if it has expired
-            if (session.ExpiryTime < DateTime.UtcNow)
-            {
-                context.Sessions.Remove(session);
-                await context.SaveChangesAsync();
-                return false;
-            }
-
-            session.ExpiryTime = DateTime.UtcNow.AddDays(30);
+            context.UserRefreshTokens.Add(refreshToken);
             await context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task DeleteUserSession(string sessionId)
-        {
-            await context.Sessions.Where(x => x.SessionId == sessionId).ExecuteDeleteAsync();
-
-            Log.Information($"[Logout User] Session {sessionId} deleted");
         }
     }
 }

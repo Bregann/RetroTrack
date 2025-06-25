@@ -1,11 +1,10 @@
-﻿using RetroTrack.Domain.DTOs.Controllers.Users;
-using RetroTrack.Domain.DTOs.Helpers;
+﻿using RetroTrack.Domain.DTOs.Controllers.Users.Responses;
 
 namespace RetroTrack.Domain.Interfaces.Controllers
 {
     public interface IUsersControllerDataService
     {
-        Task<bool> CheckUserUpdateCompleted(UserDataDto userData);
-        Task<UpdateUserGamesDto> UpdateUserGames(UserDataDto userData);
+        Task<bool> CheckUserUpdateCompleted(int userId);
+        Task<RequestUserGameUpdateResponse> RequestUserGameUpdate(int userId);
     }
 }

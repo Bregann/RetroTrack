@@ -1,12 +1,12 @@
+'use client'
+
 import { Modal, PasswordInput, TextInput, Text, Group, Button, Alert } from '@mantine/core'
 import { useState } from 'react'
 import { useForm } from '@mantine/form'
 import { IconAlertCircle, IconCheck, IconLock } from '@tabler/icons-react'
-import fetchHelper from '@/helpers/FetchHelper'
-
-import sessionHelper from '@/helpers/SessionHelper'
-import notificationHelper from '@/helpers/NotificationHelper'
-import { type RegisterUserDto } from '@/pages/api/auth/RegisterUser'
+import { doPost } from '@/helpers/apiClient'
+import { useAuth } from '@/context/authContext'
+import notificationHelper from '@/helpers/notificationHelper'
 
 interface FormValues {
   username: string
@@ -15,12 +15,11 @@ interface FormValues {
 }
 
 export interface RegisterModalProps {
-  setOpened: (value: boolean) => void
-  onSuccessfulRegister: () => Promise<void>
+  onClose: (value: boolean) => void
   openedState: boolean
 }
 
-const RegisterModal = (props: RegisterModalProps): JSX.Element => {
+const RegisterModal = (props: RegisterModalProps) => {
   const form = useForm<FormValues>({
     initialValues: {
       username: '',
@@ -28,6 +27,8 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
       apiKey: ''
     }
   })
+
+  const auth = useAuth()
 
   const RegisterUser = async (values: FormValues): Promise<void> => {
     setErrorMessage(null)
@@ -40,33 +41,30 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
     }
 
     setRegisterButtonLoading(true)
-    const res = await fetchHelper.doPost('/auth/RegisterUser', values)
+    const res = await doPost('/api/auth/RegisterNewUser', { body: values })
 
-    if (res.errored) {
-      setErrorMessage('There has been an unexpected error. Please try again shortly')
+    // Check if there's any error
+    if (res.status === 400) {
+      setErrorMessage(res.raw.statusText || 'An error occurred while registering. Please try again later.')
+      setRegisterButtonLoading(false)
+    }
+    else if (res.status !== 200){
+      setErrorMessage('An error occurred while registering. Please try again later.')
       setRegisterButtonLoading(false)
       return
     }
-
-    const data: RegisterUserDto = await res.data
-
-    // Check if there's any error
-    if (!data.success) {
-      setErrorMessage(data.reason)
-      setRegisterButtonLoading(false)
-    } else {
+    else {
       // Send the sign in request
-      const res = await sessionHelper.attemptLogin(values.username, values.password)
+      const res = await auth.login(values.username, values.password)
 
-      if (res.success) {
+      if (res) {
         // Close the menu
         setRegisterButtonLoading(false)
-        props.setOpened(false)
-        await props.onSuccessfulRegister()
+        props.onClose(false)
         notificationHelper.showSuccessNotification('Success', 'Account created and successfully logged in!', 5000, <IconCheck />)
       } else {
         setRegisterButtonLoading(false)
-        props.setOpened(false)
+        props.onClose(false)
 
         notificationHelper.showSuccessNotification('Success', 'Account created! You can now login', 5000, <IconCheck />)
       }
@@ -79,7 +77,7 @@ const RegisterModal = (props: RegisterModalProps): JSX.Element => {
   return (
     <Modal
       opened={props.openedState}
-      onClose={() => { props.setOpened(false) }}
+      onClose={() => { props.onClose(false) }}
       title="Register">
       {errorMessage !== null &&
         <Alert

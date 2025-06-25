@@ -1,0 +1,71 @@
+.iconBox {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.gameIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.gameScreenshot {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.gameCoverBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+  border-radius: 4px;
+}
+
+.gameCoverArt{
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  height: 100%;
+}
+
+.progressBar {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  margin: 1rem auto;
+  background-color: light-dark(var(--mantine-color-light-5), var(--mantine-color-dark-7));
+}
+
+.progressBar > * {
+  flex-grow: 1;
+  position: relative;
+}
+
+.progressBar .ProgressLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.achievementIconTypeBox {
+  position: absolute;
+  bottom: 8;
+  right: 8;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  z-index: 1000;
+}

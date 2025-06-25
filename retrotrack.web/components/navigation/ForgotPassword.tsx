@@ -1,10 +1,11 @@
+'use client'
+
 import { Alert, Button, Group, Modal, PasswordInput, TextInput, Text } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useState } from 'react'
 import { IconAlertCircle, IconCheck, IconLock } from '@tabler/icons-react'
-import fetchHelper from '@/helpers/FetchHelper'
-import { type ResetUserPasswordDto } from '@/pages/api/auth/ResetUserPassword'
-import notificationHelper from '@/helpers/NotificationHelper'
+import { doPost } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
 
 interface FormValues {
   username: string
@@ -13,11 +14,11 @@ interface FormValues {
 }
 
 export interface ForgotPasswordModalProps {
-  setOpened: (value: boolean) => void
+  onClose: (value: boolean) => void
   openedState: boolean
 }
 
-const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
+export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false)
 
@@ -29,7 +30,7 @@ const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
     }
   })
 
-  const ResetPassword = async (values: FormValues): Promise<void> => {
+  const resetPassword = async (values: FormValues): Promise<void> => {
     setErrorMessage(null)
 
     const spChars = /[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?]+/
@@ -40,19 +41,10 @@ const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
     }
 
     setForgotPasswordLoading(true)
-    const res = await fetchHelper.doPost('/auth/ResetUserPassword', values)
+    const res = await doPost('/api/auth/ResetUserPassword', { body: values })
 
-    if (res.errored) {
-      setErrorMessage('There has been an unexpected error. Please try again shortly')
-      setForgotPasswordLoading(false)
-      return
-    }
-
-    const data: ResetUserPasswordDto = res.data
-
-    // Check if there's any error
-    if (!data.success) {
-      setErrorMessage(data.reason)
+    if (res.status === 400) {
+      setErrorMessage(res.raw.statusText)
       setForgotPasswordLoading(false)
       return
     }
@@ -60,13 +52,13 @@ const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
     notificationHelper.showSuccessNotification('Success', 'Password reset! You may login now', 5000, <IconCheck />)
 
     setForgotPasswordLoading(false)
-    props.setOpened(false)
+    props.onClose(false)
   }
 
   return (
     <Modal
       opened={props.openedState}
-      onClose={() => { props.setOpened(false) }}
+      onClose={() => { props.onClose(false) }}
       title="Forgot Password">
       {errorMessage !== null &&
         <Alert
@@ -77,7 +69,7 @@ const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
           {errorMessage}
         </Alert>}
 
-      <form onSubmit={form.onSubmit(async (values) => { await ResetPassword(values) })}>
+      <form onSubmit={form.onSubmit(async (values) => { await resetPassword(values) })}>
         <TextInput
           label="RetroAchievements Username"
           placeholder="RetroAchievements Username"
@@ -122,5 +114,3 @@ const ForgotPasswordModal = (props: ForgotPasswordModalProps): JSX.Element => {
     </Modal>
   )
 }
-
-export default ForgotPasswordModal

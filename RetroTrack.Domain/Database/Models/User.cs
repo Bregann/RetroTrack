@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
@@ -41,8 +42,13 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public long UserPoints { get; set; }
 
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<TrackedGame> TrackedGames { get; set; } = null!;
-        public virtual ICollection<Session> Sessions { get; set; } = null!;
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<UserRefreshToken> RefreshTokens { get; set; } = null!;
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<UserGameProgress> UserGameProgress { get; set; } = null!;
     }
 }

@@ -1,15 +1,14 @@
 import { Modal, Anchor, TextInput, PasswordInput, Group, Button, Alert } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useState } from 'react'
-import notificationHelper from '@/helpers/NotificationHelper'
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react'
-import sessionHelper from '@/helpers/SessionHelper'
+import { useAuth } from '@/context/authContext'
 import ForgotPasswordModal from './ForgotPassword'
+import notificationHelper from '@/helpers/notificationHelper'
 
 interface LoginModalProps {
-  setOpened: (value: boolean) => void
+  onClose: (value: boolean) => void
   openedState: boolean
-  onSuccessfulLogin: () => Promise<void>
 }
 
 interface FormValues {
@@ -17,7 +16,7 @@ interface FormValues {
   password: string
 }
 
-const LoginModal = (props: LoginModalProps): JSX.Element => {
+export default function LoginModal(props: LoginModalProps) {
   const [forgotPasswordOpened, setForgotPasswordOpened] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loginButtonLoading, setLoginButtonLoading] = useState(false)
@@ -28,21 +27,22 @@ const LoginModal = (props: LoginModalProps): JSX.Element => {
     }
   })
 
+  const auth = useAuth()
+
   const SendLoginRequest = async (values: FormValues): Promise<void> => {
     setLoginButtonLoading(true)
 
     // Send the sign in request
-    const res = await sessionHelper.attemptLogin(values.username, values.password)
+    const res = await auth.login(values.username, values.password)
 
-    if (res.success) {
+    if (res) {
       // Close the menu
-      props.setOpened(false)
+      props.onClose(false)
       setLoginButtonLoading(false)
 
       notificationHelper.showSuccessNotification('Success', 'Successfully logged in!', 3000, <IconCheck />)
-      await props.onSuccessfulLogin()
     } else {
-      setErrorMessage(res.reason)
+      setErrorMessage('Invalid username or password. Please try again.')
       setLoginButtonLoading(false)
     }
   }
@@ -51,7 +51,7 @@ const LoginModal = (props: LoginModalProps): JSX.Element => {
     <>
       <Modal
         opened={props.openedState}
-        onClose={() => { props.setOpened(false) }}
+        onClose={() => { props.onClose(false) }}
         title="Login">
         {errorMessage !== null &&
           <Alert
@@ -94,9 +94,7 @@ const LoginModal = (props: LoginModalProps): JSX.Element => {
         </form>
       </Modal>
 
-      <ForgotPasswordModal openedState={forgotPasswordOpened} setOpened={setForgotPasswordOpened} />
+      <ForgotPasswordModal openedState={forgotPasswordOpened} onClose={setForgotPasswordOpened} />
     </>
   )
 }
-
-export default LoginModal
