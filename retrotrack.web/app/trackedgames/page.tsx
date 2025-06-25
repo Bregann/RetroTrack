@@ -1,7 +1,16 @@
 import TrackedGames from '@/components/pages/TrackedGames'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
+import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata = {
+  title: 'RetroTrack - Tracked Games',
+  description: 'View and manage your tracked games on RetroTrack. Keep track of your progress and achievements.',
+  icons: {
+    icon: '/favicon.ico'
+  }
+}
 
 export default async function Page() {
   const cookieStore = await cookies()

@@ -3,7 +3,16 @@ import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
+import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata = {
+  title: 'RetroTrack - Console Games',
+  description: 'View all games for a specific console on RetroTrack. Track your progress and achievements for each game.',
+  icons: {
+    icon: '/favicon.ico'
+  }
+}
 
 export default async function Page({
   params,
@@ -59,6 +68,7 @@ export default async function Page({
           consoleName={publicData.consoleName}
           totalGames={publicData.totalCount}
           pageData={publicData}
+          showConsoleColumn={false}
         />
       }
 
@@ -68,8 +78,10 @@ export default async function Page({
           consoleName={loggedInData.consoleName}
           totalGames={loggedInData.totalCount}
           pageData={loggedInData}
+          showConsoleColumn={false}
         />
       }
     </main>
   )
 }
+

@@ -30,7 +30,6 @@ COPY . .
 
 ENV NEXT_PRIVATE_STANDALONE=true
 
-
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \

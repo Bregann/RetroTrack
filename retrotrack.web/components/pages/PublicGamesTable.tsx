@@ -66,7 +66,7 @@ const columns: Column<Game>[] = [
 ]
 
 export default function PublicGamesTable(props: PublicGamesTableProps) {
-  if (props.showConsoleColumn === true) {
+  if (props.showConsoleColumn === true && columns.find(c => c.key === 'consoleName') === undefined && props.consoleId === -1) {
     columns.push({
       title: 'Console',
       key: 'consoleName',
@@ -75,6 +75,13 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     })
   }
 
+  if(columns.find(c => c.key === 'consoleName') !== undefined && props.consoleId !== -1) {
+    // remove consoleName column if it exists
+    const consoleColumnIndex = columns.findIndex(c => c.key === 'consoleName')
+    if (consoleColumnIndex !== -1) {
+      columns.splice(consoleColumnIndex, 1)
+    }
+  }
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<Game>>({
     key: 'gameTitle',

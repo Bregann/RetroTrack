@@ -11,6 +11,26 @@ import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/Get
 import { GameModalProvider } from '@/context/gameModalContext'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 import { Notifications } from '@mantine/notifications'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'RetroTrack',
+  description: 'RetroTrack is a feature-rich achievement tracker for RetroAchievements!',
+  icons: {
+    icon: '/favicon.ico'
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1
+    }
+  }
+}
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -75,6 +95,7 @@ export default async function RootLayout({
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
+        <meta charSet="utf-8" />
         <ColorSchemeScript />
       </head>
       <body style={{ marginBottom: 20 }}>

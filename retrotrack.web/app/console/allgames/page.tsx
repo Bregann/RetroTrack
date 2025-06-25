@@ -3,7 +3,16 @@ import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
+import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata = {
+  title: 'RetroTrack - All Games',
+  description: 'View all games across all consoles on RetroTrack. Track your progress and achievements for each game.',
+  icons: {
+    icon: '/favicon.ico'
+  }
+}
 
 export default async function Page() {
   const cookieStore = await cookies()

@@ -1,5 +1,8 @@
+let API_BASE_URL = 'https://retrotrack.bregan.me'
+
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+  API_BASE_URL = 'http://localhost:3000'
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -32,7 +35,7 @@ async function doRequest<T>(
     cookieHeader, // for passing cookies manually - needed for server-side requests
   } = options
 
-  const res = await fetch(`http://localhost:3000${endpoint}`, {
+  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
     credentials: 'include',
     headers: {
@@ -50,7 +53,7 @@ async function doRequest<T>(
   if (res.status === 401 && retry) {
     console.warn('401 detected. Attempting refresh...')
 
-    const refreshRes = await fetch('http://localhost:3000/api/auth/RefreshToken', {
+    const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
       method: 'POST',
       credentials: 'include',
     })

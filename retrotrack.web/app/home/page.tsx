@@ -1,6 +1,15 @@
 import HomeComponent from '@/components/pages/HomeComponent'
 import { doGet } from '@/helpers/apiClient'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'RetroTrack - Home',
+  description: 'RetroTrack is a feature-rich achievement tracker for RetroAchievements!',
+  icons: {
+    icon: '/favicon.ico'
+  }
+}
 
 export default async function Home() {
   const homePageData = await doGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames', { next: { revalidate: 60 } })

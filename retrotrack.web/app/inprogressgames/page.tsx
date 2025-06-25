@@ -1,7 +1,16 @@
 import InProgressGamesTable from '@/components/pages/InProgressGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
+import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata ={
+  title: 'RetroTrack - In Progress Games',
+  description: 'View all games you are currently playing on RetroTrack. Track your progress and achievements for each game.',
+  icons: {
+    icon: '/favicon.ico'
+  }
+}
 
 export default async function Page() {
   const cookieStore = await cookies()
