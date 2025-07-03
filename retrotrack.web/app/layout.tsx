@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 

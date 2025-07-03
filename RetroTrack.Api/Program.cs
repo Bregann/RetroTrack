@@ -61,7 +61,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontendLocalhost", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins("http://localhost:3000", "https://retrotrack.bregan.me")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();

@@ -13,63 +13,62 @@ export async function middleware(request: NextRequest) {
 
   // Only when we have a refreshToken but no accessToken
   if (!accessToken && refreshToken) {
-    // Call your refresh endpoint, sending the refreshToken as a cookie
-    const refreshRes = await fetch(`${API_BASE_URL}/auth/RefreshToken`, {
-      method: 'POST',
-      headers: {
-        'X-ApiSecretKey': API_SECRET_KEY,
-        // forward only the refreshToken cookie
-        'Cookie': `${REFRESH_TOKEN_COOKIE}=${refreshToken}`,
-      },
-    })
+    try {
+      const refreshRes = await fetch(`${API_BASE_URL}/auth/RefreshToken`, {
+        method: 'POST',
+        headers: {
+          'X-ApiSecretKey': API_SECRET_KEY,
+          // forward only the refreshToken cookie
+          'Cookie': `${REFRESH_TOKEN_COOKIE}=${refreshToken}`,
+        },
+      })
 
-    if (refreshRes.ok) {
-      // Pull out all Set-Cookie headers
-      const setCookieHeaders: string[] =
-        refreshRes.headers.getSetCookie?.() ??
-        (refreshRes.headers.get('set-cookie')?.split(/,(?=[^ ;]+=)/) || [])
+      if (refreshRes.ok) {
+        // Pull out all Set-Cookie headers
+        const setCookieHeaders: string[] =
+          refreshRes.headers.getSetCookie?.() ??
+          (refreshRes.headers.get('set-cookie')?.split(/,(?=[^ ;]+=)/) || [])
 
-      // Extract the new accessToken value
-      let newAccessTokenValue: string | undefined
-      for (const header of setCookieHeaders) {
-        if (header.startsWith(`${ACCESS_TOKEN_COOKIE}=`)) {
-          const [pair] = header.split('; ')
-          newAccessTokenValue = pair.split('=')[1]
-          break
-        }
-      }
-
-      if (newAccessTokenValue) {
-        // Build a new Cookie header:
-        // - strip any old accessToken
-        // - append the fresh one
-        const originalCookies = request.headers.get('cookie') || ''
-        const filtered = originalCookies
-          .split('; ')
-          .filter((c) => !c.startsWith(`${ACCESS_TOKEN_COOKIE}=`) && c)
-        filtered.push(`${ACCESS_TOKEN_COOKIE}=${newAccessTokenValue}`)
-        const newCookieHeader = filtered.join('; ')
-
-        // Clone request headers and override the Cookie header
-        const newHeaders = new Headers(request.headers)
-        newHeaders.set('cookie', newCookieHeader)
-
-        // Prepare the middleware response:
-        const response = NextResponse.next({
-          request: {
-            headers: newHeaders,
-          },
-        })
-
-        // Also re-apply all Set-Cookie headers so the browser stores them
+        // Extract the new accessToken value
+        let newAccessTokenValue: string | undefined
         for (const header of setCookieHeaders) {
-          response.headers.append('set-cookie', header)
+          if (header.startsWith(`${ACCESS_TOKEN_COOKIE}=`)) {
+            const [pair] = header.split('; ')
+            newAccessTokenValue = pair.split('=')[1]
+            break
+          }
         }
 
-        return response
+        if (newAccessTokenValue) {
+          const originalCookies = request.headers.get('cookie') || ''
+          const filtered = originalCookies
+            .split('; ')
+            .filter((c) => !c.startsWith(`${ACCESS_TOKEN_COOKIE}=`) && c)
+          filtered.push(`${ACCESS_TOKEN_COOKIE}=${newAccessTokenValue}`)
+          const newCookieHeader = filtered.join('; ')
+
+          // Clone request headers and override the Cookie header
+          const newHeaders = new Headers(request.headers)
+          newHeaders.set('cookie', newCookieHeader)
+
+          // Prepare the middleware response:
+          const response = NextResponse.next({
+            request: {
+              headers: newHeaders,
+            },
+          })
+
+          // Also re-apply all Set-Cookie headers so the browser stores them
+          for (const header of setCookieHeaders) {
+            response.headers.append('set-cookie', header)
+          }
+
+          return response
+        }
       }
+    } catch (error) {
+      console.error('Error during token refresh:', error)
     }
-    // if refresh fails, just continue without modifying (or you could redirect to /login)
   }
 
   return NextResponse.next()
@@ -81,4 +80,3 @@ export const config = {
     '/((?!_next/static|_next/image|api|favicon.ico).*)',
   ],
 }
-

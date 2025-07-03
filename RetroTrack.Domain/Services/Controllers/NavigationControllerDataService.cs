@@ -55,7 +55,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 RAName = user.RAUsername,
                 RAUserProfileUrl = user.UserProfileUrl,
-                UserPoints = user.UserPoints,
+                UserPoints = user.UserPointsSoftcore,
                 TotalAchievementsSoftcore = await context.UserGameProgress.Where(x => x.UserId == userId).SumAsync(x => x.AchievementsGained),
                 TotalAchievementsHardcore = await context.UserGameProgress.Where(x => x.UserId == userId).SumAsync(x => x.AchievementsGainedHardcore),
                 GamesBeatenHardcore = consoleProgressData.Sum(x => x.GamesBeatenHardcore),

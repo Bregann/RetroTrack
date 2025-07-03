@@ -110,7 +110,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     LastActivity = DateTime.UtcNow,
                     LastUserUpdate = DateTime.UtcNow,
                     LastAchievementsUpdate = DateTime.UtcNow,
-                    UserPoints = userProfile.TotalPoints,
+                    UserPointsSoftcore = userProfile.TotalPoints,
                     UserProfileUrl = "/UserPic/" + userProfile.User + ".png",
                 });
 

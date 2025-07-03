@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import TrackedGames from '@/components/pages/TrackedGames'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'

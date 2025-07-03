@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import InProgressGamesTable from '@/components/pages/InProgressGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'

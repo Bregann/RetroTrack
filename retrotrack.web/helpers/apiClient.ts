@@ -35,60 +35,85 @@ async function doRequest<T>(
     cookieHeader, // for passing cookies manually - needed for server-side requests
   } = options
 
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
-      ...headers,
-    },
-    // only JSON-ify if you passed a body
-    body: body ? JSON.stringify(body) : undefined,
-    // sprinkle in Next.js fetch options
-    ...(nextFetchOptions && { next: nextFetchOptions }),
-  })
+  const MAX_RETRIES = 3
+  let attempt = 0
 
-  // 🛑 Unauthorized? Time to refresh & retry ONCE
-  if (res.status === 401 && retry) {
-    console.warn('401 detected. Attempting refresh...')
+  while (attempt < MAX_RETRIES) {
+    try {
+      console.log(`🔗 ${method} ${API_BASE_URL}${endpoint} (attempt ${attempt + 1})`)
 
-    const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-
-    if (refreshRes.ok) {
-      console.log('Refresh successful! Retrying request...')
-      return doRequest<T>(method, endpoint, {
-        body,
-        headers,
-        retry: false,
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method,
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+          ...headers,
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        ...(nextFetchOptions && { next: nextFetchOptions }),
       })
-    } else {
-      console.error('Refresh failed. You shall not pass.')
+
+      // 🛑 Unauthorized? Time to refresh & retry ONCE
+      if (res.status === 401 && retry) {
+        console.warn('401 detected. Attempting refresh...')
+
+        const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
+          method: 'POST',
+          credentials: 'include',
+        })
+
+        if (refreshRes.ok) {
+          console.log('Refresh successful! Retrying request...')
+          return doRequest<T>(method, endpoint, {
+            body,
+            headers,
+            retry: false,
+          })
+        } else {
+          console.error('Refresh failed. You shall not pass.')
+          return {
+            data: undefined,
+            status: res.status,
+            ok: false,
+            raw: res,
+          }
+        }
+      }
+
+      let data: T | undefined = undefined
+      try {
+        const text = await res.text()
+        data = text ? JSON.parse(text) : undefined
+      } catch {
+        console.warn('⚠️ Failed to parse JSON response')
+      }
+
       return {
-        data: undefined,
+        data,
         status: res.status,
-        ok: false,
+        ok: res.ok,
         raw: res,
+      }
+    } catch (error) {
+      console.error(`Error in doRequest (attempt ${attempt + 1}):`, error)
+      attempt++
+      if (attempt >= MAX_RETRIES) {
+        return {
+          data: undefined,
+          status: 500,
+          ok: false,
+          raw: new Response(null, { status: 500 }),
+        }
       }
     }
   }
-
-  let data: T | undefined = undefined
-  try {
-    const text = await res.text()
-    data = text ? JSON.parse(text) : undefined
-  } catch {
-    console.warn('⚠️ Failed to parse JSON response')
-  }
-
+  // Should not reach here, but just in case
   return {
-    data,
-    status: res.status,
-    ok: res.ok,
-    raw: res,
+    data: undefined,
+    status: 500,
+    ok: false,
+    raw: new Response(null, { status: 500 }),
   }
 }
 

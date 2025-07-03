@@ -8,6 +8,9 @@ namespace RetroTrack.Domain.Helpers
     {
         public static void RegisterJobs()
         {
+#if DEBUG
+
+#else
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpCompletedJobs", service => service.CleanUpCompletedJobs(), "0 0 * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpStuckJobs", service => service.RequeueErroredJobs(), "* */1 * * *");
@@ -18,6 +21,7 @@ namespace RetroTrack.Domain.Helpers
             RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetGameDataForRecentlyModifiedGamesJob", service => service.GetGameDataForRecentlyModifiedGames(), "30 0 * * *");
 
             Log.Information("[Hangfire] Jobs have been registered successfully.");
+#endif
         }
     }
 }

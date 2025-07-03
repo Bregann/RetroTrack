@@ -1,0 +1,38 @@
+.wallIcon {
+  width: 64px;
+  height: 64px;
+}
+
+.lastPlayedIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.lastPlayedText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dividerText {
+  color: light-dark(#263042, #ffffff);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.statCard {
+  border: 2px solid;
+  border-color: #1590e2;
+}
+
+.lastPlayedCard {
+  border: 2px solid;
+  border-color: #da59da;
+}
+
+.hardcoreBorder {
+  border: 3px solid;
+  border-color:gold;
+}

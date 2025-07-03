@@ -40,7 +40,10 @@ namespace RetroTrack.Domain.Database.Models
         public string UserProfileUrl { get; set; } = "";
 
         [Required]
-        public long UserPoints { get; set; }
+        public long UserPointsSoftcore { get; set; } = 0;
+
+        [Required]
+        public long UserPointsHardcore { get; set; } = 0;
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<TrackedGame> TrackedGames { get; set; } = null!;

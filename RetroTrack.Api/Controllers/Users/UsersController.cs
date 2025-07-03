@@ -26,5 +26,12 @@ namespace RetroTrack.Api.Controllers.Users
 
             return await usersControllerData.CheckUserUpdateCompleted(user);
         }
+
+        [HttpGet("{username}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile([FromRoute] string username)
+        {
+            return await usersControllerData.GetUserProfile(username.ToLower());
+        }
     }
 }

@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import IndexComponent from '@/components/pages/IndexComponent'
 import { Metadata } from 'next'
 

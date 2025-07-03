@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import HomeComponent from '@/components/pages/HomeComponent'
 import { doGet } from '@/helpers/apiClient'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'

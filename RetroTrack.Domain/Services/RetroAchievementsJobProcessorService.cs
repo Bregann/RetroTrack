@@ -325,12 +325,13 @@ namespace RetroTrack.Domain.Services
 
                 // get the user from the database
                 user.UserProfileUrl = "/UserPic/" + userProfile.User + ".png";
-                user.UserPoints = userProfile.TotalPoints;
+                user.UserPointsSoftcore = userProfile.TotalSoftcorePoints;
+                user.UserPointsHardcore = userProfile.TotalPoints;
                 user.LastUserUpdate = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();
 
-                Log.Information($"[RetroAchievements] User {user.LoginUsername} profile updated with points: {user.UserPoints}, profile URL: {user.UserProfileUrl}");
+                Log.Information($"[RetroAchievements] User {user.LoginUsername} profile updated with points: {user.UserPointsSoftcore}, profile URL: {user.UserProfileUrl}");
 
                 // process the game list
                 // firstly check if there are any games in the database that are not in the game list, if so, remove them

@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import LoggedInGamesTable from '@/components/pages/LoggedInGamesTable'
 import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'

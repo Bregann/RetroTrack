@@ -87,7 +87,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
 
       {gameQuery.data !== undefined &&
         <>
-          <SimpleGrid cols={isSmall ? 1 : 3} mb="md">
+          <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
             <Image
               src={`https://media.retroachievements.org${gameQuery.data.imageInGame}`}
               alt="In-Game Screenshot"

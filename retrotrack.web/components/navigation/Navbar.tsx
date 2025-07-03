@@ -147,7 +147,7 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button onClick={() => { setShowUpdateInfoModal(true) }}>V4 Update + Support Info</Button>
+            <Button onClick={() => { setShowUpdateInfoModal(true) }}>V4.1 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -205,6 +205,7 @@ export function Navbar(props: NavbarProps) {
             onClick={() => setCurrentPage('/home')}
             style={{ borderRadius: '10px' }}
           />
+
           <NavLink
             label="All Games"
             component={Link}
@@ -311,14 +312,16 @@ export function Navbar(props: NavbarProps) {
         {props.loggedInNavigationData !== undefined && props.loggedInNavigationData !== null &&
           <Box p="xs" className={styles.profileBox}>
             <Group gap="sm" mb="xs" align="center">
-              {/* Placeholder avatar */}
-              <Image
-                alt='User avatar'
-                src={`https://media.retroachievements.org${props.loggedInNavigationData.raUserProfileUrl}`}
-                width={55}
-                height={55}
-                style={{ borderRadius: '8px' }}
-              />
+              <Link href={`/profile/${props.loggedInNavigationData.raName}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setCurrentPage('/profile')}>
+                <Image
+                  alt='User avatar'
+                  src={`https://media.retroachievements.org${props.loggedInNavigationData.raUserProfileUrl}`}
+                  width={55}
+                  height={55}
+                  style={{ borderRadius: '8px' }}
+                />
+              </Link>
+
               <Text fw={600} size="sm">{props.loggedInNavigationData.raName}</Text>
             </Group>
 
@@ -331,16 +334,16 @@ export function Navbar(props: NavbarProps) {
               {props.loggedInNavigationData.gamesMastered !== 0 && <Text size="sm">Mastered: {props.loggedInNavigationData.gamesMastered}</Text>}
             </Stack>
 
-            {/* Profile link */}
-            {/* <Button
-            component="a"
-            href="/profile"
-            variant="subtle"
-            size="xs"
-            fullWidth
-          >
-    View Profile
-          </Button> */}
+            <Button
+              component={Link}
+              href={`/profile/${props.loggedInNavigationData.raName}`}
+              variant="subtle"
+              size="xs"
+              fullWidth
+              onClick={() => setCurrentPage('/profile')}
+            >
+              View Profile
+            </Button>
           </Box>
         }
 
@@ -357,7 +360,22 @@ export function Navbar(props: NavbarProps) {
           openedState={registerModalOpen}
         />
 
-        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack v4.0 Update">
+        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack v4.1 Update">
+          <Text mb="md">RetroTrack v4.1 has been released! Here are some of the new features:</Text>
+          <ul>
+            <li>Bug fixes and improvements</li>
+            <li>User Profiles!</li>
+          </ul>
+
+          <Text mt="md">You can now access your user profile by clicking the profile button in the navigation. You can share your profile link to show off your RetroAchievements progress to anyone!</Text>
+          <Text mt="md">It currently only supports users registered to RetroTrack.</Text>
+
+          <Text fw={'bold'} mt="md" size='xl'>Next Update plan:</Text>
+          <ul>
+            <li>Support profile page for logged out users</li>
+            <li>Allow users to customise order of beaten and mastered games</li>
+          </ul>
+
           <Text mb="md">RetroTrack v4.0 has been released! Here are some of the new features:</Text>
           <ul>
             <li>New user interface with a fresh design</li>
@@ -369,13 +387,11 @@ export function Navbar(props: NavbarProps) {
           <Text fw={'bold'} mt="md" size='xl'>Next Update plan:</Text>
           <ul>
             <li>Fixing any bugs that may have been introduced in the new version</li>
-            <li>Dedicated game pages to go alongside modals</li>
           </ul>
 
           <Text fw={'bold'} mt="md" size='xl'>Need help?</Text>
           <Text mt="xs">If you have any feedback or suggestions or bug reports, please let me know on either Discord (my username is <b>guinea.</b>), GitHub <a href='https://github.com/Bregann/RetroTrack' target='_blank'>here</a> or on RetroAchievements <a href='https://retroachievements.org/user/guinea' target='_blank'>here</a>!</Text>
         </Modal>
-
       </AppShell.Main>
     </AppShell>
   )

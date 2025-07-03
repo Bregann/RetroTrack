@@ -5,6 +5,7 @@ namespace RetroTrack.Domain.Interfaces.Controllers
     public interface IUsersControllerDataService
     {
         Task<bool> CheckUserUpdateCompleted(int userId);
+        Task<GetUserProfileResponse> GetUserProfile(string username);
         Task<RequestUserGameUpdateResponse> RequestUserGameUpdate(int userId);
     }
 }
