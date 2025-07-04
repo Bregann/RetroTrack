@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -64,6 +64,9 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT 3000
+
+# make Node always prefer IPv4
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
