@@ -149,7 +149,7 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V4.1 Update + Support Info</Button>
+            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V5.1 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
