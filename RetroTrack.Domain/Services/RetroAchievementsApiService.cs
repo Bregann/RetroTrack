@@ -247,5 +247,26 @@ namespace RetroTrack.Domain.Services
 
             return JsonConvert.DeserializeObject<GetUserCompletionProgress>(response.Content);
         }
+
+        /// <summary>
+        /// Gets the user's profile from their username from the RetroAchievements API. Returns null if the user is not found or if there is an error.
+        /// This should only be used for fetching a user profile from the RetroAchievements API when the user is not found in the database.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task<GetUserProfile?> GetUserProfileFromUsername(string username)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetUserProfile.php?z=${_apiUsername}&y={_apiKey}&u={username}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting user profile for {username}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetUserProfile>(response.Content);
+        }
     }
 }

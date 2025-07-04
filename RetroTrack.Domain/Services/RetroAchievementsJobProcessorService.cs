@@ -4,6 +4,7 @@ using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.RetroAchievementsApi;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using Serilog;
 
@@ -369,7 +370,7 @@ namespace RetroTrack.Domain.Services
                         existingGame.AchievementsGainedHardcore = game.NumAwardedHardcore;
                         existingGame.GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100;
                         existingGame.GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100;
-                        existingGame.HighestAwardKind = ConvertHighestAwardKind(game.HighestAwardKind);
+                        existingGame.HighestAwardKind = RetroAchievementsHelper.ConvertHighestAwardKind(game.HighestAwardKind);
                         existingGame.HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null;
                         existingGame.MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null;
                         existingGame.ConsoleId = game.ConsoleId;
@@ -388,7 +389,7 @@ namespace RetroTrack.Domain.Services
                             AchievementsGainedHardcore = game.NumAwardedHardcore,
                             GamePercentage = (double)game.NumAwarded / game.MaxPossible * 100,
                             GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
-                            HighestAwardKind = ConvertHighestAwardKind(game.HighestAwardKind),
+                            HighestAwardKind = RetroAchievementsHelper.ConvertHighestAwardKind(game.HighestAwardKind),
                             HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null,
                             MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null
                         };
@@ -475,33 +476,6 @@ namespace RetroTrack.Domain.Services
                 ErrorTimestamp = DateTime.UtcNow
             });
             await context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Converts the string representation of the highest award kind to the corresponding enum value.
-        /// </summary>
-        /// <param name="awardKind"></param>
-        /// <returns></returns>
-        private static HighestAwardKind? ConvertHighestAwardKind(string? awardKind)
-        {
-            if (awardKind == null)
-            {
-                return null;
-            }
-
-            switch (awardKind)
-            {
-                case "beaten-softcore":
-                    return HighestAwardKind.BeatenSoftcore;
-                case "beaten-hardcore":
-                    return HighestAwardKind.BeatenHardcore;
-                case "completed":
-                    return HighestAwardKind.Completed;
-                case "mastered":
-                    return HighestAwardKind.Mastered;
-                default:
-                    return null;
-            }
         }
     }
 }

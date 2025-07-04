@@ -17,6 +17,7 @@ export interface GetUserProfileResponse {
   last5GamesPlayed: Last5[]
   last5Awards: Last5[]
   consoleProgressData: ConsoleProgressDatum[]
+  message?: string
 }
 
 export interface ConsoleProgressDatum {

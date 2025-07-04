@@ -49,6 +49,9 @@ namespace RetroTrack.Domain.Services
             //Check if the cache time has passed, if so then return null as it will need to be updated
             if (cacheMinutes.TotalMinutes > cachedItem.MinutesToCacheFor)
             {
+                // delete the cache item as it has expired
+                context.DataCaching.Remove(cachedItem);
+                await context.SaveChangesAsync();
                 return null;
             }
 

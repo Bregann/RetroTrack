@@ -1,15 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
-using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.DTOs.Controllers.Users.Responses;
+using RetroTrack.Domain.DTOs.RetroAchievementsApi;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Exceptions;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
+using Serilog;
+using System.Text.Json;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
-    public class UsersControllerDataService(AppDbContext context, IRetroAchievementsSchedulerService raScheduler) : IUsersControllerDataService
+    public class UsersControllerDataService(AppDbContext context, IRetroAchievementsSchedulerService raScheduler, IRetroAchievementsApiService raApiService, ICachingService cachingService) : IUsersControllerDataService
     {
         public async Task<RequestUserGameUpdateResponse> RequestUserGameUpdate(int userId)
         {
@@ -57,8 +61,168 @@ namespace RetroTrack.Domain.Services.Controllers
 
             if (user == null)
             {
-                // todo: get the data from the API instead
-                throw new Exception("User not found");
+                // check if they're in the cache as this gets heavily cached when they aren't registered users
+                // this is to avoid hitting the api too much
+
+                var cachedUser = await cachingService.GetCacheItem($"raProfile_{username.ToLower()}");
+
+                if (cachedUser != null)
+                {
+                    Log.Information($"[RetroAchievements] User {username} found in cache, returning cached data.");
+                    var cachedData = JsonSerializer.Deserialize<GetUserProfileResponse>(cachedUser);
+
+                    if (cachedData == null)
+                    {
+                        Log.Error($"[RetroAchievements] Cached data for user {username} is null.");
+                        throw new InvalidOperationException("Error loading profile from cache.");
+                    }
+
+                    return cachedData;
+                }
+
+                // if they aren't found then get the data from the ra api
+                var raUserProfile = await raApiService.GetUserProfileFromUsername(username);
+
+                if (raUserProfile == null)
+                {
+                    throw new KeyNotFoundException("User not found");
+                }
+
+                // get all their game progress
+                var userGameProgress = await raApiService.GetUserCompletionProgress(raUserProfile.User, raUserProfile.Ulid);
+
+                if (userGameProgress == null)
+                {
+                    throw new RetroAchievementsApiException("Failed to fetch user game progress from RetroAchievements API");
+                }
+
+                // add the game progress into a new variable and keep calling the api till all data is fetched
+                var allUserGameProgress = new List<Result>();
+                allUserGameProgress.AddRange(userGameProgress.Results);
+
+                if (userGameProgress.Total > 500)
+                {
+                    Log.Information($"[RetroAchievements] User {raUserProfile.User} has more than 500 games, processing additional data in batches.");
+                    var timesToProcess = Math.Ceiling((decimal)userGameProgress.Total / 500) - 1;
+                    var skip = 500;
+
+                    for (int i = 0; i < timesToProcess; i++)
+                    {
+                        var extraData = await raApiService.GetUserCompletionProgress(raUserProfile.User, raUserProfile.Ulid, skip);
+
+                        if (extraData == null || extraData.Results == null)
+                        {
+                            Log.Error($"[RetroAchievements] Failed to fetch additional user game progress for {raUserProfile.User} at skip {skip}");
+                            throw new RetroAchievementsApiException("Failed to extra fetch user game progress from RetroAchievements API");
+                        }
+
+                        allUserGameProgress.AddRange(extraData.Results);
+                        skip += 500;
+                        await Task.Delay(1000); // Delay to avoid hitting API rate limits
+                    }
+                }
+
+                Log.Information($"[RetroAchievements] Fetched {allUserGameProgress.Count} games for user {raUserProfile.User}");
+
+                // get the console progress data
+                var consoleProgressData = allUserGameProgress
+                    .GroupBy(x => x.ConsoleId)
+                    .Select(group => new ConsoleProgressData
+                    {
+                        ConsoleId = group.Key,
+                        ConsoleName = group.First().ConsoleName,
+                        ConsoleType = context.GameConsoles.First(x => x.ConsoleId == group.Key).ConsoleType,
+                        TotalGamesInConsole = group.Count(),
+                        GamesBeatenHardcore = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered),
+                        GamesBeatenSoftcore = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenSoftcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed),
+                        GamesMastered = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered),
+                        GamesCompleted = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed),
+                        PercentageBeatenSoftcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) != HighestAwardKind.BeatenSoftcore) / group.Count() * 100, 2) : 0,
+                        PercentageBeatenHardcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) != HighestAwardKind.BeatenHardcore) / group.Count() * 100, 2) : 0,
+                        PercentageCompleted = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed) / group.Count() * 100, 2) : 0,
+                        PercentageMastered = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered) / group.Count() * 100, 2) : 0
+                    })
+                    .OrderBy(x => x.ConsoleName)
+                    .ToArray();
+
+                // create the dto to return
+                var data = new GetUserProfileResponse
+                {
+                    AchievementsEarnedHardcore = allUserGameProgress.Sum(x => x.NumAwardedHardcore),
+                    AchievementsEarnedSoftcore = allUserGameProgress.Sum(x => x.NumAwarded),
+                    ConsoleProgressData = consoleProgressData,
+                    GamesBeatenHardcore = allUserGameProgress.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore),
+                    GamesBeatenSoftcore = allUserGameProgress.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenSoftcore),
+                    GamesCompleted = allUserGameProgress.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed),
+                    GamesInProgress = allUserGameProgress.Count(x => x.HighestAwardKind == null),
+                    GamesMastered = allUserGameProgress.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered),
+                    GamesMasteredWall = allUserGameProgress
+                        .Where(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered)
+                        .Select(x => new WallGame
+                        {
+                            GameId = x.GameId,
+                            ConsoleName = x.ConsoleName,
+                            Title = x.Title,
+                            ImageUrl = x.ImageIcon,
+                            DateAchieved = x.HighestAwardDate.HasValue ? x.HighestAwardDate.Value.UtcDateTime : new DateTime(0),
+                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered
+                        })
+                        .ToArray(),
+                    Last5Awards = allUserGameProgress
+                        .OrderByDescending(x => x.HighestAwardDate)
+                        .Take(5)
+                        .Select(x => new Last5GameInfo
+                        {
+                            GameId = x.GameId,
+                            Title = x.Title,
+                            ImageUrl = x.ImageIcon,
+                            DatePlayed = x.HighestAwardDate.HasValue ? x.HighestAwardDate.Value.UtcDateTime : new DateTime(0),
+                            AchievementsUnlockedHardcore = x.NumAwardedHardcore,
+                            AchievementsUnlockedSoftcore = x.NumAwarded,
+                            TotalGameAchievements = x.MaxPossible,
+                            TotalGamePoints = context.Games.First(g => g.Id == x.GameId).Points,
+                            HighestAward = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind)
+                        })
+                        .ToArray(),
+                    GamesBeatenWall = allUserGameProgress
+                        .Where(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenSoftcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore)
+                        .Select(x => new WallGame
+                        {
+                            GameId = x.GameId,
+                            ConsoleName = x.ConsoleName,
+                            Title = x.Title,
+                            ImageUrl = x.ImageIcon,
+                            DateAchieved = x.HighestAwardDate.HasValue ? x.HighestAwardDate.Value.UtcDateTime : new DateTime(0),
+                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore
+                        })
+                        .ToArray(),
+                    HardcorePoints = raUserProfile.TotalPoints,
+                    SoftcorePoints = raUserProfile.TotalSoftcorePoints,
+                    LastUserUpdate = DateTime.UtcNow,
+                    Last5GamesPlayed = allUserGameProgress
+                        .OrderByDescending(x => x.MostRecentAwardedDate)
+                        .Take(5)
+                        .Select(x => new Last5GameInfo
+                        {
+                            GameId = x.GameId,
+                            Title = x.Title,
+                            ImageUrl = x.ImageIcon,
+                            DatePlayed = x.MostRecentAwardedDate.HasValue ? x.MostRecentAwardedDate.Value.UtcDateTime : DateTime.MinValue,
+                            AchievementsUnlockedHardcore = x.NumAwardedHardcore,
+                            AchievementsUnlockedSoftcore = x.NumAwarded,
+                            TotalGameAchievements = x.MaxPossible,
+                            TotalGamePoints = context.Games.First(g => g.Id == x.GameId).Points,
+                            HighestAward = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind)
+                        })
+                        .ToArray(),
+                    RaUsername = raUserProfile.User,
+                };
+
+                // cache the data for 30 minutes
+                var cacheData = JsonSerializer.Serialize(data);
+                await cachingService.AddOrUpdateCacheItem($"raProfile_{username.ToLower()}", cacheData, 30);
+
+                return data;
             }
             else
             {

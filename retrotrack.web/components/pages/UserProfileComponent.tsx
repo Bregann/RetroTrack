@@ -17,7 +17,7 @@ import {
   Progress,
   Accordion,
 } from '@mantine/core'
-import { IconLock } from '@tabler/icons-react'
+import { IconInfoCircle, IconLock } from '@tabler/icons-react'
 import styles from '@/css/pages/profile.module.scss'
 import { useMediaQuery } from '@mantine/hooks'
 import { GetUserProfileResponse } from '@/interfaces/api/users/GetUserProfileResponse'
@@ -38,6 +38,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
 
   const wallIconAmount = isXl ? 16 : isLg ? 14 : isMd ? 6 : isSm ? 5 : 4
   const statColsAmount = isLg ? 4 : isMd ? 2 : 1
+  const consoleBreakdownColsAmount = isXl ? 3 : isLg ? 3 : isMd ? 2 : 1
 
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
@@ -51,12 +52,19 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
           <Title order={2}>{pageData.raUsername}</Title>
           <Group gap="xl">
             <Stack gap={2}>
-              {pageData.softcorePoints !== pageData.hardcorePoints && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints}</Text></Text>}
+              {pageData.softcorePoints !== pageData.hardcorePoints && pageData.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints}</Text></Text>}
               {pageData.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{pageData.hardcorePoints}</Text></Text>}
               { pageData.lastUserUpdate &&
-              <Text c="dimmed" size="sm" >
-                Last Updated: {new Date(pageData.lastUserUpdate).toLocaleDateString()} {new Date(pageData.lastUserUpdate).toLocaleTimeString()}
-              </Text>
+                <Group gap={4}>
+                  <Text c="dimmed" size="sm">
+                  Last Updated: {new Date(pageData.lastUserUpdate).toLocaleDateString()} {new Date(pageData.lastUserUpdate).toLocaleTimeString()}
+                  </Text>
+                  <Tooltip label="If you are not registered, data is cached for 30 minutes unless you are registered and logged in" withArrow>
+                    <Box component="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <IconInfoCircle size={16} color="gray" />
+                    </Box>
+                  </Tooltip>
+                </Group>
               }
             </Stack>
 
@@ -163,7 +171,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                     <Text fw={600}>{ConsoleType[console]}</Text>
                   </Accordion.Control>
                   <Accordion.Panel>
-                    <SimpleGrid cols={3} spacing="lg" mb="xl">
+                    <SimpleGrid cols={consoleBreakdownColsAmount} spacing="lg" mb="xl">
                       {pageData.consoleProgressData.filter(x => x.consoleType === console).map((consoleData) => {
                         return(
                           <Card withBorder radius="md" p="lg" key={consoleData.consoleId}>

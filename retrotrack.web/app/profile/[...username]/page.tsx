@@ -12,15 +12,13 @@ export default async function Page({
 }) {
   const { username } = await params
   const request = await doGet<GetUserProfileResponse>(`/api/users/GetUserProfile/${username}`)
-
   if (request.ok && request.data !== undefined){
     return (
       <UserProfileComponent pageData={request.data} />
     )
-  }
-  else {
+  } else {
     return (
-      <Text ta={'center'} size='xl'>Error loading user profile</Text>
+      <Text ta={'center'} size='xl'>{request.data?.message || 'An error occurred'}</Text>
     )
   }
 }

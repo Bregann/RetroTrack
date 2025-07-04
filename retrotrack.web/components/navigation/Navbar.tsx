@@ -16,8 +16,10 @@ import {
   Stack,
   Box,
   Modal,
+  Accordion,
+  List,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -147,14 +149,14 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button onClick={() => { setShowUpdateInfoModal(true) }}>V4.1 Update + Support Info</Button>
+            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V4.1 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
-                <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)}>
+                <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)} visibleFrom='sm'>
                   Login
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)}>
+                <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)} visibleFrom='sm'>
                   Register
                 </Button>
               </>
@@ -162,10 +164,10 @@ export function Navbar(props: NavbarProps) {
 
             {auth.user !== null &&
               <>
-                <Button onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading}>
+                <Button onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading} visibleFrom='sm'>
                   Update Profile
                 </Button>
-                <Button onClick={() => { auth.logout(); router.refresh() }} variant="filled" size="sm" color="red">
+                <Button onClick={() => { auth.logout(); router.refresh() }} variant="filled" size="sm" color="red" visibleFrom='sm'>
                   Logout
                 </Button>
               </>
@@ -175,11 +177,13 @@ export function Navbar(props: NavbarProps) {
               variant="outline"
               size="lg"
               onClick={() => { setColorScheme(colorScheme === 'dark' ? 'light' : 'dark') }}
+              visibleFrom='sm'
             >
               <IconMoonStars />
             </ActionIcon>
 
             <ActionIcon
+              visibleFrom='sm'
               variant="outline"
               size="lg"
               component="a"
@@ -195,6 +199,27 @@ export function Navbar(props: NavbarProps) {
       {/* Navbar content */}
       <AppShell.Navbar className={styles.navbar}>
         <ScrollArea style={{ height: '100%' }}>
+          {auth.user === null &&
+            <Stack gap="xs">
+              <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)} hiddenFrom='sm'>
+                Login
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)} hiddenFrom='sm'>
+                Register
+              </Button>
+            </Stack>
+          }
+
+          {auth.user !== null &&
+            <>
+              <Button onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading} hiddenFrom='sm'>
+                Update Profile
+              </Button>
+              <Button onClick={() => { auth.logout(); router.refresh() }} variant="filled" size="sm" color="red" hiddenFrom='sm'>
+                Logout
+              </Button>
+            </>
+          }
           <NavLink
             label="Home"
             component={Link}
@@ -360,34 +385,70 @@ export function Navbar(props: NavbarProps) {
           openedState={registerModalOpen}
         />
 
-        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack v4.1 Update">
-          <Text mb="md">RetroTrack v4.1 has been released! Here are some of the new features:</Text>
-          <ul>
-            <li>Bug fixes and improvements</li>
-            <li>User Profiles!</li>
-          </ul>
+        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack Updates">
+          <Accordion
+            multiple
+            variant="contained"
+            radius="md"
+            defaultValue={['v5.1']}
+            chevron={<IconChevronRight size={16} />}
+          >
+            <Accordion.Item value="v5.1">
+              <Accordion.Control>RetroTrack v5.1 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Mobile layout fixes</List.Item>
+                  <List.Item>Logged out user profiles</List.Item>
+                </List>
+                <Text mt="md">
+                  You can now access the user profile of any registered user on RetroAchievements. You can access their profile by going to https://retroachievements.org/profile/{'<username>'} where <b>{'<username>'}</b> is the username of the user you want to view.
+                  All logged out users data is cached for 30 minutes so there will be a slight delay in seeing the latest data.
+                </Text>
 
-          <Text mt="md">You can now access your user profile by clicking the profile button in the navigation. You can share your profile link to show off your RetroAchievements progress to anyone!</Text>
-          <Text mt="md">It currently only supports users registered to RetroTrack.</Text>
+                <Text mt="md">Plans for v5.2</Text>
+                <List withPadding>
+                  <List.Item>Customise the order of the beaten and mastery wall</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
 
-          <Text fw={'bold'} mt="md" size='xl'>Next Update plan:</Text>
-          <ul>
-            <li>Support profile page for logged out users</li>
-            <li>Allow users to customise order of beaten and mastered games</li>
-          </ul>
+            <Accordion.Item value="v5">
+              <Accordion.Control>RetroTrack v5.0 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Bug fixes and improvements</List.Item>
+                  <List.Item>User Profiles!</List.Item>
+                </List>
+                <Text mt="md">
+                  You can now access your user profile by clicking the profile button in the navigation. You can share your
+                  profile link to show off your RetroAchievements progress to anyone!
+                </Text>
+                <Text mt="md">It currently only supports users registered to RetroTrack.</Text>
 
-          <Text mb="md">RetroTrack v4.0 has been released! Here are some of the new features:</Text>
-          <ul>
-            <li>New user interface with a fresh design</li>
-            <li>Bug fixes and performance improvements</li>
-          </ul>
-          <Text mt="md">Thank you for using RetroTrack!</Text>
-          <Text mt="md">If you are having issues with the new version, please try clearing your browser cache and cookies.</Text>
+                <Text mt="md">Plans for v5.1</Text>
+                <List withPadding>
+                  <List.Item>Support profile page for logged-out users</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
 
-          <Text fw={'bold'} mt="md" size='xl'>Next Update plan:</Text>
-          <ul>
-            <li>Fixing any bugs that may have been introduced in the new version</li>
-          </ul>
+            <Accordion.Item value="v4">
+              <Accordion.Control>RetroTrack v4.0 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>New user interface with a fresh design</List.Item>
+                  <List.Item>Bug fixes and performance improvements</List.Item>
+                </List>
+                <Text mt="md">Thank you for using RetroTrack!</Text>
+                <Text mt="md">
+                  If you are having issues with the new version, please try clearing your browser cache and cookies.
+                </Text>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
 
           <Text fw={'bold'} mt="md" size='xl'>Need help?</Text>
           <Text mt="xs">If you have any feedback or suggestions or bug reports, please let me know on either Discord (my username is <b>guinea.</b>), GitHub <a href='https://github.com/Bregann/RetroTrack' target='_blank'>here</a> or on RetroAchievements <a href='https://retroachievements.org/user/guinea' target='_blank'>here</a>!</Text>
