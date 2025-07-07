@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Container,
   Group,
@@ -16,8 +16,9 @@ import {
   Grid,
   Progress,
   Accordion,
+  Button,
 } from '@mantine/core'
-import { IconInfoCircle, IconLock } from '@tabler/icons-react'
+import { IconCheck, IconInfoCircle, IconLock } from '@tabler/icons-react'
 import styles from '@/css/pages/profile.module.scss'
 import { useMediaQuery } from '@mantine/hooks'
 import { GetUserProfileResponse } from '@/interfaces/api/users/GetUserProfileResponse'
@@ -25,12 +26,24 @@ import { ConsoleType } from '@/enums/consoleType'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
 import { useGameModal } from '@/context/gameModalContext'
 import Image from 'next/image'
+import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { doPost } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
+import { useAuth } from '@/context/authContext'
 
 interface UserProfileProps {
   pageData: GetUserProfileResponse
 }
 
 export default function UserProfileComponent({ pageData }: UserProfileProps) {
+  const [gamesBeatenWallData, setGamesBeatenWallData] = useState(pageData.gamesBeatenWall)
+  const [gamesMasteredWallData, setGamesMasteredWallData] = useState(pageData.gamesMasteredWall)
+  const [editingGamesBeatenWall, setEditingGamesBeatenWall] = useState(false)
+  const [editingGamesMasteredWall, setEditingGamesMasteredWall] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
   const isSm = useMediaQuery('(min-width: 900px)')
   const isMd = useMediaQuery('(min-width: 1200px)')
   const isLg = useMediaQuery('(min-width: 1700px)')
@@ -43,6 +56,104 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
   const gameModal = useGameModal()
+  const user = useAuth()
+
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  const handleDragEnd = (event: DragEndEvent, isBeatenWall: boolean) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      if (isBeatenWall) {
+        setGamesBeatenWallData((items) => {
+          const oldIndex = items.findIndex((g) => g.gameId === active.id)
+          const newIndex = items.findIndex((g) => g.gameId === over.id)
+          const newItems = arrayMove(items, oldIndex, newIndex)
+          // Update wallPosition based on new position
+          return newItems.map((item, index) => ({
+            ...item,
+            wallPosition: index,
+          }))
+        })
+      } else {
+        setGamesMasteredWallData((items) => {
+          const oldIndex = items.findIndex((g) => g.gameId === active.id)
+          const newIndex = items.findIndex((g) => g.gameId === over.id)
+          const newItems = arrayMove(items, oldIndex, newIndex)
+          // Update wallPosition based on new position
+          return newItems.map((item, index) => ({
+            ...item,
+            wallPosition: index,
+          }))
+        })
+      }
+    }
+  }
+
+  const handleSaveWallPositions = async (isBeatenWall: boolean) => {
+    if (isSaving) {
+      return
+    }
+
+    setIsSaving(true)
+    const wallData = isBeatenWall ? gamesBeatenWallData : gamesMasteredWallData
+    // get the progress ids and wall positions
+    const positions = wallData.map((game) => ({
+      progressId: game.progressId,
+      wallPosition: game.wallPosition
+    }))
+
+    const response = await doPost('/api/users/SaveUserGameWallPositions', { body: { wallData: positions } })
+
+    if (response.ok) {
+      if (isBeatenWall) {
+        notificationHelper.showSuccessNotification('Success', 'Beaten games wall positions saved successfully.', 3000, <IconCheck size={16} />)
+        setEditingGamesBeatenWall(false)
+      } else {
+        notificationHelper.showSuccessNotification('Success', 'Mastered games wall positions saved successfully.', 3000, <IconCheck size={16} />)
+        setEditingGamesMasteredWall(false)
+      }
+    } else {
+      notificationHelper.showErrorNotification('Error', 'Failed to save wall positions.', 3000, <IconInfoCircle size={16} />)
+    }
+
+    setIsSaving(false)
+  }
+
+  interface SortableTileProps {
+    id: number
+    icon: string
+    title: string
+    isHardcore: boolean
+  }
+
+  function SortableGameWallIcon({ id, icon, title, isHardcore }: SortableTileProps) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+      useSortable({ id })
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      cursor: isDragging ? 'grabbing' : 'grab',
+      opacity: isDragging ? 0.8 : 1,
+      width: 64,
+      height: 64
+    }
+
+    return (
+      <Box ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners} >
+        <Image
+          src={`https://media.retroachievements.org${icon}`}
+          alt={title}
+          width={64}
+          height={64}
+          className={`${styles.wallIcon} ${isHardcore ? styles.hardcoreBorder : ''}`}
+        />
+      </Box>
+    )
+  }
 
   return (
     <Container size={'95%'} mt={40}>
@@ -54,10 +165,10 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
             <Stack gap={2}>
               {pageData.softcorePoints !== pageData.hardcorePoints && pageData.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints}</Text></Text>}
               {pageData.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{pageData.hardcorePoints}</Text></Text>}
-              { pageData.lastUserUpdate &&
+              {pageData.lastUserUpdate &&
                 <Group gap={4}>
                   <Text c="dimmed" size="sm">
-                  Last Updated: {new Date(pageData.lastUserUpdate).toLocaleDateString()} {new Date(pageData.lastUserUpdate).toLocaleTimeString()}
+                    Last Updated: {new Date(pageData.lastUserUpdate).toLocaleDateString()} {new Date(pageData.lastUserUpdate).toLocaleTimeString()}
                   </Text>
                   <Tooltip label="If you are not registered, data is cached for 30 minutes unless you are registered and logged in" withArrow>
                     <Box component="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -67,7 +178,6 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                 </Group>
               }
             </Stack>
-
           </Group>
         </Stack>
       </Group>
@@ -110,62 +220,104 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
 
       <Grid gutter="xl">
         <Grid.Col span={isMd ? 8 : 12}>
-          <Divider label="Beaten Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }}/>
-          <SimpleGrid cols={wallIconAmount} mb="sm">
-            {pageData.gamesBeatenWall.map((game) => (
-              <Tooltip
-                key={game.gameId}
-                label={<>
-                  <Text ta='center'>{game.title}</Text>
-                  <Text ta='center' size="sm">{game.consoleName}</Text>
-                  <Text ta='center' size="sm">Earned: {new Date(game.dateAchieved).toLocaleDateString()} {new Date(game.dateAchieved).toLocaleTimeString()}</Text>
-                </>}
-                position="top"
-                withArrow
-              >
-                <Box style={{ cursor: 'pointer', width: 64, height: 64 }} onClick={() => gameModal.showModal(game.gameId)}>
-                  <Image
-                    src={`https://media.retroachievements.org${game.imageUrl}`}
-                    alt={game.title}
-                    width={64}
-                    height={64}
-                    className={`${styles.wallIcon} ${game.isHardcore ? styles.hardcoreBorder : ''}`}
-                  />
-                </Box>
-              </Tooltip>
-            ))}
-          </SimpleGrid>
+          <Divider label="Beaten Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
+          {user.isAuthenticated &&
+          <div style={{ marginBottom: 10 }}>
+            <Button disabled={isSaving} color={editingGamesBeatenWall ? 'red' : 'blue'} onClick={() => { setEditingGamesBeatenWall(!editingGamesBeatenWall) }}>{editingGamesBeatenWall ? 'Cancel' : 'Edit'}</Button>
+            {editingGamesBeatenWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(true)} color="green" ml="md">Save Changes</Button>}
+          </ div>
+          }
+          {editingGamesBeatenWall === true ?
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => { handleDragEnd(e, true) }}
+            >
+              <SortableContext items={gamesBeatenWallData.map((g) => g.gameId)} strategy={rectSortingStrategy}>
+                <SimpleGrid cols={wallIconAmount} spacing="sm">
+                  {gamesBeatenWallData.map((game) => (
+                    <SortableGameWallIcon key={game.gameId} id={game.gameId} icon={game.imageUrl} title={game.title} isHardcore={game.isHardcore} />
+                  ))}
+                </SimpleGrid>
+              </SortableContext>
+            </DndContext> :
+            <SimpleGrid cols={wallIconAmount} mb="sm">
+              {gamesBeatenWallData.map((game) => (
+                <Tooltip
+                  key={game.gameId}
+                  label={<>
+                    <Text ta='center'>{game.title}</Text>
+                    <Text ta='center' size="sm">{game.consoleName}</Text>
+                    <Text ta='center' size="sm">Earned: {new Date(game.dateAchieved).toLocaleDateString()} {new Date(game.dateAchieved).toLocaleTimeString()}</Text>
+                  </>}
+                  position="top"
+                  withArrow
+                >
+                  <Box style={{ cursor: 'pointer', width: 64, height: 64 }} onClick={() => gameModal.showModal(game.gameId)}>
+                    <Image
+                      src={`https://media.retroachievements.org${game.imageUrl}`}
+                      alt={game.title}
+                      width={64}
+                      height={64}
+                      className={`${styles.wallIcon} ${game.isHardcore ? styles.hardcoreBorder : ''}`}
+                    />
+                  </Box>
+                </Tooltip>
+              ))}
+            </SimpleGrid>
+          }
 
-          <Divider label="Completed/Mastered Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }}/>
-          <SimpleGrid cols={wallIconAmount} mb="xl">
-            {pageData.gamesMasteredWall.map((game) => (
-              <Tooltip
-                key={game.gameId}
-                label={<>
-                  <Text ta='center'>{game.title}</Text>
-                  <Text ta='center' size="sm">{game.consoleName}</Text>
-                  <Text ta='center' size="sm">Earned: {new Date(game.dateAchieved).toLocaleDateString()} {new Date(game.dateAchieved).toLocaleTimeString()}</Text>
-                </>}
-                position="top"
-                withArrow
-              >
-                <Box style={{ cursor: 'pointer', width: 64, height: 64 }} onClick={() => gameModal.showModal(game.gameId)}>
-                  <Image
-                    src={`https://media.retroachievements.org${game.imageUrl}`}
-                    alt={game.title}
-                    width={64}
-                    height={64}
-                    className={`${styles.wallIcon} ${game.isHardcore ? styles.hardcoreBorder : ''}`}
-                  />
-                </Box>
-              </Tooltip>
-            ))}
-          </SimpleGrid>
+          <Divider label="Completed/Mastered Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
+          {user.isAuthenticated &&
+          <div style={{ marginBottom: 10 }}>
+            <Button disabled={isSaving} color={editingGamesMasteredWall ? 'red' : 'blue'} onClick={() => { setEditingGamesMasteredWall(!editingGamesMasteredWall) }}>{editingGamesMasteredWall ? 'Cancel' : 'Edit'}</Button>
+            {editingGamesMasteredWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(false)} color="green" ml="md">Save Changes</Button>}
+          </ div>
+          }
+          {editingGamesMasteredWall === true ?
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => { handleDragEnd(e, false) }}
+            >
+              <SortableContext items={gamesMasteredWallData.map((g) => g.gameId)} strategy={rectSortingStrategy}>
+                <SimpleGrid cols={wallIconAmount} spacing="sm">
+                  {gamesMasteredWallData.map((game) => (
+                    <SortableGameWallIcon key={game.gameId} id={game.gameId} icon={game.imageUrl} title={game.title} isHardcore={game.isHardcore} />
+                  ))}
+                </SimpleGrid>
+              </SortableContext>
+            </DndContext> :
+            <SimpleGrid cols={wallIconAmount} mb="sm">
+              {gamesMasteredWallData.map((game) => (
+                <Tooltip
+                  key={game.gameId}
+                  label={<>
+                    <Text ta='center'>{game.title}</Text>
+                    <Text ta='center' size="sm">{game.consoleName}</Text>
+                    <Text ta='center' size="sm">Earned: {new Date(game.dateAchieved).toLocaleDateString()} {new Date(game.dateAchieved).toLocaleTimeString()}</Text>
+                  </>}
+                  position="top"
+                  withArrow
+                >
+                  <Box style={{ cursor: 'pointer', width: 64, height: 64 }} onClick={() => gameModal.showModal(game.gameId)}>
+                    <Image
+                      src={`https://media.retroachievements.org${game.imageUrl}`}
+                      alt={game.title}
+                      width={64}
+                      height={64}
+                      className={`${styles.wallIcon} ${game.isHardcore ? styles.hardcoreBorder : ''}`}
+                    />
+                  </Box>
+                </Tooltip>
+              ))}
+            </SimpleGrid>
+          }
 
-          <Divider label="Console Progress Breakdown" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }}/>
+          <Divider label="Console Progress Breakdown" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
           <Accordion>
             {consoleTypes.map((console) => {
-              return(
+              return (
                 <Accordion.Item value={ConsoleType[console]} key={console}>
                   <Accordion.Control>
                     <Text fw={600}>{ConsoleType[console]}</Text>
@@ -173,7 +325,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                   <Accordion.Panel>
                     <SimpleGrid cols={consoleBreakdownColsAmount} spacing="lg" mb="xl">
                       {pageData.consoleProgressData.filter(x => x.consoleType === console).map((consoleData) => {
-                        return(
+                        return (
                           <Card withBorder radius="md" p="lg" key={consoleData.consoleId}>
                             <Stack gap="md">
                               <Text fw={700} size="lg">{consoleData.consoleName}</Text>
@@ -182,37 +334,37 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                                 consoleData.gamesBeatenHardcore === 0 &&
                                 consoleData.gamesCompleted === 0 &&
                                 consoleData.gamesMastered === 0 &&
-                                  <Text c="dimmed" size="sm">No progress made on this console.</Text>
+                                <Text c="dimmed" size="sm">No progress made on this console.</Text>
                               }
                               <Stack gap="xs">
                                 {consoleData.gamesBeatenSoftcore !== 0 &&
-                                <>
-                                  <Divider />
-                                  <Text size="sm" c="dimmed">Softcore Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
-                                  <Progress value={consoleData.percentageBeatenSoftcore} size="xs" color="blue" />
-                                </>
+                                  <>
+                                    <Divider />
+                                    <Text size="sm" c="dimmed">Softcore Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
+                                    <Progress value={consoleData.percentageBeatenSoftcore} size="xs" color="blue" />
+                                  </>
                                 }
 
                                 {consoleData.gamesBeatenHardcore !== 0 &&
-                                <>
-                                  <Divider />
-                                  <Text size="sm" c="dimmed">Hardcore Beaten: <Text component="span" c="orange" fw={600}>{consoleData.gamesBeatenHardcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenHardcore}%)</Text></Text>
-                                  <Progress value={consoleData.percentageBeatenHardcore} size="xs" color="orange" />
-                                </>
+                                  <>
+                                    <Divider />
+                                    <Text size="sm" c="dimmed">Hardcore Beaten: <Text component="span" c="orange" fw={600}>{consoleData.gamesBeatenHardcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenHardcore}%)</Text></Text>
+                                    <Progress value={consoleData.percentageBeatenHardcore} size="xs" color="orange" />
+                                  </>
                                 }
 
                                 {consoleData.gamesCompleted !== 0 &&
-                                <>
-                                  <Text size="sm" c="dimmed">Softcore Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted}/{consoleData.totalGamesInConsole} ({consoleData.percentageCompleted}%)</Text></Text>
-                                  <Progress value={consoleData.percentageCompleted} size="xs" color="teal" />
-                                </>
+                                  <>
+                                    <Text size="sm" c="dimmed">Softcore Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted}/{consoleData.totalGamesInConsole} ({consoleData.percentageCompleted}%)</Text></Text>
+                                    <Progress value={consoleData.percentageCompleted} size="xs" color="teal" />
+                                  </>
                                 }
 
                                 {consoleData.gamesMastered !== 0 &&
-                                <>
-                                  <Text size="sm" c="dimmed">Hardcore Mastered: <Text component="span" c="yellow" fw={600}>{consoleData.gamesMastered}/{consoleData.totalGamesInConsole} ({consoleData.percentageMastered}%)</Text></Text>
-                                  <Progress value={consoleData.percentageMastered} size="xs" color="yellow" />
-                                </>
+                                  <>
+                                    <Text size="sm" c="dimmed">Hardcore Mastered: <Text component="span" c="yellow" fw={600}>{consoleData.gamesMastered}/{consoleData.totalGamesInConsole} ({consoleData.percentageMastered}%)</Text></Text>
+                                    <Progress value={consoleData.percentageMastered} size="xs" color="yellow" />
+                                  </>
                                 }
                               </Stack>
                             </Stack>
@@ -228,10 +380,10 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
         </Grid.Col>
 
         <Grid.Col span={isMd ? 4 : 12}>
-          <Divider label="Last 5 Played" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }}/>
+          <Divider label="Last 5 Played" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
           <Stack gap="sm">
             {pageData.last5GamesPlayed.map((game) => {
-              return(
+              return (
                 <Card key={game.gameId} withBorder radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
                   <Stack gap="xs">
                     <Group gap="xs">
@@ -266,10 +418,10 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
             })}
           </Stack>
 
-          <Divider label="Last 5 Beaten/Mastered" labelPosition="center" mb="md" mt="md" classNames={{ label: styles.dividerText }}/>
+          <Divider label="Last 5 Beaten/Mastered" labelPosition="center" mb="md" mt="md" classNames={{ label: styles.dividerText }} />
           <Stack gap="sm">
             {pageData.last5Awards.map((game) => {
-              return(
+              return (
                 <Card key={game.gameId} withBorder radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
                   <Stack gap="xs">
                     <Group gap="xs">
@@ -342,4 +494,5 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
       </Grid>
     </Container>
   )
+
 }

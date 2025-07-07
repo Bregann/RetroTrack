@@ -149,7 +149,7 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V5.1 Update + Support Info</Button>
+            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V5.2 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -390,9 +390,18 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v5.1']}
+            defaultValue={['v5.2']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v5.2">
+              <Accordion.Control>RetroTrack v5.2 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Logged in users have te ability to customise the order of the beaten and mastery wall</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v5.1">
               <Accordion.Control>RetroTrack v5.1 Released</Accordion.Control>
               <Accordion.Panel>
@@ -405,7 +414,6 @@ export function Navbar(props: NavbarProps) {
                   You can now access the user profile of any registered user on RetroAchievements. You can access their profile by going to https://retroachievements.org/profile/{'<username>'} where <b>{'<username>'}</b> is the username of the user you want to view.
                   All logged out users data is cached for 30 minutes so there will be a slight delay in seeing the latest data.
                 </Text>
-
                 <Text mt="md">Plans for v5.2</Text>
                 <List withPadding>
                   <List.Item>Customise the order of the beaten and mastery wall</List.Item>

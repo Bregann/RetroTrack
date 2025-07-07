@@ -391,7 +391,8 @@ namespace RetroTrack.Domain.Services
                             GamePercentageHardcore = (double)game.NumAwardedHardcore / game.MaxPossible * 100,
                             HighestAwardKind = RetroAchievementsHelper.ConvertHighestAwardKind(game.HighestAwardKind),
                             HighestAwardDate = game.HighestAwardDate.HasValue ? game.HighestAwardDate.Value.UtcDateTime : null,
-                            MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null
+                            MostRecentAwardedDate = game.MostRecentAwardedDate.HasValue ? game.MostRecentAwardedDate.Value.UtcDateTime : null,
+                            WallPosition = -1
                         };
 
                         await context.UserGameProgress.AddAsync(newUserGameProgress);

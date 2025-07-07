@@ -41,5 +41,6 @@ namespace RetroTrack.Domain.Database.Models
         public HighestAwardKind? HighestAwardKind { get; set; }
 
         public DateTime? HighestAwardDate { get; set; }
+        public int WallPosition { get; set; } = -1;
     }
 }

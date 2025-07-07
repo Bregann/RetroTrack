@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RetroTrack.Domain.DTOs.Controllers.Users.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Users.Responses;
 using RetroTrack.Domain.Exceptions;
 using RetroTrack.Domain.Interfaces.Controllers;
@@ -54,6 +55,14 @@ namespace RetroTrack.Api.Controllers.Users
                 Log.Error(ex, $"An error occurred while getting user profile for ${username}");
                 return StatusCode(500, new { Message = "An unknown error has occurred" });
             }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SaveUserGameWallPositions([FromBody] SaveUserGameWallPositionsRequest request)
+        {
+            var user = userContextHelper.GetUserId();
+            await usersControllerData.SaveUserGameWallPositions(user, request);
+            return Ok();
         }
     }
 }

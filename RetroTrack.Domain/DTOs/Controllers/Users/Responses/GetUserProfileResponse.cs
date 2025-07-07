@@ -36,6 +36,8 @@ namespace RetroTrack.Domain.DTOs.Controllers.Users.Responses
         public required string ImageUrl { get; set; }
         public required DateTime DateAchieved { get; set; }
         public required bool IsHardcore { get; set; }
+        public int WallPosition { get; set; } = -1; // default when not set
+        public int ProgressId { get; set; } = -1; // default for logged out users
     }
 
     public class Last5GameInfo

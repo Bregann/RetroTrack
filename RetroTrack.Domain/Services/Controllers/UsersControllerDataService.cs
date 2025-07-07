@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
+using RetroTrack.Domain.DTOs.Controllers.Users.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Users.Responses;
 using RetroTrack.Domain.DTOs.RetroAchievementsApi;
 using RetroTrack.Domain.Enums;
@@ -165,7 +166,8 @@ namespace RetroTrack.Domain.Services.Controllers
                             Title = x.Title,
                             ImageUrl = x.ImageIcon,
                             DateAchieved = x.HighestAwardDate.HasValue ? x.HighestAwardDate.Value.UtcDateTime : new DateTime(0),
-                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered
+                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered,
+                            WallPosition = -1
                         })
                         .ToArray(),
                     Last5Awards = allUserGameProgress
@@ -193,7 +195,8 @@ namespace RetroTrack.Domain.Services.Controllers
                             Title = x.Title,
                             ImageUrl = x.ImageIcon,
                             DateAchieved = x.HighestAwardDate.HasValue ? x.HighestAwardDate.Value.UtcDateTime : new DateTime(0),
-                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore
+                            IsHardcore = RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore,
+                            WallPosition = -1
                         })
                         .ToArray(),
                     HardcorePoints = raUserProfile.TotalPoints,
@@ -265,7 +268,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     AchievementsEarnedHardcore = userGameProgress.Sum(x => x.AchievementsGainedHardcore),
                     GamesInProgress = userGameProgress.Where(x => x.HighestAwardKind == null).Count(),
                     GamesMasteredWall = userGameProgress
-                        .Where(x => x.HighestAwardKind == HighestAwardKind.Mastered)
+                        .Where(x => x.HighestAwardKind == HighestAwardKind.Mastered || x.HighestAwardKind == HighestAwardKind.Completed)
                         .Select(x => new WallGame
                         {
                             GameId = x.GameId,
@@ -273,8 +276,11 @@ namespace RetroTrack.Domain.Services.Controllers
                             Title = x.Game.Title,
                             ImageUrl = x.Game.ImageIcon,
                             DateAchieved = x.HighestAwardDate ?? new DateTime(0),
-                            IsHardcore = x.HighestAwardKind == HighestAwardKind.Mastered
+                            IsHardcore = x.HighestAwardKind == HighestAwardKind.Mastered,
+                            WallPosition = x.WallPosition,
+                            ProgressId = x.Id
                         })
+                        .OrderBy(x => x.WallPosition == -1 ? int.MaxValue : x.WallPosition)
                         .ToArray(),
                     GamesBeatenWall = userGameProgress
                         .Where(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.BeatenHardcore)
@@ -285,8 +291,11 @@ namespace RetroTrack.Domain.Services.Controllers
                             Title = x.Game.Title,
                             ImageUrl = x.Game.ImageIcon,
                             DateAchieved = x.HighestAwardDate ?? new DateTime(0),
-                            IsHardcore = x.HighestAwardKind == HighestAwardKind.BeatenHardcore
+                            IsHardcore = x.HighestAwardKind == HighestAwardKind.BeatenHardcore,
+                            WallPosition = x.WallPosition,
+                            ProgressId = x.Id
                         })
+                        .OrderBy(x => x.WallPosition == -1 ? int.MaxValue : x.WallPosition)
                         .ToArray(),
                     Last5Awards = userGameProgress
                         .OrderByDescending(x => x.HighestAwardDate)
@@ -325,6 +334,19 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 return data;
             }
+        }
+
+        public async Task SaveUserGameWallPositions(int userId, SaveUserGameWallPositionsRequest request)
+        {
+            foreach (var game in request.WallData)
+            {
+                await context.UserGameProgress
+                    .Where(x => x.Id == game.ProgressId)
+                    .ExecuteUpdateAsync(setters => 
+                        setters.SetProperty(x => x.WallPosition, game.WallPosition));
+            }
+
+            Log.Information($"Saved wall positions for user {userId}");
         }
     }
 }

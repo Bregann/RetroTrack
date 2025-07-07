@@ -42,6 +42,8 @@ export interface GamesWall {
   imageUrl: string
   dateAchieved: Date
   isHardcore: boolean
+  wallPosition: number
+  progressId: number
 }
 
 export interface Last5 {
