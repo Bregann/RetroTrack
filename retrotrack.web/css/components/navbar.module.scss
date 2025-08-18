@@ -1,14 +1,14 @@
 .navbar {
-  background-color: light-dark(var(--mantine-color-light-4), #263042);
+  background-color: light-dark(#f4f4f4, #263042);
   padding: 5px
 }
 
 .searchInput {
-  background-color: light-dark(var(--mantine-color-light-4),(var(--mantine-color-dark-5)));
+  background-color: light-dark(#e9e9e9, #38465f);
   border: '1px solid #2e3b4e';
 }
 
 .profileBox {
-  background-color: light-dark(var(--mantine-color-light-4), #38465f);
+  background-color: light-dark(#e9e9e9, #38465f);
   border-radius: 10px;
 }
