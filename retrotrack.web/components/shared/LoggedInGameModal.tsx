@@ -439,7 +439,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 target="_blank"
                 style={{ ':hover': { color: 'white' } }}
                 href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
-
               >
                 RA Page
               </Button>
