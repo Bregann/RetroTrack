@@ -8,6 +8,13 @@ import Image from 'next/image'
 import styles from '@/css/pages/home.module.scss'
 import { useGameModal } from '@/context/gameModalContext'
 import consoleHelper from '@/helpers/consoleHelper'
+import { Press_Start_2P } from 'next/font/google'
+
+const pressStart2P = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export interface HomeComponentProps {
   pageData: GetRecentlyAddedAndUpdatedGamesResponse
@@ -23,10 +30,18 @@ export default function HomeComponent(props: HomeComponentProps) {
   return (
     <>
       <Container size="95%">
-        <h1 style={{ textAlign: 'center' }}>Welcome to RetroTrack</h1>
-        <p style={{ textAlign: 'center', marginTop: -10 }}>
+        <Text
+          size={'28px'}
+          mt={'xl'}
+          mb="sm"
+          ta="center"
+          className={pressStart2P.className}
+        >
+          Welcome to RetroTrack
+        </Text>
+        <Text ta="center">
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!
-        </p>
+        </Text>
         {props.pageData.days.map((day, index) => {
           return (
             <div key={index}>
@@ -49,7 +64,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                   <Grid>
                     {day.newSets.map((set, setIndex) => {
                       return (
-                        <Grid.Col span={span}key={setIndex}>
+                        <Grid.Col span={span} key={setIndex}>
                           <Card padding="md" radius="md" shadow="md" className={styles.newSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >
@@ -105,7 +120,7 @@ export default function HomeComponent(props: HomeComponentProps) {
                   <Grid>
                     {day.updatedSets.map((set, setIndex) => {
                       return (
-                        <Grid.Col span={span}key={setIndex}>
+                        <Grid.Col span={span} key={setIndex}>
                           <Card padding="md" radius="md" shadow="md" className={styles.updatedSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
                             <Stack gap="md">
                               <Group align="flex-start" gap="sm" >

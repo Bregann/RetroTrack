@@ -4,7 +4,7 @@
   border-radius: 8px;
 }
 
-.lastPlayedIcon { 
+.lastPlayedIcon {
   width: 48px;
   height: 48px;
   border-radius: 8px;
@@ -26,14 +26,16 @@
 .statCard {
   border: 2px solid;
   border-color: #1590e2;
+  background-color: light-dark(#f0f4ff, #263042);
 }
 
 .lastPlayedCard {
   border: 2px solid;
   border-color: #da59da;
+  background-color: light-dark(#fad6fa, #382538);
 }
 
 .hardcoreBorder {
   border: 3px solid;
-  border-color:gold;
+  border-color: gold;
 }

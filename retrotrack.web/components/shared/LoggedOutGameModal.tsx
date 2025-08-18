@@ -14,6 +14,7 @@ import {
   Box,
   Checkbox,
   Tooltip,
+  Paper,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
@@ -196,7 +197,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 }
                 if (showProgressionOnly) {
                   return (
-                    x.type === AchievementType.Progression||
+                    x.type === AchievementType.Progression ||
                     x.type === AchievementType.Win_Condition
                   )
                 }
@@ -213,6 +214,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                     p="sm"
                     style={{
                       position: 'relative',
+                      backgroundColor: 'light-dark(#f9f9f9, #263042)',
                       borderWidth: 2,
                       borderColor:
                         achievement.type === AchievementType.Missable
@@ -288,19 +290,20 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
           </SimpleGrid>
 
           {/* Action Buttons */}
-          <Group justify="apart">
-            <Button>Details</Button>
-            <Button
-              component="a"
-              variant="gradient"
-              gradient={{ from: 'indigo', to: 'cyan' }}
-              target="_blank"
-              style={{ ':hover': { color: 'white' } }}
-              href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
-            >
-              RA Page
-            </Button>
-          </Group>
+          <Paper className={styles.footer}>
+            <Group justify="apart">
+              <Button
+                component="a"
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'cyan' }}
+                target="_blank"
+                style={{ ':hover': { color: 'white' } }}
+                href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
+              >
+                RetroAchievements Page
+              </Button>
+            </Group>
+          </Paper>
         </>
       }
     </Modal >

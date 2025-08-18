@@ -76,12 +76,12 @@ export default function LoginModal(props: LoginModalProps) {
             label="Password"
             required
             withAsterisk
-            style={{ marginTop: 15 }}
+            mt="md"
+            mb="xs"
             {...form.getInputProps('password')}
           />
 
-          <Anchor onClick={() => { setForgotPasswordOpened(true) }}>Forgot password?</Anchor>
-          <Group style={{ marginTop: 20 }}>
+          <Group mt="lg">
             <Button
               type="submit"
               variant="gradient"
@@ -89,6 +89,7 @@ export default function LoginModal(props: LoginModalProps) {
               loading={loginButtonLoading}>
               Login
             </Button>
+            <Anchor onClick={() => { setForgotPasswordOpened(true) }}>Forgot password?</Anchor>
           </Group>
 
         </form>
