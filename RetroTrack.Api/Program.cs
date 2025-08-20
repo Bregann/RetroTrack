@@ -131,7 +131,6 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-
 var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
 {
     RequireSsl = false,
