@@ -29,7 +29,7 @@
 
     public static class AuthorizationMiddlewareExtensions
     {
-        public static IApplicationBuilder UseApiAuthorizationMiddleware(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseApiAuthorizationMiddleware(this IApplicationBuilder builder )
         {
             return builder.UseMiddleware<ApiAuthorisationMiddleware>();
         }
