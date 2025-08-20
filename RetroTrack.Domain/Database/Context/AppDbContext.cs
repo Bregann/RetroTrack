@@ -3,10 +3,8 @@ using RetroTrack.Domain.Database.Models;
 
 namespace RetroTrack.Domain.Database.Context
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
-        public AppDbContext(DbContextOptions options) : base(options) { }
-
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsole> GameConsoles { get; set; }
         public DbSet<Game> Games { get; set; }

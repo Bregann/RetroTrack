@@ -31,7 +31,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore BreganTwitchBot.sln
+        run: dotnet restore RetroTrack.sln
         
       - name: Check C# formatting
         run: dotnet format --verify-no-changes

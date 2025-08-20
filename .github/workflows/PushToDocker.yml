@@ -19,7 +19,7 @@ jobs:
         run: docker push 192.168.1.100:5000/retrotrackapi:latest
         
       - name: Build Next.js Docker image
-        run: docker build -f retrotrack.web/Dockerfile -t 192.168.1.100:5000/retrotrackweb:latest .
+        run: docker build -f retrotrack.web/Dockerfile -t 192.168.1.100:5000/retrotrackweb:latest ./retrotrack.web
 
       - name: Push Docker image
         run: docker push 192.168.1.100:5000/retrotrackweb:latest

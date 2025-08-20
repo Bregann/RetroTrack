@@ -251,7 +251,6 @@ namespace RetroTrack.Domain.Services.Controllers
                                 PercentageMastered = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered) / gc.GameCount * 100, 2) : 0
                             };
 
-
                 var consoleProgressData = await query.OrderBy(x => x.ConsoleName).ToArrayAsync();
 
                 var data = new GetUserProfileResponse
@@ -342,7 +341,7 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 await context.UserGameProgress
                     .Where(x => x.Id == game.ProgressId)
-                    .ExecuteUpdateAsync(setters => 
+                    .ExecuteUpdateAsync(setters =>
                         setters.SetProperty(x => x.WallPosition, game.WallPosition));
             }
 
