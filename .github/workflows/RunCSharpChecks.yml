@@ -18,7 +18,7 @@ on:
       - "RetroTrack.sln"
 
 jobs:
-  test:
+  format-csharp-code:
     runs-on: ubuntu-latest
 
     steps:
