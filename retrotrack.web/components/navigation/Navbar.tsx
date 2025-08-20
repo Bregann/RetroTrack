@@ -18,8 +18,9 @@ import {
   Modal,
   Accordion,
   List,
+  Tooltip,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress, IconRefresh } from '@tabler/icons-react'
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
@@ -149,14 +150,14 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>V5.2 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v5.2 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
-                <Button variant="filled" size="sm" onClick={() => setLoginModalOpen(true)} visibleFrom='sm'>
+                <Button variant="light" size="sm" onClick={() => setLoginModalOpen(true)} visibleFrom='sm'>
                   Login
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setRegisterModalOpen(true)} visibleFrom='sm'>
+                <Button size="sm" onClick={() => setRegisterModalOpen(true)} visibleFrom='sm'>
                   Register
                 </Button>
               </>
@@ -164,9 +165,15 @@ export function Navbar(props: NavbarProps) {
 
             {auth.user !== null &&
               <>
-                <Button onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading} visibleFrom='sm'>
-                  Update Profile
-                </Button>
+                <Tooltip label="Update profile">
+                  <ActionIcon
+                    size="lg"
+                    onClick={async () => { await requestGamesUpdate() }} disabled={updateGamesButtonLoading}
+                    visibleFrom='sm'
+                    color="green">
+                    <IconRefresh />
+                  </ActionIcon>
+                </Tooltip>
                 <Button onClick={() => { auth.logout(); router.refresh() }} variant="filled" size="sm" color="red" visibleFrom='sm'>
                   Logout
                 </Button>
@@ -174,19 +181,22 @@ export function Navbar(props: NavbarProps) {
             }
 
             <ActionIcon
-              variant="outline"
               size="lg"
               onClick={() => { setColorScheme(colorScheme === 'dark' ? 'light' : 'dark') }}
               visibleFrom='sm'
+              color="gray"
+              ml="xs"
+              variant='light'
             >
               <IconMoonStars />
             </ActionIcon>
 
             <ActionIcon
               visibleFrom='sm'
-              variant="outline"
+              color="gray"
               size="lg"
               component="a"
+              variant='light'
               href="https://github.com/Bregann/RetroTrack"
               target="_blank"
             >
@@ -335,8 +345,8 @@ export function Navbar(props: NavbarProps) {
         </ScrollArea>
 
         {props.loggedInNavigationData !== undefined && props.loggedInNavigationData !== null &&
-          <Box p="xs" className={styles.profileBox}>
-            <Group gap="sm" mb="xs" align="center">
+          <Box p="xs" m="xs" className={styles.profileBox}>
+            <Group gap="sm" mb="" align="center">
               <Link href={`/profile/${props.loggedInNavigationData.raName}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setCurrentPage('/profile')}>
                 <Image
                   alt='User avatar'
@@ -347,16 +357,16 @@ export function Navbar(props: NavbarProps) {
                 />
               </Link>
 
-              <Text fw={600} size="sm">{props.loggedInNavigationData.raName}</Text>
+              <Text fw={600} size="md">{props.loggedInNavigationData.raName}</Text>
             </Group>
 
             <Stack gap={4} mb="xs">
-              {props.loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="sm">Games Beaten (SC): {props.loggedInNavigationData.gamesBeatenSoftcore}</Text>}
-              {props.loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="sm">Games Beaten (HC): {props.loggedInNavigationData.gamesBeatenHardcore}</Text>}
-              {props.loggedInNavigationData.totalAchievementsSoftcore !== props.loggedInNavigationData.totalAchievementsHardcore && <Text size="sm">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore - props.loggedInNavigationData.totalAchievementsSoftcore}</Text>}
-              {props.loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="sm">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore}</Text>}
-              {props.loggedInNavigationData.gamesCompleted !== 0 && <Text size="sm">Completed: {props.loggedInNavigationData.gamesCompleted}</Text>}
-              {props.loggedInNavigationData.gamesMastered !== 0 && <Text size="sm">Mastered: {props.loggedInNavigationData.gamesMastered}</Text>}
+              {props.loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (SC): {props.loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
+              {props.loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (HC): {props.loggedInNavigationData.gamesBeatenHardcore.toLocaleString()}</Text>}
+              {props.loggedInNavigationData.totalAchievementsSoftcore !== props.loggedInNavigationData.totalAchievementsHardcore && <Text size="xs" c="dimmed">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore - props.loggedInNavigationData.totalAchievementsSoftcore}</Text>}
+              {props.loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
+              {props.loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {props.loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
+              {props.loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {props.loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
             </Stack>
 
             <Button

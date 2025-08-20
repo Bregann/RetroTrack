@@ -3,10 +3,12 @@ export const runtime = 'nodejs'
 import InProgressGamesTable from '@/components/pages/InProgressGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
+import { Container, Title, Button, Text } from '@mantine/core'
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 
-export const metadata: Metadata ={
+export const metadata: Metadata = {
   title: 'RetroTrack - In Progress Games',
   description: 'View all games you are currently playing on RetroTrack. Track your progress and achievements for each game.',
   icons: {
@@ -41,10 +43,11 @@ export default async function Page() {
   return (
     <main>
       {loggedInData === null &&
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h1>Error</h1>
-          <p>Failed to load in progress game page data. Please try again later.</p>
-        </div>
+        <Container ta="center">
+          <Title order={2} pt="xl">Error</Title>
+          <Text pb="lg">Sorry about that, we couldn't find your games, either you are not logged in or an error occurred.</Text>
+          <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
+        </Container>
       }
 
       {loggedInData !== null &&

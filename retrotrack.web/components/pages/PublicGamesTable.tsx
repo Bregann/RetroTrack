@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Button, Center, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
+import { Button, Center, Container, Group, Input, Loader, Paper, Select, Text } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -10,6 +10,14 @@ import { usePublicPaginatedTableQuery } from '@/hooks/consoles/usePublicPaginate
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
+import { Press_Start_2P } from 'next/font/google'
+
+const pressStart2P = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+})
+
 
 interface PublicGamesTableProps {
   pageData: GetGamesForConsoleResponse
@@ -19,7 +27,7 @@ interface PublicGamesTableProps {
   showConsoleColumn?: boolean
 }
 
-const columns: Column<Game>[] = [
+const baseColumns: Column<Game>[] = [
   {
     title: '',
     key: 'gameImageUrl',
@@ -66,22 +74,23 @@ const columns: Column<Game>[] = [
 ]
 
 export default function PublicGamesTable(props: PublicGamesTableProps) {
-  if (props.showConsoleColumn === true && columns.find(c => c.key === 'consoleName') === undefined && props.consoleId === -1) {
-    columns.push({
-      title: 'Console',
-      key: 'consoleName',
-      sortable: props.consoleId === -1, // Only show if consoleId is -1
-      show: props.consoleId === -1
-    })
-  }
+  // Create a fresh copy of columns for this component instance
+  const columns = useMemo(() => {
+    const cols = [...baseColumns]
 
-  if(columns.find(c => c.key === 'consoleName') !== undefined && props.consoleId !== -1) {
-    // remove consoleName column if it exists
-    const consoleColumnIndex = columns.findIndex(c => c.key === 'consoleName')
-    if (consoleColumnIndex !== -1) {
-      columns.splice(consoleColumnIndex, 1)
+    // Add console column only if showConsoleColumn is true and consoleId is -1
+    if (props.showConsoleColumn === true && props.consoleId === -1) {
+      cols.push({
+        title: 'Console',
+        key: 'consoleName',
+        sortable: true,
+        show: true
+      })
     }
-  }
+
+    return cols
+  }, [props.showConsoleColumn, props.consoleId])
+
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<Game>>({
     key: 'gameTitle',
@@ -95,7 +104,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   const queryString = useMemo(() => {
     const skip = (page - 1) * 100
     const take = 100
-    const sortKeyMap: Record<string,string> = {
+    const sortKeyMap: Record<string, string> = {
       gameTitle: 'SortByName',
       gameGenre: 'SortByGenre',
       achievementCount: 'SortByAchievementCount',
@@ -132,10 +141,15 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
 
   return (
     <Container size="95%">
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ marginBottom: '0rem' }}>{props.consoleName}</h1>
-        <p style={{ marginTop: 0 }}>There are a total of {props.totalGames} games!</p>
-      </div>
+      <Container ta="center" py="xs">
+        <Text
+          size={'28px'}
+          mt={'md'}
+          ta="center"
+          className={pressStart2P.className}
+        >{props.consoleName}</Text>
+        <Text mb="xs">There are a total of {props.totalGames} games!</Text>
+      </Container>
 
       <Paper className={styles.paper}>
         <Group
@@ -152,8 +166,8 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               flex: 1,
               minWidth: 0,
             }}
-            onChange={(e) =>{
-              if(e.currentTarget.value.trim() === '') {
+            onChange={(e) => {
+              if (e.currentTarget.value.trim() === '') {
                 setSearchTerm(null)
                 setSearchInput(null)
               }
@@ -172,10 +186,10 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
             onChange={(value) => setSearchDropdownValue(value ?? '0')}
           />
           <Button style={{ flex: '0 0 auto', ml: 10 }}
-            onClick={() => {setSearchTerm(searchInput)}}
+            onClick={() => { setSearchTerm(searchInput) }}
             disabled={!searchInput || searchInput.trim() === ''}
           >
-    Search
+            Search
           </Button>
         </Group>
 

@@ -131,12 +131,6 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseApiAuthorizationMiddleware();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
 
 var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
 {
@@ -155,8 +149,19 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
 
 app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = auth
+    Authorization = auth,
+    IgnoreAntiforgeryToken = true
 }, JobStorage.Current);
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/hangfire"), branch =>
+{
+    branch.UseApiAuthorizationMiddleware();
+});
+
+app.MapControllers();
 
 HangfireJobSetup.RegisterJobs();
 

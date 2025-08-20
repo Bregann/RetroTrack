@@ -52,10 +52,10 @@ export function PaginatedTable<T>({
     let direction: SortDirection
 
     if (!isSameColumn) {
-    // first-ever click on this column
+      // first-ever click on this column
       direction = column.toggleDescFirst ? 'desc' : 'asc'
     } else {
-    // already sorted, so just flip it
+      // already sorted, so just flip it
       direction = currentDir === 'asc' ? 'desc' : 'asc'
     }
 
@@ -90,9 +90,9 @@ export function PaginatedTable<T>({
                   onClick={() => canSort && handleHeaderClick(col)}
                 >
                   {col.title}
-                  {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }}/> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }}/>)}
+                  {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }} /> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }} />)}
                   {canSort && !isSorted && (
-                    <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }}/>
+                    <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }} />
                   )}
                 </Table.Th>
               )

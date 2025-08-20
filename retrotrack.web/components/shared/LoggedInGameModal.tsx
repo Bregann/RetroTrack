@@ -16,6 +16,7 @@ import {
   Checkbox,
   Tooltip,
   Paper,
+  ActionIcon,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
@@ -28,6 +29,7 @@ import {
   IconBuilding,
   IconTools,
   IconExclamationMark,
+  IconRefresh,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
 import { useLoggedInGameInfoQuery } from '@/hooks/games/useLoggedInGameInfoQuery'
@@ -128,199 +130,204 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       }
 
       {gameQuery.data !== undefined &&
-      <>
-        <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
-          <Image
-            src={`https://media.retroachievements.org${gameQuery.data.imageInGame}`}
-            alt="In-Game Screenshot"
-            radius="sm"
-            className={styles.gameScreenshot}
-          />
-          <Image
-            src={`https://media.retroachievements.org${gameQuery.data.imageTitle}`}
-            alt="Title Screen"
-            radius="sm"
-            className={styles.gameScreenshot}
-          />
-          <Box className={styles.gameCoverBox}>
+        <>
+          <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
             <Image
-              src={`https://media.retroachievements.org${gameQuery.data.imageBoxArt}`}
-              alt="Box Art"
+              src={`https://media.retroachievements.org${gameQuery.data.imageInGame}`}
+              alt="In-Game Screenshot"
               radius="sm"
-              className={styles.gameCoverArt}
+              className={styles.gameScreenshot}
             />
-          </Box>
-        </SimpleGrid>
+            <Image
+              src={`https://media.retroachievements.org${gameQuery.data.imageTitle}`}
+              alt="Title Screen"
+              radius="sm"
+              className={styles.gameScreenshot}
+            />
+            <Box className={styles.gameCoverBox}>
+              <Image
+                src={`https://media.retroachievements.org${gameQuery.data.imageBoxArt}`}
+                alt="Box Art"
+                radius="sm"
+                className={styles.gameCoverArt}
+              />
+            </Box>
+          </SimpleGrid>
 
-        <Divider my="sm" label="Summary" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
+          <Divider my="sm" label="Summary" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
 
-        <SimpleGrid cols={isSmall ? 2 : 4} mb="md">
-          <Card withBorder>
-            <Stack align="center" gap={6}>
-              <ThemeIcon size="xl" radius="md" color="yellow">
-                <IconTrophy size={24} />
-              </ThemeIcon>
-              <Text fw={700} ta={'center'}>{gameQuery.data.achievementsAwardedTotal}/{gameQuery.data.achievementCount} Achievements</Text>
-              <Stack gap="xs" justify="center" ta={'center'}>
-                <Text size="sm" c="dimmed">73.73% complete</Text>
-                {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.achievementsAwardedSoftcore}</Text>}
-                {gameQuery.data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {gameQuery.data.achievementsAwardedHardcore}</Text>}
-                <Text size="sm" c="grey">Locked: {gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal}</Text>
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} mb="md">
+            <Card withBorder>
+              <Stack align="center" gap={6}>
+                <ThemeIcon size="xl" radius="md" color="yellow">
+                  <IconTrophy size={24} />
+                </ThemeIcon>
+                <Text fw={700} ta={'center'}>{gameQuery.data.achievementsAwardedTotal.toLocaleString()}/{gameQuery.data.achievementCount.toLocaleString()} Achievements</Text>
+                <Stack gap="xs" justify="center" ta={'center'}>
+                  <Text size="sm" c="dimmed">
+                    {((gameQuery.data.achievementsAwardedTotal / gameQuery.data.achievementCount) * 100).toFixed(2)}% complete
+                  </Text>
+                  {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.achievementsAwardedSoftcore}</Text>}
+                  {gameQuery.data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {gameQuery.data.achievementsAwardedHardcore}</Text>}
+                  <Text size="sm" c="grey">Locked: {gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal}</Text>
+                </Stack>
               </Stack>
-            </Stack>
-          </Card>
+            </Card>
 
-          <Card withBorder>
-            <Stack align="center" gap={6}>
-              <ThemeIcon size="xl" radius="md" color="teal">
-                <IconStar size={24} />
-              </ThemeIcon>
-              <Text fw={700} ta={'center'}>{gameQuery.data.pointsAwardedTotal}/{gameQuery.data.totalGamePoints} Points</Text>
-              <Stack gap="xs" justify="center" ta={'center'}>
-                <Text size="sm" c="dimmed">73.73% complete</Text>
-                {gameQuery.data.pointsAwardedSoftcore !== gameQuery.data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.pointsAwardedSoftcore}</Text>}
-                {gameQuery.data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {gameQuery.data.pointsAwardedHardcore}</Text>}
+            <Card withBorder>
+              <Stack align="center" gap={6}>
+                <ThemeIcon size="xl" radius="md" color="teal">
+                  <IconStar size={24} />
+                </ThemeIcon>
+                <Text fw={700} ta={'center'}>{gameQuery.data.pointsAwardedTotal.toLocaleString()}/{gameQuery.data.totalGamePoints.toLocaleString()} Points</Text>
+                <Stack gap="xs" justify="center" ta={'center'}>
+                  <Text size="sm" c="dimmed">
+                    {((gameQuery.data.pointsAwardedTotal / gameQuery.data.totalGamePoints) * 100).toFixed(2)}% complete
+                  </Text>
+                  {gameQuery.data.pointsAwardedSoftcore !== gameQuery.data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.pointsAwardedSoftcore}</Text>}
+                  {gameQuery.data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {gameQuery.data.pointsAwardedHardcore}</Text>}
+                </Stack>
               </Stack>
-            </Stack>
-          </Card>
+            </Card>
 
-          <Card withBorder radius="md" p="md">
-            <Stack align="center" gap="sm">
-              <ThemeIcon size="xl" radius="md" color="violet">
-                <IconDeviceGamepad size={24} />
-              </ThemeIcon>
-              <Text fw={700}>Game Info</Text>
+            <Card withBorder radius="md" p="md">
+              <Stack align="center" gap="sm">
+                <ThemeIcon size="xl" radius="md" color="violet">
+                  <IconDeviceGamepad size={24} />
+                </ThemeIcon>
+                <Text fw={700}>Game Info</Text>
 
-              <Group gap="xl" align="flex-start" justify="center" style={{ width: '100%' }}>
-                <Stack gap="4">
-                  <Group gap="xs">
+                <Group gap="xl" align="flex-start" justify="center" style={{ width: '100%' }}>
+                  <Stack gap="4">
+                    <Group gap="xs">
+                      <IconDeviceGamepad size={16} />
+                      <Text size="sm">{gameQuery.data.consoleName}</Text>
+                    </Group>
+                    <Group gap="xs">
+                      <IconStar size={16} />
+                      <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+                    </Group>
+                  </Stack>
+
+                  <Stack gap="4">
+                    <Group gap="xs">
+                      <IconBuilding size={16} />
+                      <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
+                    </Group>
+                    <Group gap="xs">
+                      <IconTools size={16} />
+                      <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
+                    </Group>
+                  </Stack>
+                </Group>
+
+                <Group gap="xs">
+                  <IconUsers size={16} />
+                  <Text size="sm">{gameQuery.data.players} Players</Text>
+                </Group>
+              </Stack>
+            </Card>
+
+            <Card withBorder>
+              <Stack align="center" gap={6}>
+                <ThemeIcon size="xl" radius="md" color="teal">
+                  <IconCheck size={24} />
+                </ThemeIcon>
+                <Text fw={700} ta={'center'}>Completion State</Text>
+                <Stack gap={4}>
+                  <Group gap="6" justify='center'>
                     <IconDeviceGamepad size={16} />
-                    <Text size="sm">{gameQuery.data.consoleName}</Text>
+                    <Text>Date Beaten:</Text>
                   </Group>
-                  <Group gap="xs">
-                    <IconStar size={16} />
-                    <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+
+                  <Text size="sm" c="dimmed" ta={'center'}>
+                    {gameQuery.data.dateBeatenHardcore === null && gameQuery.data.dateBeatenSoftcore === null
+                      ? 'N/A'
+                      : gameQuery.data.dateBeatenHardcore ?? gameQuery.data.dateBeatenSoftcore}
+                  </Text>
+
+                  <Group gap="6" justify='center' mt={10}>
+                    <IconDeviceGamepad size={16} />
+                    <Text>Date Completed/Mastered:</Text>
                   </Group>
+                  <Text size="sm" c="dimmed" ta={'center'}>
+                    {gameQuery.data.dateMastered === null && gameQuery.data.dateCompleted === null
+                      ? 'N/A'
+                      : gameQuery.data.dateMastered ?? gameQuery.data.dateCompleted}
+                  </Text>
                 </Stack>
-
-                <Stack gap="4">
-                  <Group gap="xs">
-                    <IconBuilding size={16} />
-                    <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
-                  </Group>
-                  <Group gap="xs">
-                    <IconTools size={16} />
-                    <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
-                  </Group>
-                </Stack>
-              </Group>
-
-              <Group gap="xs">
-                <IconUsers size={16} />
-                <Text size="sm">{gameQuery.data.players} Players</Text>
-              </Group>
-            </Stack>
-          </Card>
-
-          <Card withBorder>
-            <Stack align="center" gap={6}>
-              <ThemeIcon size="xl" radius="md" color="teal">
-                <IconCheck size={24} />
-              </ThemeIcon>
-              <Text fw={700} ta={'center'}>Completion State</Text>
-              <Stack gap={4}>
-                <Group gap="6" justify='center'>
-                  <IconDeviceGamepad size={16} />
-                  <Text>Date Beaten:</Text>
-                </Group>
-
-                <Text size="sm" c="dimmed" ta={'center'}>
-                  {gameQuery.data.dateBeatenHardcore === null && gameQuery.data.dateBeatenSoftcore === null
-                    ? 'N/A'
-                    : gameQuery.data.dateBeatenHardcore ?? gameQuery.data.dateBeatenSoftcore}
-                </Text>
-
-                <Group gap="6" justify='center' mt={10}>
-                  <IconDeviceGamepad size={16} />
-                  <Text>Date Completed/Mastered:</Text>
-                </Group>
-                <Text size="sm" c="dimmed" ta={'center'}>
-                  {gameQuery.data.dateMastered === null && gameQuery.data.dateCompleted === null
-                    ? 'N/A'
-                    : gameQuery.data.dateMastered ?? gameQuery.data.dateCompleted}
-                </Text>
               </Stack>
-            </Stack>
-          </Card>
-        </SimpleGrid>
+            </Card>
+          </SimpleGrid>
 
-        <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }}/>
-        <Progress.Root size={20} className={styles.progressBar}>
-          {gameQuery.data.achievementsAwardedHardcore != 0 && <Progress.Section value={gameQuery.data.achievementsAwardedHardcore} color="orange">
-            <Progress.Label>Hardcore ({gameQuery.data.achievementsAwardedHardcore})</Progress.Label>
-          </Progress.Section>}
-          {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Progress.Section value={gameQuery.data.achievementsAwardedSoftcore} color="cyan">
-            <Progress.Label>Softcore ({gameQuery.data.achievementsAwardedSoftcore})</Progress.Label>
-          </Progress.Section>}
-          <Progress.Section value={gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal} color="grey">
-            <Progress.Label>Locked ({gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal})</Progress.Label>
-          </Progress.Section>
-        </Progress.Root>
-        <Group>
-          <Checkbox
-            label="Hide Unlocked Achievements"
-            checked={hideUnlockedAchievements}
-            onChange={(e) => setHideUnlockedAchievements(e.currentTarget.checked)}
-          />
-          <Checkbox
-            label="Show Progression Achievements Only"
-            checked={showProgressionOnly}
-            onChange={(e) => setShowProgressionOnly(e.currentTarget.checked)}
-          />
-          <Checkbox
-            label="Show Missable Achievements Only"
-            checked={showMissableOnly}
-            onChange={(e) => setShowMissableOnly(e.currentTarget.checked)}
-          />
-        </Group>
+          <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
+          <Progress.Root size={20} className={styles.progressBar}>
+            {gameQuery.data.achievementsAwardedHardcore != 0 && <Progress.Section value={gameQuery.data.achievementsAwardedHardcore} color="orange">
+              <Progress.Label>Hardcore ({gameQuery.data.achievementsAwardedHardcore})</Progress.Label>
+            </Progress.Section>}
+            {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Progress.Section value={gameQuery.data.achievementsAwardedSoftcore} color="cyan">
+              <Progress.Label>Softcore ({gameQuery.data.achievementsAwardedSoftcore})</Progress.Label>
+            </Progress.Section>}
+            <Progress.Section value={gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal} color="grey">
+              <Progress.Label>Locked ({gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal})</Progress.Label>
+            </Progress.Section>
+          </Progress.Root>
+          <Group>
+            <Checkbox
+              label="Hide Unlocked Achievements"
+              checked={hideUnlockedAchievements}
+              onChange={(e) => setHideUnlockedAchievements(e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="Show Progression Achievements Only"
+              checked={showProgressionOnly}
+              onChange={(e) => setShowProgressionOnly(e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="Show Missable Achievements Only"
+              checked={showMissableOnly}
+              onChange={(e) => setShowMissableOnly(e.currentTarget.checked)}
+            />
+          </Group>
 
-        <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
-          {gameQuery.data.achievements
-            .filter((x) => {
-              if (hideUnlockedAchievements) {
-                return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
-              }
-              return true
-            })
-            .filter((x) => {
-              if (showProgressionOnly && showMissableOnly) {
-                return (
-                  x.type === AchievementType.Progression ||
+          <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
+            {gameQuery.data.achievements
+              .filter((x) => {
+                if (hideUnlockedAchievements) {
+                  return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
+                }
+                return true
+              })
+              .filter((x) => {
+                if (showProgressionOnly && showMissableOnly) {
+                  return (
+                    x.type === AchievementType.Progression ||
                     x.type === AchievementType.Missable ||
                     x.type === AchievementType.Win_Condition
-                )
-              }
-              if (showProgressionOnly) {
-                return (
-                  x.type === AchievementType.Progression||
+                  )
+                }
+                if (showProgressionOnly) {
+                  return (
+                    x.type === AchievementType.Progression ||
                     x.type === AchievementType.Win_Condition
-                )
-              }
-              if (showMissableOnly) {
-                return x.type === AchievementType.Missable
-              }
-              return true
-            }).map((achievement) => {
-              return (
-                <Card
-                  key={achievement.id}
-                  withBorder
-                  radius="sm"
-                  p="sm"
-                  style={{
-                    position: 'relative',
-                    borderWidth: 2,
-                    borderColor:
+                  )
+                }
+                if (showMissableOnly) {
+                  return x.type === AchievementType.Missable
+                }
+                return true
+              }).map((achievement) => {
+                return (
+                  <Card
+                    key={achievement.id}
+                    withBorder
+                    radius="sm"
+                    p="sm"
+                    style={{
+                      position: 'relative',
+                      borderWidth: 2,
+                      backgroundColor: 'light-dark(#f9f9f9, #263042)',
+                      borderColor:
                         achievement.type === AchievementType.Missable
                           ? 'var(--mantine-color-orange-filled)'
                           : achievement.type === AchievementType.Progression
@@ -328,73 +335,73 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                             : achievement.type === AchievementType.Win_Condition
                               ? 'var(--mantine-color-green-filled)'
                               : 'transparent'
-                  }}
-                >
-                  {/* Achievement Icon and Details */}
-                  <Group align="center" gap="md">
-                    <Box className={styles.iconBox}>
-                      <Image
-                        src={`https://media.retroachievements.org/Badge/${achievement.badgeName}`}
-                        alt="Achievement Icon"
-                        width={64}
-                        height={64}
-                        radius="sm"
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </Box>
+                    }}
+                  >
+                    {/* Achievement Icon and Details */}
+                    <Group align="center" gap="md">
+                      <Box className={styles.iconBox}>
+                        <Image
+                          src={`https://media.retroachievements.org/Badge/${achievement.badgeName}`}
+                          alt="Achievement Icon"
+                          width={64}
+                          height={64}
+                          radius="sm"
+                          style={{ objectFit: 'contain' }}
+                        />
+                      </Box>
 
-                    <Stack gap={2} style={{ flex: 1 }}>
-                      <Text fw={500}>{achievement.title}</Text>
-                      <Text size="sm" c="dimmed">{achievement.description}</Text>
-                      {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
-                    </Stack>
+                      <Stack gap={2} style={{ flex: 1 }}>
+                        <Text fw={500}>{achievement.title}</Text>
+                        <Text size="sm" c="dimmed">{achievement.description}</Text>
+                        {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
+                      </Stack>
 
-                    <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
-                  </Group>
-                  {(() => {
-                    switch (achievement.type) {
-                      case AchievementType.Progression:
-                        return (
-                          <Tooltip label="Progression Achievement" position="top" withArrow>
-                            <Box className={styles.achievementIconTypeBox}>
-                              <ThemeIcon color="cyan" size="sm" radius="xl">
-                                <IconCheck size={16} />
-                              </ThemeIcon>
-                            </Box>
-                          </Tooltip>
-                        )
-                      case AchievementType.Missable:
-                        return (
-                          <Tooltip label="Missable Achievement" position="top" withArrow>
-                            <Box className={styles.achievementIconTypeBox}>
-                              <ThemeIcon color="orange" size="sm" radius="xl">
-                                <IconExclamationMark size={16} />
-                              </ThemeIcon>
-                            </Box>
-                          </Tooltip>
-                        )
-                      case AchievementType.Win_Condition:
-                        return (
-                          <Tooltip label="Win Condition" position="top" withArrow>
-                            <Box className={styles.achievementIconTypeBox}>
-                              <ThemeIcon color="green" size="sm" radius="xl">
-                                <IconAward size={16} />
-                              </ThemeIcon>
-                            </Box>
-                          </Tooltip>
-                        )
-                      default:
-                        return null
-                    }
-                  })()}
-                </Card>
-              )
-            })
-          }
-        </SimpleGrid>
+                      <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
+                    </Group>
+                    {(() => {
+                      switch (achievement.type) {
+                        case AchievementType.Progression:
+                          return (
+                            <Tooltip label="Progression Achievement" position="top" withArrow>
+                              <Box className={styles.achievementIconTypeBox}>
+                                <ThemeIcon color="cyan" size="sm" radius="xl">
+                                  <IconCheck size={16} />
+                                </ThemeIcon>
+                              </Box>
+                            </Tooltip>
+                          )
+                        case AchievementType.Missable:
+                          return (
+                            <Tooltip label="Missable Achievement" position="top" withArrow>
+                              <Box className={styles.achievementIconTypeBox}>
+                                <ThemeIcon color="orange" size="sm" radius="xl">
+                                  <IconExclamationMark size={16} />
+                                </ThemeIcon>
+                              </Box>
+                            </Tooltip>
+                          )
+                        case AchievementType.Win_Condition:
+                          return (
+                            <Tooltip label="Win Condition" position="top" withArrow>
+                              <Box className={styles.achievementIconTypeBox}>
+                                <ThemeIcon color="green" size="sm" radius="xl">
+                                  <IconAward size={16} />
+                                </ThemeIcon>
+                              </Box>
+                            </Tooltip>
+                          )
+                        default:
+                          return null
+                      }
+                    })()}
+                  </Card>
+                )
+              })
+            }
+          </SimpleGrid>
 
-        {/* Notes Section */}
-        {/* <Stack gap="xs" mb="md">
+          {/* Notes Section */}
+          {/* <Stack gap="xs" mb="md">
           <Text fw={500}>Your Notes</Text>
           <Textarea
             placeholder="Write your notes here..."
@@ -405,10 +412,17 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
             <Button>Save Notes</Button>
           </Group>
         </Stack> */}
-        <Paper className={styles.footer}>
-          <Group justify="apart">
-            <Button onClick={async () => { await handleGameUpdate() }} disabled={disabled}>Update Game</Button>
-            <Group gap="sm">
+          <Paper className={styles.footer}>
+            <Group justify="apart" gap="xs">
+              <Tooltip label="Update game">
+                <ActionIcon
+                  size="lg"
+                  onClick={async () => { await handleGameUpdate() }} disabled={disabled}
+                  visibleFrom='sm'
+                  color="green">
+                  <IconRefresh />
+                </ActionIcon>
+              </Tooltip>
               <Button
                 onClick={async () => await trackedGameMutation.mutateAsync({
                   gameId: props.gameId,
@@ -418,7 +432,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               >
                 {gameQuery.data.gameTracked ? 'Untrack Game' : 'Track Game'}
               </Button>
-              <Button>Game Page</Button>
               <Button
                 component="a"
                 variant="gradient"
@@ -427,7 +440,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 style={{ ':hover': { color: 'white' } }}
                 href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
               >
-              RA Page
+                RA Page
               </Button>
               <Checkbox
                 label="Auto Update Achievements"
@@ -435,10 +448,9 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 onChange={(e) => setAutoUpdateChecked(e.currentTarget.checked)}
               />
             </Group>
-          </Group>
-        </Paper>
+          </Paper>
 
-      </>
+        </>
       }
     </Modal>
   )

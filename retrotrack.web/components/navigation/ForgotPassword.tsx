@@ -65,7 +65,7 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
           icon={<IconAlertCircle size={16} />}
           title="Error resetting user password"
           color="red"
-          style={{ marginTop: 20 }}>
+          mt="sm">
           {errorMessage}
         </Alert>}
 
@@ -75,6 +75,7 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
           placeholder="RetroAchievements Username"
           withAsterisk
           required
+          mt="xs"
           {...form.getInputProps('username')}
         />
 
@@ -83,10 +84,10 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
           placeholder="RetroAchievements API Key"
           withAsterisk
           required
-          style={{ marginTop: 15, marginBottom: 10 }}
+          my="xs"
           {...form.getInputProps('apiKey')}
         />
-        <Text fz="sm">You can find your API at <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">https://retroachievements.org/controlpanel.php</a>. <br />The key is only used for verifying that username and API key match. <b>Your key is not stored.</b></Text>
+        <Text fz="sm">You can find your RetroAchievements API key <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">here</a>. <br /><b>Your key is not stored.</b> It is only used for verifying that username and API key match, so it's actually you.</Text>
 
         <PasswordInput
           leftSection={<IconLock size={16} />}
@@ -96,7 +97,7 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
           required
           withAsterisk
           error="Error"
-          style={{ marginTop: 15, marginBottom: 10 }}
+          my="xs"
           {...form.getInputProps('password')}
         />
         <Text fz="sm">This is the password to log in to RetroTrack, <b>not your RetroAchievements password!</b></Text>

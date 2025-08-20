@@ -158,13 +158,13 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
   return (
     <Container size={'95%'} mt={40}>
       <Group align="center" gap="lg" mb="lg">
-        <Avatar src={`https://media.retroachievements.org/UserPic/${pageData.raUsername}.png`} size={100} radius="xl" />
+        <Avatar src={`https://media.retroachievements.org/UserPic/${pageData.raUsername}.png`} size={100} radius="lg" />
         <Stack gap={4}>
           <Title order={2}>{pageData.raUsername}</Title>
           <Group gap="xl">
             <Stack gap={2}>
-              {pageData.softcorePoints !== pageData.hardcorePoints && pageData.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints}</Text></Text>}
-              {pageData.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{pageData.hardcorePoints}</Text></Text>}
+              {pageData.softcorePoints !== pageData.hardcorePoints && pageData.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints.toLocaleString()}</Text></Text>}
+              {pageData.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{pageData.hardcorePoints.toLocaleString()}</Text></Text>}
               {pageData.lastUserUpdate &&
                 <Group gap={4}>
                   <Text c="dimmed" size="sm">
@@ -187,8 +187,8 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
           <Stack align="center" gap="xs">
             <Text fw={700}>Games Beaten</Text>
             <Stack gap={0} align="center">
-              {pageData.gamesBeatenSoftcore !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.gamesBeatenSoftcore}</Text></Text>}
-              {pageData.gamesBeatenHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.gamesBeatenHardcore}</Text></Text>}
+              {pageData.gamesBeatenSoftcore !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.gamesBeatenSoftcore.toLocaleString()}</Text></Text>}
+              {pageData.gamesBeatenHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.gamesBeatenHardcore.toLocaleString()}</Text></Text>}
             </Stack>
           </Stack>
         </Card>
@@ -196,8 +196,8 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
           <Stack align="center" gap="xs">
             <Text fw={700}>Games Completed/Mastered</Text>
             <Stack gap={0} align="center">
-              {pageData.gamesCompleted !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.gamesCompleted}</Text></Text>}
-              {pageData.gamesMastered !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.gamesMastered}</Text></Text>}
+              {pageData.gamesCompleted !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.gamesCompleted.toLocaleString()}</Text></Text>}
+              {pageData.gamesMastered !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.gamesMastered.toLocaleString()}</Text></Text>}
             </Stack>
           </Stack>
         </Card>
@@ -205,15 +205,15 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
           <Stack align="center" gap="xs">
             <Text fw={700}>Achievements Unlocked</Text>
             <Stack gap={0} align="center">
-              {pageData.achievementsEarnedSoftcore !== pageData.achievementsEarnedHardcore && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.achievementsEarnedSoftcore}</Text></Text>}
-              {pageData.achievementsEarnedHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.achievementsEarnedHardcore}</Text></Text>}
+              {pageData.achievementsEarnedSoftcore !== pageData.achievementsEarnedHardcore && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{pageData.achievementsEarnedSoftcore.toLocaleString()}</Text></Text>}
+              {pageData.achievementsEarnedHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{pageData.achievementsEarnedHardcore.toLocaleString()}</Text></Text>}
             </Stack>
           </Stack>
         </Card>
         <Card withBorder radius="md" p="lg" className={styles.statCard}>
           <Stack align="center" gap="xs">
             <Text fw={700}>In Progress Games</Text>
-            <Text size="lg" fw={600}>{pageData.gamesInProgress}</Text>
+            <Text size="lg" fw={600}>{pageData.gamesInProgress.toLocaleString()}</Text>
           </Stack>
         </Card>
       </SimpleGrid>
@@ -222,10 +222,10 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
         <Grid.Col span={isMd ? 8 : 12}>
           <Divider label="Beaten Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
           {user.isAuthenticated &&
-          <div style={{ marginBottom: 10 }}>
-            <Button disabled={isSaving} color={editingGamesBeatenWall ? 'red' : 'blue'} onClick={() => { setEditingGamesBeatenWall(!editingGamesBeatenWall) }}>{editingGamesBeatenWall ? 'Cancel' : 'Edit'}</Button>
-            {editingGamesBeatenWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(true)} color="green" ml="md">Save Changes</Button>}
-          </ div>
+            <div style={{ marginBottom: 10 }}>
+              <Button disabled={isSaving} color={editingGamesBeatenWall ? 'red' : 'blue'} onClick={() => { setEditingGamesBeatenWall(!editingGamesBeatenWall) }}>{editingGamesBeatenWall ? 'Cancel' : 'Edit'}</Button>
+              {editingGamesBeatenWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(true)} color="green" ml="md">Save Changes</Button>}
+            </ div>
           }
           {editingGamesBeatenWall === true ?
             <DndContext
@@ -269,10 +269,10 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
 
           <Divider label="Completed/Mastered Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
           {user.isAuthenticated &&
-          <div style={{ marginBottom: 10 }}>
-            <Button disabled={isSaving} color={editingGamesMasteredWall ? 'red' : 'blue'} onClick={() => { setEditingGamesMasteredWall(!editingGamesMasteredWall) }}>{editingGamesMasteredWall ? 'Cancel' : 'Edit'}</Button>
-            {editingGamesMasteredWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(false)} color="green" ml="md">Save Changes</Button>}
-          </ div>
+            <div style={{ marginBottom: 10 }}>
+              <Button disabled={isSaving} color={editingGamesMasteredWall ? 'red' : 'blue'} onClick={() => { setEditingGamesMasteredWall(!editingGamesMasteredWall) }}>{editingGamesMasteredWall ? 'Cancel' : 'Edit'}</Button>
+              {editingGamesMasteredWall && <Button disabled={isSaving} onClick={() => handleSaveWallPositions(false)} color="green" ml="md">Save Changes</Button>}
+            </ div>
           }
           {editingGamesMasteredWall === true ?
             <DndContext
@@ -340,7 +340,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                                 {consoleData.gamesBeatenSoftcore !== 0 &&
                                   <>
                                     <Divider />
-                                    <Text size="sm" c="dimmed">Softcore Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
+                                    <Text size="sm" c="dimmed">Softcore Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
                                     <Progress value={consoleData.percentageBeatenSoftcore} size="xs" color="blue" />
                                   </>
                                 }
@@ -348,21 +348,21 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
                                 {consoleData.gamesBeatenHardcore !== 0 &&
                                   <>
                                     <Divider />
-                                    <Text size="sm" c="dimmed">Hardcore Beaten: <Text component="span" c="orange" fw={600}>{consoleData.gamesBeatenHardcore}/{consoleData.totalGamesInConsole} ({consoleData.percentageBeatenHardcore}%)</Text></Text>
+                                    <Text size="sm" c="dimmed">Hardcore Beaten: <Text component="span" c="orange" fw={600}>{consoleData.gamesBeatenHardcore.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageBeatenHardcore}%)</Text></Text>
                                     <Progress value={consoleData.percentageBeatenHardcore} size="xs" color="orange" />
                                   </>
                                 }
 
                                 {consoleData.gamesCompleted !== 0 &&
                                   <>
-                                    <Text size="sm" c="dimmed">Softcore Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted}/{consoleData.totalGamesInConsole} ({consoleData.percentageCompleted}%)</Text></Text>
+                                    <Text size="sm" c="dimmed">Softcore Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageCompleted}%)</Text></Text>
                                     <Progress value={consoleData.percentageCompleted} size="xs" color="teal" />
                                   </>
                                 }
 
                                 {consoleData.gamesMastered !== 0 &&
                                   <>
-                                    <Text size="sm" c="dimmed">Hardcore Mastered: <Text component="span" c="yellow" fw={600}>{consoleData.gamesMastered}/{consoleData.totalGamesInConsole} ({consoleData.percentageMastered}%)</Text></Text>
+                                    <Text size="sm" c="dimmed">Hardcore Mastered: <Text component="span" c="yellow" fw={600}>{consoleData.gamesMastered.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageMastered}%)</Text></Text>
                                     <Progress value={consoleData.percentageMastered} size="xs" color="yellow" />
                                   </>
                                 }

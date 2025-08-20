@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -11,6 +11,13 @@ import { useGameModal } from '@/context/gameModalContext'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
 import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
 import { useUserTrackedGamesQuery } from '@/hooks/trackedGames/useUserTrackedGamesQuery'
+import { Press_Start_2P } from 'next/font/google'
+
+const pressStart2P = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 interface TrackedGamesProps {
   pageData: GetUserTrackedGamesResponse
@@ -80,7 +87,7 @@ const columns: Column<LoggedInGame>[] = [
     title: 'Highest Award',
     key: 'highestAward',
     render: (item) => {
-      switch (item.highestAward){
+      switch (item.highestAward) {
         case HighestAwardKind.BeatenSoftcore:
           return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
         case HighestAwardKind.BeatenHardcore:
@@ -121,7 +128,7 @@ export default function TrackedGames(props: TrackedGamesProps) {
   const queryString = useMemo(() => {
     const skip = (page - 1) * 100
     const take = 100
-    const sortKeyMap: Record<string,string> = {
+    const sortKeyMap: Record<string, string> = {
       gameTitle: 'SortByName',
       gameGenre: 'SortByGenre',
       achievementCount: 'SortByAchievementCount',
@@ -164,10 +171,15 @@ export default function TrackedGames(props: TrackedGamesProps) {
 
   return (
     <Container size="95%">
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ marginBottom: '0rem' }}>Tracked Games</h1>
-        <p style={{ marginTop: 0 }}>There are a total of {props.totalGames} tracked games!</p>
-      </div>
+      <Container ta="center" py="xs">
+        <Text
+          size={'28px'}
+          mt={'md'}
+          ta="center"
+          className={pressStart2P.className}
+        >Tracked Games</Text>
+        <Text mb="xs">There are a total of {props.totalGames} games!</Text>
+      </Container>
 
       <Paper className={styles.paper}>
         {isLoading ? (
@@ -193,8 +205,8 @@ export default function TrackedGames(props: TrackedGamesProps) {
                   flex: 1,
                   minWidth: 0,
                 }}
-                onChange={(e) =>{
-                  if(e.currentTarget.value.trim() === '') {
+                onChange={(e) => {
+                  if (e.currentTarget.value.trim() === '') {
                     setSearchTerm(null)
                     setSearchInput(null)
                   }
@@ -213,16 +225,16 @@ export default function TrackedGames(props: TrackedGamesProps) {
                 onChange={(value) => setSearchDropdownValue(value ?? '0')}
               />
               <Button style={{ flex: '0 0 auto', ml: 10 }}
-                onClick={() => {setSearchTerm(searchInput)}}
+                onClick={() => { setSearchTerm(searchInput) }}
                 disabled={!searchInput || searchInput.trim() === ''}
               >
                 Search
               </Button>
             </Group>
             <Group ml={20}>
-              <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }}/>
-              <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }}/>
-              <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }}/>
+              <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />
+              <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }} />
+              <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }} />
             </Group>
             <PaginatedTable
               data={data!.games}
