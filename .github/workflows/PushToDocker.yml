@@ -1,0 +1,25 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-publish:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build C# Docker image
+        run: docker build -f RetroTrack.Api/Dockerfile -t 192.168.1.100:5000/retrotrackapi:latest .
+
+      - name: Push Docker image
+        run: docker push 192.168.1.100:5000/retrotrackapi:latest
+        
+      - name: Build Next.js Docker image
+        run: docker build -f retrotrack.web/Dockerfile -t 192.168.1.100:5000/retrotrackweb:latest .
+
+      - name: Push Docker image
+        run: docker push 192.168.1.100:5000/retrotrackweb:latest

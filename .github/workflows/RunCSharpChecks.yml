@@ -1,0 +1,37 @@
+name: Run C# formatting
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "RetroTrack.Domain/**"
+      - "RetroTrack.Api/**"
+      - "RetroTrack.sln"
+
+  push:
+    branches:
+      - main
+    paths:
+      - "RetroTrack.Domain/**"
+      - "RetroTrack.Api/**"
+      - "RetroTrack.sln"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore BreganTwitchBot.sln
+        
+      - name: Check C# formatting
+        run: dotnet format --verify-no-changes
