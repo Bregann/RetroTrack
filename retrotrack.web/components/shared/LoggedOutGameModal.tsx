@@ -147,18 +147,18 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                     </Group>
                     <Group gap="xs">
                       <IconStar size={16} />
-                      <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+                      <Text size="sm">{gameQuery.data.genre !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
 
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconBuilding size={16} />
-                      <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
+                      <Text size="sm">Publisher: {gameQuery.data.publisher !== '' || 'Not Set'}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconTools size={16} />
-                      <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
+                      <Text size="sm">Developer: {gameQuery.data.developer !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
                 </Group>

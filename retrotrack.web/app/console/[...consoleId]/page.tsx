@@ -1,5 +1,3 @@
-export const runtime = 'nodejs'
-
 import LoggedInGamesTable from '@/components/pages/LoggedInGamesTable'
 import PublicGamesTable from '@/components/pages/PublicGamesTable'
 import { doGet } from '@/helpers/apiClient'
@@ -62,7 +60,7 @@ export default async function Page({
       {publicData === null && loggedInData === null &&
         <Container ta="center">
           <Title order={2} pt="xl">Error</Title>
-          <Text pb="lg">Sorry about that, we couldn't load the game data, try again later.</Text>
+          <Text pb="lg">Sorry about that, we couldn&apos;t load the game data, try again later.</Text>
           <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
         </Container>
       }

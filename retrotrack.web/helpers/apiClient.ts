@@ -1,4 +1,4 @@
-let API_BASE_URL = 'https://retrotrack.bregan.me'
+let API_BASE_URL = 'https://fm.bregan.me'
 
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -7,11 +7,11 @@ if (process.env.NODE_ENV === 'development') {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 //TODO: comment it properly
-interface FetchResponse<T> {
+export interface FetchResponse<T> {
   data?: T
   status: number
   ok: boolean
-  raw: Response
+  statusMessage?: string
 }
 
 interface RequestOptions {
@@ -47,11 +47,11 @@ async function doRequest<T>(
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+          ...(cookieHeader !== undefined ? { Cookie: cookieHeader } : {}),
           ...headers,
         },
-        body: body ? JSON.stringify(body) : undefined,
-        ...(nextFetchOptions && { next: nextFetchOptions }),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        ...(nextFetchOptions !== undefined && { next: nextFetchOptions }),
       })
 
       // 🛑 Unauthorized? Time to refresh & retry ONCE
@@ -76,24 +76,34 @@ async function doRequest<T>(
             data: undefined,
             status: res.status,
             ok: false,
-            raw: res,
           }
         }
       }
 
       let data: T | undefined = undefined
-      try {
+      let statusMessage: string | undefined = undefined
+
+      // if response is not 200, get the status message
+      if (res.status !== 200) {
         const text = await res.text()
-        data = text ? JSON.parse(text) : undefined
-      } catch {
-        console.warn('⚠️ Failed to parse JSON response')
+        statusMessage = text
+      } else {
+        try {
+          const text = await res.text()
+          if (text !== '') {
+            const parsed = JSON.parse(text)
+            data = parsed
+          }
+        } catch {
+          console.warn('⚠️ Failed to parse JSON response')
+        }
       }
 
       return {
         data,
         status: res.status,
         ok: res.ok,
-        raw: res,
+        statusMessage: statusMessage
       }
     } catch (error) {
       console.error(`Error in doRequest (attempt ${attempt + 1}):`, error)
@@ -103,7 +113,6 @@ async function doRequest<T>(
           data: undefined,
           status: 500,
           ok: false,
-          raw: new Response(null, { status: 500 }),
         }
       }
     }
@@ -113,7 +122,6 @@ async function doRequest<T>(
     data: undefined,
     status: 500,
     ok: false,
-    raw: new Response(null, { status: 500 }),
   }
 }
 
@@ -131,3 +139,14 @@ export const doPatch = <T>(endpoint: string, options?: RequestOptions) =>
 
 export const doDelete = <T>(endpoint: string, options?: RequestOptions) =>
   doRequest<T>('DELETE', endpoint, options)
+
+// react query fetching
+export async function doQueryGet<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+  const res: FetchResponse<T> = await doGet<T>(endpoint, options)
+
+  if (!res.ok) {
+    throw new Error(res.statusMessage ?? `Failed to fetch: ${endpoint}`)
+  }
+
+  return res.data as T
+}

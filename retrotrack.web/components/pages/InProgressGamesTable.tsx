@@ -132,7 +132,7 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
       percentageComplete: 'SortByPercentageComplete'
     }
 
-    const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
+    const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
     const sortValue = sortOption.direction === 'asc'
 
     let query = `ConsoleId=-1&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}&HideUnstartedGames=true&HideCompletedGames=true`
@@ -219,7 +219,7 @@ export default function InProgressGamesTable(props: InProgressGamesTableProps) {
               />
               <Button style={{ flex: '0 0 auto', ml: 10 }}
                 onClick={() => { setSearchTerm(searchInput) }}
-                disabled={!searchInput || searchInput.trim() === ''}
+                disabled={searchInput === null || searchInput.trim() === ''}
               >
                 Search
               </Button>

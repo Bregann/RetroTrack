@@ -1,5 +1,3 @@
-export const runtime = 'nodejs'
-
 import InProgressGamesTable from '@/components/pages/InProgressGamesTable'
 import { doGet } from '@/helpers/apiClient'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
@@ -45,7 +43,7 @@ export default async function Page() {
       {loggedInData === null &&
         <Container ta="center">
           <Title order={2} pt="xl">Error</Title>
-          <Text pb="lg">Sorry about that, we couldn't find your games, either you are not logged in or an error occurred.</Text>
+          <Text pb="lg">Sorry about that, we couldn&apos;t find your games, either you are not logged in or an error occurred.</Text>
           <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
         </Container>
       }

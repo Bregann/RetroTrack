@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Title, Text } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -152,7 +152,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
       percentageComplete: 'SortByPercentageComplete'
     }
 
-    const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
+    const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
     const sortValue = sortOption.direction === 'asc'
 
     let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}${hideCompletedGames ? '&HideCompletedGames=true' : ''}${hideInProgressGames ? '&HideInProgressGames=true' : ''}`
@@ -239,7 +239,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               />
               <Button style={{ flex: '0 0 auto', ml: 10 }}
                 onClick={() => { setSearchTerm(searchInput) }}
-                disabled={!searchInput || searchInput.trim() === ''}
+                disabled={searchInput === null || searchInput.trim() === ''}
               >
                 Search
               </Button>

@@ -18,7 +18,7 @@ interface FormValues {
 
 export default function LoginModal(props: LoginModalProps) {
   const [forgotPasswordOpened, setForgotPasswordOpened] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loginButtonLoading, setLoginButtonLoading] = useState(false)
   const form = useForm<FormValues>({
     initialValues: {

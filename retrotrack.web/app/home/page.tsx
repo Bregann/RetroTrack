@@ -1,5 +1,3 @@
-export const runtime = 'nodejs'
-
 import HomeComponent from '@/components/pages/HomeComponent'
 import { doGet } from '@/helpers/apiClient'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
@@ -22,7 +20,7 @@ export default async function Home() {
       {homePageData.status !== 200 &&
         <Container ta="center">
           <Title order={2} pt="xl">Error {homePageData.status}</Title>
-          <Text pb="lg">Sorry about that, we couldn't load the home page data. Try again later.</Text>
+          <Text pb="lg">Sorry about that, we couldn&apos;t load the home page data. Try again later.</Text>
           <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
         </Container>
       }

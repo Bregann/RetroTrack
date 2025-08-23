@@ -27,10 +27,19 @@ export const useToggleTrackedGameStatus = ():
       const { gameId, newStatus } = vars
       await queryClient.cancelQueries({ queryKey: ['getGameInfoForUser', gameId] })
       const previous = queryClient.getQueryData<GetLoggedInSpecificGameInfoResponse>(['getGameInfoForUser', gameId])
-      if (previous) {
+      if (previous === undefined) {
+        // Provide a minimal object with required fields for optimistic update
         queryClient.setQueryData<GetLoggedInSpecificGameInfoResponse>(
           ['getGameInfoForUser', gameId],
-          { ...previous, gameTracked: newStatus }
+          {
+            gameId,
+            title: '',
+            consoleId: 0,
+            consoleName: '',
+            // Add all other required fields with default values
+            gameTracked: newStatus,
+            // If there are more required fields, add them here
+          } as GetLoggedInSpecificGameInfoResponse
         )
       }
       return { previous, gameId }
@@ -38,7 +47,7 @@ export const useToggleTrackedGameStatus = ():
     onSuccess: (_voidData, { gameId, newStatus }) => {
       // NO refetch—just ensure cache is in sync
       const previous = queryClient.getQueryData<GetLoggedInSpecificGameInfoResponse>(['getGameInfoForUser', gameId])
-      if (previous) {
+      if (previous != null) {
         queryClient.setQueryData<GetLoggedInSpecificGameInfoResponse>(
           ['getGameInfoForUser', gameId],
           { ...previous, gameTracked: newStatus }
@@ -51,7 +60,7 @@ export const useToggleTrackedGameStatus = ():
       context: unknown
     ) => {
       const safeContext = context as { previous?: GetLoggedInSpecificGameInfoResponse; gameId: number } | undefined
-      if (safeContext?.previous) {
+      if (safeContext !== undefined && safeContext.previous != null) {
         queryClient.setQueryData(['getGameInfoForUser', gameId], safeContext.previous)
       }
       notificationHelper.showErrorNotification(

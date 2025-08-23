@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const tokenRow = document.cookie
       .split('; ')
       .find(row => row.startsWith('accessToken='))
-    const token = tokenRow ? tokenRow.split('=')[1] : undefined
+    const token = tokenRow !== undefined ? tokenRow.split('=')[1] : undefined
 
     if (token !== undefined) {
       const payload = JSON.parse(atob(token.split('.')[1]))
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: user !== null, user, login, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   )

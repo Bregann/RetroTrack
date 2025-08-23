@@ -155,11 +155,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/hangfire"), branch =>
-{
-    branch.UseApiAuthorizationMiddleware();
-});
-
 app.MapControllers();
 
 HangfireJobSetup.RegisterJobs();

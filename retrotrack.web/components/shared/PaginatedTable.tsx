@@ -43,17 +43,17 @@ export function PaginatedTable<T>({
   styles
 }: PaginatedTableProps<T>) {
   const currentKey = sortOption?.key
-  const currentDir = sortOption?.direction || 'asc'
+  const currentDir = sortOption?.direction ?? 'asc'
 
   const handleHeaderClick = (column?: Column<T>) => {
-    if (!column?.key || !onSortChange) return
+    if (column?.key === undefined|| onSortChange === undefined) return
 
     const isSameColumn = currentKey === column.key
     let direction: SortDirection
 
     if (!isSameColumn) {
       // first-ever click on this column
-      direction = column.toggleDescFirst ? 'desc' : 'asc'
+      direction = column.toggleDescFirst === false ? 'desc' : 'asc'
     } else {
       // already sorted, so just flip it
       direction = currentDir === 'asc' ? 'desc' : 'asc'
@@ -63,10 +63,10 @@ export function PaginatedTable<T>({
   }
 
   const rows = data.map((item, index) => (
-    <Table.Tr key={index} onClick={() => onRowClick && onRowClick(item, index)} style={{ cursor: onRowClick ? 'pointer' : 'default' }}>
+    <Table.Tr key={index} onClick={() => onRowClick !== undefined && onRowClick(item, index)} style={{ cursor: onRowClick !== undefined ? 'pointer' : 'default' }}>
       {columns.filter(x => x.show !== false).map((col, colIndex) => (
         <Table.Td key={colIndex}>
-          {col.render
+          {col.render !== undefined
             ? col.render(item, index)
             : String(item[col.key!] as ReactNode)}
         </Table.Td>
@@ -81,7 +81,7 @@ export function PaginatedTable<T>({
           <Table.Tr>
             {columns.filter(x => x.show !== false).map((col, colIndex) => {
               const isSorted = col.key === currentKey
-              const canSort = Boolean(col.sortable && onSortChange)
+              const canSort = Boolean(col.sortable !== undefined && onSortChange)
 
               return (
                 <Table.Th

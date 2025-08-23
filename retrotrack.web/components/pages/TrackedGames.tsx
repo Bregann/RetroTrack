@@ -139,7 +139,7 @@ export default function TrackedGames(props: TrackedGamesProps) {
       percentageComplete: 'SortByPercentageComplete'
     }
 
-    const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
+    const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
     const sortValue = sortOption.direction === 'asc'
 
     let query = `Skip=${skip}&Take=${take}&${sortParam}=${sortValue}${hideBeatenGames ? '&HideBeatenGames=true' : ''}${hideCompletedGames ? '&HideCompletedGames=true' : ''}${hideInProgressGames ? '&HideInProgressGames=true' : ''}`
@@ -226,7 +226,7 @@ export default function TrackedGames(props: TrackedGamesProps) {
               />
               <Button style={{ flex: '0 0 auto', ml: 10 }}
                 onClick={() => { setSearchTerm(searchInput) }}
-                disabled={!searchInput || searchInput.trim() === ''}
+                disabled={searchInput === null || searchInput.trim() === ''}
               >
                 Search
               </Button>

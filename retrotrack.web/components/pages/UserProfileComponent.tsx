@@ -63,7 +63,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
   const handleDragEnd = (event: DragEndEvent, isBeatenWall: boolean) => {
     const { active, over } = event
 
-    if (over && active.id !== over.id) {
+    if (over !== null && active.id !== over.id) {
       if (isBeatenWall) {
         setGamesBeatenWallData((items) => {
           const oldIndex = items.findIndex((g) => g.gameId === active.id)
@@ -165,7 +165,7 @@ export default function UserProfileComponent({ pageData }: UserProfileProps) {
             <Stack gap={2}>
               {pageData.softcorePoints !== pageData.hardcorePoints && pageData.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{pageData.softcorePoints.toLocaleString()}</Text></Text>}
               {pageData.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{pageData.hardcorePoints.toLocaleString()}</Text></Text>}
-              {pageData.lastUserUpdate &&
+              {pageData.lastUserUpdate !== undefined &&
                 <Group gap={4}>
                   <Text c="dimmed" size="sm">
                     Last Updated: {new Date(pageData.lastUserUpdate).toLocaleDateString()} {new Date(pageData.lastUserUpdate).toLocaleTimeString()}

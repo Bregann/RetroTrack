@@ -112,12 +112,16 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
       points: 'SortByPoints',
       consoleName: 'SortByConsole'
     }
-    const sortParam = sortKeyMap[sortOption.key] || 'SortByName'
+
+    const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
     const sortValue = sortOption.direction === 'asc'
+
     let query = `ConsoleId=${props.consoleId}&Skip=${skip}&Take=${take}&${sortParam}=${sortValue}`
+
     if (searchTerm !== null && searchTerm !== '') {
       query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
+
     return query
   }, [page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
@@ -187,7 +191,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
           />
           <Button style={{ flex: '0 0 auto', ml: 10 }}
             onClick={() => { setSearchTerm(searchInput) }}
-            disabled={!searchInput || searchInput.trim() === ''}
+            disabled={searchInput === null || searchInput.trim() === ''}
           >
             Search
           </Button>

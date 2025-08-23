@@ -205,18 +205,18 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                     </Group>
                     <Group gap="xs">
                       <IconStar size={16} />
-                      <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+                      <Text size="sm">{gameQuery.data.genre !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
 
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconBuilding size={16} />
-                      <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
+                      <Text size="sm">Publisher: {gameQuery.data.publisher !== '' || 'Not Set'}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconTools size={16} />
-                      <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
+                      <Text size="sm">Developer: {gameQuery.data.developer!== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
                 </Group>
@@ -353,7 +353,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                       <Stack gap={2} style={{ flex: 1 }}>
                         <Text fw={500}>{achievement.title}</Text>
                         <Text size="sm" c="dimmed">{achievement.description}</Text>
-                        {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
+                        {achievement.dateEarnedSoftcore !== null && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
                       </Stack>
 
                       <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
