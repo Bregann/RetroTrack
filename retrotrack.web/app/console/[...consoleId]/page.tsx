@@ -68,7 +68,6 @@ export default async function Page({
       {publicData !== null && loggedInData === null &&
         <PublicGamesTable
           consoleId={parseInt(consoleId)}
-          consoleName={publicData.consoleName}
           totalGames={publicData.totalCount}
           pageData={publicData}
           showConsoleColumn={false}
@@ -78,7 +77,6 @@ export default async function Page({
       {publicData === null && loggedInData !== null &&
         <LoggedInGamesTable
           consoleId={parseInt(consoleId)}
-          consoleName={loggedInData.consoleName}
           totalGames={loggedInData.totalCount}
           pageData={loggedInData}
           showConsoleColumn={false}
