@@ -9,6 +9,7 @@ namespace RetroTrack.Domain.Helpers
         public static void RegisterJobs()
         {
 #if DEBUG
+            RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");
 
 #else
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");

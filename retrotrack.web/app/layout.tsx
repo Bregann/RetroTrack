@@ -78,7 +78,6 @@ export default async function RootLayout({
       queryFn: async () => await doQueryGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData', { headers: { Cookie: cookieHeader } }),
     })
   } else {
-
     await queryClient.prefetchQuery({
       queryKey: ['getPublicNavigationData'],
       queryFn: async () => await doQueryGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData'),

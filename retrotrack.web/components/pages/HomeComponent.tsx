@@ -9,6 +9,8 @@ import styles from '@/css/pages/home.module.scss'
 import { useGameModal } from '@/context/gameModalContext'
 import consoleHelper from '@/helpers/consoleHelper'
 import { Press_Start_2P } from 'next/font/google'
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -16,16 +18,18 @@ const pressStart2P = Press_Start_2P({
   display: 'swap',
 })
 
-export interface HomeComponentProps {
-  pageData: GetRecentlyAddedAndUpdatedGamesResponse
-}
-
-export default function HomeComponent(props: HomeComponentProps) {
+export default function HomeComponent() {
   const isLg = useMediaQuery('(min-width: 1600px)')
   const isXl = useMediaQuery('(min-width: 2440px)')
   const span = isXl ? 4 : isLg ? 6 : 12
 
   const gameModal = useGameModal()
+
+  const { data: pageData, isLoading: isLoadingPageData, isError: isErrorPageData, error: pageDataError } = useQuery<GetRecentlyAddedAndUpdatedGamesResponse>({
+    queryKey: ['recentlyAddedAndUpdatedGames'],
+    queryFn: async () => await doQueryGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames'),
+    staleTime: 60000
+  })
 
   return (
     <>
@@ -42,7 +46,20 @@ export default function HomeComponent(props: HomeComponentProps) {
         <Text ta="center">
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!
         </Text>
-        {props.pageData.days.map((day, index) => {
+
+        {isLoadingPageData &&
+          <Text ta="center" mt="md">
+            Loading...
+          </Text>
+        }
+
+        {isErrorPageData &&
+          <Text ta="center" mt="md" c="red">
+            An error occurred: {(pageDataError as Error).message}
+          </Text>
+        }
+
+        {pageData !== undefined && pageData.days.map((day, index) => {
           return (
             <div key={index}>
               <Divider
