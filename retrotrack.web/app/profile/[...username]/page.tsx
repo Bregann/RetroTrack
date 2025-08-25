@@ -6,7 +6,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query
 export default async function Page({
   params,
 }: {
-  params: { username: string }
+  params: Promise<{ username: string }>
 }) {
   const { username } = await params
   const queryClient = new QueryClient()
