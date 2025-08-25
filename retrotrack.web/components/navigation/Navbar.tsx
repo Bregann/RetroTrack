@@ -418,7 +418,7 @@ export function Navbar(props: NavbarProps) {
               <Accordion.Panel>
                 <Text mb="sm">Here are some of the new features:</Text>
                 <List withPadding>
-                  <List.Item>Logged in users have te ability to customise the order of the beaten and mastery wall</List.Item>
+                  <List.Item>Logged in users have the ability to customise the order of the beaten and mastery wall</List.Item>
                 </List>
               </Accordion.Panel>
             </Accordion.Item>
