@@ -1,10 +1,9 @@
 import TrackedGames from '@/components/pages/TrackedGames'
-import { doGet } from '@/helpers/apiClient'
+import { doQueryGet } from '@/helpers/apiClient'
 import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
-import { Button, Container, Text, Title } from '@mantine/core'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'RetroTrack - Tracked Games',
@@ -16,8 +15,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const cookieStore = await cookies()
-
-  let loggedInData: GetUserTrackedGamesResponse | null = null
+  const queryClient = new QueryClient()
 
   // Check if the user is logged in by checking for the accessToken cookie
   if (cookieStore.has('accessToken')) {
@@ -29,31 +27,16 @@ export default async function Page() {
       .map(c => `${c.name}=${c.value}`)
       .join('; ')
 
-    const result = await doGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=100&SortByName=true', { cookieHeader })
-    if (result.status !== 200 || result.data === undefined) {
-      console.error('Failed to load logged in navigation data:', result.status)
-      loggedInData = null
-    } else {
-      loggedInData = result.data
-    }
+    await queryClient.prefetchQuery({
+      queryKey: ['Skip=0&Take=100&SortByName=true'],
+      queryFn: () => doQueryGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=100&SortByName=true', { next: { revalidate: 60 }, cookieHeader }),
+      staleTime: 60000
+    })
   }
 
   return (
-    <main>
-      {loggedInData === null &&
-        <Container ta="center">
-          <Title order={2} pt="xl">Error</Title>
-          <Text pb="lg">Sorry about that, we couldn&apos;t find your games, either you are not logged in or an error occurred.</Text>
-          <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
-        </Container>
-      }
-
-      {loggedInData !== null &&
-        <TrackedGames
-          totalGames={loggedInData.totalCount}
-          pageData={loggedInData}
-        />
-      }
-    </main>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <TrackedGames />
+    </HydrationBoundary>
   )
 }

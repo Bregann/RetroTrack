@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -10,19 +10,17 @@ import { useDebouncedState } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
 import { GetUserTrackedGamesResponse } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse'
-import { useUserTrackedGamesQuery } from '@/hooks/trackedGames/useUserTrackedGamesQuery'
 import { Press_Start_2P } from 'next/font/google'
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import Loading from '@/app/loading'
+import Link from 'next/link'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
   subsets: ['latin'],
   display: 'swap',
 })
-
-interface TrackedGamesProps {
-  pageData: GetUserTrackedGamesResponse
-  totalGames: number
-}
 
 const columns: Column<LoggedInGame>[] = [
   {
@@ -111,7 +109,7 @@ const columns: Column<LoggedInGame>[] = [
   }
 ]
 
-export default function TrackedGames(props: TrackedGamesProps) {
+export default function TrackedGames() {
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<LoggedInGame>>({
     key: 'gameTitle',
@@ -151,12 +149,11 @@ export default function TrackedGames(props: TrackedGamesProps) {
     return query
   }, [hideBeatenGames, hideCompletedGames, hideInProgressGames, page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
-  const isFirstLoad = queryString === 'Skip=0&Take=100&SortByName=true'
-
-  const { data, isLoading, isError, error } = useUserTrackedGamesQuery(
-    queryString,
-    isFirstLoad ? props.pageData : undefined
-  )
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: [queryString],
+    queryFn: async () => await doQueryGet<GetUserTrackedGamesResponse>(`/api/trackedgames/GetTrackedGamesForUser?${queryString}`, { next: { revalidate: 60 } }),
+    staleTime: 60000,
+  })
 
   const gameModal = useGameModal()
 
@@ -167,93 +164,105 @@ export default function TrackedGames(props: TrackedGamesProps) {
     { value: '3', label: 'Achievement Description' }
   ]
 
-  const totalPages = data?.totalPages ?? 0
-
   return (
     <Container size="95%">
-      <Container ta="center" py="xs">
-        <Text
-          size={'28px'}
-          mt={'md'}
-          ta="center"
-          className={pressStart2P.className}
-        >Tracked Games</Text>
-        <Text mb="xs">There are a total of {props.totalGames} games!</Text>
-      </Container>
+      {isLoading &&
+        <Loading />
+      }
+      {isError &&
+        <Container ta="center">
+          <Title order={2} pt="xl">Error</Title>
+          <Text pb="lg">Sorry about that, we couldn&apos;t load the game data, try again later.</Text>
+          <Button size="md" radius="md" variant="light" component={Link} href={'/home'}>Head Home</Button>
+        </Container>
+      }
+      {data !== undefined &&
+        <>
+          <Container ta="center" py="xs">
+            <Text
+              size={'28px'}
+              mt={'md'}
+              ta="center"
+              className={pressStart2P.className}
+            >Tracked Games</Text>
+            <Text mb="xs">There are a total of {data.totalCount} games!</Text>
+          </Container>
 
-      <Paper className={styles.paper}>
-        {isLoading ? (
-          <Center style={{ padding: '2rem' }}>
-            <Loader variant="dots" size="lg" />{/* or variant="bars", "oval"—choose your vibe */}
-            <p style={{ marginLeft: 10 }}>Loading games...</p>
-          </Center>
-        ) : isError ? (
-          <p style={{ color: 'red' }}>Oops: {error.message}</p>
-        ) : (
-          <>
-            <Group
-              justify="center"
-              mt={10}
-              mb={10}
-              pr={20}
-              pl={20}
-              style={{ width: '100%' }}
-            >
-              <Input
-                placeholder="Search..."
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                }}
-                onChange={(e) => {
-                  if (e.currentTarget.value.trim() === '') {
-                    setSearchTerm(null)
-                    setSearchInput(null)
-                  }
-                  setSearchInput(e.currentTarget.value)
-                }
-                }
-              />
-              <Select
-                data={searchDropdownOptions}
-                style={{
-                  flex: '0 0 150px',
-                  minWidth: 0,
-                }}
-                clearable
-                defaultValue={searchDropdownValue}
-                onChange={(value) => setSearchDropdownValue(value ?? '0')}
-              />
-              <Button style={{ flex: '0 0 auto', ml: 10 }}
-                onClick={() => { setSearchTerm(searchInput) }}
-                disabled={searchInput === null || searchInput.trim() === ''}
-              >
-                Search
-              </Button>
-            </Group>
-            <Group ml={20}>
-              <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />
-              <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }} />
-              <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }} />
-            </Group>
-            <PaginatedTable
-              data={data!.games}
-              columns={columns}
-              page={page}
-              total={totalPages}
-              sortOption={sortOption}
-              onSortChange={(opt) => {
-                setPage(1)
-                setSortOption(opt)
-              }}
-              onPageChange={setPage}
-              onRowClick={(item) => {
-                gameModal.showModal(item.gameId)
-              }}
-            />
-          </>
-        )}
-      </Paper>
+          <Paper className={styles.paper}>
+            {isLoading ? (
+              <Center style={{ padding: '2rem' }}>
+                <Loader variant="dots" size="lg" />
+                <p style={{ marginLeft: 10 }}>Loading games...</p>
+              </Center>
+            ) : isError ? (
+              <p style={{ color: 'red' }}>Oops: {error.message}</p>
+            ) : (
+              <>
+                <Group
+                  justify="center"
+                  mt={10}
+                  mb={10}
+                  pr={20}
+                  pl={20}
+                  style={{ width: '100%' }}
+                >
+                  <Input
+                    placeholder="Search..."
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                    onChange={(e) => {
+                      if (e.currentTarget.value.trim() === '') {
+                        setSearchTerm(null)
+                        setSearchInput(null)
+                      }
+                      setSearchInput(e.currentTarget.value)
+                    }
+                    }
+                  />
+                  <Select
+                    data={searchDropdownOptions}
+                    style={{
+                      flex: '0 0 150px',
+                      minWidth: 0,
+                    }}
+                    clearable
+                    defaultValue={searchDropdownValue}
+                    onChange={(value) => setSearchDropdownValue(value ?? '0')}
+                  />
+                  <Button style={{ flex: '0 0 auto', ml: 10 }}
+                    onClick={() => { setSearchTerm(searchInput) }}
+                    disabled={searchInput === null || searchInput.trim() === ''}
+                  >
+                    Search
+                  </Button>
+                </Group>
+                <Group ml={20}>
+                  <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />
+                  <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }} />
+                  <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }} />
+                </Group>
+                <PaginatedTable
+                  data={data!.games}
+                  columns={columns}
+                  page={page}
+                  total={data.totalCount}
+                  sortOption={sortOption}
+                  onSortChange={(opt) => {
+                    setPage(1)
+                    setSortOption(opt)
+                  }}
+                  onPageChange={setPage}
+                  onRowClick={(item) => {
+                    gameModal.showModal(item.gameId)
+                  }}
+                />
+              </>
+            )}
+          </Paper>
+        </>
+      }
     </Container>
   )
 }
