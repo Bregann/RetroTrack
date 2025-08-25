@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -13,6 +13,7 @@ import { Press_Start_2P } from 'next/font/google'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
+import Link from 'next/link'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -186,7 +187,11 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
         <Loading />
       }
       {isError &&
-        <Text c="red">Error: {error.message}</Text>
+        <Container ta="center">
+          <Title order={2} pt="xl">Error</Title>
+          <Text pb="lg">Sorry about that, we couldn&apos;t load the game data, try again later.</Text>
+          <Button size="md" radius="md" variant="light" component={Link} href={'/home'}>Head Home</Button>
+        </Container>
       }
       {data !== undefined &&
         <>
