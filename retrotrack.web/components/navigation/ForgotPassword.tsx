@@ -44,7 +44,7 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
     const res = await doPost('/api/auth/ResetUserPassword', { body: values })
 
     if (res.status === 400) {
-      setErrorMessage(res.raw.statusText)
+      setErrorMessage(res.statusMessage ?? 'Error resetting password')
       setForgotPasswordLoading(false)
       return
     }
