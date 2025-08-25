@@ -1,4 +1,4 @@
-import { LoggedInGame } from "../games/GetUserProgressForConsoleResponse"
+import { LoggedInGame } from '../games/GetUserProgressForConsoleResponse'
 
 export interface GetUserTrackedGamesResponse {
     totalCount: number

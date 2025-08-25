@@ -1,11 +1,8 @@
-export const runtime = 'nodejs'
-
 import HomeComponent from '@/components/pages/HomeComponent'
-import { doGet } from '@/helpers/apiClient'
+import { doQueryGet } from '@/helpers/apiClient'
 import { GetRecentlyAddedAndUpdatedGamesResponse } from '@/interfaces/api/games/GetRecentlyAddedAndUpdatedGamesResponse'
-import { Button, Container, Title, Text } from '@mantine/core'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { Metadata } from 'next'
-import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'RetroTrack - Home',
@@ -16,19 +13,17 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const homePageData = await doGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames', { next: { revalidate: 60 } })
+  const queryClient = new QueryClient()
+
+  await queryClient.prefetchQuery({
+    queryKey: ['recentlyAddedAndUpdatedGames'],
+    queryFn: async () => await doQueryGet<GetRecentlyAddedAndUpdatedGamesResponse>('/api/games/GetRecentlyAddedAndUpdatedGames'),
+    staleTime: 60000
+  })
+
   return (
-    <main>
-      {homePageData.status !== 200 &&
-        <Container ta="center">
-          <Title order={2} pt="xl">Error {homePageData.status}</Title>
-          <Text pb="lg">Sorry about that, we couldn't load the home page data. Try again later.</Text>
-          <Link href="/home"><Button size="md" radius="md" variant="light">Head Home</Button></Link>
-        </Container>
-      }
-      {homePageData.ok && homePageData.data !== undefined &&
-        <HomeComponent pageData={homePageData.data} />
-      }
-    </main>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <HomeComponent />
+    </HydrationBoundary>
   )
 }

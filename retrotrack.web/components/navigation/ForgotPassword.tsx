@@ -87,7 +87,7 @@ export default function ForgotPasswordModal(props: ForgotPasswordModalProps) {
           my="xs"
           {...form.getInputProps('apiKey')}
         />
-        <Text fz="sm">You can find your RetroAchievements API key <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">here</a>. <br /><b>Your key is not stored.</b> It is only used for verifying that username and API key match, so it's actually you.</Text>
+        <Text fz="sm">You can find your RetroAchievements API key <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">here</a>. <br /><b>Your key is not stored.</b> It is only used for verifying that username and API key match, so it&apos;s actually you.</Text>
 
         <PasswordInput
           leftSection={<IconLock size={16} />}

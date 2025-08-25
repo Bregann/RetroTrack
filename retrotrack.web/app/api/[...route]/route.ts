@@ -1,11 +1,13 @@
-export const runtime = 'nodejs'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 // Use environment variables for configuration
-const API_BASE_URL = process.env.API_BASE_URL || 'https://localhost:7248/api'
-const API_SECRET_KEY = process.env.API_SECRET_KEY || 'supersecret'
+let API_BASE_URL = process.env.API_BASE_URL
+
+if (process.env.NODE_ENV === 'development') {
+  API_BASE_URL = 'https://localhost:7248/api'
+}
+
 const ACCESS_TOKEN_COOKIE = 'accessToken'
 
 // Headers that should not be forwarded from the client to the backend
@@ -35,7 +37,7 @@ async function handler(
 
   // 3) assemble the full URL
   //    only add '?' if there was any search
-  const url = `${API_BASE_URL}/${segments.join('/')}${qs ? `?${qs}` : ''}`
+  const url = `${API_BASE_URL}/${segments.join('/')}${qs !== '' ? `?${qs}` : ''}`
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
 
@@ -48,25 +50,23 @@ async function handler(
     }
   })
 
-  if (accessToken) {
+  if (accessToken !== undefined) {
     headers.set('Authorization', `Bearer ${accessToken}`)
   }
-
-  headers.set('X-ApiSecretKey', API_SECRET_KEY)
 
   // --- Request Body (Prioritize Streaming) ---
   let body: BodyInit | null = null
   const contentType = headers.get('content-type')
 
   // 2. Stream the body for performance, except for specific cases
-  if (req.body && !['GET', 'HEAD'].includes(req.method)) {
+  if (req.body !== null && !['GET', 'HEAD'].includes(req.method)) {
     // multipart/form-data cannot be streamed directly and must be reconstructed.
     // Other content types can be streamed.
-    if (contentType?.includes('multipart/form-data')) {
+    if (contentType !== null && contentType.includes('multipart/form-data')) {
       body = await req.formData()
       // Let fetch set the new Content-Type with the correct boundary
       headers.delete('content-type')
-    } else if(url === `${API_BASE_URL}/auth/DeleteUserSession`){
+    } else if (url === `${API_BASE_URL}/auth/DeleteUserSession`) {
       // set the body to be the refresh token for the logout request
       body = JSON.stringify({ refreshToken: cookieStore.get('refreshToken')?.value })
       cookieStore.delete('refreshToken') // Clear the refresh token cookie
@@ -101,7 +101,7 @@ async function handler(
   })
 
   // Re-apply Set-Cookie headers one by one
-  if (setCookie) {
+  if (setCookie !== null) {
     // getSetCookie() is available in newer environments and is preferred
     const setCookieHeaders = backendRes.headers.getSetCookie?.() ?? [setCookie]
     for (const cookie of setCookieHeaders) {

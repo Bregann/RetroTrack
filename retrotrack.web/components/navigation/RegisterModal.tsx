@@ -45,7 +45,7 @@ const RegisterModal = (props: RegisterModalProps) => {
 
     // Check if there's any error
     if (res.status === 400) {
-      setErrorMessage(res.raw.statusText || 'An error occurred while registering. Please try again later.')
+      setErrorMessage(res.statusMessage ?? 'An error occurred while registering. Please try again later.')
       setRegisterButtonLoading(false)
     }
     else if (res.status !== 200) {
@@ -105,7 +105,7 @@ const RegisterModal = (props: RegisterModalProps) => {
           my="xs"
           {...form.getInputProps('apiKey')}
         />
-        <Text fz="sm">You can find your RetroAchievements API key <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">here</a>. <br /><b>Your key is not stored.</b> It is only used for verifying that username and API key match, so it's actually you.</Text>
+        <Text fz="sm">You can find your RetroAchievements API key <a href='https://retroachievements.org/controlpanel.php' target='_blank' rel="noreferrer">here</a>. <br /><b>Your key is not stored.</b> It is only used for verifying that username and API key match, so it&apos;s actually you.</Text>
 
         <PasswordInput
           placeholder="Password"

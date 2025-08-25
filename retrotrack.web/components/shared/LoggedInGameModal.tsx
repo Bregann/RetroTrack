@@ -30,13 +30,16 @@ import {
   IconTools,
   IconExclamationMark,
   IconRefresh,
+  IconInfoCircle,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
-import { useLoggedInGameInfoQuery } from '@/hooks/games/useLoggedInGameInfoQuery'
 import { AchievementType } from '@/enums/achievementType'
 import { useEffect, useRef, useState } from 'react'
 import notificationHelper from '@/helpers/notificationHelper'
-import { useToggleTrackedGameStatus } from '@/hooks/trackedGames/useToggleTrackedGameStatus'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'
+import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
 
 interface LoggedInGameModalProps {
   gameId: number
@@ -45,8 +48,35 @@ interface LoggedInGameModalProps {
 
 export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
-  const gameQuery = useLoggedInGameInfoQuery(props.gameId)
-  const trackedGameMutation = useToggleTrackedGameStatus()
+  const queryClient = useQueryClient()
+
+  const { isLoading, isError, data, refetch } = useQuery({
+    queryKey: ['getGameInfoForUser', props.gameId],
+    refetchOnMount: true,
+    queryFn: async () => await doQueryGet<GetLoggedInSpecificGameInfoResponse>(`/api/games/GetGameInfoForUser/${props.gameId}`)
+  })
+
+  const { mutateAsync: trackedGameMutation } = useMutationApiData({
+    url: data?.gameTracked === true ? `/api/trackedgames/DeleteTrackedGame/${props.gameId}` : `/api/trackedgames/AddTrackedGame/${props.gameId}`,
+    invalidateQuery: false,
+    queryKey: ['getGameInfoForUser', props.gameId],
+    apiMethod: data?.gameTracked === true ? 'DELETE' : 'POST',
+    onSuccess: async () => {
+      // set the query data to the opposite of what it is currently
+      queryClient.setQueryData(['getGameInfoForUser', props.gameId], (oldData: GetLoggedInSpecificGameInfoResponse | undefined) => {
+        if (oldData === undefined) return oldData
+        return {
+          ...oldData,
+          gameTracked: !oldData.gameTracked
+        }
+      })
+
+      notificationHelper.showSuccessNotification('Success', data?.gameTracked === true ? 'Game untracked.' : 'Game tracked.', 3000, <IconCheck size={16} />)
+    },
+    onError: () => {
+      notificationHelper.showErrorNotification('Error', 'Failed to update tracked game.', 3000, <IconInfoCircle size={16} />)
+    }
+  })
 
   const [hideUnlockedAchievements, setHideUnlockedAchievements] = useState(false)
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
@@ -58,7 +88,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
 
   const handleGameUpdate = async () => {
     setDisabled(true)
-    await gameQuery.refetch()
+    await refetch()
     notificationHelper.showSuccessNotification('Game Updated', 'Game information has been updated', 3000, <IconCheck />)
     gameUpdateButtonTimerRef.current = setTimeout(() => {
       setDisabled(false)
@@ -77,7 +107,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
     if (autoUpdateChecked) {
       notificationHelper.showSuccessNotification('Enabled', 'Achievement auto updates enabled', 3000, <IconCheck />)
       gameAutoUpdateTimerRef.current = setInterval(async () => {
-        await gameQuery.refetch()
+        await refetch()
       }, 60000)
     }
     if (!autoUpdateChecked && gameAutoUpdateTimerRef.current !== null) {
@@ -86,7 +116,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       notificationHelper.showSuccessNotification('Disabled', 'Achievement auto updates disabled', 3000, <IconCheck />)
     }
 
-  }, [autoUpdateChecked, gameQuery])
+  }, [autoUpdateChecked, refetch])
 
   return (
     <Modal
@@ -97,15 +127,15 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       radius="sm"
       title={
         // If gameQuery is loading, show a loading state
-        gameQuery.isLoading ? (
+        isLoading ? (
           <Text>Loading...</Text>
-        ) : gameQuery.isError ? (
+        ) : isError ? (
           <Text c="red">Error loading game info</Text>
         ) : (
           <Group gap="md" align="center" justify="center" style={{ flexWrap: 'nowrap' }}>
             <Box className={styles.iconBox}>
               <Image
-                src={`https://media.retroachievements.org${gameQuery.data?.gameImage}`}
+                src={`https://media.retroachievements.org${data?.gameImage}`}
                 alt="Game Icon"
                 width={64}
                 height={64}
@@ -114,39 +144,39 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               />
             </Box>
             <Text size="xl" fw={700}>
-              {gameQuery.data?.title}
+              {data?.title}
             </Text>
           </Group>
         )
       }
     >
       {/* If gameQuery is loading, show a loading state */}
-      {gameQuery.isLoading &&
+      {isLoading &&
         <Text>Loading game details...</Text>
       }
 
-      {gameQuery.isError &&
+      {isError &&
         <Text c="red">Error loading game info</Text>
       }
 
-      {gameQuery.data !== undefined &&
+      {data !== undefined &&
         <>
           <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
             <Image
-              src={`https://media.retroachievements.org${gameQuery.data.imageInGame}`}
+              src={`https://media.retroachievements.org${data.imageInGame}`}
               alt="In-Game Screenshot"
               radius="sm"
               className={styles.gameScreenshot}
             />
             <Image
-              src={`https://media.retroachievements.org${gameQuery.data.imageTitle}`}
+              src={`https://media.retroachievements.org${data.imageTitle}`}
               alt="Title Screen"
               radius="sm"
               className={styles.gameScreenshot}
             />
             <Box className={styles.gameCoverBox}>
               <Image
-                src={`https://media.retroachievements.org${gameQuery.data.imageBoxArt}`}
+                src={`https://media.retroachievements.org${data.imageBoxArt}`}
                 alt="Box Art"
                 radius="sm"
                 className={styles.gameCoverArt}
@@ -162,14 +192,14 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 <ThemeIcon size="xl" radius="md" color="yellow">
                   <IconTrophy size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta={'center'}>{gameQuery.data.achievementsAwardedTotal.toLocaleString()}/{gameQuery.data.achievementCount.toLocaleString()} Achievements</Text>
+                <Text fw={700} ta={'center'}>{data.achievementsAwardedTotal.toLocaleString()}/{data.achievementCount.toLocaleString()} Achievements</Text>
                 <Stack gap="xs" justify="center" ta={'center'}>
                   <Text size="sm" c="dimmed">
-                    {((gameQuery.data.achievementsAwardedTotal / gameQuery.data.achievementCount) * 100).toFixed(2)}% complete
+                    {((data.achievementsAwardedTotal / data.achievementCount) * 100).toFixed(2)}% complete
                   </Text>
-                  {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.achievementsAwardedSoftcore}</Text>}
-                  {gameQuery.data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {gameQuery.data.achievementsAwardedHardcore}</Text>}
-                  <Text size="sm" c="grey">Locked: {gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal}</Text>
+                  {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {data.achievementsAwardedSoftcore}</Text>}
+                  {data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {data.achievementsAwardedHardcore}</Text>}
+                  <Text size="sm" c="grey">Locked: {data.achievementCount - data.achievementsAwardedTotal}</Text>
                 </Stack>
               </Stack>
             </Card>
@@ -179,13 +209,13 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 <ThemeIcon size="xl" radius="md" color="teal">
                   <IconStar size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta={'center'}>{gameQuery.data.pointsAwardedTotal.toLocaleString()}/{gameQuery.data.totalGamePoints.toLocaleString()} Points</Text>
+                <Text fw={700} ta={'center'}>{data.pointsAwardedTotal.toLocaleString()}/{data.totalGamePoints.toLocaleString()} Points</Text>
                 <Stack gap="xs" justify="center" ta={'center'}>
                   <Text size="sm" c="dimmed">
-                    {((gameQuery.data.pointsAwardedTotal / gameQuery.data.totalGamePoints) * 100).toFixed(2)}% complete
+                    {((data.pointsAwardedTotal / data.totalGamePoints) * 100).toFixed(2)}% complete
                   </Text>
-                  {gameQuery.data.pointsAwardedSoftcore !== gameQuery.data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {gameQuery.data.pointsAwardedSoftcore}</Text>}
-                  {gameQuery.data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {gameQuery.data.pointsAwardedHardcore}</Text>}
+                  {data.pointsAwardedSoftcore !== data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {data.pointsAwardedSoftcore}</Text>}
+                  {data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {data.pointsAwardedHardcore}</Text>}
                 </Stack>
               </Stack>
             </Card>
@@ -201,29 +231,29 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconDeviceGamepad size={16} />
-                      <Text size="sm">{gameQuery.data.consoleName}</Text>
+                      <Text size="sm">{data.consoleName}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconStar size={16} />
-                      <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+                      <Text size="sm">{data.genre !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
 
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconBuilding size={16} />
-                      <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
+                      <Text size="sm">Publisher: {data.publisher !== '' || 'Not Set'}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconTools size={16} />
-                      <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
+                      <Text size="sm">Developer: {data.developer!== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
                 </Group>
 
                 <Group gap="xs">
                   <IconUsers size={16} />
-                  <Text size="sm">{gameQuery.data.players} Players</Text>
+                  <Text size="sm">{data.players} Players</Text>
                 </Group>
               </Stack>
             </Card>
@@ -241,9 +271,9 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                   </Group>
 
                   <Text size="sm" c="dimmed" ta={'center'}>
-                    {gameQuery.data.dateBeatenHardcore === null && gameQuery.data.dateBeatenSoftcore === null
+                    {data.dateBeatenHardcore === null && data.dateBeatenSoftcore === null
                       ? 'N/A'
-                      : gameQuery.data.dateBeatenHardcore ?? gameQuery.data.dateBeatenSoftcore}
+                      : data.dateBeatenHardcore ?? data.dateBeatenSoftcore}
                   </Text>
 
                   <Group gap="6" justify='center' mt={10}>
@@ -251,9 +281,9 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                     <Text>Date Completed/Mastered:</Text>
                   </Group>
                   <Text size="sm" c="dimmed" ta={'center'}>
-                    {gameQuery.data.dateMastered === null && gameQuery.data.dateCompleted === null
+                    {data.dateMastered === null && data.dateCompleted === null
                       ? 'N/A'
-                      : gameQuery.data.dateMastered ?? gameQuery.data.dateCompleted}
+                      : data.dateMastered ?? data.dateCompleted}
                   </Text>
                 </Stack>
               </Stack>
@@ -262,14 +292,14 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
 
           <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
           <Progress.Root size={20} className={styles.progressBar}>
-            {gameQuery.data.achievementsAwardedHardcore != 0 && <Progress.Section value={gameQuery.data.achievementsAwardedHardcore} color="orange">
-              <Progress.Label>Hardcore ({gameQuery.data.achievementsAwardedHardcore})</Progress.Label>
+            {data.achievementsAwardedHardcore != 0 && <Progress.Section value={data.achievementsAwardedHardcore} color="orange">
+              <Progress.Label>Hardcore ({data.achievementsAwardedHardcore})</Progress.Label>
             </Progress.Section>}
-            {gameQuery.data.achievementsAwardedSoftcore !== gameQuery.data.achievementsAwardedHardcore && <Progress.Section value={gameQuery.data.achievementsAwardedSoftcore} color="cyan">
-              <Progress.Label>Softcore ({gameQuery.data.achievementsAwardedSoftcore})</Progress.Label>
+            {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Progress.Section value={data.achievementsAwardedSoftcore} color="cyan">
+              <Progress.Label>Softcore ({data.achievementsAwardedSoftcore})</Progress.Label>
             </Progress.Section>}
-            <Progress.Section value={gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal} color="grey">
-              <Progress.Label>Locked ({gameQuery.data.achievementCount - gameQuery.data.achievementsAwardedTotal})</Progress.Label>
+            <Progress.Section value={data.achievementCount - data.achievementsAwardedTotal} color="grey">
+              <Progress.Label>Locked ({data.achievementCount - data.achievementsAwardedTotal})</Progress.Label>
             </Progress.Section>
           </Progress.Root>
           <Group>
@@ -291,7 +321,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
           </Group>
 
           <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
-            {gameQuery.data.achievements
+            {data.achievements
               .filter((x) => {
                 if (hideUnlockedAchievements) {
                   return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
@@ -353,7 +383,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                       <Stack gap={2} style={{ flex: 1 }}>
                         <Text fw={500}>{achievement.title}</Text>
                         <Text size="sm" c="dimmed">{achievement.description}</Text>
-                        {achievement.dateEarnedSoftcore && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
+                        {achievement.dateEarnedSoftcore !== null && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
                       </Stack>
 
                       <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
@@ -424,13 +454,10 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 </ActionIcon>
               </Tooltip>
               <Button
-                onClick={async () => await trackedGameMutation.mutateAsync({
-                  gameId: props.gameId,
-                  newStatus: !gameQuery.data.gameTracked
-                })}
-                color={gameQuery.data.gameTracked ? 'red' : 'blue'}
+                onClick={async () => { await trackedGameMutation({}) }}
+                color={data.gameTracked ? 'red' : 'blue'}
               >
-                {gameQuery.data.gameTracked ? 'Untrack Game' : 'Track Game'}
+                {data.gameTracked ? 'Untrack Game' : 'Track Game'}
               </Button>
               <Button
                 component="a"
@@ -438,7 +465,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 gradient={{ from: 'indigo', to: 'cyan' }}
                 target="_blank"
                 style={{ ':hover': { color: 'white' } }}
-                href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
+                href={'https://retroachievements.org/game/' + data.gameId}
               >
                 RA Page
               </Button>

@@ -4,7 +4,6 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RetroTrack.Api;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
@@ -154,11 +153,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/hangfire"), branch =>
-{
-    branch.UseApiAuthorizationMiddleware();
-});
 
 app.MapControllers();
 

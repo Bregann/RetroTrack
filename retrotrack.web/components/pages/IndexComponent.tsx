@@ -1,7 +1,7 @@
 'use client'
 
 import { Container, Text, Divider, List, ThemeIcon, rem, Title } from '@mantine/core'
-import { IconCheck, IconCircleCheck } from '@tabler/icons-react'
+import { IconCheck } from '@tabler/icons-react'
 import Link from 'next/link'
 import { Press_Start_2P } from 'next/font/google'
 
@@ -31,7 +31,7 @@ export default function IndexComponent() {
       <Title order={2} ta="left">Features</Title>
       <Text size="md" pb="xs" ta="left">As soon as you register, you get access to these features:</Text>
       <List
-        mx={"xl"}
+        mx={'xl'}
         spacing="xs"
         pb="xs"
         size="md"

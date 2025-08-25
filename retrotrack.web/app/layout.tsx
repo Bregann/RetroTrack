@@ -1,5 +1,3 @@
-export const runtime = 'nodejs'
-
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
@@ -8,12 +6,13 @@ import { AuthProvider } from '@/context/authContext'
 import { Navbar } from '@/components/navigation/Navbar'
 import Providers from './providers'
 import { cookies } from 'next/headers'
-import { doGet } from '@/helpers/apiClient'
+import { doQueryGet } from '@/helpers/apiClient'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 import { GameModalProvider } from '@/context/gameModalContext'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 import { Notifications } from '@mantine/notifications'
 import { Metadata } from 'next'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 
 export const metadata: Metadata = {
   title: 'RetroTrack',
@@ -59,8 +58,7 @@ export default async function RootLayout({
 }) {
 
   const cookieStore = await cookies()
-  let data: GetPublicNavigationDataResponse[] | null = null
-  let loggedInData: GetLoggedInNavigationDataResponse | null = null
+  const queryClient = new QueryClient()
 
   // get the navigation data depending on whether the user is logged in or not
   // if the user is logged in, we will get the navigation data for the logged in user
@@ -74,24 +72,16 @@ export default async function RootLayout({
       .map(c => `${c.name}=${c.value}`)
       .join('; ')
 
-    const result = await doGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData', { cookieHeader })
 
-    if (result.status !== 200 || result.data === undefined) {
-      console.error('Failed to load logged in navigation data:', result.status)
-      loggedInData = null
-    } else {
-      loggedInData = result.data
-    }
+    await queryClient.prefetchQuery({
+      queryKey: ['getLoggedInNavigationData'],
+      queryFn: async () => await doQueryGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData', { headers: { Cookie: cookieHeader } }),
+    })
   } else {
-
-    const result = await doGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData')
-    if (result.status !== 200 || result.data === undefined) {
-      console.error('Failed to load public navigation data:', result.status)
-      data = null
-    }
-    else {
-      data = result.data
-    }
+    await queryClient.prefetchQuery({
+      queryKey: ['getPublicNavigationData'],
+      queryFn: async () => await doQueryGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData'),
+    })
   }
 
   return (
@@ -106,7 +96,9 @@ export default async function RootLayout({
             <Notifications />
             <AuthProvider>
               <GameModalProvider>
-                <Navbar publicNavigationData={data} loggedInNavigationData={loggedInData}>{children}</Navbar>
+                <HydrationBoundary state={dehydrate(queryClient)}>
+                  <Navbar>{children}</Navbar>
+                </HydrationBoundary>
               </GameModalProvider>
             </AuthProvider>
           </MantineProvider>

@@ -24,17 +24,18 @@ import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDevi
 import { Press_Start_2P } from 'next/font/google'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
-import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 import { ConsoleType } from '@/enums/consoleType'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { useAuth } from '@/context/authContext'
-import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 import Image from 'next/image'
 import notificationHelper from '@/helpers/notificationHelper'
-import { doGet, doPost } from '@/helpers/apiClient'
+import { doGet, doPost, doQueryGet } from '@/helpers/apiClient'
 import { RequestUserGameUpdateResponse } from '@/interfaces/api/users/RequestUserGameUpdateResponse'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
+import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -44,8 +45,6 @@ const pressStart2P = Press_Start_2P({
 
 interface NavbarProps {
   children: React.ReactNode,
-  publicNavigationData: GetPublicNavigationDataResponse[] | null
-  loggedInNavigationData?: GetLoggedInNavigationDataResponse | null
 }
 
 export function Navbar(props: NavbarProps) {
@@ -112,6 +111,17 @@ export function Navbar(props: NavbarProps) {
     setUserUpdateRequested(true)
     setUpdateGamesButtonLoading(false)
   }
+
+  const { data: publicNavigationData, isLoading: isLoadingPublicNavigationData } = useQuery({
+    queryKey: ['getPublicNavigationData'],
+    queryFn: async () => await doQueryGet<GetPublicNavigationDataResponse[]>('/api/navigation/GetPublicNavigationData')
+  })
+
+  const { data: loggedInNavigationData, isLoading: isLoadingLoggedInNavigationData } = useQuery({
+    queryKey: ['getLoggedInNavigationData'],
+    queryFn: async () => await doQueryGet<GetLoggedInNavigationDataResponse>('/api/navigation/GetLoggedInNavigationData'),
+    enabled: auth.user !== null,
+  })
 
   return (
     <AppShell
@@ -281,7 +291,7 @@ export function Navbar(props: NavbarProps) {
           {consoleTypes.map((type) => {
             return (
               <NavLink label={ConsoleType[type]} key={type}>
-                {props.publicNavigationData !== null && props.publicNavigationData.filter(x => x.consoleType === type).map((navItem) => {
+                {!isLoadingPublicNavigationData && publicNavigationData !== undefined && auth.isAuthenticated === false && publicNavigationData.filter(x => x.consoleType === type).map((navItem) => {
                   return (
                     <div key={navItem.consoleId}>
                       <NavLink
@@ -300,7 +310,7 @@ export function Navbar(props: NavbarProps) {
                     </div>
                   )
                 })}
-                {props.loggedInNavigationData !== null && props.loggedInNavigationData?.consoleProgressData.filter(x => x.consoleType === type).map((navItem) => {
+                {!isLoadingLoggedInNavigationData && loggedInNavigationData !== undefined && loggedInNavigationData.consoleProgressData.filter(x => x.consoleType === type).map((navItem) => {
                   return (
                     <div key={navItem.consoleId}>
                       <NavLink
@@ -344,34 +354,34 @@ export function Navbar(props: NavbarProps) {
 
         </ScrollArea>
 
-        {props.loggedInNavigationData !== undefined && props.loggedInNavigationData !== null &&
+        {loggedInNavigationData !== undefined &&
           <Box p="xs" m="xs" className={styles.profileBox}>
             <Group gap="sm" mb="" align="center">
-              <Link href={`/profile/${props.loggedInNavigationData.raName}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setCurrentPage('/profile')}>
+              <Link href={`/profile/${loggedInNavigationData.raName}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setCurrentPage('/profile')}>
                 <Image
                   alt='User avatar'
-                  src={`https://media.retroachievements.org${props.loggedInNavigationData.raUserProfileUrl}`}
+                  src={`https://media.retroachievements.org${loggedInNavigationData.raUserProfileUrl}`}
                   width={55}
                   height={55}
                   style={{ borderRadius: '8px' }}
                 />
               </Link>
 
-              <Text fw={600} size="md">{props.loggedInNavigationData.raName}</Text>
+              <Text fw={600} size="md">{loggedInNavigationData.raName}</Text>
             </Group>
 
             <Stack gap={4} mb="xs">
-              {props.loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (SC): {props.loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
-              {props.loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (HC): {props.loggedInNavigationData.gamesBeatenHardcore.toLocaleString()}</Text>}
-              {props.loggedInNavigationData.totalAchievementsSoftcore !== props.loggedInNavigationData.totalAchievementsHardcore && <Text size="xs" c="dimmed">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore - props.loggedInNavigationData.totalAchievementsSoftcore}</Text>}
-              {props.loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {props.loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
-              {props.loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {props.loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
-              {props.loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {props.loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
+              {loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (SC): {loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (HC): {loggedInNavigationData.gamesBeatenHardcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.totalAchievementsSoftcore !== loggedInNavigationData.totalAchievementsHardcore && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore - loggedInNavigationData.totalAchievementsSoftcore}</Text>}
+              {loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
+              {loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
             </Stack>
 
             <Button
               component={Link}
-              href={`/profile/${props.loggedInNavigationData.raName}`}
+              href={`/profile/${loggedInNavigationData.raName}`}
               variant="subtle"
               size="xs"
               fullWidth

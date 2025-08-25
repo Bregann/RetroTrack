@@ -12,6 +12,15 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
+  {
+    ignores: [
+      'node_modules',
+      '.next',
+      'dist',
+      'build',
+      'next-env.d.ts'
+    ],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -33,6 +42,8 @@ const eslintConfig = [
         named: 'never',
         asyncArrow: 'always'
       }],
+      'space-before-blocks': ['error', 'always'],
+      'keyword-spacing': ['error', { before: true, after: true }],
       'eol-last': ['error', 'always'],
       'no-multi-spaces': ['error'],
       'key-spacing': ['error', {
@@ -42,7 +53,16 @@ const eslintConfig = [
       }],
       semi: ['error', 'never'],
       quotes: ['error', 'single', { avoidEscape: true }],
-      indent: ['error', 2, { SwitchCase: 1 }]
+      'block-spacing': ['error', 'always'],
+      '@typescript-eslint/strict-boolean-expressions': ['error', {
+        allowString: false,
+        allowNumber: false,
+        allowNullableObject: false,
+        allowNullableBoolean: false,
+        allowNullableString: false,
+        allowNullableNumber: false,
+        allowAny: false,
+      }]
     }
   }
 ]

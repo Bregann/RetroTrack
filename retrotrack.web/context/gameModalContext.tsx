@@ -30,7 +30,7 @@ export const GameModalProvider = ({ children }: { children: React.ReactNode }) =
 
 export const useGameModal = () => {
   const context = useContext(GameModalContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useGameModal must be used within a GameModalProvider')
   }
   return context

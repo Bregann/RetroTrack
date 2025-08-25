@@ -29,9 +29,11 @@ import {
   IconExclamationMark,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
-import { usePublicGetGameInfoQuery } from '@/hooks/games/usePublicGetGameInfoQuery'
 import { useState } from 'react'
 import { AchievementType } from '@/enums/achievementType'
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import { GetPublicSpecificGameInfoResponse } from '@/interfaces/api/games/GetPublicSpecificGameInfoResponse'
 
 interface LoggedOutGameModalProps {
   gameId: number
@@ -40,7 +42,11 @@ interface LoggedOutGameModalProps {
 
 export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
-  const gameQuery = usePublicGetGameInfoQuery(props.gameId)
+  const { isLoading, isError, data } = useQuery({
+    queryKey: ['getPublicSpecificGameInfo', props.gameId],
+    refetchOnMount: true,
+    queryFn: async () => await doQueryGet<GetPublicSpecificGameInfoResponse>(`/api/games/getPublicSpecificGameInfo/${props.gameId}`)
+  })
 
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
   const [showMissableOnly, setShowMissableOnly] = useState(false)
@@ -54,15 +60,15 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
       radius="sm"
       title={
         // If gameQuery is loading, show a loading state
-        gameQuery.isLoading ? (
+        isLoading ? (
           <Text>Loading...</Text>
-        ) : gameQuery.isError ? (
+        ) : isError ? (
           <Text c="red">Error loading game info</Text>
         ) : (
           <Group gap="md" align="center" justify="center" style={{ flexWrap: 'nowrap' }}>
             <Box className={styles.iconBox}>
               <Image
-                src={`https://media.retroachievements.org${gameQuery.data?.gameImage}`}
+                src={`https://media.retroachievements.org${data?.gameImage}`}
                 alt="Game Icon"
                 width={64}
                 height={64}
@@ -71,39 +77,39 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
               />
             </Box>
             <Text size="xl" fw={700}>
-              {gameQuery.data?.title}
+              {data?.title}
             </Text>
           </Group>
         )
       }
     >
       {/* If gameQuery is loading, show a loading state */}
-      {gameQuery.isLoading &&
+      {isLoading &&
         <Text>Loading game details...</Text>
       }
 
-      {gameQuery.isError &&
+      {isError &&
         <Text c="red">Error loading game info</Text>
       }
 
-      {gameQuery.data !== undefined &&
+      {data !== undefined &&
         <>
           <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
             <Image
-              src={`https://media.retroachievements.org${gameQuery.data.imageInGame}`}
+              src={`https://media.retroachievements.org${data.imageInGame}`}
               alt="In-Game Screenshot"
               radius="sm"
               className={styles.gameScreenshot}
             />
             <Image
-              src={`https://media.retroachievements.org${gameQuery.data.imageTitle}`}
+              src={`https://media.retroachievements.org${data.imageTitle}`}
               alt="Title Screen"
               radius="sm"
               className={styles.gameScreenshot}
             />
             <Box className={styles.gameCoverBox}>
               <Image
-                src={`https://media.retroachievements.org${gameQuery.data.imageBoxArt}`}
+                src={`https://media.retroachievements.org${data.imageBoxArt}`}
                 alt="Box Art"
                 radius="sm"
                 className={styles.gameCoverArt}
@@ -119,7 +125,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 <ThemeIcon size="xl" radius="md" color="yellow">
                   <IconTrophy size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta="center">{gameQuery.data.achievementCount} Achievements</Text>
+                <Text fw={700} ta="center">{data.achievementCount} Achievements</Text>
               </Stack>
             </Card>
 
@@ -128,7 +134,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 <ThemeIcon size="xl" radius="md" color="teal">
                   <IconStar size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta={'center'}>{gameQuery.data.achievements.reduce((partialSum, x) => partialSum + x.points, 0)} Points</Text>
+                <Text fw={700} ta={'center'}>{data.achievements.reduce((partialSum, x) => partialSum + x.points, 0)} Points</Text>
               </Stack>
             </Card>
 
@@ -143,29 +149,29 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconDeviceGamepad size={16} />
-                      <Text size="sm">{gameQuery.data.consoleName}</Text>
+                      <Text size="sm">{data.consoleName}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconStar size={16} />
-                      <Text size="sm">{gameQuery.data.genre || 'Not Set'}</Text>
+                      <Text size="sm">{data.genre !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
 
                   <Stack gap="4">
                     <Group gap="xs">
                       <IconBuilding size={16} />
-                      <Text size="sm">Publisher: {gameQuery.data.publisher || 'Not Set'}</Text>
+                      <Text size="sm">Publisher: {data.publisher !== '' || 'Not Set'}</Text>
                     </Group>
                     <Group gap="xs">
                       <IconTools size={16} />
-                      <Text size="sm">Developer: {gameQuery.data.developer || 'Not Set'}</Text>
+                      <Text size="sm">Developer: {data.developer !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
                 </Group>
 
                 <Group gap="xs">
                   <IconUsers size={16} />
-                  <Text size="sm">{gameQuery.data.players} Players</Text>
+                  <Text size="sm">{data.players} Players</Text>
                 </Group>
               </Stack>
             </Card>
@@ -186,7 +192,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
           </Group>
 
           <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
-            {gameQuery.data.achievements
+            {data.achievements
               .filter((x) => {
                 if (showProgressionOnly && showMissableOnly) {
                   return (
@@ -298,7 +304,7 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 gradient={{ from: 'indigo', to: 'cyan' }}
                 target="_blank"
                 style={{ ':hover': { color: 'white' } }}
-                href={'https://retroachievements.org/game/' + gameQuery.data.gameId}
+                href={'https://retroachievements.org/game/' + data.gameId}
               >
                 RetroAchievements Page
               </Button>
