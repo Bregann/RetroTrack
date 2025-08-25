@@ -4,7 +4,6 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RetroTrack.Api;
 using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
