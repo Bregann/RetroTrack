@@ -34,7 +34,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import { useAuth } from '@/context/authContext'
 import { useQuery } from '@tanstack/react-query'
 import Loading from '@/app/loading'
-import { useMutationPost } from '@/helpers/mutations/useMutationPost'
+import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
 
 interface UserProfileComponentProps {
   username: string
@@ -113,10 +113,11 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
     }
   }
 
-  const { mutateAsync: saveWallPositionsMutateAsync } = useMutationPost({
+  const { mutateAsync: saveWallPositionsMutateAsync } = useMutationApiData({
     url: '/api/users/SaveUserGameWallPositions',
     queryKey: ['GetUserProfile', props.username],
     invalidateQuery: true,
+    apiMethod: 'POST',
     onError: () => {
       notificationHelper.showErrorNotification('Error', 'Failed to save wall positions.', 3000, <IconInfoCircle size={16} />)
     },
