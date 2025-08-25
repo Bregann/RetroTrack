@@ -29,7 +29,7 @@ export default async function Page() {
       .map(c => `${c.name}=${c.value}`)
       .join('; ')
 
-    queryClient.prefetchQuery({
+    await queryClient.prefetchQuery({
       queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true'],
       queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/GetUserProgressForConsole?ConsoleId=-1&Skip=0&Take=100&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true', { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000

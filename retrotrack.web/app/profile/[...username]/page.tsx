@@ -9,16 +9,16 @@ export default async function Page({
   params: { username: string }
 }) {
   const { username } = await params
-  const query = new QueryClient()
+  const queryClient = new QueryClient()
 
-  query.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['GetUserProfile', username],
     queryFn: async () => await doQueryGet<GetUserProfileResponse>(`/api/users/GetUserProfile/${username}`, { next: { revalidate: 60 } }),
     staleTime: 60000
   })
 
   return (
-    <HydrationBoundary state={dehydrate(query)}>
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <UserProfileComponent username={username} />
     </HydrationBoundary>
   )

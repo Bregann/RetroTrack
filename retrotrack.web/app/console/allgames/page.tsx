@@ -29,8 +29,8 @@ export default async function Page() {
       .map(c => `${c.name}=${c.value}`)
       .join('; ')
 
-    queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true'],
+    await queryClient.prefetchQuery({
+      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true-lg'],
       queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/GetUserProgressForConsole?ConsoleId=-1&Skip=0&Take=100&SortByName=true', { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000
     })
@@ -44,8 +44,8 @@ export default async function Page() {
     )
   }
   else {
-    queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true-lg'],
+    await queryClient.prefetchQuery({
+      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true'],
       queryFn: async () => await doQueryGet<GetGamesForConsoleResponse>('/api/games/GetGamesForConsole?ConsoleId=-1&Skip=0&Take=100&SortByName=true', { next: { revalidate: 60 } }),
       staleTime: 60000
     })
