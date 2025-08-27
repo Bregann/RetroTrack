@@ -25,6 +25,7 @@ export interface GetLoggedInSpecificGameInfoResponse {
     dateBeatenHardcore: string | null
     dateCompleted: string | null
     dateMastered: string | null
+    userNotes: string | null
 }
 
 export interface UserAchievement {

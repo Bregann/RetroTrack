@@ -160,7 +160,7 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v5.2 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v6.0 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -410,9 +410,21 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v5.2']}
+            defaultValue={['v6.0']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v6.0">
+              <Accordion.Control>RetroTrack v6.0 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicate game page which includes more information</List.Item>
+                  <List.Item>Ability to add notes to games. Easily keep track of information</List.Item>
+                  <List.Item>Various UI design updates</List.Item>
+                  <List.Item>Various code improvements</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v5.2">
               <Accordion.Control>RetroTrack v5.2 Released</Accordion.Control>
               <Accordion.Panel>

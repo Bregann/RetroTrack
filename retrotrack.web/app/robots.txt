@@ -1,0 +1,12 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Main sitemap index
+Sitemap: https://retrotrack.bregan.me/sitemap.xml
+# Static pages and consoles sitemap
+Sitemap: https://retrotrack.bregan.me/sitemap-static.xml
+# Game sitemaps will be referenced in the sitemap index
+
+# Rate limiting
+Crawl-delay: 1

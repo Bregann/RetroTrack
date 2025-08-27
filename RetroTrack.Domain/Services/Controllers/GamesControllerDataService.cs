@@ -341,7 +341,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 DateBeatenHardcore = gameBeatenDateHardcore,
                 DateCompleted = gameCompletedDate,
                 DateMastered = gameMasteredDate,
-                GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId)
+                GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId),
+                UserNotes = context.UserGameNotes.Where(x => x.UserId == userId && x.GameId == gameId).Select(x => x.Notes).FirstOrDefault()
             };
         }
 
@@ -482,6 +483,70 @@ namespace RetroTrack.Domain.Services.Controllers
                 TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
                 ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
+        }
+
+        public async Task<GetLeaderboardsFromGameIdResponse?> GetLeaderboardsFromGameId(int gameId)
+        {
+            // get the first 500 leaderboards
+            var leaderboards = await raApiService.GetGameLeaderboards(gameId);
+
+            if (leaderboards == null)
+            {
+                return null;
+            }
+
+            // if there's more than 500 leaderboards, we need to get the rest and add them to the list
+            if (leaderboards.Total > 500)
+            {
+                int skipAmount = 500;
+                while (skipAmount < leaderboards.Total)
+                {
+                    var moreLeaderboards = await raApiService.GetGameLeaderboards(gameId, skipAmount);
+
+                    if (moreLeaderboards != null)
+                    {
+                        leaderboards.Results.AddRange(moreLeaderboards.Results);
+                    }
+
+                    skipAmount += 500;
+                }
+            }
+
+            return new GetLeaderboardsFromGameIdResponse
+            {
+                TotalLeaderboards = leaderboards.Total,
+                Leaderboards = leaderboards.Results.OrderBy(x => x.RankAsc).Select((x, index) => new LeaderboardDetails
+                {
+                    LeaderboardId = x.Id,
+                    Rank = index + 1,
+                    Title = x.Title,
+                    Description = x.Description,
+                    Author = x.Author,
+                    TopUser = x.TopEntry.User ?? "N/A",
+                    TopScore = x.TopEntry.FormattedScore ?? "N/A"
+                }).ToArray()
+            };
+        }
+
+        public async Task UpdateUserNotes(int userId, int gameId, string notes)
+        {
+            var existingNotes = await context.UserGameNotes.FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == gameId);
+
+            if (existingNotes != null)
+            {
+                existingNotes.Notes = notes;
+            }
+            else
+            {
+                await context.UserGameNotes.AddAsync(new UserGameNote
+                {
+                    UserId = userId,
+                    GameId = gameId,
+                    Notes = notes
+                });
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

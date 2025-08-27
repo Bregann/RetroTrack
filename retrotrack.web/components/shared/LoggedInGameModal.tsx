@@ -17,6 +17,7 @@ import {
   Tooltip,
   Paper,
   ActionIcon,
+  Textarea,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
@@ -78,6 +79,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
     }
   })
 
+  const [userNotes, setUserNotes] = useState<string | null>(null)
   const [hideUnlockedAchievements, setHideUnlockedAchievements] = useState(false)
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
   const [showMissableOnly, setShowMissableOnly] = useState(false)
@@ -94,6 +96,19 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       setDisabled(false)
     }, 30000)
   }
+
+  const { mutateAsync: handleSaveNotes } = useMutationApiData<string, null>({
+    url: `/api/games/UpdateUserGameNotes/${props.gameId}`,
+    invalidateQuery: false,
+    queryKey: ['getGameInfoForUser', props.gameId],
+    apiMethod: 'POST',
+    onSuccess: async () => {
+      notificationHelper.showSuccessNotification('Success', 'User notes updated.', 3000, <IconCheck size={16} />)
+    },
+    onError: () => {
+      notificationHelper.showErrorNotification('Error', 'Failed to update user notes.', 3000, <IconInfoCircle size={16} />)
+    }
+  })
 
   useEffect(() => {
     return () => {
@@ -117,6 +132,10 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
     }
 
   }, [autoUpdateChecked, refetch])
+
+  useEffect(() => {
+    setUserNotes(data?.userNotes ?? null)
+  }, [data])
 
   return (
     <Modal
@@ -246,7 +265,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                     </Group>
                     <Group gap="xs">
                       <IconTools size={16} />
-                      <Text size="sm">Developer: {data.developer!== '' || 'Not Set'}</Text>
+                      <Text size="sm">Developer: {data.developer !== '' || 'Not Set'}</Text>
                     </Group>
                   </Stack>
                 </Group>
@@ -319,6 +338,20 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               onChange={(e) => setShowMissableOnly(e.currentTarget.checked)}
             />
           </Group>
+
+          <Stack gap="xs" mb="md" mt="sm">
+            <Text fw={500}>Your Notes</Text>
+            <Textarea
+              placeholder="Write your notes here..."
+              minRows={3}
+              autosize
+              value={userNotes ?? ''}
+              onChange={(e) => setUserNotes(e.currentTarget.value)}
+            />
+            <Group justify="right">
+              <Button onClick={async () => { await handleSaveNotes(userNotes ?? '') }}>Save Notes</Button>
+            </Group>
+          </Stack>
 
           <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
             {data.achievements
@@ -429,19 +462,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
               })
             }
           </SimpleGrid>
-
-          {/* Notes Section */}
-          {/* <Stack gap="xs" mb="md">
-          <Text fw={500}>Your Notes</Text>
-          <Textarea
-            placeholder="Write your notes here..."
-            minRows={3}
-            autosize
-          />
-          <Group justify="right">
-            <Button>Save Notes</Button>
-          </Group>
-        </Stack> */}
           <Paper className={styles.footer}>
             <Group justify="apart" gap="xs">
               <Tooltip label="Update game">

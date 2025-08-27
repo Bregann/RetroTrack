@@ -11,16 +11,19 @@ namespace RetroTrack.Domain.Database.Models
 
         [Required]
         public required int UserId { get; set; }
+
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
 
         [Required]
         public required int GameId { get; set; }
+
         [ForeignKey(nameof(GameId))]
         public virtual Game Game { get; set; } = null!;
 
         [Required]
         public required int ConsoleId { get; set; }
+
         [ForeignKey(nameof(ConsoleId))]
         public virtual GameConsole Console { get; set; } = null!;
 

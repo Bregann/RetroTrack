@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
@@ -171,6 +172,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   })
 
   const gameModal = useGameModal()
+  const router = useRouter()
 
   const searchDropdownOptions = [
     { value: '0', label: 'Game Title' },
@@ -274,6 +276,16 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
                   onRowClick={(item) => {
                     gameModal.showModal(item.gameId)
                   }}
+                  actions={[{
+                    onClick: (item) => gameModal.showModal(item.gameId),
+                    label: 'Game Modal',
+                    variant: 'filled'
+                  },
+                  {
+                    onClick: (item) => router.push(`/game/${item.gameId}`),
+                    label: 'Game Page',
+                    variant: 'filled'
+                  }]}
                 />
               </>
             )}
