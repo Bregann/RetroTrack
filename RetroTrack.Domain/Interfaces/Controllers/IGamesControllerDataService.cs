@@ -10,5 +10,7 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfo(int gameId);
         Task<GetLoggedInSpecificGameInfoResponse?> GetLoggedInSpecificGameInfo(int userId, int gameId);
         Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole(int userId, GetUserProgressForConsoleRequest request);
+        Task<GetLeaderboardsFromGameIdResponse?> GetLeaderboardsFromGameId(int gameId);
+        Task UpdateUserNotes(int userId, int gameId, string notes);
     }
 }

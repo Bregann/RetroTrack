@@ -14,4 +14,5 @@ export interface Game {
     gameImageUrl: string
     points: number
     consoleName?: string // Optional, only present if consoleId is -1
+    buttons?: string
 }

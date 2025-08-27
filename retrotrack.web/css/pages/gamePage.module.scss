@@ -1,0 +1,27 @@
+.pageContainer {
+  min-height: 100vh;
+  padding: 0;
+}
+
+.leaderboardCard {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.leaderboardEntry {
+  transition: background-color 0.2s ease;
+}
+
+.leaderboardEntry:hover {
+  background-color: light-dark(#f1f3f4, #373a40) !important;
+}
+
+.topThreeEntry {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+}

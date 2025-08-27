@@ -268,5 +268,20 @@ namespace RetroTrack.Domain.Services
 
             return JsonConvert.DeserializeObject<GetUserProfile>(response.Content);
         }
+
+        public async Task<GetGameLeaderboards?> GetGameLeaderboards(int gameId, int skipAmount = 0, int count = 500)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGameLeaderboards.php?z={_apiUsername}&y={_apiKey}&i={gameId}&c={count}&o={skipAmount}", Method.Get);
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game leaderboards for game id {gameId}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetGameLeaderboards>(response.Content);
+        }
     }
 }

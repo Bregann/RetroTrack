@@ -32,6 +32,8 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public string? DateBeatenHardcore { get; set; }
         public string? DateCompleted { get; set; }
         public string? DateMastered { get; set; }
+
+        public string? UserNotes { get; set; }
     }
 
     public class UserAchievement
