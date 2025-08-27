@@ -34,6 +34,7 @@ import { AchievementType } from '@/enums/achievementType'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetPublicSpecificGameInfoResponse } from '@/interfaces/api/games/GetPublicSpecificGameInfoResponse'
+import Link from 'next/link'
 
 interface LoggedOutGameModalProps {
   gameId: number
@@ -307,6 +308,15 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 href={'https://retroachievements.org/game/' + data.gameId}
               >
                 RetroAchievements Page
+              </Button>
+              <Button
+                component={Link}
+                variant="gradient"
+                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                href={'/game/'.concat(data.gameId.toString()) }
+                onClick={() => props.onClose()}
+              >
+                RetroTrack Page
               </Button>
             </Group>
           </Paper>

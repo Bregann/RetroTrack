@@ -41,6 +41,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'
 import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
+import Link from 'next/link'
 
 interface LoggedInGameModalProps {
   gameId: number
@@ -488,6 +489,15 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 href={'https://retroachievements.org/game/' + data.gameId}
               >
                 RA Page
+              </Button>
+              <Button
+                component={Link}
+                variant="gradient"
+                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                href={'/game/'.concat(data.gameId.toString()) }
+                onClick={() => props.onClose()}
+              >
+                RetroTrack Page
               </Button>
               <Checkbox
                 label="Auto Update Achievements"
