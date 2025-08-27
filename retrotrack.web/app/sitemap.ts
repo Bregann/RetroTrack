@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Add entries for each game sitemap chunk
       for (let i = 0; i < numberOfSitemaps; i++) {
         sitemapEntries.push({
-          url: `https://retrotrack.bregan.me/sitemap-games/${i}`,
+          url: `https://retrotrack.bregan.me/sitemap-games/${i}/sitemap.xml`,
           lastModified: new Date(),
           changeFrequency: 'daily' as const,
           priority: 0.8
