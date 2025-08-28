@@ -306,13 +306,16 @@ namespace RetroTrack.Domain.Services.Controllers
                     .OrderByDescending(x => x.Value.DateEarned)
                     .FirstOrDefault();
 
-                gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
+                if (lastAchievement.Value != null)
+                {
+                    gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
 
-                var lastAchievementHardcore = data.Achievements
-                    .OrderByDescending(x => x.Value.DateEarnedHardcore)
-                    .FirstOrDefault();
+                    var lastAchievementHardcore = data.Achievements
+                        .OrderByDescending(x => x.Value.DateEarnedHardcore)
+                        .FirstOrDefault();
 
-                gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
+                    gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
+                }
             }
 
             return new GetLoggedInSpecificGameInfoResponse
