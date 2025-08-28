@@ -28,8 +28,8 @@ export default async function Page() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['Skip=0&Take=100&SortByName=true'],
-      queryFn: () => doQueryGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=100&SortByName=true', { next: { revalidate: 60 }, cookieHeader }),
+      queryKey: ['Skip=0&Take=25&SortByName=true'],
+      queryFn: () => doQueryGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=25&SortByName=true', { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000
     })
   }

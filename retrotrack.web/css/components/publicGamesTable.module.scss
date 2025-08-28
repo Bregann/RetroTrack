@@ -6,9 +6,26 @@
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 10px;
+    
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        padding: 8px;
+        margin: 0 8px;
+    }
 }
 
 .roundedImage {
   border-radius: 5px;
   flex-shrink: 0;
+  
+  // Responsive image sizing
+  @media (max-width: 768px) {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  @media (max-width: 480px) {
+    width: 40px !important;
+    height: 40px !important;
+  }
 }

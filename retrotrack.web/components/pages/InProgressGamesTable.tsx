@@ -7,20 +7,15 @@ import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
-import { useDebouncedState } from '@mantine/hooks'
+import { useDebouncedState, useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 import { HighestAwardKind } from '@/enums/highestAwardKind'
-import { Press_Start_2P } from 'next/font/google'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
 import Link from 'next/link'
-
-const pressStart2P = Press_Start_2P({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { useRouter } from 'next/navigation'
+import { pressStart2P } from '@/font/pressStart2P'
 
 const columns: Column<LoggedInGame>[] = [
   {
@@ -28,13 +23,15 @@ const columns: Column<LoggedInGame>[] = [
     key: 'gameImageUrl',
     render: (item) => {
       return (
-        <Image
-          src={`https://media.retroachievements.org${item.gameImageUrl}`}
-          alt={`${item.gameTitle} achievement icon`}
-          width={64}
-          height={64}
-          className={styles.roundedImage}
-        />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
+          <Image
+            src={`https://media.retroachievements.org${item.gameImageUrl}`}
+            alt={`${item.gameTitle} achievement icon`}
+            width={64}
+            height={64}
+            className={styles.roundedImage}
+          />
+        </div>
       )
     }
   },
@@ -104,6 +101,23 @@ const columns: Column<LoggedInGame>[] = [
 ]
 
 export default function InProgressGamesTable() {
+  // Responsive breakpoints
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
+  // Hide certain columns on smaller screens
+  const responsiveColumns = useMemo(() => {
+    const cols = [...columns]
+    if (isMobile) {
+      // On mobile, hide genre and player count
+      cols.forEach(col => {
+        if (col.key === 'gameGenre' || col.key === 'playerCount') {
+          col.show = false
+        }
+      })
+    }
+    return cols
+  }, [isMobile])
+
   const [page, setPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption<LoggedInGame>>({
     key: 'gameTitle',
@@ -115,9 +129,13 @@ export default function InProgressGamesTable() {
   const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
   const [hideBeatenGames, setHideBeatenGames] = useState(false)
 
+  const [pageSize, setPageSize] = useState(25)
+
+  const router = useRouter()
+
   const queryString = useMemo(() => {
-    const skip = (page - 1) * 100
-    const take = 100
+    const skip = (page - 1) * pageSize
+    const take = pageSize
     const sortKeyMap: Record<string, string> = {
       gameTitle: 'SortByName',
       gameGenre: 'SortByGenre',
@@ -139,7 +157,7 @@ export default function InProgressGamesTable() {
     }
 
     return query
-  }, [hideBeatenGames, page, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
+  }, [hideBeatenGames, page, pageSize, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [queryString],
@@ -159,7 +177,7 @@ export default function InProgressGamesTable() {
   const totalPages = data?.totalPages ?? 0
 
   return (
-    <Container size="95%">
+    <Container size={isMobile ? '100%' : '95%'}>
       {isLoading &&
         <Loading />
       }
@@ -174,12 +192,12 @@ export default function InProgressGamesTable() {
         <>
           <Container ta="center" py="xs">
             <Text
-              size={'28px'}
+              size={isMobile ? '20px' : '28px'}
               mt={'md'}
               ta="center"
               className={pressStart2P.className}
             >In Progress Games</Text>
-            <Text mb="xs">There are a total of {data.totalCount} games!</Text>
+            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount} games!</Text>
           </Container>
 
           <Paper className={styles.paper}>
@@ -196,15 +214,16 @@ export default function InProgressGamesTable() {
                   justify="center"
                   mt={10}
                   mb={10}
-                  pr={20}
-                  pl={20}
+                  pr={isMobile ? 10 : 20}
+                  pl={isMobile ? 10 : 20}
                   style={{ width: '100%' }}
+                  gap={isMobile ? 'xs' : 'md'}
                 >
                   <Input
                     placeholder="Search..."
                     style={{
                       flex: 1,
-                      minWidth: 0,
+                      minWidth: isMobile ? 150 : 200,
                     }}
                     onChange={(e) => {
                       if (e.currentTarget.value.trim() === '') {
@@ -218,18 +237,20 @@ export default function InProgressGamesTable() {
                   <Select
                     data={searchDropdownOptions}
                     style={{
-                      flex: '0 0 150px',
+                      flex: isMobile ? '0 0 100px' : '0 0 150px',
                       minWidth: 0,
                     }}
                     clearable
                     defaultValue={searchDropdownValue}
                     onChange={(value) => setSearchDropdownValue(value ?? '0')}
                   />
-                  <Button style={{ flex: '0 0 auto', ml: 10 }}
+                  <Button
+                    style={{ flex: '0 0 auto' }}
+                    size={isMobile ? 'sm' : 'md'}
                     onClick={() => { setSearchTerm(searchInput) }}
                     disabled={searchInput === null || searchInput.trim() === ''}
                   >
-                    Search
+                    {isMobile ? 'Go' : 'Search'}
                   </Button>
                 </Group>
                 <Group ml={20}>
@@ -237,7 +258,7 @@ export default function InProgressGamesTable() {
                 </Group>
                 <PaginatedTable
                   data={data!.games}
-                  columns={columns}
+                  columns={responsiveColumns}
                   page={page}
                   total={totalPages}
                   sortOption={sortOption}
@@ -249,6 +270,25 @@ export default function InProgressGamesTable() {
                   onRowClick={(item) => {
                     gameModal.showModal(item.gameId)
                   }}
+                  pageSize={pageSize}
+                  onPageSizeChange={(newPageSize) => {
+                    setPageSize(newPageSize)
+                    setPage(1) // Reset to first page when changing page size
+                  }}
+                  pageSizeOptions={[10, 25, 50, 100]}
+                  showPageSizeSelector={true}
+                  actions={[
+                  {
+                    onClick: (item) => gameModal.showModal(item.gameId),
+                    label: 'Game Modal',
+                    variant: 'filled'
+                  },
+                  {
+                    onClick: (item) => router.push(`/game/${item.gameId}`),
+                    label: 'Game Page',
+                    variant: 'filled'
+                  }
+                ]}
                 />
               </>
             )}

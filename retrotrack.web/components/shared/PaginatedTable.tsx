@@ -1,7 +1,7 @@
 'use client'
 
 import React, { ReactNode } from 'react'
-import { Table, Pagination, Button, Group } from '@mantine/core'
+import { Table, Pagination, Button, Group, Select } from '@mantine/core'
 import { IconArrowDown, IconArrowUp, IconLineDashed } from '@tabler/icons-react'
 
 export interface Column<T> {
@@ -41,6 +41,10 @@ export interface PaginatedTableProps<T> {
   actions?: ActionButton<T>[]
   actionsTitle?: string
   renderActions?: (item: T, index: number) => ReactNode
+  pageSize?: number
+  onPageSizeChange?: (pageSize: number) => void
+  pageSizeOptions?: number[]
+  showPageSizeSelector?: boolean
 }
 
 export function PaginatedTable<T>({
@@ -55,7 +59,11 @@ export function PaginatedTable<T>({
   styles,
   actions,
   actionsTitle = 'Actions',
-  renderActions
+  renderActions,
+  pageSize = 100,
+  onPageSizeChange,
+  pageSizeOptions = [5, 10, 25, 50, 100],
+  showPageSizeSelector = false
 }: PaginatedTableProps<T>) {
   const currentKey = sortOption?.key
   const currentDir = sortOption?.direction ?? 'asc'
@@ -89,7 +97,7 @@ export function PaginatedTable<T>({
         </Table.Td>
       ))}
       {hasActions !== undefined && (
-        <Table.Td>
+        <Table.Td style={{ whiteSpace: 'nowrap' }}>
           {renderActions !== undefined ? (
             renderActions(item, index)
           ) : (
@@ -119,35 +127,73 @@ export function PaginatedTable<T>({
 
   return (
     <>
-      <Table striped highlightOnHover style={styles}>
-        <Table.Thead>
-          <Table.Tr>
-            {columns.filter(x => x.show !== false).map((col, colIndex) => {
-              const isSorted = col.key === currentKey
-              const canSort = Boolean(col.sortable !== undefined && onSortChange)
+      <div style={{ overflowX: 'auto' }}>
+        <Table striped highlightOnHover style={styles}>
+          <Table.Thead>
+            <Table.Tr>
+              {columns.filter(x => x.show !== false).map((col, colIndex) => {
+                const isSorted = col.key === currentKey
+                const canSort = Boolean(col.sortable !== undefined && onSortChange)
 
-              return (
-                <Table.Th
-                  key={colIndex}
-                  style={{ cursor: canSort ? 'pointer' : undefined }}
-                  onClick={() => canSort && handleHeaderClick(col)}
-                >
-                  {col.title}
-                  {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }} /> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }} />)}
-                  {canSort && !isSorted && (
-                    <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }} />
-                  )}
-                </Table.Th>
-              )
-            })}
-            {hasActions !== undefined && (
-              <Table.Th>{actionsTitle}</Table.Th>
-            )}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
-      <Pagination value={page} total={total} onChange={onPageChange} />
+                return (
+                  <Table.Th
+                    key={colIndex}
+                    style={{
+                      cursor: canSort ? 'pointer' : undefined,
+                      whiteSpace: 'nowrap'
+                    }}
+                    onClick={() => canSort && handleHeaderClick(col)}
+                  >
+                    {col.title}
+                    {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }} /> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }} />)}
+                    {canSort && !isSorted && (
+                      <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }} />
+                    )}
+                  </Table.Th>
+                )
+              })}
+              {hasActions !== undefined && (
+                <Table.Th style={{ whiteSpace: 'nowrap' }}>{actionsTitle}</Table.Th>
+              )}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </div>
+      <Group justify="space-between" align="center" style={{ marginTop: '1rem' }}>
+        {showPageSizeSelector && onPageSizeChange !== undefined && (
+          <Group gap="xs" align="center">
+            <span>Show:</span>
+            <Select
+              value={pageSize.toString()}
+              onChange={(value) => {
+                if (value !== null) {
+                  onPageSizeChange(parseInt(value))
+                }
+              }}
+              data={pageSizeOptions.map(option => ({
+                value: option.toString(),
+                label: option.toString()
+              }))}
+              style={{ width: 80 }}
+              allowDeselect={false}
+            />
+            <span>per page</span>
+          </Group>
+        )}
+        <Pagination
+          value={page}
+          total={total}
+          onChange={onPageChange}
+          style={{
+            marginLeft: showPageSizeSelector ? 'auto' : '0',
+            marginRight: showPageSizeSelector ? 'auto' : '0'
+          }}
+        />
+        {showPageSizeSelector && (
+          <div style={{ width: '120px' }} /> /* Spacer to keep pagination centered */
+        )}
+      </Group>
     </>
   )
 }

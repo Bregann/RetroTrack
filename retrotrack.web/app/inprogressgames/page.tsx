@@ -30,8 +30,8 @@ export default async function Page() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true'],
-      queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/GetUserProgressForConsole?ConsoleId=-1&Skip=0&Take=100&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true', { next: { revalidate: 60 }, cookieHeader }),
+      queryKey: ['ConsoleId=-1&Skip=0&Take=25&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true'],
+      queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/GetUserProgressForConsole?ConsoleId=-1&Skip=0&Take=25&SortByName=true&HideUnstartedGames=true&HideCompletedGames=true', { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000
     })
   }

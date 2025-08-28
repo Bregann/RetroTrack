@@ -58,34 +58,18 @@ namespace RetroTrack.Domain.Services
         /// <param name="gameId"></param>
         /// <param name="returnDatabaseData"></param>
         /// <returns></returns>
-        public async Task<GetGameExtended?> GetSpecificGameInfo(int gameId, bool returnDatabaseData = true)
+        public async Task<GetGameExtended?> GetSpecificGameInfo(int gameId, bool returnDatabaseData = true, bool fallBackData = false)
         {
-            var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetGameExtended.php?z={_apiUsername}&y={_apiKey}&i={gameId}", Method.Get);
-
-            // Get the response and deserialise
-            var response = await client.ExecuteAsync(request);
-
-            // if it has failed to get the data from the api then fall back to the database data
-            // there is a chance this is out of date but would get picked up on the next sync
-            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            async Task<GetGameExtended?> GetFromDb()
             {
-                if (!returnDatabaseData)
-                {
-                    Log.Warning($"[RetroAchievements] Error getting game data for {gameId}. Status code {response.StatusCode}. Database data not returned.");
-                    return null;
-                }
-
-                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}. Falling back to database data");
-
-                var gameFromDb = context.Games.FirstOrDefault(x => x.Id == gameId);
+                var gameFromDb = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
 
                 if (gameFromDb == null)
                 {
                     return null;
                 }
 
-                var achievements = context.Achievements.Where(x => x.GameId == gameId).ToDictionary(x => x.Id.ToString(), x => new Achievement
+                var achievements = await context.Achievements.Where(x => x.GameId == gameId).ToDictionaryAsync(x => x.Id.ToString(), x => new Achievement
                 {
                     Id = x.Id,
                     NumAwarded = 0,
@@ -111,6 +95,32 @@ namespace RetroTrack.Domain.Services
                     Id = gameId,
                     Title = gameFromDb.Title,
                 };
+            }
+
+            if (returnDatabaseData)
+            {
+                return await GetFromDb();
+            }
+
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGameExtended.php?z={_apiUsername}&y={_apiKey}&i={gameId}", Method.Get);
+
+            // Get the response and deserialise
+            var response = await client.ExecuteAsync(request);
+
+            // if it has failed to get the data from the api then fall back to the database data
+            // there is a chance this is out of date but would get picked up on the next sync
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game data for {gameId}. Falling back to database data");
+
+                // fall back to the database data
+                if (fallBackData)
+                {
+                    return await GetFromDb();
+                }
+
+                return null;
             }
 
             //if there's no achievements

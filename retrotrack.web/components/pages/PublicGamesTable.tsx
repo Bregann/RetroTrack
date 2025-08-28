@@ -7,21 +7,14 @@ import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
-import { useDebouncedState } from '@mantine/hooks'
+import { useDebouncedState, useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
-import { Press_Start_2P } from 'next/font/google'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
-const pressStart2P = Press_Start_2P({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
+import { pressStart2P } from '@/font/pressStart2P'
 
 interface PublicGamesTableProps {
   consoleId: number
@@ -33,14 +26,17 @@ const baseColumns: Column<Game>[] = [
     title: '',
     key: 'gameImageUrl',
     render: (item) => {
+      // Note: responsive sizing is handled via CSS classes
       return (
-        <Image
-          src={`https://media.retroachievements.org${item.gameImageUrl}`}
-          alt={`${item.gameTitle} achievement icon`}
-          width={64}
-          height={64}
-          className={styles.roundedImage}
-        />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
+          <Image
+            src={`https://media.retroachievements.org${item.gameImageUrl}`}
+            alt={`${item.gameTitle} achievement icon`}
+            width={64}
+            height={64}
+            className={styles.roundedImage}
+          />
+        </div>
       )
     }
   },
@@ -76,6 +72,9 @@ const baseColumns: Column<Game>[] = [
 ]
 
 export default function PublicGamesTable(props: PublicGamesTableProps) {
+  // Responsive breakpoints
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
   // Create a fresh copy of columns for this component instance
   const columns = useMemo(() => {
     const cols = [...baseColumns]
@@ -85,8 +84,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
       cols.push({
         title: 'Console',
         key: 'consoleName',
-        sortable: true,
-        show: true
+        sortable: true
       })
     }
 
@@ -94,6 +92,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   }, [props.showConsoleColumn, props.consoleId])
 
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
   const [sortOption, setSortOption] = useState<SortOption<Game>>({
     key: 'gameTitle',
     direction: 'asc',
@@ -104,8 +103,8 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
 
   const queryString = useMemo(() => {
-    const skip = (page - 1) * 100
-    const take = 100
+    const skip = (page - 1) * pageSize
+    const take = pageSize
     const sortKeyMap: Record<string, string> = {
       gameTitle: 'SortByName',
       gameGenre: 'SortByGenre',
@@ -125,7 +124,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     }
 
     return query
-  }, [page, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
+  }, [page, pageSize, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
   const { data, isLoading, isError, error } = useQuery<GetGamesForConsoleResponse>({
     queryKey: [queryString],
@@ -146,7 +145,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   const totalPages = data?.totalPages ?? 0
 
   return (
-    <Container size="95%">
+    <Container size={isMobile ? '100%' : '95%'}>
       {isLoading &&
         <Loading />
       }
@@ -161,12 +160,12 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
         <>
           <Container ta="center" py="xs">
             <Text
-              size={'28px'}
+              size={isMobile ? '20px' : '28px'}
               mt={'md'}
               ta="center"
               className={pressStart2P.className}
             >{data.consoleName}</Text>
-            <Text mb="xs">There are a total of {data.totalCount} games!</Text>
+            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount} games!</Text>
           </Container>
 
           <Paper className={styles.paper}>
@@ -174,15 +173,16 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               justify="center"
               mt={10}
               mb={10}
-              pr={20}
-              pl={20}
+              pr={isMobile ? 10 : 20}
+              pl={isMobile ? 10 : 20}
               style={{ width: '100%' }}
+              gap={isMobile ? 'xs' : 'md'}
             >
               <Input
                 placeholder="Search..."
                 style={{
                   flex: 1,
-                  minWidth: 0,
+                  minWidth: isMobile ? 150 : 200,
                 }}
                 onChange={(e) => {
                   if (e.currentTarget.value.trim() === '') {
@@ -196,18 +196,20 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               <Select
                 data={searchDropdownOptions}
                 style={{
-                  flex: '0 0 150px',
+                  flex: isMobile ? '0 0 100px' : '0 0 150px',
                   minWidth: 0,
                 }}
                 clearable
                 defaultValue={searchDropdownValue}
                 onChange={(value) => setSearchDropdownValue(value ?? '0')}
               />
-              <Button style={{ flex: '0 0 auto', ml: 10 }}
+              <Button
+                style={{ flex: '0 0 auto' }}
+                size={isMobile ? 'sm' : 'md'}
                 onClick={() => { setSearchTerm(searchInput) }}
                 disabled={searchInput === null || searchInput.trim() === ''}
               >
-                Search
+                {isMobile ? 'Go' : 'Search'}
               </Button>
             </Group>
 
@@ -233,16 +235,25 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
                 onRowClick={(item) => {
                   gameModal.showModal(item.gameId)
                 }}
-                actions={[{
-                  onClick: (item) => gameModal.showModal(item.gameId),
-                  label: 'Game Modal',
-                  variant: 'filled'
-                },
-                {
-                  onClick: (item) => router.push(`/game/${item.gameId}`),
-                  label: 'Game Page',
-                  variant: 'filled'
-                }]}
+                pageSize={pageSize}
+                onPageSizeChange={(newPageSize) => {
+                  setPageSize(newPageSize)
+                  setPage(1) // Reset to first page when changing page size
+                }}
+                pageSizeOptions={[10, 25, 50, 100]}
+                showPageSizeSelector={true}
+                actions={[
+                  {
+                    onClick: (item) => gameModal.showModal(item.gameId),
+                    label: 'Game Modal',
+                    variant: 'filled'
+                  },
+                  {
+                    onClick: (item) => router.push(`/game/${item.gameId}`),
+                    label: 'Game Page',
+                    variant: 'filled'
+                  }
+                ]}
               />
             )}
           </Paper>
