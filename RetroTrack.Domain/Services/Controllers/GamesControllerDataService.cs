@@ -7,6 +7,7 @@ using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
+using Serilog;
 using Achievement = RetroTrack.Domain.DTOs.Controllers.Games.Responses.Achievement;
 using UserAchievement = RetroTrack.Domain.DTOs.Controllers.Games.Responses.UserAchievement;
 
@@ -487,6 +488,15 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<GetLeaderboardsFromGameIdResponse?> GetLeaderboardsFromGameId(int gameId)
         {
+            // check if the game has achievements first
+            var game = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId && x.HasAchievements);
+
+            if (game == null)
+            {
+                Log.Information($"Game {gameId} does not have achievements, skipping leaderboard fetch");
+                return null;
+            }
+
             // get the first 500 leaderboards
             var leaderboards = await raApiService.GetGameLeaderboards(gameId);
 
