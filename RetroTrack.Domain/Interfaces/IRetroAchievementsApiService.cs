@@ -7,7 +7,7 @@ namespace RetroTrack.Domain.Interfaces
         Task<List<ConsoleIDs>?> GetConsoleIds();
         Task<GetGameLeaderboards?> GetGameLeaderboards(int gameId, int skipAmount = 0, int count = 500);
         Task<List<GetGameList>?> GetGameListFromConsoleId(int consoleId);
-        Task<GetGameExtended?> GetSpecificGameInfo(int gameId, bool returnDatabaseData = true);
+        Task<GetGameExtended?> GetSpecificGameInfo(int gameId, bool returnDatabaseData = true, bool fallBackData = false);
         Task<GetGameInfoAndUserProgress?> GetSpecificGameInfoAndUserProgress(string username, string ulid, int gameId);
         Task<GetUserCompletionProgress?> GetUserCompletionProgress(string username, string ulid, int skipAmount = 0, int count = 500);
         Task<GetUserProfile?> GetUserProfile(string username, string ulid);
