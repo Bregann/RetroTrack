@@ -8,15 +8,9 @@ import Image from 'next/image'
 import styles from '@/css/pages/home.module.scss'
 import { useGameModal } from '@/context/gameModalContext'
 import consoleHelper from '@/helpers/consoleHelper'
-import { Press_Start_2P } from 'next/font/google'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
-
-const pressStart2P = Press_Start_2P({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { pressStart2P } from '@/font/pressStart2P'
 
 export default function HomeComponent() {
   const isLg = useMediaQuery('(min-width: 1600px)')

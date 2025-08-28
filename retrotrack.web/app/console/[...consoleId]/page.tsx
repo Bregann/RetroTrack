@@ -35,8 +35,8 @@ export default async function Page({
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true'],
-      queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>(`/api/games/GetUserProgressForConsole?ConsoleId=${consoleId}&Skip=0&Take=100&SortByName=true`, { next: { revalidate: 60 }, cookieHeader }),
+      queryKey: ['ConsoleId=-1&Skip=0&Take=25&SortByName=true'],
+      queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>(`/api/games/GetUserProgressForConsole?ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true`, { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000
     })
     return (
@@ -50,8 +50,8 @@ export default async function Page({
   }
   else {
     await queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=100&SortByName=true-lg'],
-      queryFn: async () => await doQueryGet<GetGamesForConsoleResponse>(`/api/games/GetGamesForConsole?ConsoleId=${consoleId}&Skip=0&Take=100&SortByName=true`, { next: { revalidate: 60 } }),
+      queryKey: ['ConsoleId=-1&Skip=0&Take=25&SortByName=true-lg'],
+      queryFn: async () => await doQueryGet<GetGamesForConsoleResponse>(`/api/games/GetGamesForConsole?ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true`, { next: { revalidate: 60 } }),
       staleTime: 60000
     })
 

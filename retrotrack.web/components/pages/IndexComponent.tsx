@@ -1,15 +1,9 @@
 'use client'
 
+import { pressStart2P } from '@/font/pressStart2P'
 import { Container, Text, Divider, List, ThemeIcon, rem, Title } from '@mantine/core'
 import { IconCheck } from '@tabler/icons-react'
 import Link from 'next/link'
-import { Press_Start_2P } from 'next/font/google'
-
-const pressStart2P = Press_Start_2P({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-})
 
 export default function IndexComponent() {
   return (
