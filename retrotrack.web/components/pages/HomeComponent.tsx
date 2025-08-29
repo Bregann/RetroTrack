@@ -26,36 +26,40 @@ export default function HomeComponent() {
   })
 
   return (
-    <>
-      <Container size="95%">
+    <Container size="100%" px="md" py="xl">
+      <Stack align="center" gap="lg" mb="xl">
         <Text
-          size={'28px'}
-          mt={'xl'}
-          mb="sm"
+          size="2rem"
+          fw={700}
           ta="center"
           className={pressStart2P.className}
         >
           Welcome to RetroTrack
         </Text>
-        <Text ta="center">
+        <Text ta="center" size="lg" c="dimmed" maw={600}>
           What will you play today? Here are the latest sets added or updated on RetroAchievements. Click on a set to view the set!
         </Text>
+      </Stack>
 
-        {isLoadingPageData &&
-          <Text ta="center" mt="md">
-            Loading...
+      {isLoadingPageData && (
+        <Card radius="md" p="xl" className={styles.gameCard}>
+          <Text ta="center" size="lg" c="dimmed">
+            Loading latest sets...
           </Text>
-        }
+        </Card>
+      )}
 
-        {isErrorPageData &&
-          <Text ta="center" mt="md" c="red">
+      {isErrorPageData && (
+        <Card radius="md" p="xl" className={styles.gameCard}>
+          <Text ta="center" size="lg" c="red">
             An error occurred: {(pageDataError as Error).message}
           </Text>
-        }
+        </Card>
+      )}
 
         {pageData !== undefined && pageData.days.map((day, index) => {
           return (
-            <div key={index}>
+            <Stack key={index} gap="xl" mb="2xl">
               <Divider
                 label={day.date}
                 labelPosition="center"
@@ -63,124 +67,127 @@ export default function HomeComponent() {
                   label: styles.mainDividerText,
                 }}
               />
-              <Grid gutter={'5%'}>
+              <Grid gutter="xl">
                 <Grid.Col span={{ base: 12, sm: 6 }}>
-                  <Divider
-                    label='New Sets'
-                    labelPosition="center"
-                    classNames={{
-                      label: styles.subDividerText,
-                    }}
-                  />
-                  <Grid>
-                    {day.newSets.map((set, setIndex) => {
-                      return (
-                        <Grid.Col span={span} key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" className={styles.newSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
-                            <Stack gap="md">
-                              <Group align="flex-start" gap="sm" >
-                                <Image
-                                  src={`https://media.retroachievements.org${set.gameIcon}`}
-                                  alt={`${set.title} achievement icon`}
-                                  width={72}
-                                  height={72}
-                                  className={styles.roundedImage}
-                                />
-                                <Text
-                                  fw={700}
-                                  size="lg"
-                                  style={{ flex: 1, wordBreak: 'break-word' }}
-                                >
-                                  {set.title}
-                                </Text>
-                              </Group>
-                              <Group align='center' justify='center'>
-                                <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
-                                  {set.consoleName}
-                                </Badge>
-                              </Group>
-                              <Group gap="lg" wrap="wrap" align='center' justify='center'>
-                                <Group gap={4} align="center">
-                                  <IconTrophy size={20} color="#FFD700" />
-                                  <Text size="sm" fw={600}>
-                                    {set.achievementCount} Achievements
+                  <Stack gap="lg">
+                    <Divider
+                      label='New Sets'
+                      labelPosition="center"
+                      classNames={{
+                        label: styles.subDividerText,
+                      }}
+                    />
+                    <Grid gutter="md">
+                      {day.newSets.map((set, setIndex) => {
+                        return (
+                          <Grid.Col span={span} key={setIndex}>
+                            <Card padding="lg" radius="md" className={styles.gameCard} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
+                              <Stack gap="md">
+                                <Group align="flex-start" gap="sm">
+                                  <Image
+                                    src={`https://media.retroachievements.org${set.gameIcon}`}
+                                    alt={`${set.title} achievement icon`}
+                                    width={72}
+                                    height={72}
+                                    className={styles.roundedImage}
+                                  />
+                                  <Text
+                                    fw={700}
+                                    size="lg"
+                                    style={{ flex: 1, wordBreak: 'break-word' }}
+                                  >
+                                    {set.title}
                                   </Text>
                                 </Group>
-                                <Group gap={4} align="center">
-                                  <IconStar size={20} color="#4EA8DE" />
-                                  <Text size="sm" fw={600}>
-                                    {set.points} Points
-                                  </Text>
+                                <Group align='center' justify='center'>
+                                  <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
+                                    {set.consoleName}
+                                  </Badge>
                                 </Group>
-                              </Group>
-                            </Stack>
-                          </Card>
-                        </Grid.Col>
-                      )
-                    })}
-                  </Grid>
+                                <Group gap="lg" wrap="wrap" align='center' justify='center'>
+                                  <Group gap={4} align="center">
+                                    <IconTrophy size={18} color="#FFD700" />
+                                    <Text size="sm" fw={600}>
+                                      {set.achievementCount} Achievements
+                                    </Text>
+                                  </Group>
+                                  <Group gap={4} align="center">
+                                    <IconStar size={18} color="#4EA8DE" />
+                                    <Text size="sm" fw={600}>
+                                      {set.points} Points
+                                    </Text>
+                                  </Group>
+                                </Group>
+                              </Stack>
+                            </Card>
+                          </Grid.Col>
+                        )
+                      })}
+                    </Grid>
+                  </Stack>
                 </Grid.Col>
-                <Grid.Col span={6}>
-                  <Divider
-                    label='Updated Sets'
-                    labelPosition="center"
-                    classNames={{
-                      label: styles.subDividerText,
-                    }}
-                  />
-                  <Grid>
-                    {day.updatedSets.map((set, setIndex) => {
-                      return (
-                        <Grid.Col span={span} key={setIndex}>
-                          <Card padding="md" radius="md" shadow="md" className={styles.updatedSetCardBorder} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
-                            <Stack gap="md">
-                              <Group align="flex-start" gap="sm" >
-                                <Image
-                                  src={`https://media.retroachievements.org${set.gameIcon}`}
-                                  alt={`${set.title} achievement icon`}
-                                  width={72}
-                                  height={72}
-                                  className={styles.roundedImage}
-                                />
-                                <Text
-                                  fw={700}
-                                  size="lg"
-                                  style={{ flex: 1, wordBreak: 'break-word' }}
-                                >
-                                  {set.title}
-                                </Text>
-                              </Group>
-                              <Group align='center' justify='center'>
-                                <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md" style={{ marginTop: -5 }}>
-                                  {set.consoleName}
-                                </Badge>
-                              </Group>
-                              <Group gap="lg" wrap="wrap" align='center' justify='center'>
-                                <Group gap={4} align="center">
-                                  <IconTrophy size={20} color="#FFD700" />
-                                  <Text size="sm" fw={600}>
-                                    {set.achievementCount} Achievements
+                <Grid.Col span={{ base: 12, sm: 6 }}>
+                  <Stack gap="lg">
+                    <Divider
+                      label='Updated Sets'
+                      labelPosition="center"
+                      classNames={{
+                        label: styles.subDividerText,
+                      }}
+                    />
+                    <Grid gutter="md">
+                      {day.updatedSets.map((set, setIndex) => {
+                        return (
+                          <Grid.Col span={span} key={setIndex}>
+                            <Card padding="lg" radius="md" className={styles.gameCard} onClick={() => gameModal.showModal(set.gameId)} style={{ cursor: 'pointer' }}>
+                              <Stack gap="md">
+                                <Group align="flex-start" gap="sm">
+                                  <Image
+                                    src={`https://media.retroachievements.org${set.gameIcon}`}
+                                    alt={`${set.title} achievement icon`}
+                                    width={72}
+                                    height={72}
+                                    className={styles.roundedImage}
+                                  />
+                                  <Text
+                                    fw={700}
+                                    size="lg"
+                                    style={{ flex: 1, wordBreak: 'break-word' }}
+                                  >
+                                    {set.title}
                                   </Text>
                                 </Group>
-                                <Group gap={4} align="center">
-                                  <IconStar size={20} color="#4EA8DE" />
-                                  <Text size="sm" fw={600}>
-                                    {set.points} Points
-                                  </Text>
+                                <Group align='center' justify='center'>
+                                  <Badge color={consoleHelper.getConsoleColour(set.consoleType)} variant="filled" size="md">
+                                    {set.consoleName}
+                                  </Badge>
                                 </Group>
-                              </Group>
-                            </Stack>
-                          </Card>
-                        </Grid.Col>
-                      )
-                    })}
-                  </Grid>
+                                <Group gap="lg" wrap="wrap" align='center' justify='center'>
+                                  <Group gap={4} align="center">
+                                    <IconTrophy size={18} color="#FFD700" />
+                                    <Text size="sm" fw={600}>
+                                      {set.achievementCount} Achievements
+                                    </Text>
+                                  </Group>
+                                  <Group gap={4} align="center">
+                                    <IconStar size={18} color="#4EA8DE" />
+                                    <Text size="sm" fw={600}>
+                                      {set.points} Points
+                                    </Text>
+                                  </Group>
+                                </Group>
+                              </Stack>
+                            </Card>
+                          </Grid.Col>
+                        )
+                      })}
+                    </Grid>
+                  </Stack>
                 </Grid.Col>
               </Grid>
-            </div>
+            </Stack>
           )
         })}
-      </Container>
-    </>
+    </Container>
   )
 }

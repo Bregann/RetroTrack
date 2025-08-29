@@ -5,7 +5,7 @@ using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 
-namespace RetroTrack.Api.Controllers.Games
+namespace RetroTrack.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

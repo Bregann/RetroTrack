@@ -423,7 +423,7 @@ export function Navbar(props: NavbarProps) {
               <Accordion.Panel>
                 <Text mb="sm">Here are some of the new features:</Text>
                 <List withPadding>
-                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicate game page which includes more information</List.Item>
+                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicated game page which includes more information</List.Item>
                   <List.Item>Ability to add notes to games. Easily keep track of information</List.Item>
                   <List.Item>Various UI design updates</List.Item>
                   <List.Item>Various code improvements</List.Item>
