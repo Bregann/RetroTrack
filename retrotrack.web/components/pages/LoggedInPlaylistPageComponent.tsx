@@ -9,52 +9,38 @@ import {
   Image,
   SimpleGrid,
   Button,
-  Divider,
   Progress,
   Box,
-  Checkbox,
-  Tooltip,
-  Paper,
   ActionIcon,
   Title,
   Badge,
-  Flex,
-  ScrollArea,
-  Table,
   Select,
   TextInput,
   Avatar,
-  Anchor,
   Modal,
-  Loader,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import {
   IconTrophy,
-  IconStar,
   IconDeviceGamepad,
-  IconUsers,
   IconCheck,
-  IconAward,
   IconHeart,
   IconArrowLeft,
   IconSearch,
-  IconFilter,
   IconPlayerPlay,
   IconCrown,
   IconMedal,
   IconTargetArrow,
-  IconEdit,
   IconTrash,
   IconShare,
-  IconBookmark,
   IconPlus,
   IconPencil,
   IconDeviceFloppy,
   IconX,
+  IconSettings,
+  IconList,
 } from '@tabler/icons-react'
-import styles from '@/css/components/gameModal.module.scss'
 import pageStyles from '@/css/pages/gamePage.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
 import tableStyles from '@/css/components/publicGamesTable.module.scss'
@@ -63,6 +49,9 @@ import { useRouter } from 'next/navigation'
 import PaginatedTable from '@/components/shared/PaginatedTable'
 import type { SortOption } from '@/components/shared/PaginatedTable'
 import { useGameModal } from '@/context/gameModalContext'
+import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface LoggedInPlaylistPageProps {
   playlistId: number
@@ -222,22 +211,32 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const gameModal = useGameModal()
-  
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
+
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [consoleFilter, setConsoleFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [sortOption, setSortOption] = useState<SortOption<typeof playlistGames[0]>>({
     key: 'playlistOrder',
     direction: 'asc'
   })
-  
+
   // Edit mode states
   const [editMode, setEditMode] = useState(false)
   const [editingName, setEditingName] = useState(false)
+  const [manageMode, setManageMode] = useState(false)
+  const [orderModalOpen, setOrderModalOpen] = useState(false)
   const [tempPlaylistName, setTempPlaylistName] = useState(playlistData.title)
   const [tempGames, setTempGames] = useState(playlistGames)
+  const [orderModalGames, setOrderModalGames] = useState(playlistGames)
   const [gamesToDelete, setGamesToDelete] = useState<number[]>([])
 
   // Handle edit mode toggle
@@ -257,7 +256,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     try {
       // Here you would make API calls to save changes
       // For now, we'll just show notifications
-      
+
       if (tempPlaylistName !== playlistData.title) {
         notifications.show({
           title: 'Playlist Updated',
@@ -285,6 +284,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
 
       setEditMode(false)
       setEditingName(false)
+      setManageMode(false)
       setGamesToDelete([])
     } catch (error) {
       notifications.show({
@@ -297,8 +297,8 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
 
   // Handle game order change
   const handleOrderChange = (gameId: number, newOrder: number) => {
-    setTempGames(prev => prev.map(game => 
-      game.id === gameId 
+    setTempGames(prev => prev.map(game =>
+      game.id === gameId
         ? { ...game, playlistOrder: newOrder }
         : game
     ))
@@ -312,6 +312,102 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
   // Handle game restore
   const handleRestoreGame = (gameId: number) => {
     setGamesToDelete(prev => prev.filter(id => id !== gameId))
+  }
+
+  // Handle order modal functions
+  const saveOrderChanges = () => {
+    // Update the main games list with new order
+    setTempGames(orderModalGames)
+    setOrderModalOpen(false)
+
+    // Show notification
+    notifications.show({
+      title: 'Order Updated',
+      message: 'Game order has been updated',
+      color: 'blue',
+    })
+  }
+
+  // Handle drag end for reordering games
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over !== null && active.id !== over.id) {
+      setOrderModalGames((items) => {
+        const oldIndex = items.findIndex((g) => g.id === active.id)
+        const newIndex = items.findIndex((g) => g.id === over.id)
+        const newItems = arrayMove(items, oldIndex, newIndex)
+
+        // Update playlist order based on new position
+        return newItems.map((item, index) => ({
+          ...item,
+          playlistOrder: index + 1,
+        }))
+      })
+    }
+  }
+
+  // Sortable item component for the modal
+  interface SortableGameItemProps {
+    game: typeof playlistGames[0]
+    index: number
+  }
+
+  function SortableGameItem({ game, index }: SortableGameItemProps) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: game.id })
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      cursor: isDragging ? 'grabbing' : 'grab',
+      opacity: isDragging ? 0.8 : 1,
+      width: '100%',
+      maxWidth: '100%',
+      overflow: 'hidden',
+    }
+
+    return (
+      <Card
+        key={game.id}
+        p="sm"
+        withBorder
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+      >
+        <Group justify="space-between" align="center" wrap="nowrap" style={{ width: '100%', overflow: 'hidden' }}>
+          <Group gap="md" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <Text size="sm" fw={600} c="dimmed" style={{ minWidth: '24px', flexShrink: 0 }}>
+              {index + 1}.
+            </Text>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minWidth: '64px',
+              flexShrink: 0
+            }}>
+              <Image
+                src={`https://media.retroachievements.org${game.gameImage}`}
+                alt={game.title}
+                width={64}
+                height={64}
+                className={tableStyles.roundedImage}
+              />
+            </div>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <Text size="sm" fw={500} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {game.title}
+              </Text>
+              <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {game.consoleName}
+              </Text>
+            </div>
+          </Group>
+        </Group>
+      </Card>
+    )
   }
 
   // Handle sorting
@@ -329,10 +425,28 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     const beatenSoftcore = playlistGames.filter(g => g.status === 'beaten-softcore').length
     const inProgress = playlistGames.filter(g => g.status === 'in-progress').length
     const notStarted = playlistGames.filter(g => g.status === 'not-started').length
-    
+
     const totalPoints = playlistGames.reduce((sum, game) => sum + game.pointsEarned, 0)
     const maxPoints = playlistGames.reduce((sum, game) => sum + game.totalPoints, 0)
     const avgCompletion = playlistGames.reduce((sum, game) => sum + game.completionPercentage, 0) / total
+
+    // Calculate points for hardcore and softcore
+    const hardcorePoints = playlistGames
+      .filter(g => g.status === 'mastered' || g.status === 'beaten-hardcore')
+      .reduce((sum, game) => sum + game.pointsEarned, 0)
+    const softcorePoints = playlistGames
+      .filter(g => g.status === 'completed' || g.status === 'beaten-softcore')
+      .reduce((sum, game) => sum + game.pointsEarned, 0)
+
+    // Calculate achievements
+    const totalAchievements = playlistGames.reduce((sum, game) => sum + game.totalAchievements, 0)
+    const totalUnlockedAchievements = playlistGames.reduce((sum, game) => sum + game.unlockedAchievements, 0)
+    const hardcoreAchievements = playlistGames
+      .filter(g => g.status === 'mastered' || g.status === 'beaten-hardcore')
+      .reduce((sum, game) => sum + game.unlockedAchievements, 0)
+    const softcoreAchievements = playlistGames
+      .filter(g => g.status === 'completed' || g.status === 'beaten-softcore')
+      .reduce((sum, game) => sum + game.unlockedAchievements, 0)
 
     return {
       total,
@@ -344,7 +458,13 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       notStarted,
       totalPoints,
       maxPoints,
-      avgCompletion
+      avgCompletion,
+      hardcorePoints,
+      softcorePoints,
+      totalAchievements,
+      totalUnlockedAchievements,
+      hardcoreAchievements,
+      softcoreAchievements
     }
   }, [])
 
@@ -353,19 +473,11 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     const gamesToShow = editMode ? tempGames : playlistGames
     let filtered = gamesToShow.filter(g => !gamesToDelete.includes(g.id))
 
-    if (searchQuery) {
+    if (searchQuery.trim() !== '') {
       filtered = filtered.filter(game =>
         game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         game.consoleName.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(game => game.status === statusFilter)
-    }
-
-    if (consoleFilter !== 'all') {
-      filtered = filtered.filter(game => game.consoleName === consoleFilter)
     }
 
     // Apply sorting
@@ -392,9 +504,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
 
       return 0
     })
-  }, [searchQuery, statusFilter, consoleFilter, editMode, tempGames, gamesToDelete, sortOption])
-
-  const uniqueConsoles = [...new Set(playlistGames.map(g => g.consoleName))].sort()
+  }, [searchQuery, editMode, tempGames, gamesToDelete, sortOption])
 
   // Table columns configuration
   const columns = [
@@ -402,10 +512,10 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       title: '',
       key: 'gameImage' as keyof typeof playlistGames[0],
       render: (game: typeof playlistGames[0]) => (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           minWidth: '64px',
           opacity: gamesToDelete.includes(game.id) ? 0.5 : 1
         }}>
@@ -453,7 +563,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       sortable: true,
       render: (game: typeof playlistGames[0]) => (
         <Group gap="md" wrap="nowrap">
-          <div style={{ 
+          <div style={{
             opacity: gamesToDelete.includes(game.id) ? 0.5 : 1,
             textDecoration: gamesToDelete.includes(game.id) ? 'line-through' : 'none'
           }}>
@@ -462,6 +572,36 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
             </Text>
           </div>
         </Group>
+      )
+    },
+    {
+      title: 'Achievements',
+      key: 'totalAchievements' as keyof typeof playlistGames[0],
+      sortable: true,
+      render: (game: typeof playlistGames[0]) => (
+        <Text size="sm" fw={500}>
+          {game.totalAchievements}
+        </Text>
+      )
+    },
+    {
+      title: 'Points',
+      key: 'totalPoints' as keyof typeof playlistGames[0],
+      sortable: true,
+      render: (game: typeof playlistGames[0]) => (
+        <Text size="sm" fw={500}>
+          {game.totalPoints.toLocaleString()}
+        </Text>
+      )
+    },
+    {
+      title: 'Players',
+      key: 'title' as keyof typeof playlistGames[0],
+      sortable: false,
+      render: (game: typeof playlistGames[0]) => (
+        <Text size="sm" c="dimmed">
+          --
+        </Text>
       )
     },
     {
@@ -484,52 +624,61 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       )
     },
     {
-      title: 'Progress',
-      key: 'completionPercentage' as keyof typeof playlistGames[0],
+      title: 'Achievements Gained',
+      key: 'totalAchievements' as keyof typeof playlistGames[0],
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
-        <div>
-          <Progress
-            value={game.completionPercentage}
-            size="sm"
-            mb="xs"
-            color={getStatusColor(game.status)}
-          />
-          <Text size="xs" c="dimmed">
-            {game.unlockedAchievements}/{game.totalAchievements} achievements ({game.completionPercentage.toFixed(1)}%)
-          </Text>
-        </div>
-      )
+      render: (game: typeof playlistGames[0]) => {
+        const achievementPercentage = (game.unlockedAchievements / game.totalAchievements) * 100
+        const isHardcore = game.status === 'mastered' || game.status === 'beaten-hardcore'
+        return (
+          <div>
+            <Progress
+              value={achievementPercentage}
+              size="sm"
+              mb="xs"
+              color={isHardcore ? 'yellow' : 'blue'}
+            />
+            <Group gap={4} mb={2}>
+              <Text size="sm" fw={500}>{game.unlockedAchievements}</Text>
+              <Text size="xs" c="dimmed">/{game.totalAchievements} ({achievementPercentage.toFixed(1)}%)</Text>
+            </Group>
+            <Text size="xs" c="dimmed">
+              {isHardcore ? `${game.unlockedAchievements} Hardcore` : `${game.unlockedAchievements} Softcore`}
+            </Text>
+          </div>
+        )
+      }
     },
     {
-      title: 'Points',
-      key: 'pointsEarned' as keyof typeof playlistGames[0],
+      title: 'Points Gained',
+      key: 'totalPoints' as keyof typeof playlistGames[0],
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
-        <div>
-          <Text size="sm" fw={500}>
-            {game.pointsEarned.toLocaleString()}
-          </Text>
-          <Text size="xs" c="dimmed">
-            /{game.totalPoints.toLocaleString()}
-          </Text>
-        </div>
-      )
-    },
-    {
-      title: 'Last Played',
-      key: 'lastPlayed' as keyof typeof playlistGames[0],
-      sortable: true,
-      render: (game: typeof playlistGames[0]) => (
-        <Text size="sm">
-          {game.lastPlayed ? new Date(game.lastPlayed).toLocaleDateString() : 'Never'}
-        </Text>
-      )
+      render: (game: typeof playlistGames[0]) => {
+        const pointsPercentage = (game.pointsEarned / game.totalPoints) * 100
+        const isHardcore = game.status === 'mastered' || game.status === 'beaten-hardcore'
+        return (
+          <div>
+            <Progress
+              value={pointsPercentage}
+              size="sm"
+              mb="xs"
+              color={isHardcore ? 'yellow' : 'orange'}
+            />
+            <Group gap={4} mb={2}>
+              <Text size="sm" fw={500}>{game.pointsEarned.toLocaleString()}</Text>
+              <Text size="xs" c="dimmed">/{game.totalPoints.toLocaleString()} ({pointsPercentage.toFixed(1)}%)</Text>
+            </Group>
+            <Text size="xs" c="dimmed">
+              {isHardcore ? `${game.pointsEarned.toLocaleString()} Hardcore` : `${game.pointsEarned.toLocaleString()} Softcore`}
+            </Text>
+          </div>
+        )
+      }
     }
   ]
 
-  // Add actions column for edit mode (remove/restore) or always show regular actions
-  if (editMode && playlistData.isOwner) {
+  // Add actions column for manage mode (remove/restore) or always show regular actions
+  if (manageMode && playlistData.isOwner) {
     columns.push({
       title: 'Remove',
       key: 'id' as keyof typeof playlistGames[0],
@@ -594,59 +743,63 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
 
           {/* Playlist Info */}
           <Stack style={{ flex: 1 }} gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <div style={{ flex: 1 }}>
-                {editingName ? (
-                  <Group gap="xs" mb="xs">
-                    <TextInput
-                      value={tempPlaylistName}
-                      onChange={(e) => setTempPlaylistName(e.currentTarget.value)}
-                      size="xl"
-                      style={{ flex: 1 }}
-                      variant="unstyled"
-                      styles={{
-                        input: {
-                          fontSize: '2rem',
-                          fontWeight: 700,
-                          padding: 0,
-                          minHeight: 'auto',
-                          height: 'auto'
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setEditingName(false)
-                        } else if (e.key === 'Escape') {
-                          setTempPlaylistName(playlistData.title)
-                          setEditingName(false)
-                        }
-                      }}
-                      autoFocus
-                    />
-                    <ActionIcon
-                      variant="subtle"
-                      color="green"
-                      onClick={() => setEditingName(false)}
-                    >
-                      <IconCheck size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => {
-                        setTempPlaylistName(playlistData.title)
-                        setEditingName(false)
-                      }}
-                    >
-                      <IconX size={16} />
-                    </ActionIcon>
-                  </Group>
-                ) : (
+            {editingName ? (
+              <Group gap="xs" mb="xs" wrap="nowrap" align="center">
+                <TextInput
+                  value={tempPlaylistName}
+                  onChange={(e) => setTempPlaylistName(e.currentTarget.value)}
+                  size="xl"
+                  style={{ flex: 1 }}
+                  variant="unstyled"
+                  styles={{
+                    input: {
+                      fontSize: '2rem',
+                      fontWeight: 700,
+                      padding: 0,
+                      minHeight: 'auto',
+                      height: 'auto'
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSaveChanges()
+                      setEditingName(false)
+                    } else if (e.key === 'Escape') {
+                      setTempPlaylistName(playlistData.title)
+                      setEditingName(false)
+                    }
+                  }}
+                  autoFocus
+                />
+                <ActionIcon
+                  variant="subtle"
+                  color="green"
+                  onClick={() => {
+                    handleSaveChanges()
+                    setEditingName(false)
+                  }}
+                >
+                  <IconCheck size={16} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  onClick={() => {
+                    setTempPlaylistName(playlistData.title)
+                    setEditingName(false)
+                  }}
+                >
+                  <IconX size={16} />
+                </ActionIcon>
+              </Group>
+            ) : (
+              <Group justify="space-between" align="flex-start">
+                <div style={{ flex: 1 }}>
                   <Group gap="xs" mb="xs" align="center">
                     <Title order={1} size="2rem">
                       {editMode ? tempPlaylistName : playlistData.title}
                     </Title>
-                    {playlistData.isOwner && editMode && (
+                    {playlistData.isOwner && (
                       <ActionIcon
                         variant="subtle"
                         color="blue"
@@ -657,33 +810,44 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                       </ActionIcon>
                     )}
                   </Group>
-                )}
-                <Group gap="md" align="center" mb="sm">
-                  <Avatar size="sm" />
-                  <Text size="lg" c="dimmed">@{playlistData.username}</Text>
-                  <Badge
-                    color={playlistData.isPublic ? 'green' : 'gray'}
-                    variant="light"
-                  >
-                    {playlistData.isPublic ? 'Public' : 'Private'}
-                  </Badge>
-                </Group>
-              </div>
 
-              {/* Action Buttons */}
-              <Group gap="xs">
+                  {editMode && (
+                    <Group gap="xs" mb="sm">
+                      <Button
+                        leftSection={<IconDeviceFloppy size={16} />}
+                        variant="filled"
+                        color="green"
+                        onClick={handleSaveChanges}
+                        size="sm"
+                      >
+                        Save All Changes
+                      </Button>
+                    </Group>
+                  )}
+                  <Group gap="md" align="center" mb="sm">
+                    <Avatar size="sm" />
+                    <Text size="lg" c="dimmed">@{playlistData.username}</Text>
+                    <Badge
+                      color={playlistData.isPublic ? 'green' : 'gray'}
+                      variant="light"
+                    >
+                      {playlistData.isPublic ? 'Public' : 'Private'}
+                    </Badge>
+                    <Text size="sm" c="dimmed">
+                      Created {new Date(playlistData.createdAt).toLocaleDateString()}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                      Updated {new Date(playlistData.updatedAt).toLocaleDateString()}
+                    </Text>
+                  </Group>
+                </div>
+
+                {/* Action Buttons */}
+                <Group gap="xs">
                 {playlistData.isOwner && (
                   <>
                     {editMode ? (
                       <>
-                        <Button
-                          leftSection={<IconDeviceFloppy size={16} />}
-                          variant="filled"
-                          color="green"
-                          onClick={handleSaveChanges}
-                        >
-                          Save Changes
-                        </Button>
                         <Button
                           leftSection={<IconX size={16} />}
                           variant="outline"
@@ -695,14 +859,6 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                       </>
                     ) : (
                       <>
-                        <ActionIcon
-                          variant="light"
-                          color="blue"
-                          size="lg"
-                          onClick={handleEditModeToggle}
-                        >
-                          <IconEdit size={20} />
-                        </ActionIcon>
                         <ActionIcon variant="light" color="red" size="lg">
                           <IconTrash size={20} />
                         </ActionIcon>
@@ -725,9 +881,10 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                   </>
                 )}
               </Group>
-            </Group>
+              </Group>
+            )}
 
-            {playlistData.description && (
+            {playlistData.description?.trim() !== '' && (
               <Text size="md" c="dimmed" mb="md">
                 {playlistData.description}
               </Text>
@@ -749,32 +906,61 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       </Card>
 
       {/* Progress Stats */}
-      <SimpleGrid cols={isMobile ? 2 : 4} mb="xl" spacing="md">
+      <SimpleGrid cols={isMobile ? 2 : 5} mb="xl" spacing="md">
         <Card radius="md" p="md" className={playlistStyles.statCard}>
           <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Mastered</Text>
-            <IconCrown size={16} color="gold" />
+            <Text size="sm" c="dimmed">Beaten</Text>
+            <Group gap={4}>
+              <IconPlayerPlay size={16} color="orange" />
+              <Text size="xs" c="dimmed">({stats.beatenSoftcore})</Text>
+            </Group>
           </Group>
-          <Text size="xl" fw={700}>{stats.mastered}</Text>
-          <Text size="xs" c="dimmed">{((stats.mastered / stats.total) * 100).toFixed(1)}% of playlist</Text>
+          <Text size="xl" fw={700}>{stats.beatenHardcore + stats.beatenSoftcore}</Text>
+          <Text size="xs" c="dimmed">
+            HC: {stats.beatenHardcore} | SC: {stats.beatenSoftcore}
+          </Text>
         </Card>
 
         <Card radius="md" p="md" className={playlistStyles.statCard}>
           <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Completed</Text>
-            <IconMedal size={16} color="blue" />
+            <Text size="sm" c="dimmed">Completed / Mastered</Text>
+            <Group gap={4}>
+              <IconMedal size={16} color="blue" />
+              <Text size="xs" c="dimmed">({stats.completed})</Text>
+            </Group>
           </Group>
-          <Text size="xl" fw={700}>{stats.completed}</Text>
-          <Text size="xs" c="dimmed">{((stats.completed / stats.total) * 100).toFixed(1)}% of playlist</Text>
+          <Text size="xl" fw={700}>{stats.mastered + stats.completed}</Text>
+          <Text size="xs" c="dimmed">
+            HC: {stats.mastered} | SC: {stats.completed}
+          </Text>
         </Card>
 
         <Card radius="md" p="md" className={playlistStyles.statCard}>
           <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Total Points</Text>
+            <Text size="sm" c="dimmed">Points</Text>
             <IconTrophy size={16} color="orange" />
           </Group>
-          <Text size="xl" fw={700}>{stats.totalPoints.toLocaleString()}</Text>
-          <Text size="xs" c="dimmed">{stats.maxPoints.toLocaleString()} max</Text>
+          <Group align="baseline" gap={4}>
+            <Text size="xl" fw={700}>{stats.totalPoints.toLocaleString()}</Text>
+            <Text size="sm" c="dimmed">/{stats.maxPoints.toLocaleString()}</Text>
+          </Group>
+          <Text size="xs" c="dimmed">
+            HC: {stats.hardcorePoints.toLocaleString()} | SC: {stats.softcorePoints.toLocaleString()}
+          </Text>
+        </Card>
+
+        <Card radius="md" p="md" className={playlistStyles.statCard}>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" c="dimmed">Achievements</Text>
+            <IconMedal size={16} color="blue" />
+          </Group>
+          <Group align="baseline" gap={4}>
+            <Text size="xl" fw={700}>{stats.totalUnlockedAchievements.toLocaleString()}</Text>
+            <Text size="sm" c="dimmed">/{stats.totalAchievements.toLocaleString()}</Text>
+          </Group>
+          <Text size="xs" c="dimmed">
+            HC: {stats.hardcoreAchievements.toLocaleString()} | SC: {stats.softcoreAchievements.toLocaleString()}
+          </Text>
         </Card>
 
         <Card radius="md" p="md" className={playlistStyles.statCard}>
@@ -813,51 +999,77 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                 Search
               </Button>
             </Group>
-            
-            <Select
-              placeholder="Status"
-              data={[
-                { value: 'all', label: 'All Status' },
-                { value: 'mastered', label: 'Mastered' },
-                { value: 'completed', label: 'Completed' },
-                { value: 'beaten-hardcore', label: 'Beaten (Hardcore)' },
-                { value: 'beaten-softcore', label: 'Beaten (Softcore)' },
-                { value: 'in-progress', label: 'In Progress' },
-                { value: 'not-started', label: 'Not Started' },
-              ]}
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value || 'all')}
-              leftSection={<IconFilter size={16} />}
-              style={{ minWidth: 150 }}
-            />
-
-            <Select
-              placeholder="Console"
-              data={[
-                { value: 'all', label: 'All Consoles' },
-                ...uniqueConsoles.map(console => ({ value: console, label: console }))
-              ]}
-              value={consoleFilter}
-              onChange={(value) => setConsoleFilter(value || 'all')}
-              style={{ minWidth: 120 }}
-            />
           </Group>
 
           <Group gap="xs">
+            {manageMode && (
+              <Badge color="orange" variant="light" size="lg">
+                Manage Mode
+              </Badge>
+            )}
+
             {editMode && (
               <Badge color="blue" variant="light" size="lg">
                 Edit Mode
               </Badge>
             )}
-            
+
             {playlistData.isOwner && !editMode && (
-              <Button
-                leftSection={<IconPlus size={16} />}
-                variant="filled"
-                color="blue"
-              >
-                Add Games
-              </Button>
+              <Group gap="xs">
+                <Button
+                  leftSection={<IconPlus size={16} />}
+                  variant="filled"
+                  color="blue"
+                >
+                  Add Games
+                </Button>
+                <Button
+                  leftSection={<IconList size={16} />}
+                  variant="outline"
+                  color="blue"
+                  onClick={() => {
+                    setOrderModalGames([...playlistGames].sort((a, b) => a.playlistOrder - b.playlistOrder))
+                    setOrderModalOpen(true)
+                  }}
+                >
+                  Manage Order
+                </Button>
+                {!manageMode ? (
+                  <Button
+                    leftSection={<IconSettings size={16} />}
+                    variant="outline"
+                    color="orange"
+                    onClick={() => {
+                      setManageMode(true)
+                      setGamesToDelete([]) // Reset delete list when entering manage mode
+                    }}
+                  >
+                    Manage Games
+                  </Button>
+                ) : (
+                  <Group gap="xs">
+                    <Button
+                      leftSection={<IconCheck size={16} />}
+                      variant="filled"
+                      color="green"
+                      onClick={handleSaveChanges}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      leftSection={<IconX size={16} />}
+                      variant="outline"
+                      color="red"
+                      onClick={() => {
+                        setManageMode(false)
+                        setGamesToDelete([])
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </Group>
+                )}
+              </Group>
             )}
           </Group>
         </Group>
@@ -870,7 +1082,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         page={page}
         total={Math.ceil(filteredGames.length / pageSize)}
         onPageChange={setPage}
-        onRowClick={editMode ? undefined : (game) => gameModal.showModal(game.id)}
+        onRowClick={(editMode || manageMode) ? undefined : (game) => gameModal.showModal(game.id)}
         pageSize={pageSize}
         onPageSizeChange={(newPageSize) => {
           setPageSize(newPageSize)
@@ -880,7 +1092,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         showPageSizeSelector={true}
         sortOption={sortOption}
         onSortChange={handleSortChange}
-        actions={editMode ? [] : [
+        actions={(editMode || manageMode) ? [] : [
           {
             onClick: (game) => gameModal.showModal(game.id),
             label: 'Game Modal',
@@ -894,7 +1106,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         ]}
       />
 
-      {editMode && gamesToDelete.length > 0 && (
+      {(editMode || manageMode) && gamesToDelete.length > 0 && (
         <Card radius="md" p="md" mt="md" style={{ backgroundColor: 'var(--mantine-color-red-0)' }}>
           <Group justify="space-between" align="center">
             <div>
@@ -902,7 +1114,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                 {gamesToDelete.length} game(s) will be removed from the playlist
               </Text>
               <Text size="xs" c="dimmed">
-                Changes will be applied when you save
+                {manageMode ? 'Click "Save" to apply deletions' : 'Changes will be applied when you save'}
               </Text>
             </div>
             <Button
@@ -916,6 +1128,64 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
           </Group>
         </Card>
       )}
+
+      {/* Manage Order Modal */}
+      <Modal
+        opened={orderModalOpen}
+        onClose={() => setOrderModalOpen(false)}
+        title="Manage Game Order"
+        size="lg"
+        centered
+        styles={{
+          body: {
+            overflowX: 'hidden',
+            maxWidth: '100%'
+          },
+          content: {
+            overflowX: 'hidden'
+          }
+        }}
+      >
+        <Stack gap="md" style={{ overflowX: 'hidden', width: '100%' }}>
+          <Text size="sm" c="dimmed">
+            Drag and drop games to reorder them in your playlist.
+          </Text>
+
+          <div style={{ overflowX: 'hidden', width: '100%' }}>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={orderModalGames.map(g => g.id)} strategy={verticalListSortingStrategy}>
+                <Stack gap="xs" style={{ overflowX: 'hidden', width: '100%' }}>
+                  {orderModalGames.map((game, index) => (
+                    <SortableGameItem key={game.id} game={game} index={index} />
+                  ))}
+                </Stack>
+              </SortableContext>
+            </DndContext>
+          </div>          <Group justify="flex-end" mt="md">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOrderModalGames([...playlistGames].sort((a, b) => a.playlistOrder - b.playlistOrder))
+                setOrderModalOpen(false)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="filled"
+              color="green"
+              leftSection={<IconCheck size={16} />}
+              onClick={saveOrderChanges}
+            >
+              Save Order
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   )
 }

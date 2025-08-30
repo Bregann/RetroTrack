@@ -17,6 +17,9 @@ const myPlaylists = [
     username: 'CurrentUser',
     likes: 45,
     isPublic: true,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-08-20',
+    description: 'My all-time favorite RPGs, featuring epic stories and memorable characters.',
     gameIcons: [
       'https://media.retroachievements.org/Images/085573.png',
       'https://media.retroachievements.org/Images/085574.png',
@@ -30,6 +33,9 @@ const myPlaylists = [
     username: 'CurrentUser',
     likes: 23,
     isPublic: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-08-15',
+    description: 'Games I\'m practicing for speedruns. Private collection to track my progress.',
     gameIcons: [
       'https://media.retroachievements.org/Images/085577.png',
       'https://media.retroachievements.org/Images/085578.png',
@@ -42,6 +48,9 @@ const myPlaylists = [
     username: 'CurrentUser',
     likes: 67,
     isPublic: true,
+    createdAt: '2024-05-20',
+    updatedAt: '2024-08-10',
+    description: 'A nostalgic collection of games that defined my childhood. Pure retro joy!',
     gameIcons: [
       'https://media.retroachievements.org/Images/085580.png',
       'https://media.retroachievements.org/Images/085581.png',
@@ -59,6 +68,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 92,
     isPublic: true,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-08-20',
     gameIcons: [
       'https://media.retroachievements.org/Images/085573.png',
       'https://media.retroachievements.org/Images/085574.png',
@@ -72,6 +83,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 30,
     isPublic: true,
+    createdAt: '2024-02-10',
+    updatedAt: '2024-08-15',
     gameIcons: [
       'https://media.retroachievements.org/Images/085577.png',
       'https://media.retroachievements.org/Images/085578.png',
@@ -85,6 +98,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 69,
     isPublic: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-08-10',
     gameIcons: [
       'https://media.retroachievements.org/Images/085581.png',
       'https://media.retroachievements.org/Images/085582.png',
@@ -102,6 +117,9 @@ interface PlaylistCardProps {
     likes: number
     isPublic: boolean
     gameIcons: string[]
+    createdAt?: string
+    updatedAt?: string
+    description?: string
   }
   showCreateCard?: boolean
 }
@@ -111,7 +129,7 @@ function PlaylistCard({ playlist, showCreateCard = false }: PlaylistCardProps) {
 
   if (showCreateCard) {
     return (
-      <Card 
+      <Card
         className={styles.createPlaylistCard}
         radius="md"
         p="lg"
@@ -132,7 +150,7 @@ function PlaylistCard({ playlist, showCreateCard = false }: PlaylistCardProps) {
   }
 
   return (
-    <Card 
+    <Card
       className={styles.playlistCard}
       radius="md"
       p={0}
@@ -154,17 +172,23 @@ function PlaylistCard({ playlist, showCreateCard = false }: PlaylistCardProps) {
           ))}
         </div>
       </div>
-      
+
       <Stack p="md" gap="xs">
         <Text size="lg" fw={600} lineClamp={2} className={styles.playlistTitle}>
           {playlist.title}
         </Text>
-        
+
+        {playlist.description?.trim() !== '' && (
+          <Text size="sm" c="dimmed" lineClamp={2}>
+            {playlist.description}
+          </Text>
+        )}
+
         <Group justify="space-between" align="center">
           <Text size="sm" c="dimmed">
             @{playlist.username}
           </Text>
-          
+
           <Group gap="xs" align="center">
             <IconHeart size={16} className={styles.heartIcon} />
             <Text size="sm" c="dimmed">
@@ -172,11 +196,22 @@ function PlaylistCard({ playlist, showCreateCard = false }: PlaylistCardProps) {
             </Text>
           </Group>
         </Group>
-        
+
         {!playlist.isPublic && (
           <Badge size="sm" variant="light" color="gray">
             Private
           </Badge>
+        )}
+
+        {(playlist.createdAt?.trim() !== '' || playlist.updatedAt?.trim() !== '') && (
+          <Group gap="xs" c="dimmed" style={{ fontSize: '12px' }}>
+            {playlist.createdAt?.trim() !== '' && (
+              <Text size="xs">Created: {new Date(playlist.createdAt as string).toLocaleDateString()}</Text>
+            )}
+            {playlist.updatedAt?.trim() !== '' && (
+              <Text size="xs">Updated: {new Date(playlist.updatedAt as string).toLocaleDateString()}</Text>
+            )}
+          </Group>
         )}
       </Stack>
     </Card>
@@ -188,9 +223,9 @@ export default function LoggedInPlaylistsComponent() {
   const isLg = useMediaQuery('(min-width: 1200px)')
   const isXl = useMediaQuery('(min-width: 1600px)')
   const isXxl = useMediaQuery('(min-width: 2000px)')
-  
+
   const span = isXxl ? 2 : isXl ? 3 : isLg ? 4 : isSm ? 6 : 12
-  
+
   // Search and pagination state
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
@@ -201,15 +236,15 @@ export default function LoggedInPlaylistsComponent() {
   // Filter and sort logic
   const filteredAndSortedPlaylists = useMemo(() => {
     let playlists = activeTab === 'my-playlists' ? myPlaylists : publicPlaylists
-    
+
     // Apply search filter
-    if (searchQuery) {
-      playlists = playlists.filter(playlist => 
+    if (searchQuery.trim() !== '') {
+      playlists = playlists.filter(playlist =>
         playlist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         playlist.username.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
-    
+
     // Apply sorting
     const sorted = [...playlists].sort((a, b) => {
       switch (sortBy) {
@@ -224,7 +259,7 @@ export default function LoggedInPlaylistsComponent() {
           return b.id - a.id
       }
     })
-    
+
     return sorted
   }, [activeTab, searchQuery, sortBy])
 
@@ -237,8 +272,8 @@ export default function LoggedInPlaylistsComponent() {
 
   // Reset pagination when changing tabs or search
   const handleTabChange = (value: string | null) => {
-    if (value) {
-      setActiveTab(value)
+    if (value?.trim() !== '') {
+      setActiveTab(value as 'my-playlists' | 'public-playlists' | 'all-likes')
       setCurrentPage(1)
     }
   }
@@ -249,8 +284,8 @@ export default function LoggedInPlaylistsComponent() {
   }
 
   const handleSortChange = (value: string | null) => {
-    if (value) {
-      setSortBy(value)
+    if (value?.trim() !== '') {
+      setSortBy(value as 'newest' | 'likes' | 'title' | 'oldest')
       setCurrentPage(1)
     }
   }
@@ -264,7 +299,7 @@ export default function LoggedInPlaylistsComponent() {
         >
           Playlists
         </Text>
-        
+
         <Button
           leftSection={<IconPlus size={16} />}
           variant="filled"
@@ -296,7 +331,7 @@ export default function LoggedInPlaylistsComponent() {
               placeholder="Search playlists..."
               leftSection={<IconSearch size={16} />}
               rightSection={
-                searchQuery && (
+                searchQuery.trim() !== '' ? (
                   <ActionIcon
                     size="sm"
                     variant="subtle"
@@ -305,7 +340,7 @@ export default function LoggedInPlaylistsComponent() {
                   >
                     <IconX size={14} />
                   </ActionIcon>
-                )
+                ) : null
               }
               value={searchQuery}
               onChange={(event) => handleSearchChange(event.currentTarget.value)}
@@ -351,13 +386,13 @@ export default function LoggedInPlaylistsComponent() {
 
         <Tabs.Panel value="my-playlists">
           <Text size="sm" c="dimmed" mb="md">
-            {filteredAndSortedPlaylists.length === myPlaylists.length 
+            {filteredAndSortedPlaylists.length === myPlaylists.length
               ? `Showing all ${myPlaylists.length} playlists`
               : `Showing ${filteredAndSortedPlaylists.length} of ${myPlaylists.length} playlists`}
           </Text>
-          
+
           <Grid gutter={8}>
-            {currentPage === 1 && !searchQuery && (
+            {currentPage === 1 && searchQuery.trim() === '' && (
               <Grid.Col span={span}>
                 <PlaylistCard playlist={{} as any} showCreateCard={true} />
               </Grid.Col>
@@ -383,18 +418,18 @@ export default function LoggedInPlaylistsComponent() {
 
           {filteredAndSortedPlaylists.length === 0 && (
             <Text ta="center" c="dimmed" mt="xl" size="lg">
-              {searchQuery ? `No playlists found matching "${searchQuery}"` : 'No playlists found.'}
+              {searchQuery.trim() !== '' ? `No playlists found matching "${searchQuery}"` : 'No playlists found.'}
             </Text>
           )}
         </Tabs.Panel>
 
         <Tabs.Panel value="public-playlists">
           <Text size="sm" c="dimmed" mb="md">
-            {filteredAndSortedPlaylists.length === publicPlaylists.length 
+            {filteredAndSortedPlaylists.length === publicPlaylists.length
               ? `Showing all ${publicPlaylists.length} playlists`
               : `Showing ${filteredAndSortedPlaylists.length} of ${publicPlaylists.length} playlists`}
           </Text>
-          
+
           <Grid gutter={8}>
             {paginatedPlaylists.map((playlist) => (
               <Grid.Col key={playlist.id} span={span}>
@@ -417,7 +452,7 @@ export default function LoggedInPlaylistsComponent() {
 
           {filteredAndSortedPlaylists.length === 0 && (
             <Text ta="center" c="dimmed" mt="xl" size="lg">
-              {searchQuery ? `No playlists found matching "${searchQuery}"` : 'No playlists found.'}
+              {searchQuery.trim() !== '' ? `No playlists found matching "${searchQuery}"` : 'No playlists found.'}
             </Text>
           )}
         </Tabs.Panel>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, Container, Grid, Group, Stack, Text, TextInput, Pagination, ActionIcon } from '@mantine/core'
+import { Button, Card, Container, Grid, Group, Stack, Text, TextInput, Pagination, ActionIcon } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconHeart, IconSearch, IconX, IconLogin } from '@tabler/icons-react'
 import { pressStart2P } from '@/font/pressStart2P'
@@ -17,6 +17,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 92,
     isPublic: true,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-08-20',
     gameIcons: [
       'https://media.retroachievements.org/Images/085573.png',
       'https://media.retroachievements.org/Images/085574.png',
@@ -30,12 +32,14 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 30,
     isPublic: true,
+    createdAt: '2024-02-10',
+    updatedAt: '2024-08-15',
     gameIcons: [
       'https://media.retroachievements.org/Images/085577.png',
       'https://media.retroachievements.org/Images/085578.png',
       'https://media.retroachievements.org/Images/085579.png',
       'https://media.retroachievements.org/Images/085580.png'
-    ]
+    ],
   },
   {
     id: 6,
@@ -43,6 +47,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 69,
     isPublic: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-08-10',
     gameIcons: [
       'https://media.retroachievements.org/Images/085581.png',
       'https://media.retroachievements.org/Images/085582.png',
@@ -56,6 +62,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 30,
     isPublic: true,
+    createdAt: '2024-04-05',
+    updatedAt: '2024-08-05',
     gameIcons: [
       'https://media.retroachievements.org/Images/085585.png',
       'https://media.retroachievements.org/Images/085586.png',
@@ -68,6 +76,8 @@ const publicPlaylists = [
     username: 'Guinea',
     likes: 23,
     isPublic: true,
+    createdAt: '2024-05-15',
+    updatedAt: '2024-08-01',
     gameIcons: [
       'https://media.retroachievements.org/Images/085588.png',
       'https://media.retroachievements.org/Images/085589.png',
@@ -81,6 +91,8 @@ const publicPlaylists = [
     username: 'RetroGamer',
     likes: 156,
     isPublic: true,
+    createdAt: '2024-06-20',
+    updatedAt: '2024-07-25',
     gameIcons: [
       'https://media.retroachievements.org/Images/085592.png',
       'https://media.retroachievements.org/Images/085593.png',
@@ -94,6 +106,8 @@ const publicPlaylists = [
     username: 'SpeedRacer',
     likes: 88,
     isPublic: true,
+    createdAt: '2024-07-01',
+    updatedAt: '2024-07-20',
     gameIcons: [
       'https://media.retroachievements.org/Images/085596.png',
       'https://media.retroachievements.org/Images/085597.png',
@@ -107,6 +121,8 @@ const publicPlaylists = [
     username: 'ScreamQueen',
     likes: 134,
     isPublic: true,
+    createdAt: '2024-07-15',
+    updatedAt: '2024-07-15',
     gameIcons: [
       'https://media.retroachievements.org/Images/085600.png',
       'https://media.retroachievements.org/Images/085601.png',
@@ -124,6 +140,8 @@ interface PlaylistCardProps {
     likes: number
     isPublic: boolean
     gameIcons: string[]
+    createdAt: string
+    updatedAt: string
   }
 }
 
@@ -131,7 +149,7 @@ function PlaylistCard({ playlist }: PlaylistCardProps) {
   const router = useRouter()
 
   return (
-    <Card 
+    <Card
       className={styles.playlistCard}
       radius="md"
       p={0}
@@ -153,23 +171,32 @@ function PlaylistCard({ playlist }: PlaylistCardProps) {
           ))}
         </div>
       </div>
-      
+
       <Stack p="md" gap="xs">
         <Text size="lg" fw={600} lineClamp={2} className={styles.playlistTitle}>
           {playlist.title}
         </Text>
-        
+
         <Group justify="space-between" align="center">
           <Text size="sm" c="dimmed">
             @{playlist.username}
           </Text>
-          
+
           <Group gap="xs" align="center">
             <IconHeart size={16} className={styles.heartIcon} />
             <Text size="sm" c="dimmed">
               {playlist.likes} likes
             </Text>
           </Group>
+        </Group>
+
+        <Group justify="space-between" align="center">
+          <Text size="xs" c="dimmed">
+            Created {new Date(playlist.createdAt).toLocaleDateString()}
+          </Text>
+          <Text size="xs" c="dimmed">
+            Updated {new Date(playlist.updatedAt).toLocaleDateString()}
+          </Text>
         </Group>
       </Stack>
     </Card>
@@ -178,7 +205,7 @@ function PlaylistCard({ playlist }: PlaylistCardProps) {
 
 function LoginPromptCard() {
   return (
-    <Card 
+    <Card
       className={styles.loginPromptCard}
       radius="md"
       p="lg"
@@ -209,9 +236,9 @@ export default function LoggedOutPlaylistsComponent() {
   const isLg = useMediaQuery('(min-width: 1200px)')
   const isXl = useMediaQuery('(min-width: 1600px)')
   const isXxl = useMediaQuery('(min-width: 2000px)')
-  
+
   const span = isXxl ? 2 : isXl ? 3 : isLg ? 4 : isSm ? 6 : 12
-  
+
   // Search and pagination state
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
@@ -221,15 +248,15 @@ export default function LoggedOutPlaylistsComponent() {
   // Filter and sort logic
   const filteredAndSortedPlaylists = useMemo(() => {
     let playlists = [...publicPlaylists]
-    
+
     // Apply search filter
-    if (searchQuery) {
-      playlists = playlists.filter(playlist => 
+    if (searchQuery.trim() !== '') {
+      playlists = playlists.filter(playlist =>
         playlist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         playlist.username.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
-    
+
     // Apply sorting
     const sorted = playlists.sort((a, b) => {
       switch (sortBy) {
@@ -244,7 +271,7 @@ export default function LoggedOutPlaylistsComponent() {
           return b.id - a.id
       }
     })
-    
+
     return sorted
   }, [searchQuery, sortBy])
 
@@ -261,8 +288,8 @@ export default function LoggedOutPlaylistsComponent() {
   }
 
   const handleSortChange = (value: string | null) => {
-    if (value) {
-      setSortBy(value)
+    if (value?.trim() !== '') {
+      setSortBy(value as 'newest' | 'likes' | 'title' | 'oldest')
       setCurrentPage(1)
     }
   }
@@ -276,7 +303,7 @@ export default function LoggedOutPlaylistsComponent() {
         >
           Community Playlists
         </Text>
-        
+
         <Button
           leftSection={<IconLogin size={16} />}
           variant="filled"
@@ -310,7 +337,7 @@ export default function LoggedOutPlaylistsComponent() {
             placeholder="Search community playlists..."
             leftSection={<IconSearch size={16} />}
             rightSection={
-              searchQuery && (
+              searchQuery.trim() !== '' ? (
                 <ActionIcon
                   size="sm"
                   variant="subtle"
@@ -319,7 +346,7 @@ export default function LoggedOutPlaylistsComponent() {
                 >
                   <IconX size={14} />
                 </ActionIcon>
-              )
+              ) : null
             }
             value={searchQuery}
             onChange={(event) => handleSearchChange(event.currentTarget.value)}
@@ -365,14 +392,14 @@ export default function LoggedOutPlaylistsComponent() {
 
       {/* Results info */}
       <Text size="sm" c="dimmed" mb="md">
-        {filteredAndSortedPlaylists.length === publicPlaylists.length 
+        {filteredAndSortedPlaylists.length === publicPlaylists.length
           ? `Showing all ${publicPlaylists.length} community playlists`
           : `Showing ${filteredAndSortedPlaylists.length} of ${publicPlaylists.length} community playlists`}
       </Text>
-      
+
       <Grid gutter={8}>
         {/* Show login prompt card on first page when no search */}
-        {currentPage === 1 && !searchQuery && (
+        {currentPage === 1 && searchQuery.trim() === '' && (
           <Grid.Col span={span}>
             <LoginPromptCard />
           </Grid.Col>

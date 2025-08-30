@@ -89,9 +89,9 @@ export function PaginatedTable<T>({
   }
 
   const rows = data.map((item, index) => (
-    <Table.Tr 
-      key={index} 
-      onClick={() => onRowClick !== undefined && onRowClick(item, index)} 
+    <Table.Tr
+      key={index}
+      onClick={() => onRowClick !== undefined && onRowClick(item, index)}
       className={`${tableStyles.bodyRow} ${onRowClick !== undefined ? tableStyles.clickable : ''}`}
     >
       {columns.filter(x => x.show !== false).map((col, colIndex) => (
@@ -139,7 +139,7 @@ export function PaginatedTable<T>({
             <Table.Tr>
               {columns.filter(x => x.show !== false).map((col, colIndex) => {
                 const isSorted = col.key === currentKey
-                const canSort = Boolean(col.sortable !== undefined && onSortChange)
+                const canSort = Boolean((col.sortable !== false) && onSortChange)
 
                 return (
                   <Table.Th

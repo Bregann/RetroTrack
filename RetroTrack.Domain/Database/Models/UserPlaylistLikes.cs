@@ -10,10 +10,10 @@ namespace RetroTrack.Domain.Database.Models
 
         public required string UserPlaylistId { get; set; }
         [ForeignKey("UserPlaylistId")]
-        public UserPlaylist UserPlaylist { get; set; } = null!;
+        public virtual UserPlaylist UserPlaylist { get; set; } = null!;
 
         public required int UserId { get; set; }
         [ForeignKey("UserId")]
-        public User User { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
     }
 }

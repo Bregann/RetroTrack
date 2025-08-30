@@ -14,8 +14,8 @@ export async function generateMetadata({
   try {
     // TODO: Fetch playlist data for metadata when API is available
     return {
-      title: `RetroTrack - Playlist`,
-      description: `View detailed information about this gaming playlist on RetroTrack`,
+      title: 'RetroTrack - Playlist',
+      description: 'View detailed information about this gaming playlist on RetroTrack',
       icons: {
         icon: '/favicon.ico'
       }

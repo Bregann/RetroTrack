@@ -12,14 +12,9 @@ import {
   Box,
   Title,
   Badge,
-  Flex,
-  ScrollArea,
-  Table,
   Select,
   TextInput,
   Avatar,
-  Anchor,
-  Progress,
   ActionIcon,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -29,15 +24,11 @@ import {
   IconHeart,
   IconArrowLeft,
   IconSearch,
-  IconFilter,
-  IconPlayerPlay,
-  IconCrown,
   IconMedal,
   IconTargetArrow,
   IconLogin,
   IconBookmark,
 } from '@tabler/icons-react'
-import styles from '@/css/components/gameModal.module.scss'
 import pageStyles from '@/css/pages/gamePage.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
 import tableStyles from '@/css/components/publicGamesTable.module.scss'
@@ -48,6 +39,7 @@ import { useGameModal } from '@/context/gameModalContext'
 
 interface PublicPlaylistPageProps {
   playlistId: number
+  description?: string
 }
 
 // Dummy playlist data - replace with actual API call
@@ -152,11 +144,11 @@ const playlistGames = [
   }
 ]
 
-export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
+export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const gameModal = useGameModal()
-  
+
   const [searchQuery, setSearchQuery] = useState('')
   const [consoleFilter, setConsoleFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
@@ -183,7 +175,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
   const filteredGames = useMemo(() => {
     let filtered = playlistGames
 
-    if (searchQuery) {
+    if (searchQuery.trim() !== '') {
       filtered = filtered.filter(game =>
         game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         game.consoleName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -191,7 +183,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
       )
     }
 
-    if (consoleFilter !== 'all') {
+    if (consoleFilter !== 'all' && consoleFilter?.trim() !== '') {
       filtered = filtered.filter(game => game.consoleName === consoleFilter)
     }
 
@@ -363,7 +355,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
               </Group>
             </Group>
 
-            {playlistData.description && (
+            {playlistData.description?.trim() !== '' && (
               <Text size="md" c="dimmed" mb="md">
                 {playlistData.description}
               </Text>
@@ -378,6 +370,9 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
               </Text>
               <Text size="sm" c="dimmed">
                 Created {new Date(playlistData.createdAt).toLocaleDateString()}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Updated {new Date(playlistData.updatedAt).toLocaleDateString()}
               </Text>
             </Group>
           </Stack>
@@ -443,7 +438,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
             Search
           </Button>
         </Group>
-        
+
         <Select
           placeholder="All Consoles"
           data={[
@@ -451,7 +446,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
             ...uniqueConsoles.map(console => ({ value: console, label: console }))
           ]}
           value={consoleFilter}
-          onChange={(value) => setConsoleFilter(value || 'all')}
+          onChange={(value) => setConsoleFilter(value?.trim() !== '' ? value as string : 'all')}
           style={{ minWidth: 140 }}
         />
       </Group>
@@ -471,7 +466,7 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
         }}
         pageSizeOptions={[10, 25, 50, 100]}
         showPageSizeSelector={true}
-        sortOption={sortKey ? { key: sortKey as keyof typeof filteredGames[0], direction: sortDirection } : undefined}
+        sortOption={sortKey.trim() !== '' ? { key: sortKey as keyof typeof filteredGames[0], direction: sortDirection } : undefined}
         onSortChange={handleSortChange}
         actions={[
           {
@@ -488,8 +483,8 @@ export function PublicPlaylistPage(props: PublicPlaylistPageProps) {
       />
 
       {/* Call to action for better experience */}
-      <Group justify="space-between" align="center" mt="md" p="sm" style={{ 
-        background: 'light-dark(#f8f9fa, rgba(255, 255, 255, 0.02))', 
+      <Group justify="space-between" align="center" mt="md" p="sm" style={{
+        background: 'light-dark(#f8f9fa, rgba(255, 255, 255, 0.02))',
         borderRadius: 8,
         border: '1px solid light-dark(#e9ecef, rgba(255, 255, 255, 0.1))'
       }}>

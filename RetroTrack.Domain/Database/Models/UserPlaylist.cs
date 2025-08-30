@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RetroTrack.Domain.Database.Models
@@ -17,14 +18,9 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required int UserIdOwner { get; set; }
         [ForeignKey("UserIdOwner")]
-        public User UserOwner { get; set; } = null!;
+        public virtual User UserOwner { get; set; } = null!;
 
         public string? Description { get; set; }
-
-        public string? GameImageIcon1 { get; set; }
-        public string? GameImageIcon2 { get; set; }
-        public string? GameImageIcon3 { get; set; }
-        public string? GameImageIcon4 { get; set; }
 
         [Required]
         public required DateTime CreatedAt { get; set; }
@@ -32,7 +28,10 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required DateTime UpdatedAt { get; set; }
 
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<UserPlaylistGame> PlaylistGames { get; set; } = null!;
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<UserPlaylistLikes> PlaylistLikes { get; set; } = null!;
     }
 }
