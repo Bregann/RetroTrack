@@ -390,13 +390,17 @@ export function Navbar(props: NavbarProps) {
       <AppShell.Main>
         {props.children}
         <LoginModal
-          onClose={() => setLoginModalOpen(false)}
+          onClose={setLoginModalOpen}
           openedState={loginModalOpen}
         />
 
         <RegisterModal
-          onClose={() => setRegisterModalOpen(false)}
+          onClose={setRegisterModalOpen}
           openedState={registerModalOpen}
+          onSwitchToLogin={() => {
+            setRegisterModalOpen(false)
+            setLoginModalOpen(true)
+          }}
         />
 
         <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack Updates">

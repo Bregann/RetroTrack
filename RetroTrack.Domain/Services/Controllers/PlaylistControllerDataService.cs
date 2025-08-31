@@ -4,33 +4,98 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
+using System.Linq;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
     public class PlaylistControllerDataService(AppDbContext context) : IPlaylistControllerDataService
     {
-        public async Task<GetPlaylistResponse> GetPublicPlaylists(GetPlaylistRequest request)
+        public async Task<GetPlaylistResponse> GetPublicPlaylists()
         {
-            var query = context.UserPlaylists
-                .Where(p => p.IsPublic);
-
-            return await DoFilter(request, query);
+            return new GetPlaylistResponse
+            {
+                Playlists = await context.UserPlaylists
+                    .Where(p => p.IsPublic)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Select(p => new PlaylistItem
+                    {
+                        Id = p.Id.ToString(),
+                        Name = p.PlaylistName,
+                        Description = p.Description ?? string.Empty,
+                        NumberOfLikes = p.PlaylistLikes.Count,
+                        NumberOfGames = p.PlaylistGames.Count,
+                        CreatedAt = p.CreatedAt,
+                        UpdatedAt = p.UpdatedAt,
+                        CreatedBy = p.UserOwner.RAUsername,
+                        Icons = p.PlaylistGames
+                            .OrderBy(pg => pg.OrderIndex)
+                            .Take(4)
+                            .Select(pg => pg.Game.ImageIcon ?? string.Empty)
+                            .Where(url => !string.IsNullOrEmpty(url))
+                            .ToArray(),
+                        IsPublic = p.IsPublic
+                    })
+                    .ToArrayAsync()
+            };
         }
 
-        public async Task<GetPlaylistResponse> GetUserPlaylists(int userId, GetPlaylistRequest request)
+        public async Task<GetPlaylistResponse> GetUserPlaylists(int userId)
         {
-            var query = context.UserPlaylists
-                .Where(p => p.UserIdOwner == userId);
-
-            return await DoFilter(request, query);
+            return new GetPlaylistResponse
+            {
+                Playlists = await context.UserPlaylists
+                    .Where(p => p.UserIdOwner == userId)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Select(p => new PlaylistItem
+                    {
+                        Id = p.Id.ToString(),
+                        Name = p.PlaylistName,
+                        Description = p.Description ?? string.Empty,
+                        NumberOfLikes = p.PlaylistLikes.Count,
+                        NumberOfGames = p.PlaylistGames.Count,
+                        CreatedAt = p.CreatedAt,
+                        UpdatedAt = p.UpdatedAt,
+                        CreatedBy = p.UserOwner.RAUsername,
+                        Icons = p.PlaylistGames
+                            .OrderBy(pg => pg.OrderIndex)
+                            .Take(4)
+                            .Select(pg => pg.Game.ImageIcon ?? string.Empty)
+                            .Where(url => !string.IsNullOrEmpty(url))
+                            .ToArray(),
+                        IsPublic = p.IsPublic
+                    })
+                    .ToArrayAsync()
+            };
         }
 
-        public async Task<GetPlaylistResponse> GetUserLikedPlaylists(int userId, GetPlaylistRequest request)
+        public async Task<GetPlaylistResponse> GetUserLikedPlaylists(int userId)
         {
-            var query = context.UserPlaylists
-                .Where(p => p.PlaylistLikes.Any(l => l.UserId == userId) && p.UserIdOwner != userId);
-
-            return await DoFilter(request, query);
+            return new GetPlaylistResponse
+            {
+                Playlists = await context.UserPlaylistLikes
+                    .Where(l => l.UserId == userId)
+                    .Select(l => l.UserPlaylist)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Select(p => new PlaylistItem
+                    {
+                        Id = p.Id.ToString(),
+                        Name = p.PlaylistName,
+                        Description = p.Description ?? string.Empty,
+                        NumberOfLikes = p.PlaylistLikes.Count,
+                        NumberOfGames = p.PlaylistGames.Count,
+                        CreatedAt = p.CreatedAt,
+                        UpdatedAt = p.UpdatedAt,
+                        CreatedBy = p.UserOwner.RAUsername,
+                        Icons = p.PlaylistGames
+                            .OrderBy(pg => pg.OrderIndex)
+                            .Take(4)
+                            .Select(pg => pg.Game.ImageIcon ?? string.Empty)
+                            .Where(url => !string.IsNullOrEmpty(url))
+                            .ToArray(),
+                        IsPublic = p.IsPublic
+                    })
+                    .ToArrayAsync()
+            };
         }
 
         public async Task AddNewPlaylist(int userId, AddNewPlaylistRequest request)
@@ -59,7 +124,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 throw new KeyNotFoundException("Playlist not found");
             }
 
-            var games = playlist.PlaylistGames
+            IQueryable<UserPlaylistGame> games = playlist.PlaylistGames
                 .Where(pg => pg.UserPlaylistId == playlist.Id)
                 .AsQueryable();
 
@@ -69,34 +134,69 @@ namespace RetroTrack.Domain.Services.Controllers
                 games = games.Where(pg => pg.Game.Title.ToLower().Contains(searchTerm));
             }
 
-            if (request.SortByIndex == true)
+            if (request.SortByIndex != null)
             {
-                games = games.OrderBy(pg => pg.OrderIndex);
+                games = request.SortByIndex == true
+                    ? games.OrderBy(pg => pg.OrderIndex)
+                    : games.OrderByDescending(pg => pg.OrderIndex);
             }
-            else if (request.SortByGameTitle == true)
+            else if (request.SortByGameTitle != null)
             {
-                games = games.OrderBy(pg => pg.Game.Title);
+                games = request.SortByGameTitle == true
+                    ? games.OrderBy(pg => pg.Game.Title)
+                    : games.OrderByDescending(pg => pg.Game.Title);
             }
-            else if (request.SortByConsoleName == true)
+            else if (request.SortByConsoleName != null)
             {
-                games = games.OrderBy(pg => pg.Game.GameConsole.ConsoleName);
+                games = request.SortByConsoleName == true
+                    ? games.OrderBy(pg => pg.Game.GameConsole.ConsoleName)
+                    : games.OrderByDescending(pg => pg.Game.GameConsole.ConsoleName);
             }
-            else if (request.SortByGenre == true)
+            else if (request.SortByGenre != null)
             {
-                games = games.OrderBy(pg => pg.Game.GameGenre);
+                games = request.SortByGenre == true
+                    ? games.OrderBy(pg => pg.Game.GameGenre)
+                    : games.OrderByDescending(pg => pg.Game.GameGenre);
             }
-            else if (request.SortByAchievementCount == true)
+            else if (request.SortByAchievementCount != null)
             {
-                games = games.OrderByDescending(pg => pg.Game.Achievements.Count);
+                games = request.SortByAchievementCount == true
+                    ? games.OrderBy(pg => pg.Game.Achievements.Count)
+                    : games.OrderByDescending(pg => pg.Game.Achievements.Count);
             }
-            else if (request.SortByPoints == true)
+            else if (request.SortByPoints != null)
             {
-                games = games.OrderByDescending(pg => pg.Game.Achievements.Sum(a => a.Points));
+                games = request.SortByPoints == true
+                    ? games.OrderBy(pg => pg.Game.Achievements.Sum(a => a.Points))
+                    : games.OrderByDescending(pg => pg.Game.Achievements.Sum(a => a.Points));
+            }
+            else if (request.SortByPlayers != null)
+            {
+                games = request.SortByPlayers == true
+                    ? games.OrderBy(pg => pg.Game.Players)
+                    : games.OrderByDescending(pg => pg.Game.Players);
             }
             else
             {
                 games = games.OrderBy(pg => pg.OrderIndex);
             }
+
+            var gamesFromQuery = games
+                    .Skip(request.Skip)
+                    .Take(request.Take)
+                    .Select(x => new PlaylistGameItem
+                    {
+                        OrderIndex = x.OrderIndex,
+                        GameId = x.GameId,
+                        Title = x.Game.Title,
+                        ConsoleName = x.Game.GameConsole.ConsoleName,
+                        GameIconUrl = x.Game.ImageIcon ?? string.Empty,
+                        Genre = x.Game.GameGenre ?? string.Empty,
+                        AchievementCount = x.Game.Achievements.Count,
+                        Points = x.Game.Achievements.Sum(a => a.Points),
+                        Players = x.Game.Players ?? 0
+                    })
+                    .ToArray();
 
             return new GetPublicPlaylistDataResponse
             {
@@ -115,18 +215,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     .Select(pg => pg.Game.ImageIcon ?? string.Empty)
                     .Where(url => !string.IsNullOrEmpty(url))
                     .ToArray(),
-                Games = await games.Select(x => new PlaylistGameItem
-                {
-                    OrderIndex = x.OrderIndex,
-                    GameId = x.GameId,
-                    Title = x.Game.Title,
-                    ConsoleName = x.Game.GameConsole.ConsoleName,
-                    GameIconUrl = x.Game.ImageIcon ?? string.Empty,
-                    Genre = x.Game.GameGenre ?? string.Empty,
-                    AchievementCount = x.Game.Achievements.Count,
-                    Points = x.Game.Achievements.Sum(a => a.Points),
-                    Players = x.Game.Players ?? 0
-                }).ToArrayAsync(),
+                Games = gamesFromQuery,
                 TotalPointsToEarn = playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Sum(a => a.Points)),
                 TotalAchievementsToEarn = playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Count)
             };
@@ -135,41 +224,56 @@ namespace RetroTrack.Domain.Services.Controllers
         public async Task<GetLoggedInPlaylistDataResponse> GetLoggedInPlaylistData(int userId, GetLoggedInPlaylistDataRequest request)
         {
             var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && (p.IsPublic || p.UserIdOwner == userId));
+
             if (playlist == null)
             {
                 throw new KeyNotFoundException("Playlist not found");
             }
+
             var games = playlist.PlaylistGames
                 .Where(pg => pg.UserPlaylistId == playlist.Id)
                 .AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim().ToLower();
                 games = games.Where(pg => pg.Game.Title.ToLower().Contains(searchTerm));
             }
-            if (request.SortByIndex == true)
+            if (request.SortByIndex != null)
             {
-                games = games.OrderBy(pg => pg.OrderIndex);
+                games = request.SortByIndex == true
+                    ? games.OrderBy(pg => pg.OrderIndex)
+                    : games.OrderByDescending(pg => pg.OrderIndex);
             }
-            else if (request.SortByGameTitle == true)
+            else if (request.SortByGameTitle != null)
             {
-                games = games.OrderBy(pg => pg.Game.Title);
+                games = request.SortByGameTitle == true
+                    ? games.OrderBy(pg => pg.Game.Title)
+                    : games.OrderByDescending(pg => pg.Game.Title);
             }
-            else if (request.SortByConsoleName == true)
+            else if (request.SortByConsoleName != null)
             {
-                games = games.OrderBy(pg => pg.Game.GameConsole.ConsoleName);
+                games = request.SortByConsoleName == true
+                    ? games.OrderBy(pg => pg.Game.GameConsole.ConsoleName)
+                    : games.OrderByDescending(pg => pg.Game.GameConsole.ConsoleName);
             }
-            else if (request.SortByGenre == true)
+            else if (request.SortByGenre != null)
             {
-                games = games.OrderBy(pg => pg.Game.GameGenre);
+                games = request.SortByGenre == true
+                    ? games.OrderBy(pg => pg.Game.GameGenre)
+                    : games.OrderByDescending(pg => pg.Game.GameGenre);
             }
-            else if (request.SortByAchievementCount == true)
+            else if (request.SortByAchievementCount != null)
             {
-                games = games.OrderByDescending(pg => pg.Game.Achievements.Count);
+                games = request.SortByAchievementCount == true
+                    ? games.OrderBy(pg => pg.Game.Achievements.Count)
+                    : games.OrderByDescending(pg => pg.Game.Achievements.Count);
             }
-            else if (request.SortByPoints == true)
+            else if (request.SortByPoints != null)
             {
-                games = games.OrderByDescending(pg => pg.Game.Achievements.Sum(a => a.Points));
+                games = request.SortByPoints == true
+                    ? games.OrderBy(pg => pg.Game.Achievements.Sum(a => a.Points))
+                    : games.OrderByDescending(pg => pg.Game.Achievements.Sum(a => a.Points));
             }
             else
             {
@@ -180,7 +284,10 @@ namespace RetroTrack.Domain.Services.Controllers
                 .Where(ugp => ugp.UserId == userId && games.Any(pg => pg.GameId == ugp.GameId))
                 .ToListAsync();
 
-            var gameItems = await games.Select(x => new LoggedInGameItem
+            var gameItems = await games
+                .Skip(request.Skip)
+                .Take(request.Take)
+                .Select(x => new LoggedInGameItem
             {
                 OrderIndex = x.OrderIndex,
                 GameId = x.GameId,
@@ -356,6 +463,7 @@ namespace RetroTrack.Domain.Services.Controllers
             await context.SaveChangesAsync();
         }
 
+        // for filtering public and user playlists if needed. Atm it's done via the front end as all data is fetched
         private static async Task<GetPlaylistResponse> DoFilter(GetPlaylistRequest request, IQueryable<UserPlaylist> query)
         {
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))

@@ -54,7 +54,7 @@ import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } 
 import { CSS } from '@dnd-kit/utilities'
 
 interface LoggedInPlaylistPageProps {
-  playlistId: number
+  playlistId: string
 }
 
 // Dummy playlist data - replace with actual API call

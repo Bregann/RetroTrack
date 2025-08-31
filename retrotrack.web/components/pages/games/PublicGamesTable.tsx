@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react'
 import { Button, Center, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
-import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
+import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
@@ -127,7 +127,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   }, [page, pageSize, props.consoleId, searchDropdownValue, searchTerm, sortOption.direction, sortOption.key])
 
   const { data, isLoading, isError, error } = useQuery<GetGamesForConsoleResponse>({
-    queryKey: [queryString],
+    queryKey: [queryString.concat('-public')],
     refetchOnMount: true,
     queryFn: async () => await doQueryGet<GetGamesForConsoleResponse>('/api/games/getGamesForConsole?'.concat(queryString))
   })

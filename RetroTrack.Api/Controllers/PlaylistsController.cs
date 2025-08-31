@@ -9,12 +9,30 @@ namespace RetroTrack.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class PlaylistController(IPlaylistControllerDataService playlistControllerDataService, IUserContextHelper userContextHelper) : ControllerBase
+    public class PlaylistsController(IPlaylistControllerDataService playlistControllerDataService, IUserContextHelper userContextHelper) : ControllerBase
     {
         [HttpGet]
-        public async Task<GetPlaylistResponse> GetPublicPlaylists([FromQuery] GetPlaylistRequest request)
+        public async Task<GetPlaylistResponse> GetPublicPlaylists()
         {
-            return await playlistControllerDataService.GetPublicPlaylists(request);
+            return await playlistControllerDataService.GetPublicPlaylists();
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<GetPlaylistResponse> GetUserPlaylists()
+        {
+            var userId = userContextHelper.GetUserId();
+
+            return await playlistControllerDataService.GetUserPlaylists(userId);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<GetPlaylistResponse> GetUserLikedPlaylists()
+        {
+            var userId = userContextHelper.GetUserId();
+
+            return await playlistControllerDataService.GetUserLikedPlaylists(userId);
         }
 
         [HttpGet]
@@ -45,24 +63,6 @@ namespace RetroTrack.Api.Controllers
             }
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<GetPlaylistResponse> GetUserPlaylists([FromQuery] GetPlaylistRequest request)
-        {
-            var userId = userContextHelper.GetUserId();
-
-            return await playlistControllerDataService.GetUserPlaylists(userId, request);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<GetPlaylistResponse> GetUserLikedPlaylists([FromQuery] GetPlaylistRequest request)
-        {
-            var userId = userContextHelper.GetUserId();
-
-            return await playlistControllerDataService.GetUserLikedPlaylists(userId, request);
-        }
-
         [HttpPost]
         [Authorize]
         public async Task AddNewPlaylist([FromBody] AddNewPlaylistRequest request)
@@ -79,7 +79,7 @@ namespace RetroTrack.Api.Controllers
             var userId = userContextHelper.GetUserId();
             try
             {
-                await playlistControllerDataService.AddGameToPlaylist(request, userId);
+                await playlistControllerDataService.AddGameToPlaylist(userId, request);
                 return Ok();
             }
             catch (KeyNotFoundException)

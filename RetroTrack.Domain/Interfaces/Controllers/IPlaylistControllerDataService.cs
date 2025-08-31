@@ -9,9 +9,9 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task AddNewPlaylist(int userId, AddNewPlaylistRequest request);
         Task<GetLoggedInPlaylistDataResponse> GetLoggedInPlaylistData(int userId, GetLoggedInPlaylistDataRequest request);
         Task<GetPublicPlaylistDataResponse> GetPublicPlaylistData(GetPublicPlaylistDataRequest request);
-        Task<GetPlaylistResponse> GetPublicPlaylists(GetPlaylistRequest request);
-        Task<GetPlaylistResponse> GetUserLikedPlaylists(int userId, GetPlaylistRequest request);
-        Task<GetPlaylistResponse> GetUserPlaylists(int userId, GetPlaylistRequest request);
+        Task<GetPlaylistResponse> GetPublicPlaylists();
+        Task<GetPlaylistResponse> GetUserLikedPlaylists(int userId);
+        Task<GetPlaylistResponse> GetUserPlaylists(int userId);
         Task RemoveGamesFromPlaylist(RemoveGamesFromPlaylist request, int userId);
         Task ReorderPlaylistGames(ReorderPlaylistGamesRequest request, int userId);
         Task TogglePlaylistLike(string playlistId, int userId);

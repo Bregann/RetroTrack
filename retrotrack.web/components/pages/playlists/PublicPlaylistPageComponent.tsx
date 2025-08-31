@@ -12,12 +12,12 @@ import {
   Box,
   Title,
   Badge,
-  Select,
   TextInput,
-  Avatar,
   ActionIcon,
+  Loader,
+  Center,
 } from '@mantine/core'
-import { useMediaQuery } from '@mantine/hooks'
+import { useMediaQuery, useDebouncedState } from '@mantine/hooks'
 import {
   IconTrophy,
   IconDeviceGamepad,
@@ -36,178 +36,74 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import PaginatedTable from '@/components/shared/PaginatedTable'
 import { useGameModal } from '@/context/gameModalContext'
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import { GetPublicPlaylistDataResponse, PlaylistGameItem } from '@/interfaces/api/playlists/GetPublicPlaylistDataResponse'
+import type { Column, SortOption } from '@/components/shared/PaginatedTable'
+import Link from 'next/link'
 
 interface PublicPlaylistPageProps {
-  playlistId: number
-  description?: string
+  playlistId: string
 }
-
-// Dummy playlist data - replace with actual API call
-const playlistData = {
-  id: 1,
-  title: 'RPG Favorites',
-  description: 'A curated collection of my favorite RPG games from different eras. These games represent the pinnacle of storytelling and character development in gaming.',
-  username: 'Guinea',
-  isOwner: false,
-  isPublic: true,
-  likes: 45,
-  gameCount: 12,
-  createdAt: '2024-01-15',
-  updatedAt: '2024-08-20',
-  gameIcons: [
-    'https://media.retroachievements.org/Images/085573.png',
-    'https://media.retroachievements.org/Images/085574.png',
-    'https://media.retroachievements.org/Images/085575.png',
-    'https://media.retroachievements.org/Images/085576.png'
-  ]
-}
-
-// Dummy games data (public view - no personal progress)
-const playlistGames = [
-  {
-    id: 1,
-    playlistOrder: 1,
-    title: 'Final Fantasy VI',
-    consoleName: 'SNES',
-    gameImage: '/Images/085573.png',
-    totalAchievements: 85,
-    totalPoints: 1500,
-    masteryBadge: 'https://media.retroachievements.org/Badge/12345.png',
-    genre: 'JRPG',
-    developer: 'Square',
-    releaseYear: 1994
-  },
-  {
-    id: 2,
-    playlistOrder: 2,
-    title: 'Chrono Trigger',
-    consoleName: 'SNES',
-    gameImage: '/Images/085574.png',
-    totalAchievements: 92,
-    totalPoints: 1520,
-    masteryBadge: 'https://media.retroachievements.org/Badge/12346.png',
-    genre: 'JRPG',
-    developer: 'Square',
-    releaseYear: 1995
-  },
-  {
-    id: 3,
-    playlistOrder: 3,
-    title: 'Secret of Mana',
-    consoleName: 'SNES',
-    gameImage: '/Images/085575.png',
-    totalAchievements: 67,
-    totalPoints: 1200,
-    masteryBadge: null,
-    genre: 'Action RPG',
-    developer: 'Square',
-    releaseYear: 1993
-  },
-  {
-    id: 4,
-    playlistOrder: 4,
-    title: 'Tales of Phantasia',
-    consoleName: 'SNES',
-    gameImage: '/Images/085576.png',
-    totalAchievements: 78,
-    totalPoints: 1380,
-    masteryBadge: 'https://media.retroachievements.org/Badge/12348.png',
-    genre: 'JRPG',
-    developer: 'Namco',
-    releaseYear: 1995
-  },
-  {
-    id: 5,
-    playlistOrder: 5,
-    title: 'Terranigma',
-    consoleName: 'SNES',
-    gameImage: '/Images/085577.png',
-    totalAchievements: 89,
-    totalPoints: 1650,
-    masteryBadge: null,
-    genre: 'Action RPG',
-    developer: 'Quintet',
-    releaseYear: 1995
-  },
-  {
-    id: 6,
-    playlistOrder: 6,
-    title: 'Phantasy Star IV',
-    consoleName: 'Genesis',
-    gameImage: '/Images/085578.png',
-    totalAchievements: 76,
-    totalPoints: 1420,
-    masteryBadge: null,
-    genre: 'JRPG',
-    developer: 'Sega',
-    releaseYear: 1993
-  }
-]
 
 export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const gameModal = useGameModal()
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [consoleFilter, setConsoleFilter] = useState<string>('all')
+  // Search and sorting state - similar to PublicGamesTable pattern
+  const [searchInput, setSearchInput] = useDebouncedState<string | null>(null, 200)
+  const [searchTerm, setSearchTerm] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [sortKey, setSortKey] = useState<string>('')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [pageSize, setPageSize] = useState(100)
+  const [sortOption, setSortOption] = useState<SortOption<PlaylistGameItem>>({
+    key: 'orderIndex',
+    direction: 'asc',
+  })
+  // Build query string for API call
+  const queryString = useMemo(() => {
+    const skip = (page - 1) * pageSize
+    const take = pageSize
 
-  // Calculate basic stats for public view
-  const stats = useMemo(() => {
-    const total = playlistGames.length
-    const totalPoints = playlistGames.reduce((sum, game) => sum + game.totalPoints, 0)
-    const totalAchievements = playlistGames.reduce((sum, game) => sum + game.totalAchievements, 0)
-    const uniqueConsoles = [...new Set(playlistGames.map(g => g.consoleName))].length
-
-    return {
-      total,
-      totalPoints,
-      totalAchievements,
-      uniqueConsoles
-    }
-  }, [])
-
-  // Filter and sort games
-  const filteredGames = useMemo(() => {
-    let filtered = playlistGames
-
-    if (searchQuery.trim() !== '') {
-      filtered = filtered.filter(game =>
-        game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        game.consoleName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        game.genre.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    const sortKeyMap: Record<string, string> = {
+      orderIndex: 'SortByIndex',
+      title: 'SortByGameTitle',
+      consoleName: 'SortByConsoleName',
+      genre: 'SortByGenre',
+      achievementCount: 'SortByAchievementCount',
+      points: 'SortByPoints',
+      players: 'SortByPlayers'
     }
 
-    if (consoleFilter !== 'all' && consoleFilter?.trim() !== '') {
-      filtered = filtered.filter(game => game.consoleName === consoleFilter)
+    const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByIndex'
+    const sortValue = sortOption.direction === 'asc'
+
+    let query = `PlaylistId=${playlistId}&${sortParam}=${sortValue}&Skip=${skip}&Take=${take}`
+
+    if (searchTerm !== null && searchTerm !== '') {
+      query += `&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
 
-    return filtered
-  }, [searchQuery, consoleFilter])
+    return query
+  }, [page, pageSize, playlistId, searchTerm, sortOption.direction, sortOption.key])
 
-  const uniqueConsoles = [...new Set(playlistGames.map(g => g.consoleName))].sort()
+  // Fetch playlist data using React Query
+  const { data: playlistData, isLoading: isLoadingPlaylistData, isError: isErrorPlaylistData } = useQuery<GetPublicPlaylistDataResponse>({
+    queryKey: [queryString.concat('-public')],
+    queryFn: async () => await doQueryGet<GetPublicPlaylistDataResponse>('/api/playlists/GetPublicPlaylistData?'.concat(queryString)),
+    staleTime: 60000
+  })
 
   // Handle sorting
-  const handleSortChange = (option: { key: keyof typeof filteredGames[0]; direction: 'asc' | 'desc' }) => {
-    setSortKey(option.key as string)
-    setSortDirection(option.direction)
-    setPage(1) // Reset to first page when sorting changes
-  }
-
   // Table columns configuration
-  const columns = [
+  const columns: Column<PlaylistGameItem>[] = [
     {
       title: '',
-      key: 'gameImage' as keyof typeof playlistGames[0],
-      render: (game: typeof playlistGames[0]) => (
+      key: 'gameIconUrl',
+      render: (game) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
           <Image
-            src={`https://media.retroachievements.org${game.gameImage}`}
+            src={`https://media.retroachievements.org${game.gameIconUrl}`}
             alt={game.title}
             width={64}
             height={64}
@@ -218,58 +114,71 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     },
     {
       title: '#',
-      key: 'playlistOrder' as keyof typeof playlistGames[0],
+      key: 'orderIndex',
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
+      render: (game) => (
         <Text fw={600} size="sm" c="dimmed" style={{ textAlign: 'center', minWidth: '40px' }}>
-          {game.playlistOrder}
+          {game.orderIndex}
         </Text>
       )
     },
     {
       title: 'Game Title',
-      key: 'title' as keyof typeof playlistGames[0],
+      key: 'title',
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
+      render: (game) => (
         <Text fw={500}>{game.title}</Text>
       )
     },
     {
       title: 'Console',
-      key: 'consoleName' as keyof typeof playlistGames[0],
+      key: 'consoleName',
       sortable: true
     },
     {
       title: 'Genre',
-      key: 'genre' as keyof typeof playlistGames[0],
-      render: (game: typeof playlistGames[0]) => (
-        <Badge variant="light" color="gray" size="sm">
-          {game.genre}
-        </Badge>
-      )
-    },
-    {
-      title: 'Year',
-      key: 'releaseYear' as keyof typeof playlistGames[0],
+      key: 'genre',
       sortable: true
     },
     {
       title: 'Achievements',
-      key: 'totalAchievements' as keyof typeof playlistGames[0],
+      key: 'achievementCount',
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
-        <Text fw={500}>{game.totalAchievements}</Text>
-      )
+      toggleDescFirst: true
     },
     {
       title: 'Points',
-      key: 'totalPoints' as keyof typeof playlistGames[0],
+      key: 'points',
       sortable: true,
-      render: (game: typeof playlistGames[0]) => (
-        <Text fw={500}>{game.totalPoints.toLocaleString()}</Text>
-      )
+      toggleDescFirst: true
+    },
+    {
+      title: 'Players',
+      key: 'players',
+      sortable: true,
+      toggleDescFirst: true
     }
   ]
+
+  if (isErrorPlaylistData && playlistData === undefined) {
+    return (
+      <Container size="95%" py="md">
+        <Container ta="center">
+          <Title order={2} pt="xl">Error</Title>
+          <Text pb="lg">Sorry about that, we couldn&apos;t load the playlist data, try again later.</Text>
+          <Button size="md" radius="md" variant="light" component={Link} href={'/playlists'}>Back to Playlists</Button>
+        </Container>
+      </Container>
+    )
+  }
+
+  if (isLoadingPlaylistData) {
+    return (
+      <Center style={{ height: '60vh' }}>
+        <Loader size="xl" variant="dots" />
+      </Center>
+    )
+  }
 
   return (
     <Container size="95%" px="md" py="xl" className={pageStyles.pageContainer}>
@@ -310,10 +219,10 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
           {/* Playlist Cover */}
           <Box className={playlistStyles.playlistCover}>
             <div className={playlistStyles.gameIconsGrid}>
-              {playlistData.gameIcons.slice(0, 4).map((icon, index) => (
+              {playlistData.icons.slice(0, 4).map((icon, index) => (
                 <div key={index} className={playlistStyles.gameIconWrapper}>
                   <Image
-                    src={icon}
+                    src={`https://media.retroachievements.org/${icon}`}
                     alt={`Game ${index + 1}`}
                     width={80}
                     height={80}
@@ -329,11 +238,10 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             <Group justify="space-between" align="flex-start">
               <div>
                 <Title order={1} size="2rem" mb="xs">
-                  {playlistData.title}
+                  {playlistData.name}
                 </Title>
                 <Group gap="md" align="center" mb="sm">
-                  <Avatar size="sm" />
-                  <Text size="lg" c="dimmed">@{playlistData.username}</Text>
+                  <Text size="lg" c="dimmed">@{playlistData.createdBy}</Text>
                   <Badge color="green" variant="light">
                     Public Playlist
                   </Badge>
@@ -350,7 +258,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
                   variant="light"
                   color="red"
                 >
-                  {playlistData.likes} Likes
+                  {playlistData.numberOfLikes} Likes
                 </Button>
               </Group>
             </Group>
@@ -363,10 +271,10 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
 
             <Group gap="lg">
               <Text size="sm" c="dimmed">
-                <strong>{stats.total}</strong> games
+                <strong>{playlistData.numberOfGames}</strong> games
               </Text>
               <Text size="sm" c="dimmed">
-                <strong>{stats.uniqueConsoles}</strong> consoles
+                <strong>{playlistData.numberOfConsoles}</strong> consoles
               </Text>
               <Text size="sm" c="dimmed">
                 Created {new Date(playlistData.createdAt).toLocaleDateString()}
@@ -386,7 +294,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             <Text size="sm" c="dimmed">Total Games</Text>
             <IconDeviceGamepad size={16} />
           </Group>
-          <Text size="xl" fw={700}>{stats.total}</Text>
+          <Text size="xl" fw={700}>{playlistData.numberOfGames}</Text>
           <Text size="xs" c="dimmed">In this playlist</Text>
         </Card>
 
@@ -395,7 +303,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             <Text size="sm" c="dimmed">Total Points</Text>
             <IconTrophy size={16} color="orange" />
           </Group>
-          <Text size="xl" fw={700}>{stats.totalPoints.toLocaleString()}</Text>
+          <Text size="xl" fw={700}>{playlistData.totalPointsToEarn}</Text>
           <Text size="xs" c="dimmed">Available to earn</Text>
         </Card>
 
@@ -404,7 +312,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             <Text size="sm" c="dimmed">Achievements</Text>
             <IconMedal size={16} color="blue" />
           </Group>
-          <Text size="xl" fw={700}>{stats.totalAchievements}</Text>
+          <Text size="xl" fw={700}>{playlistData.totalAchievementsToEarn}</Text>
           <Text size="xs" c="dimmed">Total available</Text>
         </Card>
 
@@ -413,7 +321,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             <Text size="sm" c="dimmed">Consoles</Text>
             <IconTargetArrow size={16} color="green" />
           </Group>
-          <Text size="xl" fw={700}>{stats.uniqueConsoles}</Text>
+          <Text size="xl" fw={700}>{playlistData.numberOfConsoles}</Text>
           <Text size="xs" c="dimmed">Different systems</Text>
         </Card>
       </SimpleGrid>
@@ -424,8 +332,14 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
           <TextInput
             placeholder="Search games..."
             leftSection={<IconSearch size={16} />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            value={searchInput ?? ''}
+            onChange={(e) => {
+              if (e.currentTarget.value.trim() === '') {
+                setSearchTerm(null)
+                setSearchInput(null)
+              }
+              setSearchInput(e.currentTarget.value)
+            }}
             className={playlistStyles.searchInput}
             style={{ flex: 1 }}
           />
@@ -434,48 +348,39 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
             color="blue"
             leftSection={<IconSearch size={16} />}
             className={playlistStyles.searchButton}
+            onClick={() => setSearchTerm(searchInput)}
+            disabled={searchInput === null || searchInput.trim() === ''}
           >
             Search
           </Button>
         </Group>
-
-        <Select
-          placeholder="All Consoles"
-          data={[
-            { value: 'all', label: 'All Consoles' },
-            ...uniqueConsoles.map(console => ({ value: console, label: console }))
-          ]}
-          value={consoleFilter}
-          onChange={(value) => setConsoleFilter(value?.trim() !== '' ? value as string : 'all')}
-          style={{ minWidth: 140 }}
-        />
       </Group>
 
       {/* Games Table */}
       <PaginatedTable
-        data={filteredGames}
+        data={playlistData.games}
         columns={columns}
-        page={page}
-        total={Math.ceil(filteredGames.length / pageSize)}
-        onPageChange={setPage}
-        onRowClick={(game) => gameModal.showModal(game.id)}
+        page={1}
+        total={1}
+        onPageChange={(e) => { setPageSize(e); setPage(1) }}
+        onRowClick={(game) => gameModal.showModal(game.gameId)}
         pageSize={pageSize}
-        onPageSizeChange={(newPageSize) => {
-          setPageSize(newPageSize)
-          setPage(1)
-        }}
+        onPageSizeChange={() => {}}
         pageSizeOptions={[10, 25, 50, 100]}
-        showPageSizeSelector={true}
-        sortOption={sortKey.trim() !== '' ? { key: sortKey as keyof typeof filteredGames[0], direction: sortDirection } : undefined}
-        onSortChange={handleSortChange}
+        showPageSizeSelector={false}
+        sortOption={sortOption}
+        onSortChange={(opt) => {
+          setPage(1)
+          setSortOption(opt)
+        }}
         actions={[
           {
-            onClick: (game) => gameModal.showModal(game.id),
+            onClick: (game) => gameModal.showModal(game.gameId),
             label: 'Game Modal',
             variant: 'filled'
           },
           {
-            onClick: (game) => router.push(`/game/${game.id}`),
+            onClick: (game) => router.push(`/game/${game.gameId}`),
             label: 'Game Page',
             variant: 'filled'
           }

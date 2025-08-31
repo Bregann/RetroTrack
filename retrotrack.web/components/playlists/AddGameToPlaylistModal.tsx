@@ -122,7 +122,7 @@ export function AddGameToPlaylistModal({
   onAddToPlaylist
 }: AddGameToPlaylistModalProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  
+
   // State for adding mode vs search mode
   const [mode, setMode] = useState<'add-specific' | 'search-and-add'>('add-specific')
   const [selectedPlaylist, setSelectedPlaylist] = useState<number | null>(null)
@@ -133,7 +133,7 @@ export function AddGameToPlaylistModal({
   // Filter games based on search
   const filteredGames = useMemo(() => {
     if (!searchQuery) return mockGames
-    return mockGames.filter(g => 
+    return mockGames.filter(g =>
       g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       g.consoleName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       g.genre?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -144,9 +144,9 @@ export function AddGameToPlaylistModal({
 
   const handleAddGame = () => {
     if (!selectedPlaylist || !selectedGameForAdd) return
-    
+
     onAddToPlaylist(selectedPlaylist, position)
-    
+
     // Reset form
     setSelectedPlaylist(null)
     setPosition(undefined)
@@ -202,7 +202,7 @@ export function AddGameToPlaylistModal({
                   <Text fw={500} size="sm">Search for Games</Text>
                   <Badge variant="light" size="sm">{filteredGames.length} found</Badge>
                 </Group>
-                
+
                 <TextInput
                   placeholder="Search by title, console, or genre..."
                   leftSection={<IconSearch size={16} />}
@@ -304,7 +304,7 @@ export function AddGameToPlaylistModal({
         {/* Playlist Selection */}
         <Stack gap="md">
           <Text fw={500} size="sm">Select Playlist</Text>
-          
+
           {userPlaylists.length === 0 ? (
             <Alert color="blue" icon={<IconInfoCircle size={16} />}>
               You don't have any playlists yet. Create a playlist first to add games to it.
@@ -330,7 +330,7 @@ export function AddGameToPlaylistModal({
                   <IconInfoCircle size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
                 </Tooltip>
               </Group>
-              
+
               <NumberInput
                 placeholder={`Position (1-${selectedPlaylistData.gameCount + 1})`}
                 min={1}

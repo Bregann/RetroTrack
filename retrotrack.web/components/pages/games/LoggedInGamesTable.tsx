@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
-import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
+import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
@@ -178,7 +178,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
 
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: [queryString.concat('-lg')],
+    queryKey: [queryString],
     queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/getUserProgressForConsole?'.concat(queryString)),
   })
 

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Requests
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Requests
 {
     public class GetLoggedInPlaylistDataRequest : GetPublicPlaylistDataRequest
     {
-        public bool? SortByAchievementProgress { get; set; } = false;
-        public bool? SortByCompletionStatus { get; set; } = false;
+        public bool? SortByAchievementProgress { get; set; } = null;
+        public bool? SortByCompletionStatus { get; set; } = null;
     }
 }
