@@ -15,5 +15,7 @@ namespace RetroTrack.Domain.Database.Models
         public required int UserId { get; set; }
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
+
+        public required DateTime LikedAt { get; set; }
     }
 }

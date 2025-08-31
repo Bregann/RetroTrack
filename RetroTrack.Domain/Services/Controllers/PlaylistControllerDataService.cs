@@ -33,13 +33,13 @@ namespace RetroTrack.Domain.Services.Controllers
             return await DoFilter(request, query);
         }
 
-        public async Task<string> AddNewPlaylist(int userId, string playlistName, string? description, bool isPublic)
+        public async Task AddNewPlaylist(int userId, AddNewPlaylistRequest request)
         {
             var newPlaylist = new UserPlaylist
             {
-                PlaylistName = playlistName,
-                Description = description,
-                IsPublic = isPublic,
+                PlaylistName = request.PlaylistName,
+                Description = request.Description,
+                IsPublic = request.IsPublic,
                 UserIdOwner = userId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -47,8 +47,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
             await context.UserPlaylists.AddAsync(newPlaylist);
             await context.SaveChangesAsync();
-
-            return newPlaylist.Id;
+            return;
         }
 
         public async Task<GetPublicPlaylistDataResponse> GetPublicPlaylistData(GetPublicPlaylistDataRequest request)
@@ -238,28 +237,122 @@ namespace RetroTrack.Domain.Services.Controllers
             };
         }
 
-        public async Task AddGameToPlaylist(string playlistId, int gameId, int userId)
+        public async Task AddGameToPlaylist(int userId, AddGameToPlaylistRequest request)
         {
-            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == playlistId && p.UserIdOwner == userId);
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && p.UserIdOwner == userId);
 
             if (playlist == null)
             {
                 throw new KeyNotFoundException("Playlist not found");
             }
 
-            if (playlist.PlaylistGames.Any(pg => pg.GameId == gameId))
+            if (playlist.PlaylistGames.Any(pg => pg.GameId == request.GameId))
             {
                 throw new InvalidOperationException("Game already in playlist");
             }
 
             var newPlaylistGame = new UserPlaylistGame
             {
-                UserPlaylistId = playlistId,
-                GameId = gameId,
+                UserPlaylistId = request.PlaylistId,
+                GameId = request.GameId,
                 OrderIndex = playlist.PlaylistGames.Count + 1
             };
 
             await context.UserPlaylistGames.AddAsync(newPlaylistGame);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task RemoveGamesFromPlaylist(RemoveGamesFromPlaylist request, int userId)
+        {
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && p.UserIdOwner == userId);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Playlist not found");
+            }
+
+            var gamesToRemove = playlist.PlaylistGames.Where(pg => request.GameIds.Contains(pg.GameId)).ToList();
+
+            if (gamesToRemove.Count == 0)
+            {
+                throw new KeyNotFoundException("No matching games found in playlist");
+            }
+
+            context.UserPlaylistGames.RemoveRange(gamesToRemove);
+            await context.SaveChangesAsync();
+
+            // Reorder remaining games
+            var remainingGames = playlist.PlaylistGames.Except(gamesToRemove).OrderBy(pg => pg.OrderIndex).ToList();
+            for (int i = 0; i < remainingGames.Count; i++)
+            {
+                remainingGames[i].OrderIndex = i + 1;
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task ReorderPlaylistGames(ReorderPlaylistGamesRequest request, int userId)
+        {
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && p.UserIdOwner == userId);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Playlist not found");
+            }
+
+            var gameDict = playlist.PlaylistGames.ToDictionary(pg => pg.GameId);
+
+            foreach (var data in request.ReorderData)
+            {
+                if (gameDict.TryGetValue(data.GameId, out var pg))
+                {
+                    pg.OrderIndex = data.NewIndex;
+                }
+                else
+                {
+                    throw new KeyNotFoundException($"Game with ID {data.GameId} not found in playlist");
+                }
+            }
+
+            // Ensure no duplicate indices and all indices are within valid range
+            var totalGames = playlist.PlaylistGames.Count;
+            var indices = playlist.PlaylistGames.Select(pg => pg.OrderIndex).ToList();
+
+            if (indices.Distinct().Count() != totalGames || indices.Any(i => i < 1 || i > totalGames))
+            {
+                throw new InvalidOperationException("Invalid reorder data");
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task TogglePlaylistLike(string playlistId, int userId)
+        {
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == playlistId);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Playlist not found");
+            }
+
+            var existingLike = await context.UserPlaylistLikes.FirstOrDefaultAsync(l => l.UserId == userId && l.UserPlaylistId == playlistId);
+
+            if (existingLike != null)
+            {
+                context.UserPlaylistLikes.Remove(existingLike);
+            }
+            else
+            {
+                var newLike = new UserPlaylistLikes
+                {
+                    UserId = userId,
+                    UserPlaylistId = playlistId,
+                    LikedAt = DateTime.UtcNow
+                };
+
+                await context.UserPlaylistLikes.AddAsync(newLike);
+            }
+
             await context.SaveChangesAsync();
         }
 
