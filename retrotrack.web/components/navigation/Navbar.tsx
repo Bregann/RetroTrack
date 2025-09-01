@@ -20,7 +20,7 @@ import {
   List,
   Tooltip,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress, IconRefresh } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh } from '@tabler/icons-react'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { ConsoleType } from '@/enums/consoleType'
@@ -253,6 +253,17 @@ export function Navbar(props: NavbarProps) {
             py="xs"
             leftSection={<IconDeviceGamepad3 size={20} stroke={1.5} />}
             onClick={() => setCurrentPage('/console/allgames')}
+            style={{ borderRadius: '10px' }}
+          />
+
+          <NavLink
+            label="Playlists"
+            component={Link}
+            href="/playlists"
+            active={currentPage === '/playlists'}
+            py="xs"
+            leftSection={<IconPlaylist size={20} stroke={1.5} />}
+            onClick={() => setCurrentPage('/playlists')}
             style={{ borderRadius: '10px' }}
           />
 

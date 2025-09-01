@@ -12,6 +12,7 @@ export interface GetLoggedInPlaylistDataResponse {
   updatedAt: string
   createdBy: string
   icons: string[]
+  totalGamesInPlaylist: number
   totalPointsToEarn: number
   totalAchievementsToEarn: number
   totalAchievementsEarnedSoftcore: number
@@ -21,6 +22,12 @@ export interface GetLoggedInPlaylistDataResponse {
   totalGamesCompletedSoftcore: number
   totalGamesMasteredHardcore: number
   games: LoggedInGameItem[]
+  isPlaylistOwner: boolean
+  isPublic: boolean
+  isLiked: boolean
+  percentageBeaten: number
+  percentageMastered: number
+  percentageAchievementsGained: number
 }
 
 export interface LoggedInGameItem extends PlaylistGameItem {

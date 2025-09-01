@@ -48,6 +48,12 @@ export function PlaylistCard(props: PlaylistCardProps) {
           {props.title}
         </Text>
 
+        {props.description !== null && props.description !== undefined && props.description.trim() !== '' && (
+          <Text size="sm" c="dimmed" lineClamp={2}>
+            {props.description}
+          </Text>
+        )}
+
         <Group justify="space-between" align="center">
           <Text size="sm" c="dimmed">
             @{props.username}

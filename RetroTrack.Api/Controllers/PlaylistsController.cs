@@ -92,6 +92,27 @@ namespace RetroTrack.Api.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult> AddMultipleGamesToPlaylist([FromBody] AddMultipleGamesToPlaylistRequest request)
+        {
+            var userId = userContextHelper.GetUserId();
+
+            try
+            {
+                await playlistControllerDataService.AddMultipleGamesToPlaylist(userId, request);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpDelete]
         [Authorize]
         public async Task<ActionResult> RemoveGamesFromPlaylist([FromBody] RemoveGamesFromPlaylist request)
@@ -133,7 +154,7 @@ namespace RetroTrack.Api.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("{playlistId}")]
         [Authorize]
         public async Task<ActionResult> TogglePlaylistLike([FromRoute] string playlistId)
         {
@@ -151,6 +172,13 @@ namespace RetroTrack.Api.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet("{gameTitle}/{playlistId}")]
+        [Authorize]
+        public async Task<SearchGamesResponse> SearchGames([FromRoute] string gameTitle, [FromRoute] string playlistId)
+        {
+            return await playlistControllerDataService.SearchGames(gameTitle, playlistId);
         }
     }
 }

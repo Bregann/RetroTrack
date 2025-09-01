@@ -1,222 +1,16 @@
 'use client'
 
-import { Badge, Button, Card, Container, Grid, Group, Stack, Tabs, Text, TextInput, Pagination, ActionIcon } from '@mantine/core'
+import { Button, Card, Container, Grid, Group, Stack, Tabs, Text, TextInput, Pagination, ActionIcon } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
-import { IconHeart, IconPlus, IconUsers, IconSearch, IconX } from '@tabler/icons-react'
+import { IconPlus, IconUsers, IconSearch, IconX, IconHeart } from '@tabler/icons-react'
 import { pressStart2P } from '@/font/pressStart2P'
 import styles from '@/css/pages/playlists.module.scss'
-import Image from 'next/image'
 import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
-
-// Dummy data for user's playlists
-const myPlaylists = [
-  {
-    id: 1,
-    title: 'RPG Favorites',
-    username: 'CurrentUser',
-    likes: 45,
-    isPublic: true,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-08-20',
-    description: 'My all-time favorite RPGs, featuring epic stories and memorable characters.',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085573.png',
-      'https://media.retroachievements.org/Images/085574.png',
-      'https://media.retroachievements.org/Images/085575.png',
-      'https://media.retroachievements.org/Images/085576.png'
-    ]
-  },
-  {
-    id: 2,
-    title: 'Speedrun Practice',
-    username: 'CurrentUser',
-    likes: 23,
-    isPublic: false,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-08-15',
-    description: 'Games I\'m practicing for speedruns. Private collection to track my progress.',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085577.png',
-      'https://media.retroachievements.org/Images/085578.png',
-      'https://media.retroachievements.org/Images/085579.png'
-    ]
-  },
-  {
-    id: 3,
-    title: 'Childhood Memories',
-    username: 'CurrentUser',
-    likes: 67,
-    isPublic: true,
-    createdAt: '2024-05-20',
-    updatedAt: '2024-08-10',
-    description: 'A nostalgic collection of games that defined my childhood. Pure retro joy!',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085580.png',
-      'https://media.retroachievements.org/Images/085581.png',
-      'https://media.retroachievements.org/Images/085582.png',
-      'https://media.retroachievements.org/Images/085583.png'
-    ]
-  }
-]
-
-// Import public playlists from the main component (you might want to move this to a shared file)
-const publicPlaylists = [
-  {
-    id: 4,
-    title: 'Cozy RPG Evenings',
-    username: 'Guinea',
-    likes: 92,
-    isPublic: true,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-08-20',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085573.png',
-      'https://media.retroachievements.org/Images/085574.png',
-      'https://media.retroachievements.org/Images/085575.png',
-      'https://media.retroachievements.org/Images/085576.png'
-    ]
-  },
-  {
-    id: 5,
-    title: 'Hard Mode Only',
-    username: 'Guinea',
-    likes: 30,
-    isPublic: true,
-    createdAt: '2024-02-10',
-    updatedAt: '2024-08-15',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085577.png',
-      'https://media.retroachievements.org/Images/085578.png',
-      'https://media.retroachievements.org/Images/085579.png',
-      'https://media.retroachievements.org/Images/085580.png'
-    ]
-  },
-  {
-    id: 6,
-    title: 'Classic Platformers',
-    username: 'Guinea',
-    likes: 69,
-    isPublic: true,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-08-10',
-    gameIcons: [
-      'https://media.retroachievements.org/Images/085581.png',
-      'https://media.retroachievements.org/Images/085582.png',
-      'https://media.retroachievements.org/Images/085583.png',
-      'https://media.retroachievements.org/Images/085584.png'
-    ]
-  }
-]
-
-interface PlaylistCardProps {
-  playlist: {
-    id: number
-    title: string
-    username: string
-    likes: number
-    isPublic: boolean
-    gameIcons: string[]
-    createdAt?: string
-    updatedAt?: string
-    description?: string
-  }
-  showCreateCard?: boolean
-}
-
-function PlaylistCard({ playlist, showCreateCard = false }: PlaylistCardProps) {
-  const router = useRouter()
-
-  if (showCreateCard) {
-    return (
-      <Card
-        className={styles.createPlaylistCard}
-        radius="md"
-        p="lg"
-        style={{ cursor: 'pointer' }}
-        onClick={() => {
-          // TODO: Open create playlist modal
-          console.log('Create playlist clicked')
-        }}
-      >
-        <Stack align="center" justify="center" h="100%">
-          <IconPlus size={48} className={styles.createIcon} />
-          <Text size="lg" fw={600} ta="center">
-            Create a Playlist
-          </Text>
-        </Stack>
-      </Card>
-    )
-  }
-
-  return (
-    <Card
-      className={styles.playlistCard}
-      radius="md"
-      p={0}
-      style={{ cursor: 'pointer' }}
-      onClick={() => router.push(`/playlist/${playlist.id}`)}
-    >
-      <div className={styles.playlistImageContainer}>
-        <div className={styles.gameIconsGrid}>
-          {playlist.gameIcons.slice(0, 4).map((icon, index) => (
-            <div key={index} className={styles.gameIconWrapper}>
-              <Image
-                src={icon}
-                alt={`Game ${index + 1}`}
-                width={96}
-                height={96}
-                className={styles.gameIcon}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Stack p="md" gap="xs">
-        <Text size="lg" fw={600} lineClamp={2} className={styles.playlistTitle}>
-          {playlist.title}
-        </Text>
-
-        {playlist.description?.trim() !== '' && (
-          <Text size="sm" c="dimmed" lineClamp={2}>
-            {playlist.description}
-          </Text>
-        )}
-
-        <Group justify="space-between" align="center">
-          <Text size="sm" c="dimmed">
-            @{playlist.username}
-          </Text>
-
-          <Group gap="xs" align="center">
-            <IconHeart size={16} className={styles.heartIcon} />
-            <Text size="sm" c="dimmed">
-              {playlist.likes} likes
-            </Text>
-          </Group>
-        </Group>
-
-        {!playlist.isPublic && (
-          <Badge size="sm" variant="light" color="gray">
-            Private
-          </Badge>
-        )}
-
-        {(playlist.createdAt?.trim() !== '' || playlist.updatedAt?.trim() !== '') && (
-          <Group gap="xs" c="dimmed" style={{ fontSize: '12px' }}>
-            {playlist.createdAt?.trim() !== '' && (
-              <Text size="xs">Created: {new Date(playlist.createdAt as string).toLocaleDateString()}</Text>
-            )}
-            {playlist.updatedAt?.trim() !== '' && (
-              <Text size="xs">Updated: {new Date(playlist.updatedAt as string).toLocaleDateString()}</Text>
-            )}
-          </Group>
-        )}
-      </Stack>
-    </Card>
-  )
-}
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import { GetPlaylistResponse, PlaylistItem } from '@/interfaces/api/playlists/GetPlaylistResponse'
+import { PlaylistCard } from '@/components/playlists/PlaylistCard'
+import CreatePlaylistModal from '@/components/playlists/CreatePlaylistModal'
 
 export default function LoggedInPlaylistsComponent() {
   const isSm = useMediaQuery('(min-width: 768px)')
@@ -226,42 +20,67 @@ export default function LoggedInPlaylistsComponent() {
 
   const span = isXxl ? 2 : isXl ? 3 : isLg ? 4 : isSm ? 6 : 12
 
-  // Search and pagination state
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
   const [activeTab, setActiveTab] = useState('my-playlists')
+  const [createModalOpened, setCreateModalOpened] = useState(false)
   const itemsPerPage = 12
+
+  const { data: userPlaylistsData, isLoading: userPlaylistsLoading } = useQuery<GetPlaylistResponse>({
+    queryKey: ['getUserPlaylists'],
+    queryFn: async () => await doQueryGet<GetPlaylistResponse>('/api/playlists/GetUserPlaylists'),
+    staleTime: 60000
+  })
+
+  const { data: publicPlaylistsData, isLoading: publicPlaylistsLoading } = useQuery<GetPlaylistResponse>({
+    queryKey: ['getPublicPlaylists'],
+    queryFn: async () => await doQueryGet<GetPlaylistResponse>('/api/playlists/GetPublicPlaylists'),
+    staleTime: 60000
+  })
+
+  const { data: likedPlaylistsData, isLoading: likedPlaylistsLoading } = useQuery<GetPlaylistResponse>({
+    queryKey: ['getUserLikedPlaylists'],
+    queryFn: async () => await doQueryGet<GetPlaylistResponse>('/api/playlists/GetUserLikedPlaylists'),
+    staleTime: 60000
+  })
 
   // Filter and sort logic
   const filteredAndSortedPlaylists = useMemo(() => {
-    let playlists = activeTab === 'my-playlists' ? myPlaylists : publicPlaylists
+    // Get the correct playlists array from the query data
+    const playlists: PlaylistItem[] =
+      activeTab === 'my-playlists'
+        ? userPlaylistsData?.playlists ?? []
+        : activeTab === 'all-likes'
+        ? likedPlaylistsData?.playlists ?? []
+        : publicPlaylistsData?.playlists ?? []
 
     // Apply search filter
-    if (searchQuery.trim() !== '') {
-      playlists = playlists.filter(playlist =>
-        playlist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        playlist.username.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
+    const filtered = searchQuery.trim() !== ''
+      ? playlists.filter(playlist =>
+          playlist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          playlist.createdBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          playlist.description.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : playlists
 
     // Apply sorting
-    const sorted = [...playlists].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'likes':
-          return b.likes - a.likes
+          return b.numberOfLikes - a.numberOfLikes
         case 'title':
-          return a.title.localeCompare(b.title)
+          return a.name.localeCompare(b.name)
         case 'oldest':
-          return a.id - b.id
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         case 'newest':
         default:
-          return b.id - a.id
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       }
     })
 
     return sorted
-  }, [activeTab, searchQuery, sortBy])
+  }, [activeTab, searchQuery, sortBy, userPlaylistsData, publicPlaylistsData, likedPlaylistsData])
 
   // Pagination logic
   const totalPages = Math.ceil(filteredAndSortedPlaylists.length / itemsPerPage)
@@ -290,6 +109,23 @@ export default function LoggedInPlaylistsComponent() {
     }
   }
 
+  // Loading state
+  if (userPlaylistsLoading || publicPlaylistsLoading || likedPlaylistsLoading) {
+    return (
+      <Container size="95%" py="md">
+        <Text ta="center" size="lg">Loading playlists...</Text>
+      </Container>
+    )
+  }
+
+  if ( userPlaylistsData === undefined || publicPlaylistsData === undefined || likedPlaylistsData === undefined) {
+    return (
+      <Container size="95%" py="md">
+        <Text ta="center" size="lg" c="red">Failed to load playlists. Please try again later.</Text>
+      </Container>
+    )
+  }
+
   return (
     <Container size="95%" py="md">
       <Group justify="space-between" align="center" mb="lg">
@@ -306,6 +142,7 @@ export default function LoggedInPlaylistsComponent() {
           color="blue"
           size="md"
           className={styles.createButton}
+          onClick={() => setCreateModalOpened(true)}
         >
           Create New Playlist
         </Button>
@@ -314,13 +151,13 @@ export default function LoggedInPlaylistsComponent() {
       <Tabs value={activeTab} onChange={handleTabChange} className={styles.playlistTabs}>
         <Tabs.List mb="md">
           <Tabs.Tab value="my-playlists" leftSection={<IconUsers size={16} />}>
-            My Playlists ({myPlaylists.length})
+            My Playlists ({userPlaylistsData.playlists.length})
           </Tabs.Tab>
           <Tabs.Tab value="public-playlists" leftSection={<IconHeart size={16} />}>
-            Public Playlists ({publicPlaylists.length})
+            Public Playlists ({publicPlaylistsData.playlists.length})
           </Tabs.Tab>
           <Tabs.Tab value="all-likes" leftSection={<IconHeart size={16} />}>
-            Liked Playlists
+            Liked Playlists ({likedPlaylistsData.playlists.length})
           </Tabs.Tab>
         </Tabs.List>
 
@@ -347,14 +184,6 @@ export default function LoggedInPlaylistsComponent() {
               className={styles.searchInput}
               style={{ flex: 1 }}
             />
-            <Button
-              variant="filled"
-              color="blue"
-              leftSection={<IconSearch size={16} />}
-              className={styles.searchButton}
-            >
-              Search
-            </Button>
           </Group>
         </Group>
 
@@ -386,20 +215,43 @@ export default function LoggedInPlaylistsComponent() {
 
         <Tabs.Panel value="my-playlists">
           <Text size="sm" c="dimmed" mb="md">
-            {filteredAndSortedPlaylists.length === myPlaylists.length
-              ? `Showing all ${myPlaylists.length} playlists`
-              : `Showing ${filteredAndSortedPlaylists.length} of ${myPlaylists.length} playlists`}
+            {filteredAndSortedPlaylists.length === userPlaylistsData.playlists.length
+              ? `Showing all ${userPlaylistsData.playlists.length} playlists`
+              : `Showing ${filteredAndSortedPlaylists.length} of ${userPlaylistsData.playlists.length} playlists`}
           </Text>
 
           <Grid gutter={8}>
             {currentPage === 1 && searchQuery.trim() === '' && (
               <Grid.Col span={span}>
-                <PlaylistCard playlist={{} as any} showCreateCard={true} />
+                <Card
+                  className={styles.createPlaylistCard}
+                  radius="md"
+                  p="lg"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setCreateModalOpened(true)}
+                >
+                  <Stack align="center" justify="center" h="100%">
+                    <IconPlus size={48} className={styles.createIcon} />
+                    <Text size="lg" fw={600} ta="center">
+                      Create a Playlist
+                    </Text>
+                  </Stack>
+                </Card>
               </Grid.Col>
             )}
             {paginatedPlaylists.map((playlist) => (
               <Grid.Col key={playlist.id} span={span}>
-                <PlaylistCard playlist={playlist} />
+                <PlaylistCard
+                  id={playlist.id}
+                  title={playlist.name}
+                  username={playlist.createdBy}
+                  description={playlist.description}
+                  gameIcons={playlist.icons}
+                  likes={playlist.numberOfLikes}
+                  createdAt={playlist.createdAt}
+                  updatedAt={playlist.updatedAt}
+                  isPublic={playlist.isPublic}
+                />
               </Grid.Col>
             ))}
           </Grid>
@@ -425,15 +277,25 @@ export default function LoggedInPlaylistsComponent() {
 
         <Tabs.Panel value="public-playlists">
           <Text size="sm" c="dimmed" mb="md">
-            {filteredAndSortedPlaylists.length === publicPlaylists.length
-              ? `Showing all ${publicPlaylists.length} playlists`
-              : `Showing ${filteredAndSortedPlaylists.length} of ${publicPlaylists.length} playlists`}
+            {filteredAndSortedPlaylists.length === publicPlaylistsData.playlists.length
+              ? `Showing all ${publicPlaylistsData.playlists.length} playlists`
+              : `Showing ${filteredAndSortedPlaylists.length} of ${publicPlaylistsData.playlists.length} playlists`}
           </Text>
 
           <Grid gutter={8}>
             {paginatedPlaylists.map((playlist) => (
               <Grid.Col key={playlist.id} span={span}>
-                <PlaylistCard playlist={playlist} />
+                <PlaylistCard
+                  id={playlist.id}
+                  title={playlist.name}
+                  username={playlist.createdBy}
+                  description={playlist.description}
+                  gameIcons={playlist.icons}
+                  likes={playlist.numberOfLikes}
+                  createdAt={playlist.createdAt}
+                  updatedAt={playlist.updatedAt}
+                  isPublic={playlist.isPublic}
+                />
               </Grid.Col>
             ))}
           </Grid>
@@ -458,11 +320,54 @@ export default function LoggedInPlaylistsComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="all-likes">
-          <Text ta="center" c="dimmed" mt="xl">
-            Your liked playlists will appear here.
+          <Text size="sm" c="dimmed" mb="md">
+            {filteredAndSortedPlaylists.length === likedPlaylistsData.playlists.length
+              ? `Showing all ${likedPlaylistsData.playlists.length} liked playlists`
+              : `Showing ${filteredAndSortedPlaylists.length} of ${likedPlaylistsData.playlists.length} liked playlists`}
           </Text>
+
+          <Grid gutter={8}>
+            {paginatedPlaylists.map((playlist) => (
+              <Grid.Col key={playlist.id} span={span}>
+                <PlaylistCard
+                  id={playlist.id}
+                  title={playlist.name}
+                  username={playlist.createdBy}
+                  description={playlist.description}
+                  gameIcons={playlist.icons}
+                  likes={playlist.numberOfLikes}
+                  createdAt={playlist.createdAt}
+                  updatedAt={playlist.updatedAt}
+                  isPublic={playlist.isPublic}
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
+
+          {totalPages > 1 && (
+            <Group justify="center" mt="xl">
+              <Pagination
+                value={currentPage}
+                onChange={setCurrentPage}
+                total={totalPages}
+                size="md"
+                className={styles.pagination}
+              />
+            </Group>
+          )}
+
+          {filteredAndSortedPlaylists.length === 0 && (
+            <Text ta="center" c="dimmed" mt="xl" size="lg">
+              {searchQuery.trim() !== '' ? `No liked playlists found matching "${searchQuery}"` : 'No liked playlists found.'}
+            </Text>
+          )}
         </Tabs.Panel>
       </Tabs>
+
+      <CreatePlaylistModal
+        opened={createModalOpened}
+        onClose={() => setCreateModalOpened(false)}
+      />
     </Container>
   )
 }

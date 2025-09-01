@@ -4,7 +4,6 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
-using System.Linq;
 
 namespace RetroTrack.Domain.Services.Controllers
 {
@@ -100,7 +99,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task AddNewPlaylist(int userId, AddNewPlaylistRequest request)
         {
-            var newPlaylist = new UserPlaylist
+            var newPlaylist = new Database.Models.UserPlaylist
             {
                 PlaylistName = request.PlaylistName,
                 Description = request.Description,
@@ -280,29 +279,31 @@ namespace RetroTrack.Domain.Services.Controllers
                 games = games.OrderBy(pg => pg.OrderIndex);
             }
 
+            var gameIds = games.Select(pg => pg.GameId).ToList();
+
             var userGameProgress = await context.UserGameProgress
-                .Where(ugp => ugp.UserId == userId && games.Any(pg => pg.GameId == ugp.GameId))
+                .Where(ugp => ugp.UserId == userId && gameIds.Contains(ugp.GameId))
                 .ToListAsync();
 
-            var gameItems = await games
+            var gameItems = games
                 .Skip(request.Skip)
                 .Take(request.Take)
                 .Select(x => new LoggedInGameItem
-            {
-                OrderIndex = x.OrderIndex,
-                GameId = x.GameId,
-                Title = x.Game.Title,
-                ConsoleName = x.Game.GameConsole.ConsoleName,
-                GameIconUrl = x.Game.ImageIcon ?? string.Empty,
-                Genre = x.Game.GameGenre ?? string.Empty,
-                AchievementCount = x.Game.Achievements.Count,
-                Points = x.Game.Achievements.Sum(a => a.Points),
-                Players = x.Game.Players ?? 0,
-                HighestAward = Enums.HighestAwardKind.Unknown,
-                AchievementsEarnedSoftcore = 0,
-                AchievementsEarnedHardcore = 0
-            })
-            .ToArrayAsync();
+                {
+                    OrderIndex = x.OrderIndex,
+                    GameId = x.GameId,
+                    Title = x.Game.Title,
+                    ConsoleName = x.Game.GameConsole.ConsoleName,
+                    GameIconUrl = x.Game.ImageIcon ?? string.Empty,
+                    Genre = x.Game.GameGenre ?? string.Empty,
+                    AchievementCount = x.Game.Achievements.Count,
+                    Points = x.Game.Achievements.Sum(a => a.Points),
+                    Players = x.Game.Players ?? 0,
+                    HighestAward = Enums.HighestAwardKind.Unknown,
+                    AchievementsEarnedSoftcore = 0,
+                    AchievementsEarnedHardcore = 0
+                })
+                .ToArray();
 
             foreach (var item in gameItems)
             {
@@ -315,6 +316,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     item.AchievementsEarnedSoftcore = ugp.AchievementsGained;
                 }
             }
+
+            var totalGamesInPlaylist = playlist.PlaylistGames.Count;
+            var averagePercentageBeaten = totalGamesInPlaylist == 0 ? 0 : Math.Round((double)userGameProgress.Count(ugp => ugp.HighestAwardKind != null && ugp.HighestAwardKind != Enums.HighestAwardKind.Unknown) / totalGamesInPlaylist * 100, 2);
+            var averagePercentageMastered = totalGamesInPlaylist == 0 ? 0 : Math.Round((double)userGameProgress.Count(ugp => ugp.HighestAwardKind == Enums.HighestAwardKind.Completed || ugp.HighestAwardKind == Enums.HighestAwardKind.Mastered) / totalGamesInPlaylist * 100, 2);
+            var averagePercentageAchievementsGained = playlist.PlaylistGames.Count == 0 ? 0 : Math.Round((double)userGameProgress.Sum(ugp => ugp.AchievementsGained) / playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Count) * 100, 2);
 
             return new GetLoggedInPlaylistDataResponse
             {
@@ -333,6 +339,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     .Select(pg => pg.Game.ImageIcon ?? string.Empty)
                     .ToArray(),
                 Games = gameItems,
+                TotalGamesInPlaylist = playlist.PlaylistGames.Count,
                 TotalAchievementsEarnedHardcore = userGameProgress.Sum(ugp => ugp.AchievementsGainedHardcore),
                 TotalAchievementsEarnedSoftcore = userGameProgress.Sum(ugp => ugp.AchievementsGained),
                 TotalAchievementsToEarn = playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Count),
@@ -340,7 +347,13 @@ namespace RetroTrack.Domain.Services.Controllers
                 TotalGamesBeatenSoftcore = userGameProgress.Count(ugp => ugp.HighestAwardKind == Enums.HighestAwardKind.BeatenSoftcore),
                 TotalGamesCompletedSoftcore = userGameProgress.Count(ugp => ugp.HighestAwardKind == Enums.HighestAwardKind.Completed),
                 TotalGamesMasteredHardcore = userGameProgress.Count(ugp => ugp.HighestAwardKind == Enums.HighestAwardKind.Mastered),
-                TotalPointsToEarn = playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Sum(a => a.Points))
+                TotalPointsToEarn = playlist.PlaylistGames.Sum(pg => pg.Game.Achievements.Sum(a => a.Points)),
+                IsPlaylistOwner = playlist.UserIdOwner == userId,
+                IsPublic = playlist.IsPublic,
+                IsLiked = playlist.PlaylistLikes.Any(l => l.UserId == userId),
+                PercentageBeaten = averagePercentageBeaten,
+                PercentageMastered = averagePercentageMastered,
+                PercentageAchievementsGained = averagePercentageAchievementsGained
             };
         }
 
@@ -366,6 +379,34 @@ namespace RetroTrack.Domain.Services.Controllers
             };
 
             await context.UserPlaylistGames.AddAsync(newPlaylistGame);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task AddMultipleGamesToPlaylist(int userId, AddMultipleGamesToPlaylistRequest request)
+        {
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && p.UserIdOwner == userId);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Playlist not found");
+            }
+
+            foreach (var game in request.GameIds)
+            {
+                if (!playlist.PlaylistGames.Any(pg => pg.GameId == game))
+                {
+                    var newPlaylistGame = new UserPlaylistGame
+                    {
+                        UserPlaylistId = request.PlaylistId,
+                        GameId = game,
+                        OrderIndex = playlist.PlaylistGames.Count + 1
+                    };
+
+                    await context.UserPlaylistGames.AddAsync(newPlaylistGame);
+                }
+
+            }
+
             await context.SaveChangesAsync();
         }
 
@@ -463,8 +504,36 @@ namespace RetroTrack.Domain.Services.Controllers
             await context.SaveChangesAsync();
         }
 
+        public async Task<SearchGamesResponse> SearchGames(string gameTitle, string playlistId)
+        {
+            var searchTerm = gameTitle.Trim().ToLower();
+
+            // do the search for games that are not already in the playlist
+            var results = await context.Games
+                .Where(g => g.HasAchievements &&
+                            g.Title.ToLower().Contains(searchTerm) &&
+                            !g.UserPlaylistGames.Any(pg => pg.UserPlaylistId == playlistId))
+                .OrderBy(g => g.Title)
+                .Take(20)
+                .Select(g => new PlaylistSearchGameResult
+                {
+                    GameId = g.Id,
+                    Title = g.Title,
+                    ConsoleName = g.GameConsole.ConsoleName,
+                    GameImage = g.ImageIcon ?? string.Empty,
+                    AchievementCount = g.Achievements.Count,
+                    Points = g.Achievements.Sum(a => a.Points)
+                })
+                .ToArrayAsync();
+
+            return new SearchGamesResponse
+            {
+                Results = results
+            };
+        }
+
         // for filtering public and user playlists if needed. Atm it's done via the front end as all data is fetched
-        private static async Task<GetPlaylistResponse> DoFilter(GetPlaylistRequest request, IQueryable<UserPlaylist> query)
+        private static async Task<GetPlaylistResponse> DoFilter(GetPlaylistRequest request, IQueryable<Database.Models.UserPlaylist> query)
         {
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {

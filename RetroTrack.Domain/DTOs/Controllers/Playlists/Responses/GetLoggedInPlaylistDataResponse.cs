@@ -14,6 +14,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Responses
         public required DateTime UpdatedAt { get; set; }
         public required string CreatedBy { get; set; } = string.Empty;
         public required string[] Icons { get; set; } = [];
+        public required long TotalGamesInPlaylist { get; set; }
         public required long TotalPointsToEarn { get; set; }
         public required long TotalAchievementsToEarn { get; set; }
         public required long TotalAchievementsEarnedSoftcore { get; set; }
@@ -22,7 +23,13 @@ namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Responses
         public required long TotalGamesBeatenHardcore { get; set; }
         public required long TotalGamesCompletedSoftcore { get; set; }
         public required long TotalGamesMasteredHardcore { get; set; }
+        public required double PercentageBeaten { get; set; }
+        public required double PercentageMastered { get; set; }
+        public required double PercentageAchievementsGained { get; set; }
         public required LoggedInGameItem[] Games { get; set; } = [];
+        public required bool IsPlaylistOwner { get; set; }
+        public required bool IsPublic { get; set; }
+        public required bool IsLiked { get; set; }
     }
 
     public class LoggedInGameItem : PlaylistGameItem

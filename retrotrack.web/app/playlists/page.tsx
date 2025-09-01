@@ -1,5 +1,5 @@
 import LoggedInPlaylistsComponent from '@/components/pages/playlists/LoggedInPlaylistsComponent'
-import LoggedOutPlaylistsComponent from '@/components/pages/playlists/LoggedOutPlaylistsComponent'
+import LoggedOutPlaylistsComponent from '@/components/pages/playlists/PublicPlaylistsComponent'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetPlaylistResponse } from '@/interfaces/api/playlists/GetPlaylistResponse'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
