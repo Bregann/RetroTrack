@@ -56,11 +56,5 @@ namespace RetroTrack.Domain.Database.Models
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<UserGameNote> UserGameNotes { get; set; } = null!;
-
-        [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<UserPlaylist> UserPlaylists { get; set; } = null!;
-
-        [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<UserPlaylistLikes> LikedPlaylists { get; set; } = null!;
     }
 }

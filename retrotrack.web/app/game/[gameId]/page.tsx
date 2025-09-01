@@ -1,5 +1,5 @@
-import { PublicGamePage } from '@/components/pages/games/PublicGamePageComponent'
-import { LoggedInGamePage } from '@/components/pages/games/LoggedInGamePageComponent'
+import { PublicGamePage } from '@/components/pages/PublicGamePageComponent'
+import { LoggedInGamePage } from '@/components/pages/LoggedInGamePageComponent'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetPublicSpecificGameInfoResponse } from '@/interfaces/api/games/GetPublicSpecificGameInfoResponse'
 import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'

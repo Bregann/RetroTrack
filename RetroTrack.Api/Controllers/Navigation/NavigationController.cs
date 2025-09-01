@@ -4,7 +4,7 @@ using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 
-namespace RetroTrack.Api.Controllers
+namespace RetroTrack.Api.Controllers.Navigation
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

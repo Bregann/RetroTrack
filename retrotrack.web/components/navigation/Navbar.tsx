@@ -20,7 +20,7 @@ import {
   List,
   Tooltip,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconProgress, IconRefresh } from '@tabler/icons-react'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { ConsoleType } from '@/enums/consoleType'
@@ -256,17 +256,6 @@ export function Navbar(props: NavbarProps) {
             style={{ borderRadius: '10px' }}
           />
 
-          <NavLink
-            label="Playlists"
-            component={Link}
-            href="/playlists"
-            active={currentPage === '/playlists'}
-            py="xs"
-            leftSection={<IconPlaylist size={20} stroke={1.5} />}
-            onClick={() => setCurrentPage('/playlists')}
-            style={{ borderRadius: '10px' }}
-          />
-
           {auth.user !== null &&
             <>
               <NavLink
@@ -401,17 +390,13 @@ export function Navbar(props: NavbarProps) {
       <AppShell.Main>
         {props.children}
         <LoginModal
-          onClose={setLoginModalOpen}
+          onClose={() => setLoginModalOpen(false)}
           openedState={loginModalOpen}
         />
 
         <RegisterModal
-          onClose={setRegisterModalOpen}
+          onClose={() => setRegisterModalOpen(false)}
           openedState={registerModalOpen}
-          onSwitchToLogin={() => {
-            setRegisterModalOpen(false)
-            setLoginModalOpen(true)
-          }}
         />
 
         <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack Updates">
@@ -438,7 +423,7 @@ export function Navbar(props: NavbarProps) {
               <Accordion.Panel>
                 <Text mb="sm">Here are some of the new features:</Text>
                 <List withPadding>
-                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicated game page which includes more information</List.Item>
+                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicate game page which includes more information</List.Item>
                   <List.Item>Ability to add notes to games. Easily keep track of information</List.Item>
                   <List.Item>Various UI design updates</List.Item>
                   <List.Item>Various code improvements</List.Item>

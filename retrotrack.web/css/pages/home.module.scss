@@ -1,53 +1,29 @@
-// Modern divider styling
 .mainDividerText {
-  color: light-dark(
-    var(--mantine-color-gray-7),
-    var(--mantine-color-gray-3)
-  );
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 2rem;
+  color: light-dark(#263042, #ffffff);
+  font-size: 25px;
+  font-weight: 600;
+  margin-top: 25px;
 }
 
 .subDividerText {
-  color: light-dark(
-    var(--mantine-color-gray-6),
-    var(--mantine-color-gray-4)
-  );
-  font-size: 1.1rem;
+  color: light-dark(#263042, #ffffff);
+  font-size: 20px;
   font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 15px;
+  margin-bottom: 20px;
 }
 
-// Modern game card styling
-.gameCard {
-  background: light-dark(
-    var(--mantine-color-gray-0),
-    var(--mantine-color-dark-6)
-  );
-  border: 1px solid light-dark(
-    var(--mantine-color-gray-3),
-    var(--mantine-color-dark-4)
-  );
-  transition: all 0.2s ease;
-  
-  &:hover {
-    border-color: light-dark(
-      var(--mantine-color-blue-3),
-      var(--mantine-color-blue-6)
-    );
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+.newSetCardBorder {
+  border: 2px solid;
+  border-color: #1590e2;
+}
+
+.updatedSetCardBorder {
+  border: 2px solid;
+  border-color: #da59da;
 }
 
 .roundedImage {
-  border-radius: 8px;
+  border-radius: 5px;
   flex-shrink: 0;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    transform: scale(1.02);
-  }
 }

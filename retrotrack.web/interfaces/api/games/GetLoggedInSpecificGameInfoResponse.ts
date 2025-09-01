@@ -1,5 +1,3 @@
-import { UserPlaylist } from '../playlists/UserPlaylist'
-
 export interface GetLoggedInSpecificGameInfoResponse {
     gameId: number
     title: string
@@ -28,7 +26,6 @@ export interface GetLoggedInSpecificGameInfoResponse {
     dateCompleted: string | null
     dateMastered: string | null
     userNotes: string | null
-    playlists: UserPlaylist[]
 }
 
 export interface UserAchievement {

@@ -1,5 +1,4 @@
-﻿using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
-using RetroTrack.Domain.Enums;
+﻿using RetroTrack.Domain.Enums;
 
 namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
 {
@@ -35,8 +34,6 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public string? DateMastered { get; set; }
 
         public string? UserNotes { get; set; }
-
-        public required UserPlaylist[] Playlists { get; set; }
     }
 
     public class UserAchievement

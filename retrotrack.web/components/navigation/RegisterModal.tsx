@@ -1,6 +1,6 @@
 'use client'
 
-import { Modal, PasswordInput, TextInput, Text, Group, Button, Alert, Anchor, Divider } from '@mantine/core'
+import { Modal, PasswordInput, TextInput, Text, Group, Button, Alert } from '@mantine/core'
 import { useState } from 'react'
 import { useForm } from '@mantine/form'
 import { IconAlertCircle, IconCheck, IconLock } from '@tabler/icons-react'
@@ -17,7 +17,6 @@ interface FormValues {
 export interface RegisterModalProps {
   onClose: (value: boolean) => void
   openedState: boolean
-  onSwitchToLogin?: () => void
 }
 
 const RegisterModal = (props: RegisterModalProps) => {
@@ -130,20 +129,6 @@ const RegisterModal = (props: RegisterModalProps) => {
             Register
           </Button>
         </Group>
-
-        {props.onSwitchToLogin !== undefined && (
-          <>
-            <Divider my="md" />
-            <Group justify="center">
-              <Text size="sm" c="dimmed">
-                Already have an account?{' '}
-                <Anchor onClick={props.onSwitchToLogin} fw={500}>
-                  Login here
-                </Anchor>
-              </Text>
-            </Group>
-          </>
-        )}
       </form>
     </Modal>
   )

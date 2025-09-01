@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
-import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
+import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
@@ -178,7 +178,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
 
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: [queryString],
+    queryKey: [queryString.concat('-lg')],
     queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/getUserProgressForConsole?'.concat(queryString)),
   })
 
@@ -271,7 +271,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
                     {isMobile ? 'Go' : 'Search'}
                   </Button>
                 </Group>
-                <Group ml={20} mb={15}>
+                <Group ml={20}>
                   <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />
                   <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }} />
                   <Checkbox checked={hideCompletedGames} label="Hide Completed/Mastered Games" onChange={() => { setHideCompletedGames(!hideCompletedGames) }} />

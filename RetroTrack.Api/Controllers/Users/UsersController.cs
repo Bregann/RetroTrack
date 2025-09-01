@@ -7,7 +7,7 @@ using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
 using Serilog;
 
-namespace RetroTrack.Api.Controllers
+namespace RetroTrack.Api.Controllers.Users
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

@@ -18,7 +18,7 @@ import {
   Accordion,
   Button,
 } from '@mantine/core'
-import { IconCheck, IconInfoCircle, IconLock, IconTrophy, IconCrown, IconMedal, IconPercentage } from '@tabler/icons-react'
+import { IconCheck, IconInfoCircle, IconLock } from '@tabler/icons-react'
 import styles from '@/css/pages/profile.module.scss'
 import { useMediaQuery } from '@mantine/hooks'
 import { GamesWall, GetUserProfileResponse } from '@/interfaces/api/users/GetUserProfileResponse'
@@ -188,103 +188,69 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
   }
 
   return (
-    <Container size="100%" px="md" py="xl">
+    <Container size={'95%'} mt={40}>
       {isLoading && <Loading />}
       {isError && <Text>Error loading profile data.</Text>}
 
       {data !== undefined &&
         <>
-          {/* Profile Header Card */}
-          <Card radius="md" p="lg" mb="xl" className={styles.profileHeaderCard}>
-            <Group align="flex-start" wrap="nowrap" gap="lg">
-              <Avatar
-                src={`https://media.retroachievements.org/UserPic/${data.raUsername}.png`}
-                size={120}
-                radius="lg"
-                className={styles.profileAvatar}
-              />
-              <Stack style={{ flex: 1 }} gap="sm">
-                <Title order={1} size="2rem" mb="xs">{data.raUsername}</Title>
-
-                <Group gap="xl">
-                  <Stack gap={2}>
-                    {data.softcorePoints !== data.hardcorePoints && data.softcorePoints !== 0 && (
-                      <Text size="lg">
-                        Softcore Points: <Text component="span" fw={700} c="blue">{data.softcorePoints.toLocaleString()}</Text>
+          <Group align="center" gap="lg" mb="lg">
+            <Avatar src={`https://media.retroachievements.org/UserPic/${data.raUsername}.png`} size={100} radius="lg" />
+            <Stack gap={4}>
+              <Title order={2}>{data.raUsername}</Title>
+              <Group gap="xl">
+                <Stack gap={2}>
+                  {data.softcorePoints !== data.hardcorePoints && data.softcorePoints !== 0 && <Text>Softcore Points: <Text component="span" fw={700}>{data.softcorePoints.toLocaleString()}</Text></Text>}
+                  {data.hardcorePoints !== 0 && <Text>Hardcore Points: <Text component="span" fw={700}>{data.hardcorePoints.toLocaleString()}</Text></Text>}
+                  {data.lastUserUpdate !== undefined &&
+                    <Group gap={4}>
+                      <Text c="dimmed" size="sm">
+                        Last Updated: {new Date(data.lastUserUpdate).toLocaleDateString()} {new Date(data.lastUserUpdate).toLocaleTimeString()}
                       </Text>
-                    )}
-                    {data.hardcorePoints !== 0 && (
-                      <Text size="lg">
-                        Hardcore Points: <Text component="span" fw={700} c="gold">{data.hardcorePoints.toLocaleString()}</Text>
-                      </Text>
-                    )}
-                  </Stack>
-                </Group>
+                      <Tooltip label="If you are not registered, data is cached for 30 minutes unless you are registered and logged in" withArrow>
+                        <Box component="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                          <IconInfoCircle size={16} color="gray" />
+                        </Box>
+                      </Tooltip>
+                    </Group>
+                  }
+                </Stack>
+              </Group>
+            </Stack>
+          </Group>
 
-                {data.lastUserUpdate !== undefined && (
-                  <Group gap="md" mt="sm">
-                    <Text size="sm" c="dimmed">
-                      Last Updated: {new Date(data.lastUserUpdate).toLocaleDateString()} {new Date(data.lastUserUpdate).toLocaleTimeString()}
-                    </Text>
-                    <Tooltip label="If you are not registered, data is cached for 30 minutes unless you are registered and logged in" withArrow>
-                      <Box component="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
-                        <IconInfoCircle size={16} color="gray" />
-                      </Box>
-                    </Tooltip>
-                  </Group>
-                )}
-              </Stack>
-            </Group>
-          </Card>
-
-          {/* Stats Cards */}
-          <SimpleGrid cols={statColsAmount} mb="xl" spacing="md">
-            <Card radius="md" p="md" className={styles.statCard}>
+          <SimpleGrid cols={statColsAmount} mb="xl">
+            <Card withBorder radius="md" p="lg" className={styles.statCard}>
               <Stack align="center" gap="xs">
-                <Group justify="center" align="center" gap="xs">
-                  <Text size="sm" fw={600} ta="center">Games Beaten</Text>
-                  <IconTrophy size={14} color="orange" />
-                </Group>
+                <Text fw={700}>Games Beaten</Text>
                 <Stack gap={0} align="center">
-                  <Text size="lg" fw={700} c="orange">
-                    {(data.gamesBeatenHardcore !== 0 ? data.gamesBeatenHardcore : data.gamesBeatenSoftcore).toLocaleString()}
-                  </Text>
+                  {data.gamesBeatenSoftcore !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{data.gamesBeatenSoftcore.toLocaleString()}</Text></Text>}
+                  {data.gamesBeatenHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{data.gamesBeatenHardcore.toLocaleString()}</Text></Text>}
                 </Stack>
               </Stack>
             </Card>
-            <Card radius="md" p="md" className={styles.statCard}>
+            <Card withBorder radius="md" p="lg" className={styles.statCard}>
               <Stack align="center" gap="xs">
-                <Group justify="center" align="center" gap="xs">
-                  <Text size="sm" fw={600} ta="center">Games Completed/Mastered</Text>
-                  <IconCrown size={14} color="gold" />
-                </Group>
+                <Text fw={700}>Games Completed/Mastered</Text>
                 <Stack gap={0} align="center">
-                  <Text size="lg" fw={700} c="gold">
-                    {(data.gamesMastered !== 0 ? data.gamesMastered : data.gamesCompleted).toLocaleString()}
-                  </Text>
+                  {data.gamesCompleted !== 0 && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{data.gamesCompleted.toLocaleString()}</Text></Text>}
+                  {data.gamesMastered !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{data.gamesMastered.toLocaleString()}</Text></Text>}
                 </Stack>
               </Stack>
             </Card>
-            <Card radius="md" p="md" className={styles.statCard}>
+            <Card withBorder radius="md" p="lg" className={styles.statCard}>
               <Stack align="center" gap="xs">
-                <Group justify="center" align="center" gap="xs">
-                  <Text size="sm" fw={600} ta="center">Achievements Unlocked</Text>
-                  <IconMedal size={14} color="blue" />
-                </Group>
+                <Text fw={700}>Achievements Unlocked</Text>
                 <Stack gap={0} align="center">
-                  <Text size="lg" fw={700} c="blue">
-                    {(data.achievementsEarnedHardcore !== 0 ? data.achievementsEarnedHardcore : data.achievementsEarnedSoftcore).toLocaleString()}
-                  </Text>
+                  {data.achievementsEarnedSoftcore !== data.achievementsEarnedHardcore && <Text size="sm" c="dimmed">Softcore: <Text component="span" fw={600}>{data.achievementsEarnedSoftcore.toLocaleString()}</Text></Text>}
+                  {data.achievementsEarnedHardcore !== 0 && <Text size="sm" c="gold">Hardcore: <Text component="span" fw={600}>{data.achievementsEarnedHardcore.toLocaleString()}</Text></Text>}
                 </Stack>
               </Stack>
             </Card>
-            <Card radius="md" p="md" className={styles.statCard}>
+            <Card withBorder radius="md" p="lg" className={styles.statCard}>
               <Stack align="center" gap="xs">
-                <Group justify="center" align="center" gap="xs">
-                  <Text size="sm" fw={600} ta="center">In Progress Games</Text>
-                  <IconPercentage size={14} color="orange" />
-                </Group>
-                <Text size="lg" fw={700} c="orange">{data.gamesInProgress.toLocaleString()}</Text>
+                <Text fw={700}>In Progress Games</Text>
+                <Text size="lg" fw={600}>{data.gamesInProgress.toLocaleString()}</Text>
               </Stack>
             </Card>
           </SimpleGrid>
@@ -421,7 +387,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
                         <SimpleGrid cols={consoleBreakdownColsAmount} spacing="lg" mb="xl">
                           {data.consoleProgressData.filter(x => x.consoleType === console).map((consoleData) => {
                             return (
-                              <Card radius="md" p="lg" key={consoleData.consoleId} className={styles.consoleCard}>
+                              <Card withBorder radius="md" p="lg" key={consoleData.consoleId}>
                                 <Stack gap="md">
                                   <Text fw={700} size="lg">{consoleData.consoleName}</Text>
                                   {/* if all values are 0 then show no progress*/}
@@ -479,7 +445,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
               <Stack gap="sm">
                 {data.last5GamesPlayed.map((game) => {
                   return (
-                    <Card key={game.gameId} radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
+                    <Card key={game.gameId} withBorder radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
                       <Stack gap="xs">
                         <Group gap="xs">
                           <Image
@@ -517,7 +483,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
               <Stack gap="sm">
                 {data.last5Awards.map((game) => {
                   return (
-                    <Card key={game.gameId} radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
+                    <Card key={game.gameId} withBorder radius="md" p="sm" className={styles.lastPlayedCard} style={{ cursor: 'pointer' }} onClick={() => gameModal.showModal(game.gameId)}>
                       <Stack gap="xs">
                         <Group gap="xs">
                           <Image

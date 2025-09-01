@@ -1,9 +1,8 @@
 'use client'
 
 import React, { ReactNode } from 'react'
-import { Table, Pagination, Button, Group, Select, Text } from '@mantine/core'
-import { IconArrowDown, IconArrowUp, IconLineDashed, IconTableOff } from '@tabler/icons-react'
-import tableStyles from '@/css/components/paginatedTable.module.scss'
+import { Table, Pagination, Button, Group, Select } from '@mantine/core'
+import { IconArrowDown, IconArrowUp, IconLineDashed } from '@tabler/icons-react'
 
 export interface Column<T> {
   title: string
@@ -89,24 +88,20 @@ export function PaginatedTable<T>({
   }
 
   const rows = data.map((item, index) => (
-    <Table.Tr
-      key={index}
-      onClick={() => onRowClick !== undefined && onRowClick(item, index)}
-      className={`${tableStyles.bodyRow} ${onRowClick !== undefined ? tableStyles.clickable : ''}`}
-    >
+    <Table.Tr key={index} onClick={() => onRowClick !== undefined && onRowClick(item, index)} style={{ cursor: onRowClick !== undefined ? 'pointer' : 'default' }}>
       {columns.filter(x => x.show !== false).map((col, colIndex) => (
-        <Table.Td key={colIndex} className={tableStyles.bodyCell}>
+        <Table.Td key={colIndex}>
           {col.render !== undefined
             ? col.render(item, index)
             : String(item[col.key!] as ReactNode)}
         </Table.Td>
       ))}
       {hasActions !== undefined && (
-        <Table.Td className={`${tableStyles.bodyCell} ${tableStyles.actionsCell}`}>
+        <Table.Td style={{ whiteSpace: 'nowrap' }}>
           {renderActions !== undefined ? (
             renderActions(item, index)
           ) : (
-            <div className={tableStyles.actionButtons}>
+            <Group gap="xs">
               {actions?.map((action, actionIndex) => (
                 <Button
                   key={actionIndex}
@@ -119,12 +114,11 @@ export function PaginatedTable<T>({
                     action.onClick(item, index)
                   }}
                   leftSection={action.icon}
-                  className={`${tableStyles.actionButton} ${tableStyles[action.variant ?? 'light']}`}
                 >
                   {action.label}
                 </Button>
               ))}
-            </div>
+            </Group>
           )}
         </Table.Td>
       )}
@@ -132,49 +126,44 @@ export function PaginatedTable<T>({
   ))
 
   return (
-    <div className={tableStyles.paginatedTableContainer}>
-      <div className={tableStyles.tableWrapper}>
-        <Table className={tableStyles.modernTable} style={styles}>
-          <Table.Thead className={tableStyles.tableHeader}>
+    <>
+      <div style={{ overflowX: 'auto' }}>
+        <Table striped highlightOnHover style={styles}>
+          <Table.Thead>
             <Table.Tr>
               {columns.filter(x => x.show !== false).map((col, colIndex) => {
                 const isSorted = col.key === currentKey
-                const canSort = Boolean((col.sortable !== false) && onSortChange)
+                const canSort = Boolean(col.sortable !== undefined && onSortChange)
 
                 return (
                   <Table.Th
                     key={colIndex}
-                    className={`${tableStyles.headerCell} ${canSort ? tableStyles.sortableHeader : ''} ${isSorted ? tableStyles.sortedHeader : ''}`}
+                    style={{
+                      cursor: canSort ? 'pointer' : undefined,
+                      whiteSpace: 'nowrap'
+                    }}
                     onClick={() => canSort && handleHeaderClick(col)}
                   >
-                    <div className={tableStyles.headerContent}>
-                      {col.title}
-                      {isSorted && (
-                        <div className={tableStyles.sortIcon}>
-                          {currentDir === 'asc' ? <IconArrowUp /> : <IconArrowDown />}
-                        </div>
-                      )}
-                      {canSort && !isSorted && (
-                        <div className={tableStyles.sortIcon}>
-                          <IconLineDashed />
-                        </div>
-                      )}
-                    </div>
+                    {col.title}
+                    {isSorted && (currentDir === 'asc' ? <IconArrowUp style={{ marginBottom: -5, marginLeft: 10 }} /> : <IconArrowDown style={{ marginBottom: -5, marginLeft: 10 }} />)}
+                    {canSort && !isSorted && (
+                      <IconLineDashed style={{ marginBottom: -7, marginLeft: 10 }} />
+                    )}
                   </Table.Th>
                 )
               })}
               {hasActions !== undefined && (
-                <Table.Th className={tableStyles.headerCell}>{actionsTitle}</Table.Th>
+                <Table.Th style={{ whiteSpace: 'nowrap' }}>{actionsTitle}</Table.Th>
               )}
             </Table.Tr>
           </Table.Thead>
-          <Table.Tbody className={tableStyles.tableBody}>{rows}</Table.Tbody>
+          <Table.Tbody>{rows}</Table.Tbody>
         </Table>
       </div>
-      <div className={tableStyles.paginationSection}>
+      <Group justify="space-between" align="center" style={{ marginTop: '1rem' }}>
         {showPageSizeSelector && onPageSizeChange !== undefined && (
-          <div className={tableStyles.pageSizeSelector}>
-            <span className={tableStyles.selectorLabel}>Show:</span>
+          <Group gap="xs" align="center">
+            <span>Show:</span>
             <Select
               value={pageSize.toString()}
               onChange={(value) => {
@@ -186,23 +175,26 @@ export function PaginatedTable<T>({
                 value: option.toString(),
                 label: option.toString()
               }))}
-              className={tableStyles.pageSizeSelect}
+              style={{ width: 80 }}
               allowDeselect={false}
             />
-            <span className={tableStyles.selectorLabel}>per page</span>
-          </div>
+            <span>per page</span>
+          </Group>
         )}
         <Pagination
           value={page}
           total={total}
           onChange={onPageChange}
-          className={tableStyles.paginationControls}
+          style={{
+            marginLeft: showPageSizeSelector ? 'auto' : '0',
+            marginRight: showPageSizeSelector ? 'auto' : '0'
+          }}
         />
         {showPageSizeSelector && (
-          <div className={tableStyles.paginationSpacer} />
+          <div style={{ width: '120px' }} /> /* Spacer to keep pagination centered */
         )}
-      </div>
-    </div>
+      </Group>
+    </>
   )
 }
 
