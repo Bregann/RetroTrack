@@ -2,7 +2,7 @@
 using RetroTrack.Domain.DTOs.Controllers.Auth.Requests;
 using RetroTrack.Domain.Interfaces.Controllers;
 
-namespace RetroTrack.Api.Controllers.Auth
+namespace RetroTrack.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

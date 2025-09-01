@@ -167,8 +167,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfo(int gameId)
         {
-            //temp fix as the image data isnt in database yet
-            var data = await raApiService.GetSpecificGameInfo(gameId, true, true);
+            var data = await raApiService.GetSpecificGameInfo(gameId, false);
 
             if (data == null)
             {
@@ -254,7 +253,15 @@ namespace RetroTrack.Domain.Services.Controllers
                     PointsAwardedSoftcore = 0,
                     PointsAwardedTotal = 0,
                     TotalGamePoints = loggedOutData.Achievements.Sum(x => x.Value.Points),
-                    GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId)
+                    GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId),
+                    Playlists = await context.UserPlaylists
+                        .Where(x => x.UserIdOwner == userId)
+                        .Where(x => !context.UserPlaylistGames.Any(pg => pg.UserPlaylistId == x.Id && pg.GameId == gameId))
+                        .Select(x => new DTOs.Controllers.Playlists.Responses.UserPlaylist
+                        {
+                            Id = x.Id,
+                            Name = x.PlaylistName
+                        }).ToArrayAsync()
                 };
             }
 
@@ -307,16 +314,13 @@ namespace RetroTrack.Domain.Services.Controllers
                     .OrderByDescending(x => x.Value.DateEarned)
                     .FirstOrDefault();
 
-                if (lastAchievement.Value != null)
-                {
-                    gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
+                gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
 
-                    var lastAchievementHardcore = data.Achievements
-                        .OrderByDescending(x => x.Value.DateEarnedHardcore)
-                        .FirstOrDefault();
+                var lastAchievementHardcore = data.Achievements
+                    .OrderByDescending(x => x.Value.DateEarnedHardcore)
+                    .FirstOrDefault();
 
-                    gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
-                }
+                gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
             }
 
             return new GetLoggedInSpecificGameInfoResponse
@@ -347,7 +351,15 @@ namespace RetroTrack.Domain.Services.Controllers
                 DateCompleted = gameCompletedDate,
                 DateMastered = gameMasteredDate,
                 GameTracked = context.TrackedGames.Any(x => x.UserId == userId && x.GameId == gameId),
-                UserNotes = context.UserGameNotes.Where(x => x.UserId == userId && x.GameId == gameId).Select(x => x.Notes).FirstOrDefault()
+                UserNotes = context.UserGameNotes.Where(x => x.UserId == userId && x.GameId == gameId).Select(x => x.Notes).FirstOrDefault(),
+                Playlists = await context.UserPlaylists
+                    .Where(x => x.UserIdOwner == userId)
+                    .Where(x => !context.UserPlaylistGames.Any(pg => pg.UserPlaylistId == x.Id && pg.GameId == gameId))
+                    .Select(x => new DTOs.Controllers.Playlists.Responses.UserPlaylist
+                    {
+                        Id = x.Id,
+                        Name = x.PlaylistName
+                    }).ToArrayAsync()
             };
         }
 

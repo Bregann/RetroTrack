@@ -2,7 +2,7 @@
 using RetroTrack.Domain.DTOs.Controllers.Sitemap;
 using RetroTrack.Domain.Interfaces.Controllers;
 
-namespace RetroTrack.Api.Controllers.Sitemap
+namespace RetroTrack.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

@@ -54,5 +54,8 @@ namespace RetroTrack.Domain.Database.Models
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<Achievement> Achievements { get; set; } = [];
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<UserPlaylistGame> UserPlaylistGames { get; set; } = [];
     }
 }

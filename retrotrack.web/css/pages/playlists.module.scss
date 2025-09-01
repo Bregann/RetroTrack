@@ -1,0 +1,269 @@
+.playlistTabs {
+  .mantine-Tabs-tab {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px 8px 0 0;
+    
+    &[data-active] {
+      background-color: light-dark(#e3f2fd, #1a1b1e);
+      border-bottom: 2px solid #1976d2;
+    }
+  }
+}
+
+.controlsContainer {
+  background: light-dark(#f8f9fa, #25262b);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid light-dark(#e9ecef, #373a40);
+}
+
+.searchContainer {
+  background: light-dark(#f8f9fa, #25262b);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid light-dark(#e9ecef, #373a40);
+}
+
+.sortButton {
+  font-size: 12px;
+  height: 28px;
+  font-weight: 500;
+  
+  &[data-variant="filled"] {
+    background: #1976d2;
+    
+    &:hover {
+      background: #1565c0;
+    }
+  }
+  
+  &[data-variant="light"] {
+    background: light-dark(#e3f2fd, #2c2e33);
+    color: light-dark(#1976d2, #74c0fc);
+    
+    &:hover {
+      background: light-dark(#bbdefb, #364248);
+    }
+  }
+}
+
+.searchInput {
+  .mantine-TextInput-input {
+    background: light-dark(#ffffff, #2c2e33);
+    border: 1px solid light-dark(#ced4da, #5c5f66);
+    
+    &:focus {
+      border-color: #1976d2;
+    }
+  }
+}
+
+.searchButton {
+  background: #1976d2;
+  border: none;
+  white-space: nowrap;
+  
+  &:hover {
+    background: #1565c0;
+  }
+}
+
+.sortSelect {
+  .mantine-Select-input {
+    background: light-dark(#ffffff, #2c2e33);
+    border: 1px solid light-dark(#ced4da, #5c5f66);
+    
+    &:focus {
+      border-color: #1976d2;
+    }
+  }
+}
+
+.pagination {
+  .mantine-Pagination-control {
+    background: light-dark(#ffffff, #2c2e33);
+    border: 1px solid light-dark(#e9ecef, #373a40);
+    color: light-dark(#495057, #c1c2c5);
+    
+    &:hover {
+      background: light-dark(#e9ecef, #373a40);
+    }
+    
+    &[data-active] {
+      background: #1976d2;
+      border-color: #1976d2;
+      color: white;
+      
+      &:hover {
+        background: #1565c0;
+      }
+    }
+  }
+}
+
+.createButton {
+  background: #1976d2;
+  border: none;
+  &:hover {
+    background: #1565c0;
+  }
+}
+
+.playlistCard {
+  background: light-dark(#ffffff, #25262b);
+  border: 1px solid light-dark(#e9ecef, #373a40);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  aspect-ratio: 1; // Makes cards square
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: light-dark(#1976d2, #339af0);
+  }
+}
+
+.createPlaylistCard {
+  background: light-dark(#f8f9fa, #2c2e33);
+  border: 2px dashed light-dark(#adb5bd, #5c5f66);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  aspect-ratio: 1; // Makes cards square
+  
+  &:hover {
+    background: light-dark(#e9ecef, #373a40);
+    border-color: light-dark(#6c757d, #909296);
+    transform: translateY(-2px);
+  }
+}
+
+.loginPromptCard {
+  background: light-dark(#e3f2fd, #1a1b1e);
+  border: 2px solid light-dark(#1976d2, #339af0);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  aspect-ratio: 1; // Makes cards square
+  
+  &:hover {
+    background: light-dark(#bbdefb, #25282b);
+    transform: translateY(-2px);
+  }
+}
+
+.infoBanner {
+  background: light-dark(#e3f2fd, #1a1b1e);
+  border: 1px solid light-dark(#1976d2, #339af0);
+}
+
+.createIcon {
+  color: light-dark(#6c757d, #909296);
+}
+
+.loginIcon {
+  color: light-dark(#1976d2, #339af0);
+}
+
+.loginButton {
+  background: #1976d2;
+  
+  &:hover {
+    background: #1565c0;
+  }
+}
+
+.playlistImageContainer {
+  position: relative;
+  width: 100%;
+  height: 60%; // Reduced height for square cards
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+}
+
+.gameIconsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  gap: 1px;
+}
+
+.gameIconWrapper {
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.gameIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.playlistCard:hover .gameIcon {
+  transform: scale(1.05);
+}
+
+.playlistTitle {
+  color: light-dark(#212529, #ffffff);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.heartIcon {
+  color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .createButton {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .playlistImageContainer {
+    height: 55%; // Adjust for mobile square cards
+  }
+}
+
+@media (max-width: 480px) {
+  .playlistTabs {
+    .mantine-Tabs-tab {
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+  }
+  
+  .playlistImageContainer {
+    height: 50%; // Adjust for small mobile square cards
+  }
+}
+
+// Playlist detail page specific styles
+.playlistHeaderCard {
+  background: light-dark(#ffffff, #1a1b1e);
+  border: 1px solid light-dark(#e9ecef, #373a40);
+  
+  .playlistCover {
+    width: 160px;
+    height: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+}
+
+.statCard {
+  background: light-dark(#f8f9fa, #25262b);
+  border: 1px solid light-dark(#e9ecef, #373a40);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: light-dark(#e3f2fd, #2c2e33);
+    border-color: light-dark(#1976d2, #74c0fc);
+  }
+}
