@@ -64,7 +64,9 @@ namespace RetroTrack.Domain.Services.Controllers
                 GamesMastered = consoleProgressData.Sum(x => x.GamesMastered),
                 TrackedGamesCount = trackedGameCount,
                 InProgressGamesCount = inProgressGameCount,
-                ConsoleProgressData = consoleProgressData
+                ConsoleProgressData = consoleProgressData,
+                TotalPointsSoftcore = user.UserPointsSoftcore,
+                TotalPointsHardcore = user.UserPointsHardcore
             };
         }
     }

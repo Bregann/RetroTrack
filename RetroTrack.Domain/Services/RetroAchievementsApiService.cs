@@ -85,9 +85,10 @@ namespace RetroTrack.Domain.Services
                 {
                     AchievementCount = achievements.Count,
                     Achievements = achievements,
-                    ImageBoxArt = "",
-                    ImageTitle = "",
-                    ImageInGame = "",
+                    ImageBoxArt = gameFromDb.ImageBoxArt,
+                    ImageTitle = gameFromDb.ImageTitle,
+                    ImageInGame = gameFromDb.ImageInGame,
+                    ImageIcon = gameFromDb.ImageIcon,
                     ConsoleId = gameFromDb.ConsoleId,
                     ConsoleName = gameFromDb.GameConsole.ConsoleName,
                     Genre = gameFromDb.GameGenre ?? "",
@@ -138,9 +139,15 @@ namespace RetroTrack.Domain.Services
                 return null;
             }
 
-            // Update the player count as the values on the table are out of sync
+            // Update the player count and image data as the values on the table are out of sync
             context.Games.Where(x => x.Id == gameId)
-                .ExecuteUpdate(x => x.SetProperty(y => y.Players, data.Players));
+                .ExecuteUpdate(x => x
+                    .SetProperty(y => y.Players, data.Players)
+                    .SetProperty(y => y.ImageIcon, data.ImageIcon)
+                    .SetProperty(y => y.ImageInGame, data.ImageInGame)
+                    .SetProperty(y => y.ImageTitle, data.ImageTitle)
+                    .SetProperty(y => y.ImageBoxArt, data.ImageBoxArt)
+                );
 
             return data;
         }
@@ -279,6 +286,13 @@ namespace RetroTrack.Domain.Services
             return JsonConvert.DeserializeObject<GetUserProfile>(response.Content);
         }
 
+        /// <summary>
+        /// Gets the game leaderboards for a specific game ID from the RetroAchievements API.
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <param name="skipAmount"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public async Task<GetGameLeaderboards?> GetGameLeaderboards(int gameId, int skipAmount = 0, int count = 500)
         {
             var client = new RestClient(_baseUrl);
@@ -292,6 +306,28 @@ namespace RetroTrack.Domain.Services
             }
 
             return JsonConvert.DeserializeObject<GetGameLeaderboards>(response.Content);
+        }
+
+        /// <summary>
+        /// Gets a summary of a game from the RetroAchievements API for a given game ID.
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <returns></returns>
+        public async Task<GetGame?> GetGameSummary(int gameId)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGame.php?z={_apiUsername}&y={_apiKey}&i={gameId}", Method.Get);
+
+            //Get the response and Deserialize
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game summary data. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetGame>(response.Content);
         }
     }
 }

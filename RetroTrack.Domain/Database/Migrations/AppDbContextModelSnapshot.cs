@@ -154,7 +154,19 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Property<bool>("HasAchievements")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("ImageBoxArt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ImageIcon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageInGame")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageTitle")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -424,6 +436,92 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.ToTable("UserGameProgress");
                 });
 
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylist", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PlaylistName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserIdOwner")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserIdOwner");
+
+                    b.ToTable("UserPlaylists");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylistGame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserPlaylistId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("UserPlaylistId");
+
+                    b.ToTable("UserPlaylistGames");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylistLikes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserPlaylistId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserPlaylistId");
+
+                    b.ToTable("UserPlaylistLikes");
+                });
+
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserRefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -550,6 +648,55 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylist", b =>
+                {
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "UserOwner")
+                        .WithMany("UserPlaylists")
+                        .HasForeignKey("UserIdOwner")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserOwner");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylistGame", b =>
+                {
+                    b.HasOne("RetroTrack.Domain.Database.Models.Game", "Game")
+                        .WithMany("UserPlaylistGames")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RetroTrack.Domain.Database.Models.UserPlaylist", "UserPlaylist")
+                        .WithMany("PlaylistGames")
+                        .HasForeignKey("UserPlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("UserPlaylist");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylistLikes", b =>
+                {
+                    b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
+                        .WithMany("LikedPlaylists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RetroTrack.Domain.Database.Models.UserPlaylist", "UserPlaylist")
+                        .WithMany("PlaylistLikes")
+                        .HasForeignKey("UserPlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserPlaylist");
+                });
+
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserRefreshToken", b =>
                 {
                     b.HasOne("RetroTrack.Domain.Database.Models.User", "User")
@@ -564,6 +711,8 @@ namespace RetroTrack.Domain.Database.Migrations
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.Game", b =>
                 {
                     b.Navigation("Achievements");
+
+                    b.Navigation("UserPlaylistGames");
                 });
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.GameConsole", b =>
@@ -578,6 +727,8 @@ namespace RetroTrack.Domain.Database.Migrations
 
             modelBuilder.Entity("RetroTrack.Domain.Database.Models.User", b =>
                 {
+                    b.Navigation("LikedPlaylists");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("TrackedGames");
@@ -585,6 +736,15 @@ namespace RetroTrack.Domain.Database.Migrations
                     b.Navigation("UserGameNotes");
 
                     b.Navigation("UserGameProgress");
+
+                    b.Navigation("UserPlaylists");
+                });
+
+            modelBuilder.Entity("RetroTrack.Domain.Database.Models.UserPlaylist", b =>
+                {
+                    b.Navigation("PlaylistGames");
+
+                    b.Navigation("PlaylistLikes");
                 });
 #pragma warning restore 612, 618
         }

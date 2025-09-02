@@ -93,6 +93,9 @@ namespace RetroTrack.Domain.Services
                             Title = game.Title,
                             ConsoleId = game.ConsoleId,
                             ImageIcon = game.ImageIcon,
+                            ImageBoxArt = "/Images/000002.png",
+                            ImageInGame = "/Images/000002.png",
+                            ImageTitle = "/Images/000002.png",
                             AchievementCount = game.AchievementCount,
                             Points = game.Points,
                             LastModified = DateTime.SpecifyKind(game.DateModified ?? DateTime.UtcNow, DateTimeKind.Utc),
@@ -157,6 +160,10 @@ namespace RetroTrack.Domain.Services
                 game.Players = gameData.Players;
                 game.LastExtraDataProcessedDate = DateTime.UtcNow;
                 game.ConsoleId = gameData.ConsoleId;
+                game.ImageIcon = gameData.ImageIcon;
+                game.ImageBoxArt = gameData.ImageBoxArt;
+                game.ImageInGame = gameData.ImageInGame;
+                game.ImageTitle = gameData.ImageTitle;
 
                 await context.SaveChangesAsync();
 

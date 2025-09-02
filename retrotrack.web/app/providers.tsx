@@ -7,6 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import { ProgressProvider } from '@bprogress/next/app'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -45,6 +46,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient()
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ProgressProvider
+        height="3px"
+        color="#228be6"
+        options={{ showSpinner: false }}
+      >
+        {children}
+      </ProgressProvider>
+    </QueryClientProvider>
   )
 }

@@ -1,5 +1,5 @@
-import LoggedInGamesTable from '@/components/pages/LoggedInGamesTable'
-import PublicGamesTable from '@/components/pages/PublicGamesTable'
+import LoggedInGamesTable from '@/components/pages/games/LoggedInGamesTable'
+import PublicGamesTable from '@/components/pages/games/PublicGamesTable'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
@@ -35,7 +35,7 @@ export default async function Page({
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=25&SortByName=true'],
+      queryKey: [`ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true`],
       queryFn: async () => await doQueryGet<GetUserProgressForConsoleResponse>(`/api/games/GetUserProgressForConsole?ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true`, { next: { revalidate: 60 }, cookieHeader }),
       staleTime: 60000
     })
@@ -50,7 +50,7 @@ export default async function Page({
   }
   else {
     await queryClient.prefetchQuery({
-      queryKey: ['ConsoleId=-1&Skip=0&Take=25&SortByName=true-lg'],
+      queryKey: [`ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true-public`],
       queryFn: async () => await doQueryGet<GetGamesForConsoleResponse>(`/api/games/GetGamesForConsole?ConsoleId=${consoleId}&Skip=0&Take=25&SortByName=true`, { next: { revalidate: 60 } }),
       staleTime: 60000
     })

@@ -18,6 +18,15 @@ namespace RetroTrack.Domain.Database.Models
         public virtual GameConsole GameConsole { get; set; } = null!;
 
         [Required]
+        public required string ImageBoxArt { get; set; } = "";
+
+        [Required]
+        public required string ImageTitle { get; set; } = "";
+
+        [Required]
+        public required string ImageInGame { get; set; } = "";
+
+        [Required]
         public required string ImageIcon { get; set; }
 
         [Required]
@@ -54,5 +63,8 @@ namespace RetroTrack.Domain.Database.Models
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<Achievement> Achievements { get; set; } = [];
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<UserPlaylistGame> UserPlaylistGames { get; set; } = [];
     }
 }

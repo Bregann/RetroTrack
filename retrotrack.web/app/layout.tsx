@@ -93,7 +93,7 @@ export default async function RootLayout({
       <body style={{ marginBottom: 20 }}>
         <Providers>
           <MantineProvider defaultColorScheme="auto" theme={theme}>
-            <Notifications />
+            <Notifications zIndex={9999} />
             <AuthProvider>
               <GameModalProvider>
                 <HydrationBoundary state={dehydrate(queryClient)}>

@@ -1,5 +1,5 @@
-import LoggedInGamesTable from '@/components/pages/LoggedInGamesTable'
-import PublicGamesTable from '@/components/pages/PublicGamesTable'
+import LoggedInGamesTable from '@/components/pages/games/LoggedInGamesTable'
+import PublicGamesTable from '@/components/pages/games/PublicGamesTable'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'

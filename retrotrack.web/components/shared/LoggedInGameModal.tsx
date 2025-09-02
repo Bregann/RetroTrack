@@ -18,6 +18,7 @@ import {
   Paper,
   ActionIcon,
   Textarea,
+  Select,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
@@ -32,6 +33,7 @@ import {
   IconExclamationMark,
   IconRefresh,
   IconInfoCircle,
+  IconPlus,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
 import { AchievementType } from '@/enums/achievementType'
@@ -41,6 +43,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'
 import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
+import { AddGameToPlaylistRequest } from '@/interfaces/api/playlists/AddGameToPlaylistRequest'
 import Link from 'next/link'
 
 interface LoggedInGameModalProps {
@@ -86,6 +89,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const [showMissableOnly, setShowMissableOnly] = useState(false)
   const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
   const [disabled, setDisabled] = useState(false)
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null)
   const gameAutoUpdateTimerRef = useRef<NodeJS.Timeout | null>(null)
   const gameUpdateButtonTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -110,6 +114,40 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       notificationHelper.showErrorNotification('Error', 'Failed to update user notes.', 3000, <IconInfoCircle size={16} />)
     }
   })
+
+  // Transform user playlists into dropdown format
+  const playlistOptions = (data?.playlists ?? []).map(playlist => ({
+    value: playlist.id,
+    label: playlist.name
+  }))
+
+  const { mutateAsync: addToPlaylistMutation } = useMutationApiData<AddGameToPlaylistRequest, null>({
+    url: '/api/playlists/AddGameToPlaylist',
+    invalidateQuery: true,
+    queryKey: ['getGameInfoForUser', props.gameId],
+    apiMethod: 'POST',
+    onSuccess: async () => {
+      notificationHelper.showSuccessNotification('Success', 'Game added to playlist successfully!', 3000, <IconCheck size={16} />)
+      setSelectedPlaylistId(null)
+    },
+    onError: () => {
+      notificationHelper.showErrorNotification('Error', 'Failed to add game to playlist.', 3000, <IconInfoCircle size={16} />)
+    }
+  })
+
+  const handleAddToPlaylist = async () => {
+    if (selectedPlaylistId === null || selectedPlaylistId === undefined || selectedPlaylistId.trim() === '') {
+      notificationHelper.showErrorNotification('Error', 'Please select a playlist first.', 3000, <IconInfoCircle size={16} />)
+      return
+    }
+
+    const requestData: AddGameToPlaylistRequest = {
+      gameId: props.gameId,
+      playlistId: selectedPlaylistId
+    }
+
+    await addToPlaylistMutation(requestData)
+  }
 
   useEffect(() => {
     return () => {
@@ -464,46 +502,80 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
             }
           </SimpleGrid>
           <Paper className={styles.footer}>
-            <Group justify="apart" gap="xs">
-              <Tooltip label="Update game">
-                <ActionIcon
-                  size="lg"
-                  onClick={async () => { await handleGameUpdate() }} disabled={disabled}
-                  visibleFrom='sm'
-                  color="green">
-                  <IconRefresh />
-                </ActionIcon>
-              </Tooltip>
-              <Button
-                onClick={async () => { await trackedGameMutation({}) }}
-                color={data.gameTracked ? 'red' : 'blue'}
-              >
-                {data.gameTracked ? 'Untrack Game' : 'Track Game'}
-              </Button>
-              <Button
-                component="a"
-                variant="gradient"
-                gradient={{ from: 'indigo', to: 'cyan' }}
-                target="_blank"
-                style={{ ':hover': { color: 'white' } }}
-                href={'https://retroachievements.org/game/' + data.gameId}
-              >
-                RA Page
-              </Button>
-              <Button
-                component={Link}
-                variant="gradient"
-                gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                href={'/game/'.concat(data.gameId.toString()) }
-                onClick={() => props.onClose()}
-              >
-                RetroTrack Page
-              </Button>
-              <Checkbox
-                label="Auto Update Achievements"
-                checked={autoUpdateChecked}
-                onChange={(e) => setAutoUpdateChecked(e.currentTarget.checked)}
-              />
+            <Group justify="space-between" gap="xs" wrap="nowrap">
+              {/* Left side - Update button and Track Game */}
+              <Group gap="xs">
+                <Tooltip label="Update game">
+                  <ActionIcon
+                    size="lg"
+                    onClick={async () => { await handleGameUpdate() }} disabled={disabled}
+                    visibleFrom='sm'
+                    color="green">
+                    <IconRefresh />
+                  </ActionIcon>
+                </Tooltip>
+                <Button
+                  onClick={async () => { await trackedGameMutation({}) }}
+                  color={data.gameTracked ? 'red' : 'blue'}
+                >
+                  {data.gameTracked ? 'Untrack Game' : 'Track Game'}
+                </Button>
+              </Group>
+
+              {/* Center - Playlist Controls (only show if user has playlists) */}
+              {playlistOptions.length > 0 && (
+                <Group gap="xs" style={{ flex: 1, justifyContent: 'center' }}>
+                  <Select
+                    placeholder="Select a playlist"
+                    data={playlistOptions}
+                    value={selectedPlaylistId}
+                    onChange={setSelectedPlaylistId}
+                    style={{ minWidth: 180 }}
+                    clearable
+                    size="sm"
+                  />
+                  <Button
+                    leftSection={<IconPlus size={14} />}
+                    onClick={handleAddToPlaylist}
+                    disabled={selectedPlaylistId === null || selectedPlaylistId === undefined || selectedPlaylistId.trim() === ''}
+                    color="green"
+                    variant="light"
+                    size="sm"
+                  >
+                    Add to Playlist
+                  </Button>
+                </Group>
+              )}
+
+              {/* Right side - External links and Auto Update */}
+              <Group gap="xs">
+                <Button
+                  component="a"
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'cyan' }}
+                  target="_blank"
+                  style={{ ':hover': { color: 'white' } }}
+                  href={'https://retroachievements.org/game/' + data.gameId}
+                  size="sm"
+                >
+                  RA Page
+                </Button>
+                <Button
+                  component={Link}
+                  variant="gradient"
+                  gradient={{ from: 'teal', to: 'lime', deg: 105 }}
+                  href={'/game/'.concat(data.gameId.toString()) }
+                  onClick={() => props.onClose()}
+                  size="sm"
+                >
+                  RetroTrack Page
+                </Button>
+                <Checkbox
+                  label="Auto Update Achievements"
+                  checked={autoUpdateChecked}
+                  onChange={(e) => setAutoUpdateChecked(e.currentTarget.checked)}
+                />
+              </Group>
             </Group>
           </Paper>
 
