@@ -167,7 +167,8 @@ namespace RetroTrack.Domain.Services.Controllers
 
         public async Task<GetPublicSpecificGameInfoResponse?> GetPublicSpecificGameInfo(int gameId)
         {
-            var data = await raApiService.GetSpecificGameInfo(gameId, false);
+            //temp fix as the image data isnt in database yet
+            var data = await raApiService.GetSpecificGameInfo(gameId, true, true);
 
             if (data == null)
             {
