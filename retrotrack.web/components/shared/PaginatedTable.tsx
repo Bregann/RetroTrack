@@ -139,7 +139,7 @@ export function PaginatedTable<T>({
             <Table.Tr>
               {columns.filter(x => x.show !== false).map((col, colIndex) => {
                 const isSorted = col.key === currentKey
-                const canSort = Boolean((col.sortable !== false) && onSortChange)
+                const canSort = Boolean(col.sortable !== false && col.sortable !== undefined && onSortChange)
 
                 return (
                   <Table.Th
