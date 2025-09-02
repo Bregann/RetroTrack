@@ -7,7 +7,8 @@ export interface GetLoggedInNavigationDataResponse {
     totalAchievementsHardcore: number
     gamesCompleted: number
     gamesMastered: number
-    userPoints: number
+    totalPointsSoftcore: number
+    totalPointsHardcore: number
     trackedGamesCount: number
     inProgressGamesCount: number
     consoleProgressData: ConsoleProgressDatum[]

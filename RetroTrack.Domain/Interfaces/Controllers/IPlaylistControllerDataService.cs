@@ -17,5 +17,6 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task ReorderPlaylistGames(ReorderPlaylistGamesRequest request, int userId);
         Task<SearchGamesResponse> SearchGames(string gameTitle, string playlistId);
         Task TogglePlaylistLike(string playlistId, int userId);
+        Task UpdatePlaylistDetails(int userId, UpdatePlaylistDetails request);
     }
 }

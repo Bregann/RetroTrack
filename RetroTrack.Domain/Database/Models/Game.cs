@@ -18,6 +18,15 @@ namespace RetroTrack.Domain.Database.Models
         public virtual GameConsole GameConsole { get; set; } = null!;
 
         [Required]
+        public required string ImageBoxArt { get; set; } = "";
+
+        [Required]
+        public required string ImageTitle { get; set; } = "";
+
+        [Required]
+        public required string ImageInGame { get; set; } = "";
+
+        [Required]
         public required string ImageIcon { get; set; }
 
         [Required]

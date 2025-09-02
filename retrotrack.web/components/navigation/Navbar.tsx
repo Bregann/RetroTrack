@@ -154,7 +154,7 @@ export function Navbar(props: NavbarProps) {
             style={{ flex: 1, maxWidth: 400 }}
           /> */}
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v6.1 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.0 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -382,6 +382,8 @@ export function Navbar(props: NavbarProps) {
               {loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
+              {loggedInNavigationData.totalPointsSoftcore !== 0 && <Text size="xs" c="dimmed">Total Points (SC): {loggedInNavigationData.totalPointsSoftcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.totalPointsHardcore !== 0 && <Text size="xs" c="dimmed">Total Points (HC): {loggedInNavigationData.totalPointsHardcore.toLocaleString()}</Text>}
             </Stack>
 
             <Button
@@ -419,9 +421,22 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v6.1']}
+            defaultValue={['v7']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v7">
+              <Accordion.Control>RetroTrack v7.0 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Game playlists! Create your own playlists of games for easy tracking of games you want to play. You can also make them public too to share with everybody!</List.Item>
+                  <List.Item>Some more UI design tweaks</List.Item>
+                  <List.Item>The ability to click a game genre to automatically filter by it</List.Item>
+                  <List.Item>Total points in the navigation stats</List.Item>
+                  <List.Item>Various code improvements</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v6.1">
               <Accordion.Control>RetroTrack v6.1 Released</Accordion.Control>
               <Accordion.Panel>

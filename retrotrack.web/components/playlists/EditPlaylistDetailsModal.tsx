@@ -63,10 +63,10 @@ export default function EditPlaylistDetailsModal({
   })
 
   const editPlaylistMutation = useMutationApiData<EditPlaylistFormData, null>({
-    url: '/api/playlists/EditPlaylistDetails',
+    url: '/api/playlists/UpdatePlaylistDetails',
     queryKey: [queryKey],
     invalidateQuery: true,
-    apiMethod: 'POST',
+    apiMethod: 'PUT',
     onSuccess: () => {
       notificationHelper.showSuccessNotification(
         'Success',

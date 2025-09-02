@@ -1,8 +1,8 @@
 'use client'
 
 import React, { ReactNode } from 'react'
-import { Table, Pagination, Button, Group, Select, Text } from '@mantine/core'
-import { IconArrowDown, IconArrowUp, IconLineDashed, IconTableOff } from '@tabler/icons-react'
+import { Table, Pagination, Button, Select, } from '@mantine/core'
+import { IconArrowDown, IconArrowUp, IconLineDashed } from '@tabler/icons-react'
 import tableStyles from '@/css/components/paginatedTable.module.scss'
 
 export interface Column<T> {

@@ -1,4 +1,6 @@
-﻿namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Requests
+﻿using RetroTrack.Domain.Enums;
+
+namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Requests
 {
     public class GetPublicPlaylistDataRequest
     {
@@ -13,5 +15,6 @@
         public bool? SortByPlayers { get; set; } = null;
         public int Skip { get; set; }
         public int Take { get; set; }
+        public ConsoleTableSearchType? SearchType { get; set; } = null;
     }
 }

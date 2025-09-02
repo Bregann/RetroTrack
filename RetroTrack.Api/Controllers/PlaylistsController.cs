@@ -180,5 +180,25 @@ namespace RetroTrack.Api.Controllers
         {
             return await playlistControllerDataService.SearchGames(gameTitle, playlistId);
         }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult> UpdatePlaylistDetails([FromBody] UpdatePlaylistDetails request)
+        {
+            var userId = userContextHelper.GetUserId();
+            try
+            {
+                await playlistControllerDataService.UpdatePlaylistDetails(userId, request);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

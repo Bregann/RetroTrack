@@ -2,12 +2,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Button, Center, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
+import { Badge, Button, Center, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
-import { useDebouncedState, useMediaQuery } from '@mantine/hooks'
+import { useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
@@ -15,6 +15,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
+import { IconX } from '@tabler/icons-react'
 
 interface PublicGamesTableProps {
   consoleId: number
@@ -48,7 +49,21 @@ const baseColumns: Column<Game>[] = [
   {
     title: 'Genre',
     key: 'gameGenre',
-    sortable: true
+    sortable: true,
+    render: (item) => {
+      const genres = item.gameGenre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+      return (
+        <div style={{ minWidth: '140px', maxWidth: '200px' }}>
+          <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            {genres.map((genre, index) => (
+              <Badge key={index} color="blue" variant="light" size="sm">
+                {genre}
+              </Badge>
+            ))}
+          </Group>
+        </div>
+      )
+    }
   },
   {
     title: 'Achievements',
@@ -75,9 +90,55 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   // Responsive breakpoints
   const isMobile = useMediaQuery('(max-width: 768px)')
 
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [sortOption, setSortOption] = useState<SortOption<Game>>({
+    key: 'gameTitle',
+    direction: 'asc',
+  })
+
+  const [searchInput, setSearchInput] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string | null>(null)
+  const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
+
   // Create a fresh copy of columns for this component instance
   const columns = useMemo(() => {
     const cols = [...baseColumns]
+
+    // Add genre render function with click handlers
+    const genreColIndex = cols.findIndex(col => col.key === 'gameGenre')
+    if (genreColIndex !== -1) {
+      cols[genreColIndex] = {
+        ...cols[genreColIndex],
+        render: (item) => {
+          const genres = item.gameGenre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+          return (
+            <div style={{ minWidth: '140px', maxWidth: '200px' }}>
+              <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                {genres.map((genre, index) => (
+                  <Badge
+                    key={index}
+                    color="blue"
+                    variant="light"
+                    size="sm"
+                    style={{ cursor: 'pointer' }}
+                    onClick={(e) => {
+                      e.stopPropagation() // Prevent row click
+                      setSearchDropdownValue('1') // Set to Genre
+                      setSearchTerm(genre)
+                      setSearchInput(genre)
+                      setPage(1) // Reset to first page
+                    }}
+                  >
+                    {genre}
+                  </Badge>
+                ))}
+              </Group>
+            </div>
+          )
+        }
+      }
+    }
 
     // Add console column only if showConsoleColumn is true and consoleId is -1
     if (props.showConsoleColumn === true && props.consoleId === -1) {
@@ -89,18 +150,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     }
 
     return cols
-  }, [props.showConsoleColumn, props.consoleId])
-
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(25)
-  const [sortOption, setSortOption] = useState<SortOption<Game>>({
-    key: 'gameTitle',
-    direction: 'asc',
-  })
-
-  const [searchInput, setSearchInput] = useDebouncedState<string | null>(null, 200)
-  const [searchTerm, setSearchTerm] = useState<string | null>(null)
-  const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
+  }, [props.showConsoleColumn, props.consoleId, setSearchDropdownValue, setSearchTerm, setSearchInput, setPage])
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * pageSize
@@ -178,19 +228,38 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               style={{ width: '100%' }}
               gap={isMobile ? 'xs' : 'md'}
             >
-              <Input
+              <TextInput
                 placeholder="Search..."
+                value={searchInput}
                 style={{
                   flex: 1,
                   minWidth: isMobile ? 150 : 200,
                 }}
                 onChange={(e) => {
-                  if (e.currentTarget.value.trim() === '') {
+                  const value = e.currentTarget.value
+                  setSearchInput(value)
+                  if (value.trim() === '') {
                     setSearchTerm(null)
-                    setSearchInput(null)
                   }
-                  setSearchInput(e.currentTarget.value)
-                }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchInput.trim() !== '') {
+                    setSearchTerm(searchInput.trim())
+                  }
+                }}
+                rightSection={
+                  searchInput !== '' ? (
+                    <ActionIcon
+                      size="sm"
+                      variant="subtle"
+                      onClick={() => {
+                        setSearchInput('')
+                        setSearchTerm(null)
+                      }}
+                    >
+                      <IconX size={16} />
+                    </ActionIcon>
+                  ) : null
                 }
               />
               <Select
@@ -206,8 +275,8 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               <Button
                 style={{ flex: '0 0 auto' }}
                 size={isMobile ? 'sm' : 'md'}
-                onClick={() => { setSearchTerm(searchInput) }}
-                disabled={searchInput === null || searchInput.trim() === ''}
+                onClick={() => { setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null) }}
+                disabled={searchInput.trim() === ''}
               >
                 {isMobile ? 'Go' : 'Search'}
               </Button>

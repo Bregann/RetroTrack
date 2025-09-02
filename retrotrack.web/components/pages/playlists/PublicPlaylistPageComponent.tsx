@@ -14,9 +14,11 @@ import {
   Badge,
   TextInput,
   Loader,
-  Center
+  Center,
+  Select,
+  ActionIcon
 } from '@mantine/core'
-import { useMediaQuery, useDebouncedState } from '@mantine/hooks'
+import { useMediaQuery } from '@mantine/hooks'
 import {
   IconTrophy,
   IconDeviceGamepad,
@@ -24,7 +26,8 @@ import {
   IconArrowLeft,
   IconSearch,
   IconMedal,
-  IconTargetArrow
+  IconTargetArrow,
+  IconX
 } from '@tabler/icons-react'
 import pageStyles from '@/css/pages/gamePage.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
@@ -55,8 +58,9 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
 
   // Search and sorting state - similar to PublicGamesTable pattern
-  const [searchInput, setSearchInput] = useDebouncedState<string | null>(null, 200)
+  const [searchInput, setSearchInput] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string | null>(null)
+  const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(100)
   const [sortOption, setSortOption] = useState<SortOption<PlaylistGameItem>>({
@@ -84,11 +88,11 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     let query = `PlaylistId=${playlistId}&${sortParam}=${sortValue}&Skip=${skip}&Take=${take}`
 
     if (searchTerm !== null && searchTerm !== '') {
-      query += `&SearchTerm=${encodeURIComponent(searchTerm)}`
+      query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
     }
 
     return query
-  }, [page, pageSize, playlistId, searchTerm, sortOption.direction, sortOption.key])
+  }, [page, pageSize, playlistId, searchTerm, searchDropdownValue, sortOption.direction, sortOption.key])
 
   const { data: playlistData, isLoading: isLoadingPlaylistData, isError: isErrorPlaylistData } = useQuery<GetPublicPlaylistDataResponse>({
     queryKey: [queryString.concat('-public')],
@@ -138,7 +142,34 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     {
       title: 'Genre',
       key: 'genre',
-      sortable: true
+      sortable: true,
+      render: (game) => {
+        const genres = game.genre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+        return (
+          <div style={{ minWidth: '140px', maxWidth: '200px' }}>
+            <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              {genres.map((genre, index) => (
+                <Badge
+                  key={index}
+                  color="blue"
+                  variant="light"
+                  size="sm"
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent row click
+                    setSearchDropdownValue('1') // Set to Genre
+                    setSearchTerm(genre)
+                    setSearchInput(genre)
+                    setPage(1) // Reset to first page
+                  }}
+                >
+                  {genre}
+                </Badge>
+              ))}
+            </Group>
+          </div>
+        )
+      }
     },
     {
       title: 'Achievements',
@@ -332,28 +363,57 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
 
       {/* Search and Filters */}
       <Group mb="md" className={playlistStyles.searchContainer}>
-        <Group style={{ flex: 1, maxWidth: 500 }} gap="xs">
+        <Group style={{ flex: 1, maxWidth: 600 }} gap="xs">
           <TextInput
             placeholder="Search games..."
             leftSection={<IconSearch size={16} />}
-            value={searchInput ?? ''}
+            value={searchInput}
             onChange={(e) => {
-              if (e.currentTarget.value.trim() === '') {
+              const value = e.currentTarget.value
+              setSearchInput(value)
+              if (value.trim() === '') {
                 setSearchTerm(null)
-                setSearchInput(null)
               }
-              setSearchInput(e.currentTarget.value)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchInput.trim() !== '') {
+                setSearchTerm(searchInput.trim())
+              }
             }}
             className={playlistStyles.searchInput}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: 200 }}
+            rightSection={
+              searchInput !== '' ? (
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  onClick={() => {
+                    setSearchInput('')
+                    setSearchTerm(null)
+                  }}
+                >
+                  <IconX size={16} />
+                </ActionIcon>
+              ) : null
+            }
+          />
+          <Select
+            data={[
+              { value: '0', label: 'Game Title' },
+              { value: '1', label: 'Genre' }
+            ]}
+            value={searchDropdownValue}
+            onChange={(value) => setSearchDropdownValue(value ?? '0')}
+            style={{ minWidth: 120 }}
+            clearable
           />
           <Button
             variant="filled"
             color="blue"
             leftSection={<IconSearch size={16} />}
             className={playlistStyles.searchButton}
-            onClick={() => setSearchTerm(searchInput)}
-            disabled={searchInput === null || searchInput.trim() === ''}
+            onClick={() => setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null)}
+            disabled={searchInput.trim() === ''}
           >
             Search
           </Button>

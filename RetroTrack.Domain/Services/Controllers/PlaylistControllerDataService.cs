@@ -3,6 +3,7 @@ using RetroTrack.Domain.Database.Context;
 using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
+using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers
@@ -127,6 +128,19 @@ namespace RetroTrack.Domain.Services.Controllers
                 .Where(pg => pg.UserPlaylistId == playlist.Id)
                 .AsQueryable();
 
+            if (request.SearchTerm != null && request.SearchType != null)
+            {
+                switch (request.SearchType)
+                {
+                    case ConsoleTableSearchType.GameTitle:
+                        games = games.Where(x => x.Game.Title.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                    case ConsoleTableSearchType.GameGenre:
+                        games = games.Where(x => x.Game.GameGenre != null && x.Game.GameGenre.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim().ToLower();
@@ -233,11 +247,19 @@ namespace RetroTrack.Domain.Services.Controllers
                 .Where(pg => pg.UserPlaylistId == playlist.Id)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            if (request.SearchTerm != null && request.SearchType != null)
             {
-                var searchTerm = request.SearchTerm.Trim().ToLower();
-                games = games.Where(pg => pg.Game.Title.ToLower().Contains(searchTerm));
+                switch (request.SearchType)
+                {
+                    case ConsoleTableSearchType.GameTitle:
+                        games = games.Where(x => x.Game.Title.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                    case ConsoleTableSearchType.GameGenre:
+                        games = games.Where(x => x.Game.GameGenre != null && x.Game.GameGenre.ToLower().Contains(request.SearchTerm.ToLower()));
+                        break;
+                }
             }
+
             if (request.SortByIndex != null)
             {
                 games = request.SortByIndex == true
@@ -530,6 +552,22 @@ namespace RetroTrack.Domain.Services.Controllers
             {
                 Results = results
             };
+        }
+
+        public async Task UpdatePlaylistDetails(int userId, UpdatePlaylistDetails request)
+        {
+            var playlist = await context.UserPlaylists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId && p.UserIdOwner == userId);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Playlist not found");
+            }
+
+            playlist.PlaylistName = request.PlaylistName;
+            playlist.Description = request.Description;
+            playlist.IsPublic = request.IsPublic;
+            playlist.UpdatedAt = DateTime.UtcNow;
+            await context.SaveChangesAsync();
         }
 
         // for filtering public and user playlists if needed. Atm it's done via the front end as all data is fetched

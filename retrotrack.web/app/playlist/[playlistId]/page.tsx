@@ -62,7 +62,7 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
     await queryClient.prefetchQuery({
       queryKey: [`PlaylistId=${playlistId}&SortByIndex=true&Skip=0&Take=100`],
-      queryFn: async () => await doQueryGet<GetLoggedInPlaylistDataResponse>(`/api/playlists/GetLoggedInPlaylistData?PlaylistId=${playlistId}&SortByIndex=true&Skip=0&Take=100`, { next: { revalidate: 60 }, cookieHeader }),
+      queryFn: async () => await doQueryGet<GetLoggedInPlaylistDataResponse>(`/api/playlists/GetLoggedInPlaylistData?PlaylistId=${playlistId}&SortByIndex=true&Skip=0&Take=100`, { cookieHeader }),
       staleTime: 60000
     })
 
