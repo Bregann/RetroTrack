@@ -184,7 +184,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
     }
 
     return cols
-  }, [props.showConsoleColumn, props.consoleId, isMobile, setSearchDropdownValue, setSearchTerm, setSearchInput, setPage])
+  }, [props.showConsoleColumn, props.consoleId, isMobile])
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * pageSize
