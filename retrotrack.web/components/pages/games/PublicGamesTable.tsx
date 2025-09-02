@@ -150,7 +150,7 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     }
 
     return cols
-  }, [props.showConsoleColumn, props.consoleId, setSearchDropdownValue, setSearchTerm, setSearchInput, setPage])
+  }, [props.showConsoleColumn, props.consoleId])
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * pageSize
