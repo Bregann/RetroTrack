@@ -29,7 +29,7 @@ export default async function Page() {
 
     await queryClient.prefetchQuery({
       queryKey: ['Skip=0&Take=25&SortByName=true'],
-      queryFn: () => doQueryGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=25&SortByName=true', { next: { revalidate: 60 }, cookieHeader }),
+      queryFn: () => doQueryGet<GetUserTrackedGamesResponse>('/api/trackedgames/GetTrackedGamesForUser?Skip=0&Take=25&SortByName=true', { cookieHeader }),
       staleTime: 60000
     })
   }

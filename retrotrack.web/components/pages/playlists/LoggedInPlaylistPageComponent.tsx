@@ -412,7 +412,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
                   loading={toggleLikeMutation.isPending}
                   disabled={toggleLikeMutation.isPending}
                 >
-                  {playlistData?.numberOfLikes} {playlistData?.isLiked === true ? 'Liked' : 'Likes'}
+                  {playlistData?.numberOfLikes?.toLocaleString()} {playlistData?.isLiked === true ? 'Liked' : 'Likes'}
                 </Button>
               </Group>
             </Group>
@@ -425,10 +425,10 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
 
             <Group gap="lg">
               <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfGames}</strong> games
+                <strong>{playlistData?.numberOfGames?.toLocaleString()}</strong> games
               </Text>
               <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfConsoles}</strong> consoles
+                <strong>{playlistData?.numberOfConsoles?.toLocaleString()}</strong> consoles
               </Text>
               <Text size="sm" c="dimmed">
                 Created {new Date(playlistData?.createdAt ?? new Date()).toLocaleDateString()}
@@ -451,16 +451,16 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
             </Group>
           </Group>
           <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{(playlistData?.totalGamesBeatenHardcore ?? 0) + (playlistData?.totalGamesBeatenSoftcore ?? 0)}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist}</Text>
+            <Text size="xl" fw={700}>{((playlistData?.totalGamesBeatenHardcore ?? 0) + (playlistData?.totalGamesBeatenSoftcore ?? 0)).toLocaleString()}</Text>
+            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist?.toLocaleString()}</Text>
           </Group>
           <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageBeaten}%</Text>
           <Progress value={playlistData?.percentageBeaten ?? 0} size="xs" color="orange" />
           {playlistData?.totalGamesBeatenSoftcore !== 0 && playlistData?.totalGamesBeatenHardcore !== playlistData?.totalGamesBeatenSoftcore && (
             <Text size="xs" c="dimmed" mt="xs">
               {playlistData?.totalGamesBeatenHardcore === 0
-                ? `SC: ${playlistData?.totalGamesBeatenSoftcore}`
-                : `HC: ${playlistData?.totalGamesBeatenHardcore} | SC: ${playlistData?.totalGamesBeatenSoftcore}`}
+                ? `SC: ${playlistData?.totalGamesBeatenSoftcore?.toLocaleString()}`
+                : `HC: ${playlistData?.totalGamesBeatenHardcore?.toLocaleString()} | SC: ${playlistData?.totalGamesBeatenSoftcore?.toLocaleString()}`}
             </Text>
           )}
         </Card>
@@ -473,16 +473,16 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
             </Group>
           </Group>
           <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{(playlistData?.totalGamesCompletedSoftcore ?? 0) + (playlistData?.totalGamesMasteredHardcore ?? 0)}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist}</Text>
+            <Text size="xl" fw={700}>{((playlistData?.totalGamesCompletedSoftcore ?? 0) + (playlistData?.totalGamesMasteredHardcore ?? 0)).toLocaleString()}</Text>
+            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist?.toLocaleString()}</Text>
           </Group>
           <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageMastered}%</Text>
           <Progress value={playlistData?.percentageMastered ?? 0} size="xs" color="blue" />
           {playlistData?.totalGamesCompletedSoftcore !== 0 && playlistData?.totalGamesMasteredHardcore !== playlistData?.totalGamesCompletedSoftcore && (
             <Text size="xs" c="dimmed" mt="xs">
               {playlistData?.totalGamesMasteredHardcore === 0
-                ? `SC: ${playlistData?.totalGamesCompletedSoftcore}`
-                : `HC: ${playlistData?.totalGamesMasteredHardcore} | SC: ${playlistData?.totalGamesCompletedSoftcore}`}
+                ? `SC: ${playlistData?.totalGamesCompletedSoftcore?.toLocaleString()}`
+                : `HC: ${playlistData?.totalGamesMasteredHardcore?.toLocaleString()} | SC: ${playlistData?.totalGamesCompletedSoftcore?.toLocaleString()}`}
             </Text>
           )}
         </Card>
@@ -493,7 +493,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
             <IconTrophy size={16} color="orange" />
           </Group>
           <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{playlistData?.totalPointsToEarn}</Text>
+            <Text size="xl" fw={700}>{playlistData?.totalPointsToEarn?.toLocaleString()}</Text>
           </Group>
         </Card>
 
@@ -503,16 +503,16 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
             <IconMedal size={16} color="blue" />
           </Group>
           <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{Math.max(playlistData?.totalAchievementsEarnedSoftcore ?? 0, playlistData?.totalAchievementsEarnedHardcore ?? 0)}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalAchievementsToEarn}</Text>
+            <Text size="xl" fw={700}>{(Math.max(playlistData?.totalAchievementsEarnedSoftcore ?? 0, playlistData?.totalAchievementsEarnedHardcore ?? 0)).toLocaleString()}</Text>
+            <Text size="sm" c="dimmed">/{playlistData?.totalAchievementsToEarn?.toLocaleString()}</Text>
           </Group>
           <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageAchievementsGained}%</Text>
           <Progress value={playlistData?.percentageAchievementsGained ?? 0} size="xs" color="green" />
           {playlistData?.totalAchievementsEarnedSoftcore !== 0 && playlistData?.totalAchievementsEarnedHardcore !== playlistData?.totalAchievementsEarnedSoftcore && (
             <Text size="xs" c="dimmed" mt="xs">
               {playlistData?.totalAchievementsEarnedHardcore === 0
-                ? `SC: ${playlistData?.totalAchievementsEarnedSoftcore}`
-                : `HC: ${playlistData?.totalAchievementsEarnedHardcore} | SC: ${playlistData?.totalAchievementsEarnedSoftcore}`}
+                ? `SC: ${playlistData?.totalAchievementsEarnedSoftcore?.toLocaleString()}`
+                : `HC: ${playlistData?.totalAchievementsEarnedHardcore?.toLocaleString()} | SC: ${playlistData?.totalAchievementsEarnedSoftcore?.toLocaleString()}`}
             </Text>
           )}
         </Card>

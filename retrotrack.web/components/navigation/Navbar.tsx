@@ -20,7 +20,7 @@ import {
   List,
   Tooltip,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh, IconSearch } from '@tabler/icons-react'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { ConsoleType } from '@/enums/consoleType'
@@ -144,17 +144,8 @@ export function Navbar(props: NavbarProps) {
             </Text>
           </Link>
 
-          {/* <TextInput
-            classNames={{
-              input: styles.searchInput,
-            }}
-            placeholder="Search all games..."
-            radius="xl"
-            size="md"
-            style={{ flex: 1, maxWidth: 400 }}
-          /> */}
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.0 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.2 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -242,6 +233,17 @@ export function Navbar(props: NavbarProps) {
             py="xs"
             leftSection={<IconHome2 size={20} stroke={1.5} />}
             onClick={() => setCurrentPage('/home')}
+            style={{ borderRadius: '10px' }}
+          />
+
+          <NavLink
+            label="Search"
+            component={Link}
+            href="/search"
+            active={currentPage === '/search'}
+            py="xs"
+            leftSection={<IconSearch size={20} stroke={1.5} />}
+            onClick={() => setCurrentPage('/search')}
             style={{ borderRadius: '10px' }}
           />
 
@@ -421,9 +423,28 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v7']}
+            defaultValue={['v7.2']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v7.2">
+              <Accordion.Control>RetroTrack v7.2 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Added stat cards to game pages</List.Item>
+                  <List.Item>Fixes to the search page and other minor improvements</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
+            <Accordion.Item value="v7.1">
+              <Accordion.Control>RetroTrack v7.1 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Search page! You can now search for specific games and achievements by keyword. This will look in both the achievement name and description</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v7">
               <Accordion.Control>RetroTrack v7.0 Released</Accordion.Control>
               <Accordion.Panel>

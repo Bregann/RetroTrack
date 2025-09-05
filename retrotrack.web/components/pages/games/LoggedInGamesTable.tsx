@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid, Progress } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
+import playlistStyles from '@/css/pages/playlists.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
@@ -15,7 +16,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
-import { IconX } from '@tabler/icons-react'
+import { IconX, IconTrophy, IconPlayerPlay, IconMedal } from '@tabler/icons-react'
 
 interface LoggedInGamesTableProps {
   consoleId: number
@@ -251,8 +252,103 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               ta="center"
               className={pressStart2P.className}
             >{data.consoleName}</Text>
-            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount} games!</Text>
+            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount.toLocaleString()} games!</Text>
           </Container>
+
+          {/* Progress Stats */}
+          <SimpleGrid cols={isMobile ? 2 : 4} mb="xl" spacing="md">
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Beaten</Text>
+                <Group gap={4}>
+                  <IconPlayerPlay size={16} color="orange" />
+                </Group>
+              </Group>
+              <Group align="baseline" gap={4}>
+                <Text size="xl" fw={700}>{((data.totalGamesBeatenHardcore ?? 0) + (data.totalGamesBeatenSoftcore ?? 0)).toLocaleString()}</Text>
+                <Text size="sm" c="dimmed">/{data.totalCount.toLocaleString()}</Text>
+              </Group>
+              <Text size="xs" c="dimmed" mb="xs">
+                {data.totalCount > 0 ? Math.round(((data.totalGamesBeatenHardcore + data.totalGamesBeatenSoftcore) / data.totalCount) * 100) : 0}%
+              </Text>
+              <Progress
+                value={data.totalCount > 0 ? ((data.totalGamesBeatenHardcore + data.totalGamesBeatenSoftcore) / data.totalCount) * 100 : 0}
+                size="xs"
+                color="orange"
+              />
+              {data.totalGamesBeatenSoftcore !== 0 && data.totalGamesBeatenHardcore !== data.totalGamesBeatenSoftcore && (
+                <Text size="xs" c="dimmed" mt="xs">
+                  {data.totalGamesBeatenHardcore === 0
+                    ? `SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`
+                    : `HC: ${data.totalGamesBeatenHardcore.toLocaleString()} | SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`}
+                </Text>
+              )}
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Completed / Mastered</Text>
+                <Group gap={4}>
+                  <IconMedal size={16} color="blue" />
+                </Group>
+              </Group>
+              <Group align="baseline" gap={4}>
+                <Text size="xl" fw={700}>{((data.totalGamesCompletedSoftcore ?? 0) + (data.totalGamesMasteredHardcore ?? 0)).toLocaleString()}</Text>
+                <Text size="sm" c="dimmed">/{data.totalCount.toLocaleString()}</Text>
+              </Group>
+              <Text size="xs" c="dimmed" mb="xs">
+                {data.totalCount > 0 ? Math.round(((data.totalGamesCompletedSoftcore + data.totalGamesMasteredHardcore) / data.totalCount) * 100) : 0}%
+              </Text>
+              <Progress
+                value={data.totalCount > 0 ? ((data.totalGamesCompletedSoftcore + data.totalGamesMasteredHardcore) / data.totalCount) * 100 : 0}
+                size="xs"
+                color="blue"
+              />
+              {data.totalGamesCompletedSoftcore !== 0 && data.totalGamesMasteredHardcore !== data.totalGamesCompletedSoftcore && (
+                <Text size="xs" c="dimmed" mt="xs">
+                  {data.totalGamesMasteredHardcore === 0
+                    ? `SC: ${data.totalGamesCompletedSoftcore.toLocaleString()}`
+                    : `HC: ${data.totalGamesMasteredHardcore.toLocaleString()} | SC: ${data.totalGamesCompletedSoftcore.toLocaleString()}`}
+                </Text>
+              )}
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Total Points</Text>
+                <IconTrophy size={16} color="orange" />
+              </Group>
+              <Group align="baseline" gap={4}>
+                <Text size="xl" fw={700}>{data.totalPointsToEarn.toLocaleString()}</Text>
+              </Group>
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Achievements</Text>
+                <IconMedal size={16} color="blue" />
+              </Group>
+              <Group align="baseline" gap={4}>
+                <Text size="xl" fw={700}>{(Math.max(data.totalAchievementsEarnedSoftcore ?? 0, data.totalAchievementsEarnedHardcore ?? 0)).toLocaleString()}</Text>
+                <Text size="sm" c="dimmed">/{data.totalAchievementsToEarn.toLocaleString()}</Text>
+              </Group>
+              <Text size="xs" c="dimmed" mb="xs">
+                {data.totalAchievementsToEarn > 0 ? Math.round((Math.max(data.totalAchievementsEarnedSoftcore, data.totalAchievementsEarnedHardcore) / data.totalAchievementsToEarn) * 100) : 0}%
+              </Text>
+              <Progress
+                value={data.totalAchievementsToEarn > 0 ? (Math.max(data.totalAchievementsEarnedSoftcore, data.totalAchievementsEarnedHardcore) / data.totalAchievementsToEarn) * 100 : 0}
+                size="xs"
+                color="green"
+              />
+              {data.totalAchievementsEarnedSoftcore !== 0 && data.totalAchievementsEarnedHardcore !== data.totalAchievementsEarnedSoftcore && (
+                <Text size="xs" c="dimmed" mt="xs">
+                  {data.totalAchievementsEarnedHardcore === 0
+                    ? `SC: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`
+                    : `HC: ${data.totalAchievementsEarnedHardcore.toLocaleString()} | SC: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`}
+                </Text>
+              )}
+            </Card>
+          </SimpleGrid>
 
           <Paper className={styles.paper}>
             {isLoading ? (

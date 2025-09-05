@@ -2,10 +2,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon } from '@mantine/core'
+import { Badge, Button, Center, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
+import playlistStyles from '@/css/pages/playlists.module.scss'
 import type { Game, GetGamesForConsoleResponse } from '@/interfaces/api/games/GetGamesForConsoleResponse'
 import { useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
@@ -15,7 +16,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
-import { IconX } from '@tabler/icons-react'
+import { IconX, IconTrophy, IconDeviceGamepad, IconMedal, IconTargetArrow } from '@tabler/icons-react'
 
 interface PublicGamesTableProps {
   consoleId: number
@@ -215,8 +216,53 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               ta="center"
               className={pressStart2P.className}
             >{data.consoleName}</Text>
-            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount} games!</Text>
+            <Text mb="xs" size={isMobile ? 'sm' : 'md'}>There are a total of {data.totalCount.toLocaleString()} games!</Text>
           </Container>
+
+          {/* Basic Stats */}
+          <SimpleGrid cols={isMobile ? 2 : 4} mb="xl" spacing="md">
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Total Games</Text>
+                <IconDeviceGamepad size={16} />
+              </Group>
+              <Text size="xl" fw={700}>{data.totalCount.toLocaleString()}</Text>
+              <Text size="xs" c="dimmed">In this console</Text>
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Total Points</Text>
+                <IconTrophy size={16} color="orange" />
+              </Group>
+              <Text size="xl" fw={700}>
+                {data.totalPoints.toLocaleString()}
+              </Text>
+              <Text size="xs" c="dimmed">Available to earn</Text>
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Achievements</Text>
+                <IconMedal size={16} color="blue" />
+              </Group>
+              <Text size="xl" fw={700}>
+                {data.totalAchievements.toLocaleString()}
+              </Text>
+              <Text size="xs" c="dimmed">Total available</Text>
+            </Card>
+
+            <Card radius="md" p="md" className={playlistStyles.statCard}>
+              <Group justify="space-between" mb="xs">
+                <Text size="sm" c="dimmed">Players</Text>
+                <IconTargetArrow size={16} color="green" />
+              </Group>
+              <Text size="xl" fw={700}>
+                {data.totalPlayers.toLocaleString()}
+              </Text>
+              <Text size="xs" c="dimmed">Total players</Text>
+            </Card>
+          </SimpleGrid>
 
           <Paper className={styles.paper}>
             <Group
