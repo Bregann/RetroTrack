@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RetroTrack.Domain.DTOs.Controllers.Search.Responses
+﻿namespace RetroTrack.Domain.DTOs.Controllers.Search.Responses
 {
     public class GetSearchConsolesResponse
     {
