@@ -9,7 +9,6 @@ import { useGameModal } from '@/context/gameModalContext'
 
 interface GameCardProps {
   game: GameSearchResult
-  searchTerm: string
 }
 
 export function GameCard({ game }: GameCardProps) {
@@ -25,7 +24,7 @@ export function GameCard({ game }: GameCardProps) {
       onClick={() => gameModal.showModal(game.gameId)}
     >
       <Group gap="md" align="flex-start">
-        <Box className={styles.iconBox}>
+        <Box className={styles.imageContainer}>
           <Image
             src={`https://media.retroachievements.org/${game.gameIconUrl}`}
             alt={game.title}

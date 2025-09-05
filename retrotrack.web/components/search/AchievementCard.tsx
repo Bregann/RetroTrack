@@ -9,7 +9,6 @@ import { useGameModal } from '@/context/gameModalContext'
 
 interface AchievementCardProps {
   achievement: AchievementSearchResult
-  searchTerm: string
 }
 
 export function AchievementCard({ achievement }: AchievementCardProps) {
@@ -25,7 +24,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
       onClick={() => gameModal.showModal(achievement.gameId)}
     >
       <Group gap="md" align="flex-start">
-        <Box className={styles.iconBox}>
+        <Box className={styles.imageContainer}>
           <Image
             src={`https://media.retroachievements.org/Badge/${achievement.iconUrl}.png`}
             alt={achievement.title}

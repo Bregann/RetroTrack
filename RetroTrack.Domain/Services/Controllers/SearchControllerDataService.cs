@@ -116,7 +116,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 new SearchConsoleItem { Id = -1, Name = "All Consoles" } // special case for all consoles
             };
 
-            consoles = await context.GameConsoles
+            var dbConsoles =  await context.GameConsoles
                 .OrderBy(c => c.ConsoleName)
                 .Select(c => new SearchConsoleItem
                 {
@@ -124,6 +124,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     Name = c.ConsoleName
                 })
                 .ToListAsync();
+
+            consoles.AddRange(dbConsoles);
 
             return new GetSearchConsolesResponse
             {
