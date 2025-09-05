@@ -219,7 +219,6 @@ export default function SearchComponent() {
                           <GameCard
                             key={game.gameId}
                             game={game}
-                            searchTerm={searchTerm ?? ''}
                           />
                         ))}
                       </Stack>
@@ -244,7 +243,6 @@ export default function SearchComponent() {
                           <AchievementCard
                             key={achievement.achievementId}
                             achievement={achievement}
-                            searchTerm={searchTerm ?? ''}
                           />
                         ))}
                       </Stack>
