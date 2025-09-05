@@ -92,6 +92,7 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
         }
       })
 
+      queryClient.invalidateQueries({ queryKey: ['getTrackedGames'] })
       notificationHelper.showSuccessNotification('Success', data?.gameTracked === true ? 'Game untracked.' : 'Game tracked.', 3000, <IconCheck size={16} />)
     },
     onError: () => {

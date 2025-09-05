@@ -6,6 +6,9 @@
         public required int TotalPages { get; set; }
         public required ConsoleGames[] Games { get; set; }
         public required string ConsoleName { get; set; }
+        public required long TotalPoints { get; set; }
+        public required long TotalAchievements { get; set; }
+        public required long TotalPlayers { get; set; }
     }
 
     public class ConsoleGames

@@ -1,7 +1,7 @@
 .paper{
     background-color: light-dark(var(--mantine-color-light-5),(var(--mantine-color-dark-7)));
-    border-radius: 5px;
-    border: 2px solid #1590e2;
+    border-radius: 8px;
+    border: 1px solid light-dark(#e9ecef, #373a40);
     padding-bottom: 20px;
     padding-left: 10px;
     padding-right: 10px;
@@ -15,7 +15,7 @@
 }
 
 .roundedImage {
-  border-radius: 5px;
+  border-radius: 8px;
   flex-shrink: 0;
   
   // Responsive image sizing

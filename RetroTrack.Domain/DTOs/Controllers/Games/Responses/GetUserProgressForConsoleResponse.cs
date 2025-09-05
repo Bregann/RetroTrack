@@ -8,6 +8,14 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required int TotalPages { get; set; }
         public required LoggedInConsoleGames[] Games { get; set; }
         public required string ConsoleName { get; set; }
+        public required long TotalPointsToEarn { get; set; }
+        public required long TotalAchievementsToEarn { get; set; }
+        public required long TotalAchievementsEarnedSoftcore { get; set; }
+        public required long TotalAchievementsEarnedHardcore { get; set; }
+        public required long TotalGamesBeatenSoftcore { get; set; }
+        public required long TotalGamesBeatenHardcore { get; set; }
+        public required long TotalGamesCompletedSoftcore { get; set; }
+        public required long TotalGamesMasteredHardcore { get; set; }
     }
 
     public class LoggedInConsoleGames

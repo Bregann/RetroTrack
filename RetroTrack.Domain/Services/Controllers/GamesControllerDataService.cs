@@ -82,6 +82,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     .AsQueryable();
             }
 
+            var totalPoints = await gameQuery.SumAsync(x => x.Points);
+            var totalAchievements = await gameQuery.SumAsync(x => x.AchievementCount);
+            var totalPlayers = await gameQuery.SumAsync(x => x.Players ?? 0);
+            var totalCount = await gameQuery.CountAsync();
+
             if (request.SearchTerm != null && request.SearchType != null)
             {
                 switch (request.SearchType)
@@ -154,13 +159,14 @@ namespace RetroTrack.Domain.Services.Controllers
                 })
                 .ToArrayAsync();
 
-            var totalCount = await gameQuery.CountAsync();
-
             return new GetGamesForConsoleResponse
             {
                 Games = games,
                 TotalCount = totalCount,
                 TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
+                TotalPoints = totalPoints,
+                TotalAchievements = totalAchievements,
+                TotalPlayers = totalPlayers,
                 ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
         }
@@ -493,12 +499,33 @@ namespace RetroTrack.Domain.Services.Controllers
                 .ToArrayAsync();
 
             var totalCount = await gameQuery.CountAsync();
+            var totalPointsToEarn = await baseGames.SumAsync(x => x.Points);
+            var totalAchievementsToEarn = await baseGames.SumAsync(x => x.AchievementCount);
+
+            var userGameProgressQuery = context.UserGameProgress
+                .Where(x => x.UserId == userId && (request.ConsoleId == -1 || x.ConsoleId == request.ConsoleId));
+
+            var totalAchievementsEarnedSoftcore = await userGameProgressQuery.SumAsync(x => x.AchievementsGained);
+            var totalAchievementsEarnedHardcore = await userGameProgressQuery.SumAsync(x => x.AchievementsGainedHardcore);
+
+            var totalGamesBeatenSoftcore = await userGameProgressQuery.Where(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.Completed).CountAsync();
+            var totalGamesBeatenHardcore = await userGameProgressQuery.Where(x => x.HighestAwardKind == HighestAwardKind.BeatenHardcore || x.HighestAwardKind == HighestAwardKind.Mastered).CountAsync();
+            var totalGamesCompletedSoftcore = await userGameProgressQuery.Where(x => x.HighestAwardKind == HighestAwardKind.Completed).CountAsync();
+            var totalGamesMasteredHardcore = await userGameProgressQuery.Where(x => x.HighestAwardKind == HighestAwardKind.Mastered).CountAsync();
 
             return new GetUserProgressForConsoleResponse
             {
                 Games = games,
                 TotalCount = totalCount,
                 TotalPages = (int)Math.Ceiling((double)totalCount / request.Take),
+                TotalPointsToEarn = totalPointsToEarn,
+                TotalAchievementsToEarn = totalAchievementsToEarn,
+                TotalAchievementsEarnedSoftcore = totalAchievementsEarnedSoftcore,
+                TotalAchievementsEarnedHardcore = totalAchievementsEarnedHardcore,
+                TotalGamesBeatenSoftcore = totalGamesBeatenSoftcore,
+                TotalGamesBeatenHardcore = totalGamesBeatenHardcore,
+                TotalGamesCompletedSoftcore = totalGamesCompletedSoftcore,
+                TotalGamesMasteredHardcore = totalGamesMasteredHardcore,
                 ConsoleName = request.ConsoleId == -1 ? "All Games" : context.GameConsoles.Where(x => x.ConsoleId == request.ConsoleId).Select(x => x.ConsoleName).FirstOrDefault() ?? "Unknown Console"
             };
         }

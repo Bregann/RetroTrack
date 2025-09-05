@@ -253,7 +253,7 @@ export default function InProgressGamesTable() {
                     {isMobile ? 'Go' : 'Search'}
                   </Button>
                 </Group>
-                <Group ml={20}>
+                <Group ml={20} mb={'md'}>
                   <Checkbox checked={hideBeatenGames} label="Hide Beaten Games" onChange={() => { setHideBeatenGames(!hideBeatenGames) }} />
                 </Group>
                 <PaginatedTable

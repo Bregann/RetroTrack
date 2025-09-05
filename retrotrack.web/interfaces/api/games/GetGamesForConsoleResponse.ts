@@ -3,6 +3,9 @@ export interface GetGamesForConsoleResponse {
     totalPages: number
     games: Game[]
     consoleName: string
+    totalPoints: number
+    totalAchievements: number
+    totalPlayers: number
 }
 
 export interface Game {
