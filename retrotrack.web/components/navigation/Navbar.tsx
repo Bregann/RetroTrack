@@ -32,7 +32,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import { doGet, doPost, doQueryGet } from '@/helpers/apiClient'
 import { RequestUserGameUpdateResponse } from '@/interfaces/api/users/RequestUserGameUpdateResponse'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { GetPublicNavigationDataResponse } from '@/interfaces/api/navigation/GetPublicNavigationDataResponse'
 import { GetLoggedInNavigationDataResponse } from '@/interfaces/api/navigation/GetLoggedInNavigationDataResponse'
 import { pressStart2P } from '@/font/pressStart2P'
@@ -55,6 +55,7 @@ export function Navbar(props: NavbarProps) {
 
   const auth = useAuth()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const consoleTypes = [ConsoleType.Nintendo, ConsoleType.Sony, ConsoleType.Atari, ConsoleType.Sega, ConsoleType.NEC, ConsoleType.SNK, ConsoleType.Other]
 
   // Used for checking the status of a user update
@@ -68,7 +69,16 @@ export function Navbar(props: NavbarProps) {
             const processed: boolean = res.data ?? false
 
             if (processed) {
-              router.refresh()
+              queryClient.invalidateQueries({ queryKey: ['getLoggedInNavigationData'] })
+              queryClient.invalidateQueries({ queryKey: ['getUserTrackedGames'] })
+              queryClient.invalidateQueries({ queryKey: ['getUserInProgressGames'] })
+              queryClient.invalidateQueries({
+                predicate: (query) => {
+                  const key = query.queryKey?.[0]
+                  return typeof key === 'string' && key === 'GetUserProfile'
+                },
+              })
+
               setUserUpdateRequested(false)
               notificationHelper.showSuccessNotification('Success', 'User update successful', 4000, <IconCheck />)
             }

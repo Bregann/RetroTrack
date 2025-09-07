@@ -2,6 +2,7 @@ import UserProfileComponent from '@/components/pages/UserProfileComponent'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetUserProfileResponse } from '@/interfaces/api/users/GetUserProfileResponse'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { cookies } from 'next/headers'
 
 export default async function Page({
   params,
@@ -10,10 +11,11 @@ export default async function Page({
 }) {
   const { username } = await params
   const queryClient = new QueryClient()
+  const cookieStore = await cookies()
 
   await queryClient.prefetchQuery({
     queryKey: ['GetUserProfile', username],
-    queryFn: async () => await doQueryGet<GetUserProfileResponse>(`/api/users/GetUserProfile/${username}`, { next: { revalidate: 60 } }),
+    queryFn: async () => await doQueryGet<GetUserProfileResponse>(`/api/users/GetUserProfile/${username}`, cookieStore.has('accessToken') ? undefined : { next: { revalidate: 60 } }),
     staleTime: 60000
   })
 
