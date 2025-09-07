@@ -123,7 +123,6 @@ export default function DeletePlaylistGamesModal({
         </Group>
       }
       size="lg"
-      scrollAreaComponent={ScrollArea.Autosize}
     >
       <Stack gap="md">
         {(errorMessage !== null && errorMessage !== '') && (
@@ -146,8 +145,9 @@ export default function DeletePlaylistGamesModal({
             <Loader size="md" />
           </Center>
         ) : (
-          <ScrollArea mah={400} type="auto">
-            <Stack gap="xs">
+          <div style={{ height: '400px', overflow: 'hidden' }}>
+            <ScrollArea h="100%" type="scroll" offsetScrollbars scrollbarSize={8}>
+              <Stack gap="xs">
               {games.length === 0 ? (
                 <Center py="xl">
                   <Text c="dimmed">No games in this playlist</Text>
@@ -205,6 +205,7 @@ export default function DeletePlaylistGamesModal({
               )}
             </Stack>
           </ScrollArea>
+          </div>
         )}
 
         <Group justify="space-between">
