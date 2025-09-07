@@ -123,8 +123,8 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         achievementCount: 'SortByAchievementCount',
         points: 'SortByPoints',
         players: 'SortByPlayers',
-        achievementProgress: 'SortByAchievementProgress',
-        completionStatus: 'SortByCompletionStatus'
+        highestAward: 'SortByCompletionStatus',
+        achievementsEarnedHardcore: 'SortByAchievementProgress'
       }
 
       const sortParam = sortKeyMap[sortOption.key as string] !== undefined ? sortKeyMap[sortOption.key as string] : 'SortByIndex'
@@ -259,6 +259,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     },
     {
       title: 'Status',
+      key: 'highestAward',
       sortable: true,
       render: (game) => (
         <div style={{ minWidth: '165px' }}>
@@ -280,6 +281,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     },
     {
       title: 'Achievement Progress',
+      key: 'achievementsEarnedHardcore',
       sortable: true,
       toggleDescFirst: true,
       render: (game) => {

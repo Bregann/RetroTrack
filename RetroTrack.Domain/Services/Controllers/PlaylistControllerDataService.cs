@@ -339,6 +339,20 @@ namespace RetroTrack.Domain.Services.Controllers
                 }
             }
 
+            if (request.SortByAchievementProgress != null)
+            {
+                gameItems = request.SortByAchievementProgress == true
+                    ? gameItems.OrderByDescending(g => g.AchievementCount == 0 ? 0 : (double)g.AchievementsEarnedSoftcore / g.AchievementCount).ToArray()
+                    : gameItems.OrderBy(g => g.AchievementCount == 0 ? 0 : (double)g.AchievementsEarnedSoftcore / g.AchievementCount).ToArray();
+            }
+
+            if (request.SortByCompletionStatus != null)
+            {
+                gameItems = request.SortByCompletionStatus == true
+                    ? gameItems.OrderByDescending(g => g.HighestAward == Enums.HighestAwardKind.Completed || g.HighestAward == Enums.HighestAwardKind.Mastered ? 1 : 0).ToArray()
+                    : gameItems.OrderBy(g => g.HighestAward == Enums.HighestAwardKind.Completed || g.HighestAward == Enums.HighestAwardKind.Mastered ? 1 : 0).ToArray();
+            }
+
             var totalGamesInPlaylist = playlist.PlaylistGames.Count;
             var averagePercentageBeaten = totalGamesInPlaylist == 0 ? 0 : Math.Round((double)userGameProgress.Count(ugp => ugp.HighestAwardKind != null && ugp.HighestAwardKind != Enums.HighestAwardKind.Unknown) / totalGamesInPlaylist * 100, 2);
             var averagePercentageMastered = totalGamesInPlaylist == 0 ? 0 : Math.Round((double)userGameProgress.Count(ugp => ugp.HighestAwardKind == Enums.HighestAwardKind.Completed || ugp.HighestAwardKind == Enums.HighestAwardKind.Mastered) / totalGamesInPlaylist * 100, 2);

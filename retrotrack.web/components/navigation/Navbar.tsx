@@ -91,7 +91,7 @@ export function Navbar(props: NavbarProps) {
         gameUpdateInterval.current = null
       }
     }
-  }, [router, userUpdateRequested])
+  }, [queryClient, router, userUpdateRequested])
 
   const requestGamesUpdate = async (): Promise<void> => {
     setUpdateGamesButtonLoading(true)
