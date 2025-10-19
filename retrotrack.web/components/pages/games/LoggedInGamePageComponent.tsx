@@ -420,6 +420,19 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
 
             <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
               {data.achievements
+                .sort((a, b) => {
+                  // Sort by unlock status first (unlocked first)
+                  const aUnlocked = a.dateEarnedSoftcore !== null || a.dateEarnedHardcore !== null
+                  const bUnlocked = b.dateEarnedSoftcore !== null || b.dateEarnedHardcore !== null
+                  if (aUnlocked !== bUnlocked) {
+                    return aUnlocked ? -1 : 1
+                  }
+                  // Then sort by achievement type if both have valid types
+                  if (a.type !== null && b.type !== null) {
+                    return a.type - b.type
+                  }
+                  return 0
+                })
                 .filter((x) => {
                   if (hideUnlockedAchievements) {
                     return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
@@ -454,7 +467,9 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
                       style={{
                         position: 'relative',
                         borderWidth: 2,
-                        backgroundColor: 'light-dark(#f9f9f9, #263042)',
+                        backgroundColor: achievement.dateEarnedSoftcore !== null || achievement.dateEarnedHardcore !== null
+                          ? 'light-dark(#e8f5e9, #1b3a29)' // Light green/dark green background for unlocked
+                          : 'light-dark(#f9f9f9, #263042)',
                         borderColor:
                           achievement.type === AchievementType.Missable
                             ? 'var(--mantine-color-orange-filled)'
@@ -462,7 +477,8 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
                               ? 'var(--mantine-color-cyan-filled)'
                               : achievement.type === AchievementType.Win_Condition
                                 ? 'var(--mantine-color-green-filled)'
-                                : 'transparent'
+                                : 'transparent',
+                        opacity: achievement.dateEarnedSoftcore !== null || achievement.dateEarnedHardcore !== null ? 1 : 0.8
                       }}
                     >
                       {/* Achievement Icon and Details */}
