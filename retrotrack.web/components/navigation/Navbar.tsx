@@ -155,7 +155,7 @@ export function Navbar(props: NavbarProps) {
           </Link>
 
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.2 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.2.1 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -433,9 +433,18 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v7.2']}
+            defaultValue={['v7.2.1']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v7.2.1">
+              <Accordion.Control>RetroTrack v7.2.1 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the improvements:</Text>
+                <List withPadding>
+                  <List.Item>Improved visibility of unlocked achievements - they now have a distinct background colour and appear first in the list</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v7.2">
               <Accordion.Control>RetroTrack v7.2 Released</Accordion.Control>
               <Accordion.Panel>
