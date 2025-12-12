@@ -234,7 +234,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
                     Type = achievement.Value.Type,
-                    DateEarnedHardcore = null
+                    DateEarnedHardcore = null,
+                    AchievementOrder = achievement.Value.DisplayOrder
                 }));
 
                 return new GetLoggedInSpecificGameInfoResponse
@@ -287,7 +288,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     Title = achievement.Value.Title,
                     DateEarnedSoftcore = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
                     DateEarnedHardcore = achievement.Value.DateEarnedHardcore != null ? DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarnedHardcore) : null,
-                    Type = achievement.Value.Type
+                    Type = achievement.Value.Type,
+                    AchievementOrder = achievement.Value.DisplayOrder
                 });
             }
 

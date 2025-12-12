@@ -403,11 +403,10 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
                 if (aUnlocked !== bUnlocked) {
                   return aUnlocked ? -1 : 1
                 }
-                // Then sort by achievement type if both have valid types
-                if (a.type !== null && b.type !== null) {
-                  return a.type - b.type
-                }
-                return 0
+                // Then sort by achievement order, or by id if achievement order is 0
+                const aSort = a.achievementOrder !== 0 ? a.achievementOrder : a.id
+                const bSort = b.achievementOrder !== 0 ? b.achievementOrder : b.id
+                return aSort - bSort
               })
               .filter((x) => {
                 if (hideUnlockedAchievements) {

@@ -40,4 +40,5 @@ export interface UserAchievement {
     dateEarnedSoftcore: null | string
     dateEarnedHardcore: null | string
     type: number | null
+    achievementOrder: number
 }
