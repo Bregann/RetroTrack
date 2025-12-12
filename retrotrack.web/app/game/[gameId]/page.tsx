@@ -50,12 +50,12 @@ export default async function GamePage({
   const cookieStore = await cookies()
   const queryClient = new QueryClient()
 
-    // prefetch achievement leaderboards - used for both logged out and in
-    await queryClient.prefetchQuery({
-      queryKey: ['getAchievementLeaderboards', parseInt(gameId, 10)],
-      queryFn: async () => await doQueryGet<GetLeaderboardsFromGameIdResponse>(`/api/games/GetLeaderboardsFromGameId/${gameId}`, { next: { revalidate: 60 } }),
-      staleTime: 60000
-    })
+  // prefetch achievement leaderboards - used for both logged out and in
+  await queryClient.prefetchQuery({
+    queryKey: ['getAchievementLeaderboards', parseInt(gameId, 10)],
+    queryFn: async () => await doQueryGet<GetLeaderboardsFromGameIdResponse>(`/api/games/GetLeaderboardsFromGameId/${gameId}`, { next: { revalidate: 60 } }),
+    staleTime: 60000
+  })
 
   // Check if the user is logged in by checking for the accessToken cookie
   if (cookieStore.has('accessToken')) {

@@ -8,7 +8,7 @@ import RegisterModal from './RegisterModal'
 import notificationHelper from '@/helpers/notificationHelper'
 
 interface LoginModalProps {
-  onClose: (value: boolean) => void
+  onClose: (_value: boolean) => void
   openedState: boolean
 }
 

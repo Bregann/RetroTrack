@@ -148,63 +148,63 @@ export default function DeletePlaylistGamesModal({
           <div style={{ height: '400px', overflow: 'hidden' }}>
             <ScrollArea h="100%" type="scroll" offsetScrollbars scrollbarSize={8}>
               <Stack gap="xs">
-              {games.length === 0 ? (
-                <Center py="xl">
-                  <Text c="dimmed">No games in this playlist</Text>
-                </Center>
-              ) : (
-                [...games].sort((a, b) => a.orderIndex - b.orderIndex).map((game) => {
-                  const isMarkedForDeletion = gamesToDelete.includes(game.gameId)
-                  return (
-                    <Card
-                      key={game.gameId}
-                      p="xs"
-                      withBorder
-                      style={{
-                        opacity: isMarkedForDeletion ? 0.6 : 1,
-                        textDecoration: isMarkedForDeletion ? 'line-through' : 'none',
-                        backgroundColor: isMarkedForDeletion ? 'rgba(255, 0, 0, 0.1)' : undefined
-                      }}
-                    >
-                      <Group gap="sm" wrap="nowrap">
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          minWidth: '64px',
-                          flexShrink: 0
-                        }}>
-                          <Image
-                            src={`https://media.retroachievements.org${game.gameIconUrl}`}
-                            alt={game.title}
-                            width={64}
-                            height={64}
-                            className={tableStyles.roundedImage}
-                          />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <Text size="sm" fw={500} lineClamp={1}>
-                            {game.title}
-                          </Text>
-                          <Text size="xs" c="dimmed">
-                            {game.consoleName}
-                          </Text>
-                        </div>
-                        <ActionIcon
-                          color={isMarkedForDeletion ? 'blue' : 'red'}
-                          variant="light"
-                          onClick={() => isMarkedForDeletion ? handleRestoreGame(game.gameId) : handleDeleteGame(game.gameId)}
-                          disabled={removeGamesMutation.isPending}
-                        >
-                          {isMarkedForDeletion ? <IconCheck size={16} /> : <IconTrash size={16} />}
-                        </ActionIcon>
-                      </Group>
-                    </Card>
-                  )
-                })
-              )}
-            </Stack>
-          </ScrollArea>
+                {games.length === 0 ? (
+                  <Center py="xl">
+                    <Text c="dimmed">No games in this playlist</Text>
+                  </Center>
+                ) : (
+                  [...games].sort((a, b) => a.orderIndex - b.orderIndex).map((game) => {
+                    const isMarkedForDeletion = gamesToDelete.includes(game.gameId)
+                    return (
+                      <Card
+                        key={game.gameId}
+                        p="xs"
+                        withBorder
+                        style={{
+                          opacity: isMarkedForDeletion ? 0.6 : 1,
+                          textDecoration: isMarkedForDeletion ? 'line-through' : 'none',
+                          backgroundColor: isMarkedForDeletion ? 'rgba(255, 0, 0, 0.1)' : undefined
+                        }}
+                      >
+                        <Group gap="sm" wrap="nowrap">
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            minWidth: '64px',
+                            flexShrink: 0
+                          }}>
+                            <Image
+                              src={`https://media.retroachievements.org${game.gameIconUrl}`}
+                              alt={game.title}
+                              width={64}
+                              height={64}
+                              className={tableStyles.roundedImage}
+                            />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <Text size="sm" fw={500} lineClamp={1}>
+                              {game.title}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {game.consoleName}
+                            </Text>
+                          </div>
+                          <ActionIcon
+                            color={isMarkedForDeletion ? 'blue' : 'red'}
+                            variant="light"
+                            onClick={() => isMarkedForDeletion ? handleRestoreGame(game.gameId) : handleDeleteGame(game.gameId)}
+                            disabled={removeGamesMutation.isPending}
+                          >
+                            {isMarkedForDeletion ? <IconCheck size={16} /> : <IconTrash size={16} />}
+                          </ActionIcon>
+                        </Group>
+                      </Card>
+                    )
+                  })
+                )}
+              </Stack>
+            </ScrollArea>
           </div>
         )}
 

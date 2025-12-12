@@ -6,7 +6,7 @@ import { createContext, useContext, useState } from 'react'
 import { useAuth } from './authContext'
 
 type GameModalContextType = {
-  showModal: (gameId: number) => void
+  showModal: (_gameId: number) => void
 }
 
 const GameModalContext = createContext<GameModalContextType | undefined>(undefined)

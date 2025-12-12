@@ -12,7 +12,7 @@ type User = {
 type AuthContextType = {
   isAuthenticated: boolean
   user: User | null
-  login: (username: string, password: string) => Promise<boolean>
+  login: (_username: string, _password: string) => Promise<boolean>
   logout: () => Promise<void>
 }
 

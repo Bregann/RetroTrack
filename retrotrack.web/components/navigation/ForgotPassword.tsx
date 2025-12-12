@@ -14,7 +14,7 @@ interface FormValues {
 }
 
 export interface ForgotPasswordModalProps {
-  onClose: (value: boolean) => void
+  onClose: (_value: boolean) => void
   openedState: boolean
 }
 

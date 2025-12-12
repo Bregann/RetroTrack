@@ -278,17 +278,17 @@ export default function InProgressGamesTable() {
                   pageSizeOptions={[10, 25, 50, 100]}
                   showPageSizeSelector={true}
                   actions={[
-                  {
-                    onClick: (item) => gameModal.showModal(item.gameId),
-                    label: 'Game Modal',
-                    variant: 'filled'
-                  },
-                  {
-                    onClick: (item) => router.push(`/game/${item.gameId}`),
-                    label: 'Game Page',
-                    variant: 'filled'
-                  }
-                ]}
+                    {
+                      onClick: (item) => gameModal.showModal(item.gameId),
+                      label: 'Game Modal',
+                      variant: 'filled'
+                    },
+                    {
+                      onClick: (item) => router.push(`/game/${item.gameId}`),
+                      label: 'Game Page',
+                      variant: 'filled'
+                    }
+                  ]}
                 />
               </>
             )}

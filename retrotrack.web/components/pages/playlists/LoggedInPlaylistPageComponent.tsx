@@ -96,48 +96,48 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
   const gameModal = useGameModal()
   const queryClient = useQueryClient()
 
-    const [searchInput, setSearchInput] = useState<string>('')
-    const [searchTerm, setSearchTerm] = useState<string | null>(null)
-    const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
-    const [page, setPage] = useState(1)
-    const [pageSize, setPageSize] = useState(100)
-    const [editModalOpened, setEditModalOpened] = useState(false)
-    const [manageGamesModalOpened, setManageGamesModalOpened] = useState(false)
-    const [orderModalOpened, setOrderModalOpened] = useState(false)
-    const [addGamesModalOpened, setAddGamesModalOpened] = useState(false)
-    const [sortOption, setSortOption] = useState<SortOption<LoggedInGameItem>>({
-      key: 'orderIndex',
-      direction: 'asc',
-    })
+  const [searchInput, setSearchInput] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string | null>(null)
+  const [searchDropdownValue, setSearchDropdownValue] = useState<string>('0')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(100)
+  const [editModalOpened, setEditModalOpened] = useState(false)
+  const [manageGamesModalOpened, setManageGamesModalOpened] = useState(false)
+  const [orderModalOpened, setOrderModalOpened] = useState(false)
+  const [addGamesModalOpened, setAddGamesModalOpened] = useState(false)
+  const [sortOption, setSortOption] = useState<SortOption<LoggedInGameItem>>({
+    key: 'orderIndex',
+    direction: 'asc',
+  })
 
-    // Build query string for API call
-    const queryString = useMemo(() => {
-      const skip = (page - 1) * pageSize
-      const take = pageSize
+  // Build query string for API call
+  const queryString = useMemo(() => {
+    const skip = (page - 1) * pageSize
+    const take = pageSize
 
-      const sortKeyMap: Record<string, string> = {
-        orderIndex: 'SortByIndex',
-        title: 'SortByGameTitle',
-        consoleName: 'SortByConsoleName',
-        genre: 'SortByGenre',
-        achievementCount: 'SortByAchievementCount',
-        points: 'SortByPoints',
-        players: 'SortByPlayers',
-        highestAward: 'SortByCompletionStatus',
-        achievementsEarnedHardcore: 'SortByAchievementProgress'
-      }
+    const sortKeyMap: Record<string, string> = {
+      orderIndex: 'SortByIndex',
+      title: 'SortByGameTitle',
+      consoleName: 'SortByConsoleName',
+      genre: 'SortByGenre',
+      achievementCount: 'SortByAchievementCount',
+      points: 'SortByPoints',
+      players: 'SortByPlayers',
+      highestAward: 'SortByCompletionStatus',
+      achievementsEarnedHardcore: 'SortByAchievementProgress'
+    }
 
-      const sortParam = sortKeyMap[sortOption.key as string] !== undefined ? sortKeyMap[sortOption.key as string] : 'SortByIndex'
-      const sortValue = sortOption.direction === 'asc'
+    const sortParam = sortKeyMap[sortOption.key as string] !== undefined ? sortKeyMap[sortOption.key as string] : 'SortByIndex'
+    const sortValue = sortOption.direction === 'asc'
 
-      let query = `PlaylistId=${props.playlistId}&${sortParam}=${sortValue}&Skip=${skip}&Take=${take}`
+    let query = `PlaylistId=${props.playlistId}&${sortParam}=${sortValue}&Skip=${skip}&Take=${take}`
 
-      if (searchTerm !== null && searchTerm !== '') {
-        query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
-      }
+    if (searchTerm !== null && searchTerm !== '') {
+      query += `&SearchType=${searchDropdownValue}&SearchTerm=${encodeURIComponent(searchTerm)}`
+    }
 
-      return query
-    }, [page, pageSize, props.playlistId, searchTerm, searchDropdownValue, sortOption.direction, sortOption.key])
+    return query
+  }, [page, pageSize, props.playlistId, searchTerm, searchDropdownValue, sortOption.direction, sortOption.key])
 
   const { data: playlistData, isLoading: isLoadingPlaylistData, isError: isErrorPlaylistData } = useQuery<GetLoggedInPlaylistDataResponse>({
     queryKey: [queryString],

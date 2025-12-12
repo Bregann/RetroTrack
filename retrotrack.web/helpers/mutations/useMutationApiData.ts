@@ -6,8 +6,8 @@ interface MutationPostOptions<TOutput> {
   queryKey: (string | number)[]
   invalidateQuery: boolean
   apiMethod: 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-  onError?: (error: Error) => void
-  onSuccess?: (data: TOutput | undefined) => void
+  onError?: (_error: Error) => void
+  onSuccess?: (_data: TOutput | undefined) => void
 }
 
 export function useMutationApiData<TInput, TOutput>(options: MutationPostOptions<TOutput>) {

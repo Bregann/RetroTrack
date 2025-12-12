@@ -1,15 +1,6 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
 
 const eslintConfig = [
   {
@@ -18,21 +9,42 @@ const eslintConfig = [
       '.next',
       'dist',
       'build',
-      'next-env.d.ts'
+      'next-env.d.ts',
+      'eslint.config.mjs',
     ],
   },
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  js.configs.recommended,
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        fetch: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+        atob: 'readonly',
+        btoa: 'readonly',
+        React: 'readonly',
+        NodeJS: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+      },
       parser: tsParser,
       parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
         project: './tsconfig.json',
-        sourceType: 'module'
-      }
+        sourceType: 'module',
+      },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin
+      '@typescript-eslint': tsPlugin,
     },
     rules: {
       'no-trailing-spaces': ['error'],
@@ -53,16 +65,12 @@ const eslintConfig = [
       }],
       semi: ['error', 'never'],
       quotes: ['error', 'single', { avoidEscape: true }],
+      indent: ['error', 2, { SwitchCase: 1 }],
       'block-spacing': ['error', 'always'],
-      '@typescript-eslint/strict-boolean-expressions': ['error', {
-        allowString: false,
-        allowNumber: false,
-        allowNullableObject: false,
-        allowNullableBoolean: false,
-        allowNullableString: false,
-        allowNullableNumber: false,
-        allowAny: false,
-      }]
+      'no-undef': 'error',
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/strict-boolean-expressions': 'off',
     }
   }
 ]
