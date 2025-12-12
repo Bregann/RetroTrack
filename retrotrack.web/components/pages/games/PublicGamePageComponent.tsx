@@ -207,6 +207,12 @@ export function PublicGamePage(props: PublicGamePageProps) {
             {/* Achievements Grid */}
             <SimpleGrid cols={isSmall ? 1 : 2} mb="md">
               {data.achievements
+                .sort((a, b) => {
+                  // Sort by achievement order, or by id if achievement order is 0
+                  const aSort = a.achievementOrder !== 0 ? a.achievementOrder : a.id
+                  const bSort = b.achievementOrder !== 0 ? b.achievementOrder : b.id
+                  return aSort - bSort
+                })
                 .filter((x) => {
                   if (showProgressionOnly && showMissableOnly) {
                     return (

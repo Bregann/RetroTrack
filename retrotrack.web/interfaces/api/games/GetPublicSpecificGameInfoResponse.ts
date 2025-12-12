@@ -24,4 +24,5 @@ export interface Achievement {
     points: number
     badgeName: string
     type: AchievementType | null
+    achievementOrder: number
 }

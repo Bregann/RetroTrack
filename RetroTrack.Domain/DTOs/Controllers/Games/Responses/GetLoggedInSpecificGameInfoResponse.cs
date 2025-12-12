@@ -49,5 +49,6 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required string? DateEarnedSoftcore { get; set; }
         public required string? DateEarnedHardcore { get; set; }
         public required AchievementType? Type { get; set; }
+        public required int AchievementOrder { get; set; }
     }
 }

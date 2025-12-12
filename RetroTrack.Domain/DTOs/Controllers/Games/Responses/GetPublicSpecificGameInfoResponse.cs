@@ -28,5 +28,6 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public long Points { get; set; }
         public required string BadgeName { get; set; }
         public AchievementType? Type { get; set; }
+        public required int AchievementOrder { get; set; }
     }
 }
