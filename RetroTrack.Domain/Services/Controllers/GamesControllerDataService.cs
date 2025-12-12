@@ -204,6 +204,7 @@ namespace RetroTrack.Domain.Services.Controllers
                     Points = x.Value.Points,
                     Title = x.Value.Title,
                     Type = x.Value.Type,
+                    AchievementOrder = x.Value.DisplayOrder
                 }).ToList()
             };
         }
