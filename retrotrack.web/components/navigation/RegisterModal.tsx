@@ -15,7 +15,7 @@ interface FormValues {
 }
 
 export interface RegisterModalProps {
-  onClose: (value: boolean) => void
+  onClose: (_value: boolean) => void
   openedState: boolean
   onSwitchToLogin?: () => void
 }

@@ -21,7 +21,7 @@ export async function GET(
     const chunkIndex = parseInt(id, 10)
     // It's good practice to check if the parsing resulted in a valid number
     if (isNaN(chunkIndex)) {
-        return new Response('Invalid sitemap index', { status: 400 })
+      return new Response('Invalid sitemap index', { status: 400 })
     }
 
     const start = chunkIndex * URLS_PER_SITEMAP
@@ -43,14 +43,14 @@ export async function GET(
 
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${
-      urlEntries.map(entry => `
+  urlEntries.map(entry => `
         <url>
           <loc>${entry.loc}</loc>
           <lastmod>${entry.lastmod}</lastmod>
           <changefreq>${entry.changefreq}</changefreq>
           <priority>${entry.priority}</priority>
         </url>`).join('')
-    }
+}
     </urlset>`.trim()
 
     return new Response(xmlContent, {

@@ -8,7 +8,7 @@ import tableStyles from '@/css/components/paginatedTable.module.scss'
 export interface Column<T> {
   title: string
   key?: keyof T
-  render?: (item: T, index: number) => ReactNode
+  render?: (_item: T, _index: number) => ReactNode
   sortable?: boolean
   show?: boolean
   toggleDescFirst?: boolean // if true, will always sort desc first
@@ -17,10 +17,10 @@ export interface Column<T> {
 export interface ActionButton<T> {
   label: string
   icon?: ReactNode
-  onClick: (item: T, index: number) => void
+  onClick: (_item: T, _index: number) => void
   variant?: string
   color?: string
-  disabled?: (item: T, index: number) => boolean
+  disabled?: (_item: T, _index: number) => boolean
 }
 
 export type SortDirection = 'asc' | 'desc'
@@ -34,16 +34,16 @@ export interface PaginatedTableProps<T> {
   columns: Column<T>[]
   page: number
   total: number
-  onPageChange: (page: number) => void
-  onSortChange?: (option: SortOption<T>) => void
-  onRowClick?: (item: T, index: number) => void
+  onPageChange: (_page: number) => void
+  onSortChange?: (_option: SortOption<T>) => void
+  onRowClick?: (_item: T, _index: number) => void
   sortOption?: SortOption<T>
   styles?: React.CSSProperties
   actions?: ActionButton<T>[]
   actionsTitle?: string
-  renderActions?: (item: T, index: number) => ReactNode
+  renderActions?: (_item: T, _index: number) => ReactNode
   pageSize?: number
-  onPageSizeChange?: (pageSize: number) => void
+  onPageSizeChange?: (_pageSize: number) => void
   pageSizeOptions?: number[]
   showPageSizeSelector?: boolean
 }

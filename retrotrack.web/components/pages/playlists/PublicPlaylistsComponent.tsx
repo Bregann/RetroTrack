@@ -294,7 +294,7 @@ export default function LoggedOutPlaylistsComponent() {
         </Text>
       }
 
-    <LoginModal openedState={loginModalOpened} onClose={() => { setLoginModalOpened(false) }} />
+      <LoginModal openedState={loginModalOpened} onClose={() => { setLoginModalOpened(false) }} />
     </Container>
   )
 }

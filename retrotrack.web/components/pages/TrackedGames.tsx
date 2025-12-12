@@ -282,24 +282,24 @@ export default function TrackedGames() {
                     gameModal.showModal(item.gameId)
                   }}
                   actions={[
-                  {
-                    onClick: (item) => gameModal.showModal(item.gameId),
-                    label: 'Game Modal',
-                    variant: 'filled'
-                  },
-                  {
-                    onClick: (item) => router.push(`/game/${item.gameId}`),
-                    label: 'Game Page',
-                    variant: 'filled'
-                  }
-                ]}
-                pageSize={pageSize}
-                onPageSizeChange={(newPageSize) => {
-                  setPageSize(newPageSize)
-                  setPage(1) // Reset to first page when changing page size
-                }}
-                pageSizeOptions={[10, 25, 50, 100]}
-                showPageSizeSelector={true}
+                    {
+                      onClick: (item) => gameModal.showModal(item.gameId),
+                      label: 'Game Modal',
+                      variant: 'filled'
+                    },
+                    {
+                      onClick: (item) => router.push(`/game/${item.gameId}`),
+                      label: 'Game Page',
+                      variant: 'filled'
+                    }
+                  ]}
+                  pageSize={pageSize}
+                  onPageSizeChange={(newPageSize) => {
+                    setPageSize(newPageSize)
+                    setPage(1) // Reset to first page when changing page size
+                  }}
+                  pageSizeOptions={[10, 25, 50, 100]}
+                  showPageSizeSelector={true}
                 />
               </>
             )}

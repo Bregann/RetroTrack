@@ -52,16 +52,16 @@ export default function LoggedInPlaylistsComponent() {
       activeTab === 'my-playlists'
         ? userPlaylistsData?.playlists ?? []
         : activeTab === 'all-likes'
-        ? likedPlaylistsData?.playlists ?? []
-        : publicPlaylistsData?.playlists ?? []
+          ? likedPlaylistsData?.playlists ?? []
+          : publicPlaylistsData?.playlists ?? []
 
     // Apply search filter
     const filtered = searchQuery.trim() !== ''
       ? playlists.filter(playlist =>
-          playlist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        playlist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           playlist.createdBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
           playlist.description.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      )
       : playlists
 
     // Apply sorting

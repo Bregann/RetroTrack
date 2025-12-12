@@ -1,9 +1,9 @@
-    export interface GetLeaderboardsFromGameIdResponse {
+export interface GetLeaderboardsFromGameIdResponse {
       totalLeaderboards: number
       leaderboards: LeaderboardDetails[]
     }
 
-    export interface LeaderboardDetails {
+export interface LeaderboardDetails {
       leaderboardId: number
       rank: number
       title: string

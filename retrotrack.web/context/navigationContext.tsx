@@ -4,9 +4,9 @@ import React, { createContext, useContext, useState, useCallback } from 'react'
 
 interface NavigationContextType {
   isNavigating: boolean
-  setNavigating: (navigating: boolean) => void
+  setNavigating: (_navigating: boolean) => void
   navigationTarget: string | null
-  setNavigationTarget: (target: string | null) => void
+  setNavigationTarget: (_target: string | null) => void
 }
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined)

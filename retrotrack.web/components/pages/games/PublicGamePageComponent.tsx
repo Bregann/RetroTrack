@@ -369,26 +369,26 @@ export function PublicGamePage(props: PublicGamePageProps) {
                           </Group>
 
                           {/* Top Entry */}
-                            <Box
-                              p="xs"
-                              style={{
-                                backgroundColor: 'light-dark(#fff9e6, #2d2a1f)',
-                                borderRadius: 4,
-                                border: '1px solid gold'
-                              }}
-                            >
-                              <Group justify="space-between" align="center">
-                                <Group gap="xs">
-                                  <IconCrown size={12} color="gold" />
-                                  <Text fw={600} size="xs">
-                                    {leaderboard.topUser}
-                                  </Text>
-                                </Group>
-                                <Text fw={700} size="xs" c="yellow">
-                                  {leaderboard.topScore}
+                          <Box
+                            p="xs"
+                            style={{
+                              backgroundColor: 'light-dark(#fff9e6, #2d2a1f)',
+                              borderRadius: 4,
+                              border: '1px solid gold'
+                            }}
+                          >
+                            <Group justify="space-between" align="center">
+                              <Group gap="xs">
+                                <IconCrown size={12} color="gold" />
+                                <Text fw={600} size="xs">
+                                  {leaderboard.topUser}
                                 </Text>
                               </Group>
-                            </Box>
+                              <Text fw={700} size="xs" c="yellow">
+                                {leaderboard.topScore}
+                              </Text>
+                            </Group>
+                          </Box>
 
                           {/* Author */}
                           <Group gap="xs" justify="flex-end">
