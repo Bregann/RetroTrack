@@ -61,6 +61,16 @@ namespace RetroTrack.Domain.Database.Models
         [Required]
         public required bool EmailMessageProcessed { get; set; }
 
+        public long? MedianTimeToBeat { get; set; }
+
+        public long? MedianTimeToBeatHardcore { get; set; }
+
+        public long? MedianTimeToComplete { get; set; }
+
+        public long? MedianTimeToMaster { get; set; }
+
+        public bool MedianTimesProcessed { get; set; } = false;
+
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<Achievement> Achievements { get; set; } = [];
 

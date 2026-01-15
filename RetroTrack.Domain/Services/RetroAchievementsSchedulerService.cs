@@ -260,5 +260,63 @@ namespace RetroTrack.Domain.Services
 
             Log.Information($"[RetroAchievements] User game update for {username} queued for processing.");
         }
+
+        /// <summary>
+        /// Gets game progression data for games released over a month ago that haven't been processed yet.
+        /// </summary>
+        /// <returns></returns>
+        public async Task GetGameProgressionDataForEligibleGames()
+        {
+            // Get all games that were released over a month ago and haven't had their median times processed yet
+            var eligibleGames = await context.Games
+                .Where(x => !x.MedianTimesProcessed && x.SetReleasedDate < DateTime.UtcNow.AddMonths(-1) && x.HasAchievements)
+                .Select(x => x.Id)
+                .ToArrayAsync();
+
+            if (eligibleGames.Length == 0)
+            {
+                Log.Information("[RetroAchievements] No eligible games found for progression data processing.");
+                return;
+            }
+
+            Log.Information($"[RetroAchievements] Found {eligibleGames.Length} eligible games for progression data processing.");
+
+            foreach (var gameId in eligibleGames)
+            {
+                var response = await raApiService.GetGameProgression(gameId);
+
+                if (response == null)
+                {
+                    Log.Warning($"[RetroAchievements] No progression data found for game ID {gameId} in RetroAchievements API response.");
+                    await Task.Delay(1000); // To avoid hitting the API too fast
+                    continue;
+                }
+
+                // Convert the dto into json string
+                var jsonData = JsonConvert.SerializeObject(response);
+
+                // Make sure that the data does not already exist in the database
+                if (await context.RetroAchievementsLogAndLoadData.AnyAsync(x => x.JsonData == jsonData && x.JobType == JobType.GetGameProgression && x.ProcessingStatus != ProcessingStatus.Errored))
+                {
+                    Log.Information($"[RetroAchievements] Game progression data for game ID {gameId} already exists in the database. Skipping");
+                    await Task.Delay(1000); // To avoid hitting the API too fast
+                    continue;
+                }
+
+                await context.RetroAchievementsLogAndLoadData.AddAsync(new RetroAchievementsLogAndLoadData
+                {
+                    JobType = JobType.GetGameProgression,
+                    FailedProcessingAttempts = 0,
+                    JsonData = jsonData,
+                    LastUpdate = DateTime.UtcNow,
+                    ProcessingStatus = ProcessingStatus.NotScheduled
+                });
+
+                await context.SaveChangesAsync();
+                Log.Information($"[RetroAchievements] Game progression data for game ID {gameId} added to the database for processing.");
+
+                await Task.Delay(1000); // To avoid hitting the API too fast
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@
     {
         GetGameList,
         GetExtendedGameData,
-        UserUpdate
+        UserUpdate,
+        GetGameProgression
     }
 }

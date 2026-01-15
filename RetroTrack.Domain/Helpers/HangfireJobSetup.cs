@@ -20,6 +20,7 @@ namespace RetroTrack.Domain.Helpers
             RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetGamesFromConsoleIdsJob", service => service.GetGamesFromConsoleIds(), "0 */6 * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetUnprocessedGameDataJob", service => service.GetGameDataForUnprocessedGames(false), "10 */6 * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetGameDataForRecentlyModifiedGamesJob", service => service.GetGameDataForRecentlyModifiedGames(), "30 0 * * *");
+            RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetGameProgressionDataForEligibleGamesJob", service => service.GetGameProgressionDataForEligibleGames(), "0 2 * * *");
 
             Log.Information("[Hangfire] Jobs have been registered successfully.");
 #endif
