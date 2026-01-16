@@ -159,8 +159,8 @@ export default function InProgressGamesTable() {
       consoleName: 'SortByConsole',
       achievementsUnlocked: 'SortByAchievementsUnlocked',
       percentageComplete: 'SortByPercentageComplete',
-      medianTimeToBeatHardcoreFormatted: 'SortByMedianTimeToBeat',
-      medianTimeToMasterFormatted: 'SortByMedianTimeToMaster'
+      medianTimeToBeatHardcoreSeconds: 'SortByMedianTimeToBeat',
+      medianTimeToMasterSeconds: 'SortByMedianTimeToMaster'
     }
 
     const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
