@@ -456,7 +456,7 @@ namespace RetroTrack.Domain.Services.Controllers
                 // Fetch user's achievement progress for this subset game
                 var subsetUserData = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, subset.Id);
 
-                var subsetAchievements = new List<SubsetAchievement>();
+                List<SubsetAchievement> subsetAchievements;
 
                 if (subsetUserData != null && subsetUserData.Achievements != null)
                 {
