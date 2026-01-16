@@ -4,7 +4,7 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.Extensions;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
 using Serilog;
@@ -51,7 +51,7 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 days.Add(new DayData
                 {
-                    Date = DateTimeHelper.HumanizeDateTime(date),
+                    Date = date.ToHumanizedString(),
                     NewSets = newSets,
                     UpdatedSets = updatedSets
                 });
@@ -142,6 +142,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? gameQuery.OrderBy(x => x.GameGenre)
                     : gameQuery.OrderByDescending(x => x.GameGenre);
             }
+            else if (request.SortByMedianTimeToBeat != null)
+            {
+                gameQuery = request.SortByMedianTimeToBeat == true
+                    ? gameQuery.OrderBy(x => x.MedianTimeToBeatHardcore ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.MedianTimeToBeatHardcore ?? 0);
+            }
+            else if (request.SortByMedianTimeToMaster != null)
+            {
+                gameQuery = request.SortByMedianTimeToMaster == true
+                    ? gameQuery.OrderBy(x => x.MedianTimeToMaster ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.MedianTimeToMaster ?? 0);
+            }
 
             var games = await gameQuery
                 .Skip(request.Skip)
@@ -155,7 +167,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     GameTitle = x.Title,
                     PlayerCount = x.Players ?? 0,
                     Points = x.Points,
-                    ConsoleName = request.ConsoleId == -1 ? x.GameConsole.ConsoleName : null
+                    ConsoleName = request.ConsoleId == -1 ? x.GameConsole.ConsoleName : null,
+                    MedianTimeToBeatHardcoreSeconds = x.MedianTimeToBeatHardcore,
+                    MedianTimeToBeatHardcoreFormatted = x.MedianTimeToBeatHardcore.ToReadableTime(),
+                    MedianTimeToMasterSeconds = x.MedianTimeToMaster,
+                    MedianTimeToMasterFormatted = x.MedianTimeToMaster.ToReadableTime()
                 })
                 .ToArrayAsync();
 
@@ -181,6 +197,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 return null;
             }
 
+            var game = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
             return new GetPublicSpecificGameInfoResponse
             {
                 GameId = data.Id,
@@ -205,7 +223,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     Title = x.Value.Title,
                     Type = x.Value.Type,
                     AchievementOrder = x.Value.DisplayOrder
-                }).ToList()
+                }).ToList(),
+                MedianTimeToBeatHardcoreSeconds = game?.MedianTimeToBeatHardcore,
+                MedianTimeToBeatHardcoreFormatted = game?.MedianTimeToBeatHardcore.ToReadableTime(),
+                MedianTimeToMasterSeconds = game?.MedianTimeToMaster,
+                MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime()
             };
         }
 
@@ -239,6 +261,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     AchievementOrder = achievement.Value.DisplayOrder
                 }));
 
+                var game = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
                 return new GetLoggedInSpecificGameInfoResponse
                 {
                     AchievementCount = loggedOutData.AchievementCount,
@@ -270,7 +294,11 @@ namespace RetroTrack.Domain.Services.Controllers
                         {
                             Id = x.Id,
                             Name = x.PlaylistName
-                        }).ToArrayAsync()
+                        }).ToArrayAsync(),
+                    MedianTimeToBeatHardcoreSeconds = game?.MedianTimeToBeatHardcore,
+                    MedianTimeToBeatHardcoreFormatted = game?.MedianTimeToBeatHardcore.ToReadableTime(),
+                    MedianTimeToMasterSeconds = game?.MedianTimeToMaster,
+                    MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime()
                 };
             }
 
@@ -287,8 +315,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     Description = achievement.Value.Description,
                     Points = achievement.Value.Points,
                     Title = achievement.Value.Title,
-                    DateEarnedSoftcore = DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarned),
-                    DateEarnedHardcore = achievement.Value.DateEarnedHardcore != null ? DateTimeHelper.HumanizeDateTimeWithTime(achievement.Value.DateEarnedHardcore) : null,
+                    DateEarnedSoftcore = achievement.Value.DateEarned.ToHumanizedStringWithTime(),
+                    DateEarnedHardcore = achievement.Value.DateEarnedHardcore.ToHumanizedStringWithTime(),
                     Type = achievement.Value.Type,
                     AchievementOrder = achievement.Value.DisplayOrder
                 });
@@ -304,15 +332,15 @@ namespace RetroTrack.Domain.Services.Controllers
 
             if (winConditionAchievement.Count != 0)
             {
-                gameBeatenDateSoftcore = DateTimeHelper.HumanizeDateTimeWithTime(winConditionAchievement
+                gameBeatenDateSoftcore = winConditionAchievement
                     .Where(x => x.Value.DateEarned != null)
                     .Select(x => x.Value.DateEarned)
-                    .FirstOrDefault());
+                    .FirstOrDefault().ToHumanizedStringWithTime();
 
-                gameBeatenDateHardcore = DateTimeHelper.HumanizeDateTimeWithTime(winConditionAchievement
+                gameBeatenDateHardcore = winConditionAchievement
                     .Where(x => x.Value.DateEarnedHardcore != null)
                     .Select(x => x.Value.DateEarnedHardcore)
-                    .FirstOrDefault());
+                    .FirstOrDefault().ToHumanizedStringWithTime();
             }
 
             string? gameCompletedDate = null;
@@ -324,14 +352,16 @@ namespace RetroTrack.Domain.Services.Controllers
                     .OrderByDescending(x => x.Value.DateEarned)
                     .FirstOrDefault();
 
-                gameCompletedDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarned);
+                gameCompletedDate = lastAchievement.Value.DateEarned.ToHumanizedStringWithTime();
 
                 var lastAchievementHardcore = data.Achievements
                     .OrderByDescending(x => x.Value.DateEarnedHardcore)
                     .FirstOrDefault();
 
-                gameMasteredDate = DateTimeHelper.HumanizeDateTimeWithTime(lastAchievement.Value.DateEarnedHardcore);
+                gameMasteredDate = lastAchievement.Value.DateEarnedHardcore.ToHumanizedStringWithTime();
             }
+
+            var gameData = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
 
             return new GetLoggedInSpecificGameInfoResponse
             {
@@ -369,7 +399,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     {
                         Id = x.Id,
                         Name = x.PlaylistName
-                    }).ToArrayAsync()
+                    }).ToArrayAsync(),
+                MedianTimeToBeatHardcoreSeconds = gameData?.MedianTimeToBeatHardcore,
+                MedianTimeToBeatHardcoreFormatted = gameData?.MedianTimeToBeatHardcore.ToReadableTime(),
+                MedianTimeToMasterSeconds = gameData?.MedianTimeToMaster,
+                MedianTimeToMasterFormatted = gameData?.MedianTimeToMaster.ToReadableTime()
             };
         }
 
@@ -481,6 +515,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? gameQuery.OrderBy(x => x.Game.GameGenre)
                     : gameQuery.OrderByDescending(x => x.Game.GameGenre);
             }
+            else if (request.SortByMedianTimeToBeat != null)
+            {
+                gameQuery = request.SortByMedianTimeToBeat == true
+                    ? gameQuery.OrderBy(x => x.Game.MedianTimeToBeatHardcore ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.Game.MedianTimeToBeatHardcore ?? 0);
+            }
+            else if (request.SortByMedianTimeToMaster != null)
+            {
+                gameQuery = request.SortByMedianTimeToMaster == true
+                    ? gameQuery.OrderBy(x => x.Game.MedianTimeToMaster ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.Game.MedianTimeToMaster ?? 0);
+            }
 
             var games = await gameQuery
                 .Skip(request.Skip)
@@ -497,7 +543,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     PlayerCount = x.Game.Players ?? 0,
                     Points = x.Game.Points,
                     ConsoleName = request.ConsoleId == -1 ? x.Game.GameConsole.ConsoleName : null,
-                    HighestAward = x.HighestAward
+                    HighestAward = x.HighestAward,
+                    MedianTimeToBeatHardcoreSeconds = x.Game.MedianTimeToBeatHardcore,
+                    MedianTimeToBeatHardcoreFormatted = x.Game.MedianTimeToBeatHardcore.ToReadableTime(),
+                    MedianTimeToMasterSeconds = x.Game.MedianTimeToMaster,
+                    MedianTimeToMasterFormatted = x.Game.MedianTimeToMaster.ToReadableTime()
                 })
                 .ToArrayAsync();
 

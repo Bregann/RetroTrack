@@ -5,6 +5,7 @@ using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Requests;
 using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Responses;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Extensions;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers
@@ -149,6 +150,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? gameQuery.OrderBy(x => x.Game.GameGenre)
                     : gameQuery.OrderByDescending(x => x.Game.GameGenre);
             }
+            else if (request.SortByMedianTimeToBeat != null)
+            {
+                gameQuery = request.SortByMedianTimeToBeat == true
+                    ? gameQuery.OrderBy(x => x.Game.MedianTimeToBeatHardcore ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.Game.MedianTimeToBeatHardcore ?? 0);
+            }
+            else if (request.SortByMedianTimeToMaster != null)
+            {
+                gameQuery = request.SortByMedianTimeToMaster == true
+                    ? gameQuery.OrderBy(x => x.Game.MedianTimeToMaster ?? long.MaxValue)
+                    : gameQuery.OrderByDescending(x => x.Game.MedianTimeToMaster ?? 0);
+            }
 
             var games = await gameQuery
                 .Skip(request.Skip)
@@ -165,7 +178,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     PlayerCount = x.Game.Players ?? 0,
                     Points = x.Game.Points,
                     HighestAward = x.HighestAward,
-                    ConsoleName = x.Game.GameConsole.ConsoleName
+                    ConsoleName = x.Game.GameConsole.ConsoleName,
+                    MedianTimeToBeatHardcoreSeconds = x.Game.MedianTimeToBeatHardcore,
+                    MedianTimeToBeatHardcoreFormatted = x.Game.MedianTimeToBeatHardcore.ToReadableTime(),
+                    MedianTimeToMasterSeconds = x.Game.MedianTimeToMaster,
+                    MedianTimeToMasterFormatted = x.Game.MedianTimeToMaster.ToReadableTime()
                 })
                 .ToArrayAsync();
 

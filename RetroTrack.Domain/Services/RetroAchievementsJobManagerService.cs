@@ -63,6 +63,9 @@ namespace RetroTrack.Domain.Services
                     case JobType.UserUpdate:
                         backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessUserUpdateJob(request.Id));
                         break;
+                    case JobType.GetGameProgression:
+                        backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetGameProgressionJob(request.Id));
+                        break;
                 }
 
                 request.ProcessingStatus = ProcessingStatus.Scheduled;

@@ -13,7 +13,10 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Requests
         public bool? SortByGenre { get; set; } = null;
         public bool? SortByPoints { get; set; } = null;
         public bool? SortByConsole { get; set; } = null;
+        public bool? SortByMedianTimeToBeat { get; set; } = null;
+        public bool? SortByMedianTimeToMaster { get; set; } = null;
         public string? SearchTerm { get; set; } = null;
         public ConsoleTableSearchType? SearchType { get; set; } = null;
     }
 }
+

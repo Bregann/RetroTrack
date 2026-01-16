@@ -24,4 +24,8 @@ export interface PlaylistGameItem {
   genre: string
   achievementCount: number
   points: number
+  medianTimeToBeatHardcoreSeconds: number | null
+  medianTimeToBeatHardcoreFormatted: string | null
+  medianTimeToMasterSeconds: number | null
+  medianTimeToMasterFormatted: string | null
 }

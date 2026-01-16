@@ -84,6 +84,20 @@ const baseColumns: Column<Game>[] = [
     sortable: true,
     toggleDescFirst: true
   },
+  {
+    title: 'Time to Beat',
+    key: 'medianTimeToBeatHardcoreSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+  },
+  {
+    title: 'Time to Master',
+    key: 'medianTimeToMasterSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToMasterFormatted ?? 'N/A'
+  },
 
 ]
 
@@ -162,7 +176,9 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
       achievementCount: 'SortByAchievementCount',
       playerCount: 'SortByPlayerCount',
       points: 'SortByPoints',
-      consoleName: 'SortByConsole'
+      consoleName: 'SortByConsole',
+      medianTimeToBeatHardcoreSeconds: 'SortByMedianTimeToBeat',
+      medianTimeToMasterSeconds: 'SortByMedianTimeToMaster'
     }
 
     const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'

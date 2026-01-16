@@ -261,17 +261,22 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       title: 'Status',
       key: 'highestAward',
       sortable: true,
-      render: (game) => (
-        <div style={{ minWidth: '165px' }}>
-          <Badge
-            color={getAwardColor(game.highestAward)}
-            variant="light"
-            leftSection={getAwardIcon(game.highestAward)}
-          >
-            {getAwardLabel(game.highestAward)}
-          </Badge>
-        </div>
-      )
+      render: (game) => {
+        const hasStarted = game.achievementsEarnedSoftcore > 0 || game.achievementsEarnedHardcore > 0
+        const isNotStartedButHasProgress = !game.highestAward && hasStarted
+
+        return (
+          <div style={{ minWidth: '165px' }}>
+            <Badge
+              color={isNotStartedButHasProgress ? 'cyan' : getAwardColor(game.highestAward)}
+              variant="light"
+              leftSection={getAwardIcon(game.highestAward)}
+            >
+              {isNotStartedButHasProgress ? 'Started' : getAwardLabel(game.highestAward)}
+            </Badge>
+          </div>
+        )
+      }
     },
     {
       title: 'Achievements',
@@ -280,7 +285,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       toggleDescFirst: true
     },
     {
-      title: 'Achievement Progress',
+      title: 'Progress',
       key: 'achievementsEarnedHardcore',
       sortable: true,
       toggleDescFirst: true,
@@ -314,6 +319,20 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
       key: 'players',
       sortable: true,
       toggleDescFirst: true
+    },
+    {
+      title: 'Time to Beat',
+      key: 'medianTimeToBeatHardcoreSeconds',
+      sortable: true,
+      toggleDescFirst: true,
+      render: (game) => game.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+    },
+    {
+      title: 'Time to Master',
+      key: 'medianTimeToMasterSeconds',
+      sortable: true,
+      toggleDescFirst: true,
+      render: (game) => game.medianTimeToMasterFormatted ?? 'N/A'
     }
   ]
 

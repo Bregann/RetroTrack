@@ -21,5 +21,10 @@
         public required string GameImageUrl { get; set; }
         public required long Points { get; set; }
         public string? ConsoleName { get; set; }
+        public long? MedianTimeToBeatHardcoreSeconds { get; set; }
+        public string? MedianTimeToBeatHardcoreFormatted { get; set; }
+        public long? MedianTimeToMasterSeconds { get; set; }
+        public string? MedianTimeToMasterFormatted { get; set; }
     }
 }
+

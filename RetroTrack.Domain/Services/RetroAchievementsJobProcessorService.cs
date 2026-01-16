@@ -105,7 +105,7 @@ namespace RetroTrack.Domain.Services
                             Players = null,
                             HasAchievements = hasAchievements,
                             LastExtraDataProcessedDate = null,
-                            ExtraDataProcessed = !hasAchievements, // New games need extra data processing only if they have achievements
+                            ExtraDataProcessed = !hasAchievements,
                             DiscordMessageProcessed = false,
                             EmailMessageProcessed = false
                         };
@@ -420,6 +420,57 @@ namespace RetroTrack.Domain.Services
             catch (Exception ex)
             {
                 await HandleAndLogException(ex, request.Id, "UserUpdate");
+            }
+        }
+
+        /// <summary>
+        /// This method processes the GetGameProgression job. It retrieves the game progression data from the JSON data stored in the request and updates the game's median time statistics.
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        public async Task ProcessGetGameProgressionJob(int requestId)
+        {
+            var request = await context.RetroAchievementsLogAndLoadData.FirstAsync(x => x.Id == requestId);
+            request.ProcessingStatus = ProcessingStatus.BeingProcessed;
+            request.LastUpdate = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+
+            Log.Information($"[RetroAchievements] Processing GetGameProgression job for request {requestId}");
+
+            try
+            {
+                // Deserialize the JSON data into a GetGameProgression object
+                var progressionData = JsonConvert.DeserializeObject<GetGameProgression>(request.JsonData);
+
+                if (progressionData == null)
+                {
+                    await HandleAndLogErroredJob(request, $"Request {requestId} has invalid JSON data for GetGameProgression job.");
+                    return;
+                }
+
+                // Get the game and update the median time data
+                var game = await context.Games.FirstAsync(x => x.Id == progressionData.Id);
+
+                game.MedianTimeToBeat = progressionData.MedianTimeToBeat;
+                game.MedianTimeToBeatHardcore = progressionData.MedianTimeToBeatHardcore;
+                game.MedianTimeToComplete = progressionData.MedianTimeToComplete;
+                game.MedianTimeToMaster = progressionData.MedianTimeToMaster;
+                game.MedianTimesProcessed = true;
+
+                await context.SaveChangesAsync();
+
+                Log.Information($"[RetroAchievements] Successfully updated game {game.Id} ({game.Title}) with median time statistics.");
+
+                // Update the request status to processed
+                request.ProcessingStatus = ProcessingStatus.Processed;
+                request.LastUpdate = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+
+                Log.Information($"[RetroAchievements] Successfully processed GetGameProgression job for request {requestId}");
+            }
+            catch (Exception ex)
+            {
+                await HandleAndLogException(ex, request.Id, "GetGameProgression");
             }
         }
 

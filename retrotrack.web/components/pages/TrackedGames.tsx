@@ -64,13 +64,13 @@ const columns: Column<LoggedInGame>[] = [
     toggleDescFirst: true
   },
   {
-    title: 'Achievements Unlocked',
+    title: 'Unlocked',
     key: 'achievementsUnlocked',
     sortable: true,
     toggleDescFirst: true
   },
   {
-    title: 'Percent Complete',
+    title: 'Complete',
     key: 'percentageComplete',
     sortable: true,
     render: (item) => {
@@ -79,7 +79,7 @@ const columns: Column<LoggedInGame>[] = [
     toggleDescFirst: true
   },
   {
-    title: 'Highest Award',
+    title: 'Award',
     key: 'highestAward',
     render: (item) => {
       switch (item.highestAward) {
@@ -103,6 +103,20 @@ const columns: Column<LoggedInGame>[] = [
     key: 'consoleName',
     sortable: true,
     show: true
+  },
+  {
+    title: 'Time to Beat',
+    key: 'medianTimeToBeatHardcoreSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+  },
+  {
+    title: 'Time to Master',
+    key: 'medianTimeToMasterSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToMasterFormatted ?? 'N/A'
   }
 ]
 
@@ -155,7 +169,9 @@ export default function TrackedGames() {
       points: 'SortByPoints',
       consoleName: 'SortByConsole',
       achievementsUnlocked: 'SortByAchievementsUnlocked',
-      percentageComplete: 'SortByPercentageComplete'
+      percentageComplete: 'SortByPercentageComplete',
+      medianTimeToBeatHardcoreSeconds: 'SortByMedianTimeToBeat',
+      medianTimeToMasterSeconds: 'SortByMedianTimeToMaster'
     }
 
     const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'

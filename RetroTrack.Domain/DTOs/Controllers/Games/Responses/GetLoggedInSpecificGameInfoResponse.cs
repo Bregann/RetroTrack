@@ -37,6 +37,11 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public string? UserNotes { get; set; }
 
         public required UserPlaylist[] Playlists { get; set; }
+
+        public long? MedianTimeToBeatHardcoreSeconds { get; set; }
+        public string? MedianTimeToBeatHardcoreFormatted { get; set; }
+        public long? MedianTimeToMasterSeconds { get; set; }
+        public string? MedianTimeToMasterFormatted { get; set; }
     }
 
     public class UserAchievement
@@ -52,3 +57,4 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required int AchievementOrder { get; set; }
     }
 }
+

@@ -29,6 +29,10 @@ export interface GetLoggedInSpecificGameInfoResponse {
     dateMastered: string | null
     userNotes: string | null
     playlists: UserPlaylist[]
+    medianTimeToBeatHardcoreSeconds: number | null
+    medianTimeToBeatHardcoreFormatted: string | null
+    medianTimeToMasterSeconds: number | null
+    medianTimeToMasterFormatted: string | null
 }
 
 export interface UserAchievement {

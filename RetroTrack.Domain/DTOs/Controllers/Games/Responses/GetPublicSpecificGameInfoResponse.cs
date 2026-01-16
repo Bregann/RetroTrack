@@ -18,6 +18,10 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required int AchievementCount { get; set; }
         public required int Players { get; set; }
         public required List<Achievement> Achievements { get; set; }
+        public long? MedianTimeToBeatHardcoreSeconds { get; set; }
+        public string? MedianTimeToBeatHardcoreFormatted { get; set; }
+        public long? MedianTimeToMasterSeconds { get; set; }
+        public string? MedianTimeToMasterFormatted { get; set; }
     }
 
     public class Achievement
@@ -31,3 +35,4 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public required int AchievementOrder { get; set; }
     }
 }
+

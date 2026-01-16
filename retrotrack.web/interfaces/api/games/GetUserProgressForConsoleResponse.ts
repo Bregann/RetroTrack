@@ -27,4 +27,8 @@ export interface LoggedInGame {
   points: number
   consoleName: string | null // Optional, can be null if consoleId is -1
   highestAward: HighestAwardKind
+  medianTimeToBeatHardcoreSeconds: number | null
+  medianTimeToBeatHardcoreFormatted: string | null
+  medianTimeToMasterSeconds: number | null
+  medianTimeToMasterFormatted: string | null
 }
