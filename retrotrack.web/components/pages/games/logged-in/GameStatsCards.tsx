@@ -71,18 +71,18 @@ export function GameStatsCards({ gameId }: GameStatsCardsProps) {
               </Group>
               <Group gap="xs">
                 <IconStar size={16} />
-                <Text size="sm">{data.genre !== '' || 'Not Set'}</Text>
+                <Text size="sm">{data.genre !== '' ? data.genre : 'Not Set'}</Text>
               </Group>
             </Stack>
 
             <Stack gap="4">
               <Group gap="xs">
                 <IconBuilding size={16} />
-                <Text size="sm">Publisher: {data.publisher !== '' || 'Not Set'}</Text>
+                <Text size="sm">Publisher: {data.publisher !== '' ? data.publisher : 'Not Set'}</Text>
               </Group>
               <Group gap="xs">
                 <IconTools size={16} />
-                <Text size="sm">Developer: {data.developer !== '' || 'Not Set'}</Text>
+                <Text size="sm">Developer: {data.developer !== '' ? data.developer : 'Not Set'}</Text>
               </Group>
             </Stack>
           </Group>
