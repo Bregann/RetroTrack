@@ -119,16 +119,16 @@ export function SubsetAchievementSet({
                 return aSort - bSort
               })
               .filter((x) => {
-                if (hideUnlocked) {
-                  return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
-                }
-                if (showProgressionOnly) {
-                  return x.type === AchievementType.Progression || x.type === AchievementType.Win_Condition
-                }
-                if (showMissableOnly) {
-                  return x.type === AchievementType.Missable
-                }
-                return true
+                const isUnlocked = x.dateEarnedSoftcore !== null || x.dateEarnedHardcore !== null
+                const matchesHidden = !hideUnlocked || !isUnlocked
+                const matchesProgression =
+                  !showProgressionOnly ||
+                  x.type === AchievementType.Progression ||
+                  x.type === AchievementType.Win_Condition
+                const matchesMissable =
+                  !showMissableOnly || x.type === AchievementType.Missable
+
+                return matchesHidden && matchesProgression && matchesMissable
               })
               .map((achievement) => (
                 <AchievementCard key={achievement.id} achievement={achievement} />
