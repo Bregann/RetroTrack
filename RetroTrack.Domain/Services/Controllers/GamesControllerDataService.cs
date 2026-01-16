@@ -341,7 +341,6 @@ namespace RetroTrack.Domain.Services.Controllers
                     });
                 }
 
-
                 return new GetLoggedInSpecificGameInfoResponse
                 {
                     AchievementCount = loggedOutData.AchievementCount,
@@ -448,7 +447,6 @@ namespace RetroTrack.Domain.Services.Controllers
                 .Where(x => x.ParentGameId == gameId && x.HasAchievements)
                 .ToListAsync();
 
-
             var subsetsWithProgress = new List<SubsetGame>();
             foreach (var subset in subsetGamesWithProgress)
             {
@@ -457,9 +455,9 @@ namespace RetroTrack.Domain.Services.Controllers
 
                 // Fetch user's achievement progress for this subset game
                 var subsetUserData = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, subset.Id);
-                
+
                 var subsetAchievements = new List<SubsetAchievement>();
-                
+
                 if (subsetUserData != null && subsetUserData.Achievements != null)
                 {
                     subsetAchievements = subsetUserData.Achievements
@@ -511,7 +509,6 @@ namespace RetroTrack.Domain.Services.Controllers
                     Achievements = subsetAchievements
                 });
             }
-
 
             return new GetLoggedInSpecificGameInfoResponse
             {

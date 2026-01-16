@@ -59,5 +59,3 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
     }
 }
 
-
-
