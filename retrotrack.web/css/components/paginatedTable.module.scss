@@ -45,7 +45,7 @@
   }
 
   .headerCell {
-    padding: 16px 20px;
+    padding: 12px 16px;
     font-weight: 600;
     font-size: 14px;
     color: light-dark(#495057, #c1c2c5);
@@ -134,14 +134,14 @@
   }
 
   .bodyCell {
-    padding: 16px 20px;
+    padding: 10px 16px;
     border: none;
     vertical-align: middle;
     font-size: 14px;
     color: light-dark(#495057, #c1c2c5);
     
     &.actionsCell {
-      padding: 12px 20px;
+      padding: 8px 16px;
       white-space: nowrap;
     }
   }

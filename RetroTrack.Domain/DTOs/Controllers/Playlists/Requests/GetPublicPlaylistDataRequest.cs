@@ -13,8 +13,11 @@ namespace RetroTrack.Domain.DTOs.Controllers.Playlists.Requests
         public bool? SortByAchievementCount { get; set; } = null;
         public bool? SortByPoints { get; set; } = null;
         public bool? SortByPlayers { get; set; } = null;
+        public bool? SortByMedianTimeToBeat { get; set; } = null;
+        public bool? SortByMedianTimeToMaster { get; set; } = null;
         public int Skip { get; set; }
         public int Take { get; set; }
         public ConsoleTableSearchType? SearchType { get; set; } = null;
     }
 }
+

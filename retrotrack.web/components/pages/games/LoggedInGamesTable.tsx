@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid, Progress } from '@mantine/core'
+import { Badge, Button, Center, Checkbox, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid, Progress, Menu } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
@@ -16,7 +16,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
-import { IconX, IconTrophy, IconPlayerPlay, IconMedal } from '@tabler/icons-react'
+import { IconX, IconTrophy, IconPlayerPlay, IconMedal, IconColumns } from '@tabler/icons-react'
 
 interface LoggedInGamesTableProps {
   consoleId: number
@@ -70,13 +70,13 @@ const baseColumns: Column<LoggedInGame>[] = [
     toggleDescFirst: true
   },
   {
-    title: 'Achievements Unlocked',
+    title: 'Unlocked',
     key: 'achievementsUnlocked',
     sortable: true,
     toggleDescFirst: true
   },
   {
-    title: 'Percent Complete',
+    title: 'Complete',
     key: 'percentageComplete',
     sortable: true,
     render: (item) => {
@@ -85,7 +85,7 @@ const baseColumns: Column<LoggedInGame>[] = [
     toggleDescFirst: true
   },
   {
-    title: 'Highest Award',
+    title: 'Award',
     key: 'highestAward',
     render: (item) => {
       switch (item.highestAward) {
@@ -103,6 +103,20 @@ const baseColumns: Column<LoggedInGame>[] = [
           return ''
       }
     }
+  },
+  {
+    title: 'Time to Beat',
+    key: 'medianTimeToBeatHardcoreSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+  },
+  {
+    title: 'Time to Master',
+    key: 'medianTimeToMasterSeconds',
+    sortable: true,
+    toggleDescFirst: true,
+    render: (item) => item.medianTimeToMasterFormatted ?? 'N/A'
   }
 ]
 
@@ -124,6 +138,25 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   const [hideInProgressGames, setHideInProgressGames] = useState(false)
   const [hideBeatenGames, setHideBeatenGames] = useState(false)
   const [hideCompletedGames, setHideCompletedGames] = useState(false)
+
+  // Column visibility state
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set([
+    'gameImageUrl', 'gameTitle', 'gameGenre', 'achievementCount', 'points', 'playerCount',
+    'achievementsUnlocked', 'percentageComplete', 'highestAward',
+    'medianTimeToBeatHardcoreSeconds', 'medianTimeToMasterSeconds'
+  ]))
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(key)) {
+        newSet.delete(key)
+      } else {
+        newSet.add(key)
+      }
+      return newSet
+    })
+  }
 
   // Create a fresh copy of columns for this component instance
   const columns = useMemo(() => {
@@ -174,6 +207,13 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
       })
     }
 
+    // Apply column visibility settings
+    cols.forEach(col => {
+      if (col.key && !visibleColumns.has(col.key as string)) {
+        col.show = false
+      }
+    })
+
     // Add console column only if showConsoleColumn is true and consoleId is -1
     if (props.showConsoleColumn === true && props.consoleId === -1) {
       cols.push({
@@ -185,7 +225,7 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
     }
 
     return cols
-  }, [props.showConsoleColumn, props.consoleId, isMobile])
+  }, [props.showConsoleColumn, props.consoleId, isMobile, visibleColumns])
 
   const queryString = useMemo(() => {
     const skip = (page - 1) * pageSize
@@ -198,7 +238,10 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
       points: 'SortByPoints',
       consoleName: 'SortByConsole',
       achievementsUnlocked: 'SortByAchievementsUnlocked',
-      percentageComplete: 'SortByPercentageComplete'
+      percentageComplete: 'SortByPercentageComplete',
+      highestAward: 'SortByHighestAward',
+      medianTimeToBeatHardcoreSeconds: 'SortByMedianTimeToBeat',
+      medianTimeToMasterSeconds: 'SortByMedianTimeToMaster'
     }
 
     const sortParam = sortKeyMap[sortOption.key] !== undefined ? sortKeyMap[sortOption.key] : 'SortByName'
@@ -361,66 +404,90 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
             ) : (
               <>
                 <Group
-                  justify="center"
+                  justify="space-between"
                   mt={10}
                   mb={10}
                   pr={isMobile ? 10 : 20}
                   pl={isMobile ? 10 : 20}
                   style={{ width: '100%' }}
                   gap={isMobile ? 'xs' : 'md'}
+                  wrap="wrap"
                 >
-                  <TextInput
-                    placeholder="Search..."
-                    value={searchInput}
-                    style={{
-                      flex: 1,
-                      minWidth: isMobile ? 150 : 200,
-                    }}
-                    onChange={(e) => {
-                      const value = e.currentTarget.value
-                      setSearchInput(value)
-                      if (value.trim() === '') {
-                        setSearchTerm(null)
+                  <Group gap={isMobile ? 'xs' : 'md'} style={{ flex: 1, minWidth: 0 }}>
+                    <TextInput
+                      placeholder="Search..."
+                      value={searchInput}
+                      style={{
+                        flex: 1,
+                        minWidth: isMobile ? 150 : 200,
+                      }}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value
+                        setSearchInput(value)
+                        if (value.trim() === '') {
+                          setSearchTerm(null)
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && searchInput.trim() !== '') {
+                          setSearchTerm(searchInput.trim())
+                        }
+                      }}
+                      rightSection={
+                        searchInput !== '' ? (
+                          <ActionIcon
+                            size="sm"
+                            variant="subtle"
+                            onClick={() => {
+                              setSearchInput('')
+                              setSearchTerm(null)
+                            }}
+                          >
+                            <IconX size={16} />
+                          </ActionIcon>
+                        ) : null
                       }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && searchInput.trim() !== '') {
-                        setSearchTerm(searchInput.trim())
-                      }
-                    }}
-                    rightSection={
-                      searchInput !== '' ? (
-                        <ActionIcon
-                          size="sm"
-                          variant="subtle"
-                          onClick={() => {
-                            setSearchInput('')
-                            setSearchTerm(null)
-                          }}
+                    />
+                    <Select
+                      data={searchDropdownOptions}
+                      style={{
+                        flex: isMobile ? '0 0 100px' : '0 0 150px',
+                        minWidth: 0,
+                      }}
+                      clearable
+                      defaultValue={searchDropdownValue}
+                      onChange={(value) => setSearchDropdownValue(value ?? '0')}
+                    />
+                    <Button
+                      style={{ flex: '0 0 auto' }}
+                      size={isMobile ? 'sm' : 'md'}
+                      onClick={() => { setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null) }}
+                      disabled={searchInput.trim() === ''}
+                    >
+                      {isMobile ? 'Go' : 'Search'}
+                    </Button>
+                  </Group>
+
+                  {/* Column Visibility Toggle */}
+                  <Menu shadow="md" width={200}>
+                    <Menu.Target>
+                      <Button variant="light" leftSection={<IconColumns size={16} />} size={isMobile ? 'sm' : 'md'}>
+                        Columns
+                      </Button>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Label>Toggle Columns</Menu.Label>
+                      {baseColumns.filter(col => col.key && col.key !== 'gameImageUrl' && col.key !== 'gameTitle').map(col => (
+                        <Menu.Item
+                          key={col.key as string}
+                          onClick={() => toggleColumn(col.key as string)}
+                          rightSection={visibleColumns.has(col.key as string) ? '✓' : ''}
                         >
-                          <IconX size={16} />
-                        </ActionIcon>
-                      ) : null
-                    }
-                  />
-                  <Select
-                    data={searchDropdownOptions}
-                    style={{
-                      flex: isMobile ? '0 0 100px' : '0 0 150px',
-                      minWidth: 0,
-                    }}
-                    clearable
-                    defaultValue={searchDropdownValue}
-                    onChange={(value) => setSearchDropdownValue(value ?? '0')}
-                  />
-                  <Button
-                    style={{ flex: '0 0 auto' }}
-                    size={isMobile ? 'sm' : 'md'}
-                    onClick={() => { setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null) }}
-                    disabled={searchInput.trim() === ''}
-                  >
-                    {isMobile ? 'Go' : 'Search'}
-                  </Button>
+                          {col.title}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Dropdown>
+                  </Menu>
                 </Group>
                 <Group ml={20} mb={15}>
                   <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />

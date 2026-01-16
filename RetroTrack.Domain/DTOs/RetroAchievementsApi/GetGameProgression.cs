@@ -24,28 +24,28 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int NumDistinctPlayers { get; set; }
 
         [JsonProperty("TimesUsedInBeatMedian")]
-        public int TimesUsedInBeatMedian { get; set; }
+        public int? TimesUsedInBeatMedian { get; set; }
 
         [JsonProperty("TimesUsedInHardcoreBeatMedian")]
-        public int TimesUsedInHardcoreBeatMedian { get; set; }
+        public int? TimesUsedInHardcoreBeatMedian { get; set; }
 
         [JsonProperty("MedianTimeToBeat")]
-        public int MedianTimeToBeat { get; set; }
+        public int? MedianTimeToBeat { get; set; }
 
         [JsonProperty("MedianTimeToBeatHardcore")]
-        public int MedianTimeToBeatHardcore { get; set; }
+        public int? MedianTimeToBeatHardcore { get; set; }
 
         [JsonProperty("TimesUsedInCompletionMedian")]
-        public int TimesUsedInCompletionMedian { get; set; }
+        public int? TimesUsedInCompletionMedian { get; set; }
 
         [JsonProperty("TimesUsedInMasteryMedian")]
-        public int TimesUsedInMasteryMedian { get; set; }
+        public int? TimesUsedInMasteryMedian { get; set; }
 
         [JsonProperty("MedianTimeToComplete")]
-        public int MedianTimeToComplete { get; set; }
+        public int? MedianTimeToComplete { get; set; }
 
         [JsonProperty("MedianTimeToMaster")]
-        public int MedianTimeToMaster { get; set; }
+        public int? MedianTimeToMaster { get; set; }
 
         [JsonProperty("NumAchievements")]
         public int NumAchievements { get; set; }
@@ -84,15 +84,16 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int NumAwardedHardcore { get; set; }
 
         [JsonProperty("TimesUsedInUnlockMedian")]
-        public int TimesUsedInUnlockMedian { get; set; }
+        public int? TimesUsedInUnlockMedian { get; set; }
 
         [JsonProperty("TimesUsedInHardcoreUnlockMedian")]
-        public int TimesUsedInHardcoreUnlockMedian { get; set; }
+        public int? TimesUsedInHardcoreUnlockMedian { get; set; }
 
         [JsonProperty("MedianTimeToUnlock")]
-        public int MedianTimeToUnlock { get; set; }
+        public int? MedianTimeToUnlock { get; set; }
 
         [JsonProperty("MedianTimeToUnlockHardcore")]
-        public int MedianTimeToUnlockHardcore { get; set; }
+        public int? MedianTimeToUnlockHardcore { get; set; }
     }
 }
+

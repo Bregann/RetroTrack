@@ -188,6 +188,20 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
       key: 'players',
       sortable: true,
       toggleDescFirst: true
+    },
+    {
+      title: 'Time to Beat',
+      key: 'medianTimeToBeatHardcoreSeconds',
+      sortable: true,
+      toggleDescFirst: true,
+      render: (game) => game.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+    },
+    {
+      title: 'Time to Master',
+      key: 'medianTimeToMasterSeconds',
+      sortable: true,
+      toggleDescFirst: true,
+      render: (game) => game.medianTimeToMasterFormatted ?? 'N/A'
     }
   ]
 

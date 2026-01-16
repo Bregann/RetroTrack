@@ -27,6 +27,7 @@ import {
   IconTools,
   IconCheck,
   IconExclamationMark,
+  IconClock,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
 import { useState } from 'react'
@@ -126,16 +127,28 @@ export function LoggedOutGameModal(props: LoggedOutGameModalProps) {
                 <ThemeIcon size="xl" radius="md" color="yellow">
                   <IconTrophy size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta="center">{data.achievementCount} Achievements</Text>
+                <Text fw={700} ta="center">Stats</Text>
+                <Stack gap="xs" justify="center" ta="center">
+                  <Text size="sm" fw={600}>{data.achievementCount} Achievements</Text>
+                  <Text size="sm" fw={600}>{data.achievements.reduce((partialSum, x) => partialSum + x.points, 0)} Points</Text>
+                </Stack>
               </Stack>
             </Card>
 
             <Card withBorder>
               <Stack align="center" justify="center" h="100%" style={{ minHeight: 120 }}>
-                <ThemeIcon size="xl" radius="md" color="teal">
-                  <IconStar size={24} />
+                <ThemeIcon size="xl" radius="md" color="grape">
+                  <IconClock size={24} />
                 </ThemeIcon>
-                <Text fw={700} ta={'center'}>{data.achievements.reduce((partialSum, x) => partialSum + x.points, 0)} Points</Text>
+                <Text fw={700} ta="center">Time Stats</Text>
+                {(data.medianTimeToBeatHardcoreFormatted !== null || data.medianTimeToMasterFormatted !== null) ? (
+                  <Stack gap="xs" justify="center" ta="center">
+                    <Text size="sm">Median Time to Beat: {data.medianTimeToBeatHardcoreFormatted ?? 'N/A'}</Text>
+                    <Text size="sm">Median Time to Master: {data.medianTimeToMasterFormatted ?? 'N/A'}</Text>
+                  </Stack>
+                ) : (
+                  <Text size="sm" c="dimmed" ta="center">Not enough data recorded</Text>
+                )}
               </Stack>
             </Card>
 

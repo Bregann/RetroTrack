@@ -15,6 +15,10 @@ export interface GetPublicSpecificGameInfoResponse {
     achievementCount: number
     players: number
     achievements: Achievement[]
+    medianTimeToBeatHardcoreSeconds: number | null
+    medianTimeToBeatHardcoreFormatted: string | null
+    medianTimeToMasterSeconds: number | null
+    medianTimeToMasterFormatted: string | null
 }
 
 export interface Achievement {

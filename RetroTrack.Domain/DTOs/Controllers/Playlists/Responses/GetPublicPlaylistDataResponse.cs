@@ -28,5 +28,10 @@
         public required string Genre { get; set; }
         public required int AchievementCount { get; set; }
         public required int Points { get; set; }
+        public long? MedianTimeToBeatHardcoreSeconds { get; set; }
+        public string? MedianTimeToBeatHardcoreFormatted { get; set; }
+        public long? MedianTimeToMasterSeconds { get; set; }
+        public string? MedianTimeToMasterFormatted { get; set; }
     }
 }
+

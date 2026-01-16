@@ -18,4 +18,8 @@ export interface Game {
     points: number
     consoleName?: string // Optional, only present if consoleId is -1
     buttons?: string
+    medianTimeToBeatHardcoreSeconds: number | null
+    medianTimeToBeatHardcoreFormatted: string | null
+    medianTimeToMasterSeconds: number | null
+    medianTimeToMasterFormatted: string | null
 }

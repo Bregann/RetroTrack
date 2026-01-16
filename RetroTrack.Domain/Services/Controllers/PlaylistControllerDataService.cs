@@ -4,6 +4,7 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
 using RetroTrack.Domain.Enums;
+using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers
@@ -189,6 +190,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? games.OrderBy(pg => pg.Game.Players)
                     : games.OrderByDescending(pg => pg.Game.Players);
             }
+            else if (request.SortByMedianTimeToBeat != null)
+            {
+                games = request.SortByMedianTimeToBeat == true
+                    ? games.OrderBy(pg => pg.Game.MedianTimeToBeatHardcore ?? long.MaxValue)
+                    : games.OrderByDescending(pg => pg.Game.MedianTimeToBeatHardcore ?? 0);
+            }
+            else if (request.SortByMedianTimeToMaster != null)
+            {
+                games = request.SortByMedianTimeToMaster == true
+                    ? games.OrderBy(pg => pg.Game.MedianTimeToMaster ?? long.MaxValue)
+                    : games.OrderByDescending(pg => pg.Game.MedianTimeToMaster ?? 0);
+            }
             else
             {
                 games = games.OrderBy(pg => pg.OrderIndex);
@@ -207,7 +220,11 @@ namespace RetroTrack.Domain.Services.Controllers
                         Genre = x.Game.GameGenre ?? string.Empty,
                         AchievementCount = x.Game.Achievements.Count,
                         Points = x.Game.Achievements.Sum(a => a.Points),
-                        Players = x.Game.Players ?? 0
+                        Players = x.Game.Players ?? 0,
+                        MedianTimeToBeatHardcoreSeconds = x.Game.MedianTimeToBeatHardcore,
+                        MedianTimeToBeatHardcoreFormatted = x.Game.MedianTimeToBeatHardcore.ToReadableTime(),
+                        MedianTimeToMasterSeconds = x.Game.MedianTimeToMaster,
+                        MedianTimeToMasterFormatted = x.Game.MedianTimeToMaster.ToReadableTime()
                     })
                     .ToArray();
 
@@ -296,6 +313,18 @@ namespace RetroTrack.Domain.Services.Controllers
                     ? games.OrderBy(pg => pg.Game.Achievements.Sum(a => a.Points))
                     : games.OrderByDescending(pg => pg.Game.Achievements.Sum(a => a.Points));
             }
+            else if (request.SortByMedianTimeToBeat != null)
+            {
+                games = request.SortByMedianTimeToBeat == true
+                    ? games.OrderBy(pg => pg.Game.MedianTimeToBeatHardcore ?? long.MaxValue)
+                    : games.OrderByDescending(pg => pg.Game.MedianTimeToBeatHardcore ?? 0);
+            }
+            else if (request.SortByMedianTimeToMaster != null)
+            {
+                games = request.SortByMedianTimeToMaster == true
+                    ? games.OrderBy(pg => pg.Game.MedianTimeToMaster ?? long.MaxValue)
+                    : games.OrderByDescending(pg => pg.Game.MedianTimeToMaster ?? 0);
+            }
             else
             {
                 games = games.OrderBy(pg => pg.OrderIndex);
@@ -323,7 +352,11 @@ namespace RetroTrack.Domain.Services.Controllers
                     Players = x.Game.Players ?? 0,
                     HighestAward = Enums.HighestAwardKind.Unknown,
                     AchievementsEarnedSoftcore = 0,
-                    AchievementsEarnedHardcore = 0
+                    AchievementsEarnedHardcore = 0,
+                    MedianTimeToBeatHardcoreSeconds = x.Game.MedianTimeToBeatHardcore,
+                    MedianTimeToBeatHardcoreFormatted = x.Game.MedianTimeToBeatHardcore.ToReadableTime(),
+                    MedianTimeToMasterSeconds = x.Game.MedianTimeToMaster,
+                    MedianTimeToMasterFormatted = x.Game.MedianTimeToMaster.ToReadableTime()
                 })
                 .ToArray();
 

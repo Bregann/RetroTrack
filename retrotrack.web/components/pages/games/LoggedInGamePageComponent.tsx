@@ -40,6 +40,7 @@ import {
   IconCrown,
   IconArrowLeft,
   IconPlus,
+  IconClock,
 } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
 import pageStyles from '@/css/pages/gamePage.module.scss'
@@ -276,30 +277,19 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
                   <ThemeIcon size="xl" radius="md" color="yellow">
                     <IconTrophy size={24} />
                   </ThemeIcon>
-                  <Text fw={700} ta={'center'}>{data.achievementsAwardedTotal.toLocaleString()}/{data.achievementCount.toLocaleString()} Achievements</Text>
+                  <Text fw={700} ta={'center'}>Progress</Text>
                   <Stack gap="xs" justify="center" ta={'center'}>
+                    <Text size="sm" fw={600}>
+                      {data.achievementsAwardedTotal.toLocaleString()}/{data.achievementCount.toLocaleString()} Achievements
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {data.pointsAwardedTotal.toLocaleString()}/{data.totalGamePoints.toLocaleString()} Points
+                    </Text>
                     <Text size="sm" c="dimmed">
                       {((data.achievementsAwardedTotal / data.achievementCount) * 100).toFixed(2)}% complete
                     </Text>
-                    {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {data.achievementsAwardedSoftcore}</Text>}
-                    {data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">Hardcore: {data.achievementsAwardedHardcore}</Text>}
-                    <Text size="sm" c="grey">Locked: {data.achievementCount - data.achievementsAwardedTotal}</Text>
-                  </Stack>
-                </Stack>
-              </Card>
-
-              <Card withBorder>
-                <Stack align="center" gap={6}>
-                  <ThemeIcon size="xl" radius="md" color="teal">
-                    <IconStar size={24} />
-                  </ThemeIcon>
-                  <Text fw={700} ta={'center'}>{data.pointsAwardedTotal.toLocaleString()}/{data.totalGamePoints.toLocaleString()} Points</Text>
-                  <Stack gap="xs" justify="center" ta={'center'}>
-                    <Text size="sm" c="dimmed">
-                      {((data.pointsAwardedTotal / data.totalGamePoints) * 100).toFixed(2)}% complete
-                    </Text>
-                    {data.pointsAwardedSoftcore !== data.pointsAwardedHardcore && <Text size="sm" c="cyan">Softcore: {data.pointsAwardedSoftcore}</Text>}
-                    {data.pointsAwardedHardcore !== 0 && <Text size="sm" c="cyan">Hardcore: {data.pointsAwardedHardcore}</Text>}
+                    {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Text size="sm" c="cyan">SC: {data.achievementsAwardedSoftcore}</Text>}
+                    {data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">HC: {data.achievementsAwardedHardcore}</Text>}
                   </Stack>
                 </Stack>
               </Card>
@@ -370,6 +360,23 @@ export function LoggedInGamePage(props: LoggedInGamePageProps) {
                         : data.dateMastered ?? data.dateCompleted}
                     </Text>
                   </Stack>
+                </Stack>
+              </Card>
+
+              <Card withBorder>
+                <Stack align="center" justify="center" h="100%" gap="sm">
+                  <ThemeIcon size="xl" radius="md" color="grape">
+                    <IconClock size={24} />
+                  </ThemeIcon>
+                  <Text fw={700} ta="center">Time Stats</Text>
+                  {(data.medianTimeToBeatHardcoreFormatted !== null || data.medianTimeToMasterFormatted !== null) ? (
+                    <Stack gap="xs" ta="center">
+                      <Text size="sm">Median Time to Beat: {data.medianTimeToBeatHardcoreFormatted ?? 'N/A'}</Text>
+                      <Text size="sm">Median Time to Master: {data.medianTimeToMasterFormatted ?? 'N/A'}</Text>
+                    </Stack>
+                  ) : (
+                    <Text size="sm" c="dimmed" ta="center">Not enough data recorded</Text>
+                  )}
                 </Stack>
               </Card>
             </SimpleGrid>

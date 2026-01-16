@@ -264,14 +264,29 @@ namespace RetroTrack.Domain.Services
         /// <summary>
         /// Gets game progression data for games released over a month ago that haven't been processed yet.
         /// </summary>
+        /// <param name="processEntireDatabase">Set to true to process all games with achievements, ignoring the processed flag and release date</param>
         /// <returns></returns>
-        public async Task GetGameProgressionDataForEligibleGames()
+        public async Task GetGameProgressionDataForEligibleGames(bool processEntireDatabase = false)
         {
             // Get all games that were released over a month ago and haven't had their median times processed yet
-            var eligibleGames = await context.Games
-                .Where(x => !x.MedianTimesProcessed && x.SetReleasedDate < DateTime.UtcNow.AddMonths(-1) && x.HasAchievements)
-                .Select(x => x.Id)
-                .ToArrayAsync();
+            int[] eligibleGames;
+
+            if (!processEntireDatabase)
+            {
+                eligibleGames = await context.Games
+                    .Where(x => !x.MedianTimesProcessed && x.SetReleasedDate < DateTime.UtcNow.AddMonths(-1) && x.HasAchievements)
+                    .Select(x => x.Id)
+                    .ToArrayAsync();
+                Log.Information("[RetroAchievements] Processing only unprocessed games released over a month ago.");
+            }
+            else
+            {
+                eligibleGames = await context.Games
+                    .Where(x => x.HasAchievements)
+                    .Select(x => x.Id)
+                    .ToArrayAsync();
+                Log.Information("[RetroAchievements] Processing all games with achievements in the database.");
+            }
 
             if (eligibleGames.Length == 0)
             {
