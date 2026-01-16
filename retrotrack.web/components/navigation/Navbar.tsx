@@ -155,7 +155,7 @@ export function Navbar(props: NavbarProps) {
           </Link>
 
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.2.1 Update + Support Info</Button>
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.3 Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -433,9 +433,20 @@ export function Navbar(props: NavbarProps) {
             multiple
             variant="contained"
             radius="md"
-            defaultValue={['v7.2.1']}
+            defaultValue={['v7.3']}
             chevron={<IconChevronRight size={16} />}
           >
+            <Accordion.Item value="v7.3">
+              <Accordion.Control>RetroTrack v7.3 Released</Accordion.Control>
+              <Accordion.Panel>
+                <Text mb="sm">Here are some of the new features:</Text>
+                <List withPadding>
+                  <List.Item>Subset support - Games with achievement subsets now display them in an accordion format on game pages and modals</List.Item>
+                  <List.Item>Median Time to Beat and Median Time to Master statistics - Now visible on game pages, modals, and in game tables</List.Item>
+                  <List.Item>Major code refactoring - Game components have been reorganized into smaller, more maintainable pieces</List.Item>
+                </List>
+              </Accordion.Panel>
+            </Accordion.Item>
             <Accordion.Item value="v7.2.1">
               <Accordion.Control>RetroTrack v7.2.1 Released</Accordion.Control>
               <Accordion.Panel>
