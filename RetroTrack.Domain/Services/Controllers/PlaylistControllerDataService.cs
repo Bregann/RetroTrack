@@ -4,7 +4,7 @@ using RetroTrack.Domain.Database.Models;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Playlists.Responses;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.Extensions;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers

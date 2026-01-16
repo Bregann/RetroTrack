@@ -1,4 +1,4 @@
-﻿namespace RetroTrack.Domain.Helpers
+﻿namespace RetroTrack.Domain.Extensions
 {
     public static class DateTimeExtensions
     {

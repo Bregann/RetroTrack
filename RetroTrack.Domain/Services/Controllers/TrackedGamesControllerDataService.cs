@@ -5,7 +5,7 @@ using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Requests;
 using RetroTrack.Domain.DTOs.Controllers.TrackedGames.Responses;
 using RetroTrack.Domain.Enums;
-using RetroTrack.Domain.Helpers;
+using RetroTrack.Domain.Extensions;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Domain.Services.Controllers
