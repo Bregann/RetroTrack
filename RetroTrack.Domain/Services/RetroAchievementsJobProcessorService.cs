@@ -158,6 +158,7 @@ namespace RetroTrack.Domain.Services
                 var game = await context.Games.FirstAsync(x => x.Id == gameData.Id);
                 game.GameGenre = gameData.Genre;
                 game.Players = gameData.Players;
+                game.ParentGameId = gameData.ParentGameId;
                 game.LastExtraDataProcessedDate = DateTime.UtcNow;
                 game.ConsoleId = gameData.ConsoleId;
                 game.ImageIcon = gameData.ImageIcon;

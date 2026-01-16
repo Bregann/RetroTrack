@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Badge, Button, Center, Checkbox, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid, Progress, Menu } from '@mantine/core'
-import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
+import PaginatedTable, { Column, SortOption } from '@/components/shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
@@ -27,7 +27,7 @@ const baseColumns: Column<LoggedInGame>[] = [
   {
     title: '',
     key: 'gameImageUrl',
-    render: (item) => {
+    render: (item: LoggedInGame) => {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
           <Image
@@ -79,7 +79,7 @@ const baseColumns: Column<LoggedInGame>[] = [
     title: 'Complete',
     key: 'percentageComplete',
     sortable: true,
-    render: (item) => {
+    render: (item: LoggedInGame) => {
       return `${item.percentageComplete}%`
     },
     toggleDescFirst: true
@@ -87,7 +87,7 @@ const baseColumns: Column<LoggedInGame>[] = [
   {
     title: 'Award',
     key: 'highestAward',
-    render: (item) => {
+    render: (item: LoggedInGame) => {
       switch (item.highestAward) {
         case HighestAwardKind.BeatenSoftcore:
           return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
@@ -109,14 +109,14 @@ const baseColumns: Column<LoggedInGame>[] = [
     key: 'medianTimeToBeatHardcoreSeconds',
     sortable: true,
     toggleDescFirst: true,
-    render: (item) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+    render: (item: LoggedInGame) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
   },
   {
     title: 'Time to Master',
     key: 'medianTimeToMasterSeconds',
     sortable: true,
     toggleDescFirst: true,
-    render: (item) => item.medianTimeToMasterFormatted ?? 'N/A'
+    render: (item: LoggedInGame) => item.medianTimeToMasterFormatted ?? 'N/A'
   }
 ]
 
@@ -167,12 +167,12 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
     if (genreColIndex !== -1) {
       cols[genreColIndex] = {
         ...cols[genreColIndex],
-        render: (item) => {
-          const genres = item.gameGenre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+        render: (item: LoggedInGame) => {
+          const genres = item.gameGenre.split(',').map((g: string) => g.trim()).filter((g: string) => g.length > 0)
           return (
             <div style={{ minWidth: '140px', maxWidth: '200px' }}>
               <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                {genres.map((genre, index) => (
+                {genres.map((genre: string, index: number) => (
                   <Badge
                     key={index}
                     color="blue"
@@ -500,35 +500,35 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
                   page={page}
                   total={totalPages}
                   sortOption={sortOption}
-                  onSortChange={(opt) => {
+                  onSortChange={(opt: SortOption<LoggedInGame>) => {
                     setPage(1)
                     setSortOption(opt)
                   }}
                   pageSize={pageSize}
-                  onPageSizeChange={(newPageSize) => {
+                  onPageSizeChange={(newPageSize: number) => {
                     setPageSize(newPageSize)
                     setPage(1) // Reset to first page when changing page size
                   }}
                   pageSizeOptions={[10, 25, 50, 100]}
                   showPageSizeSelector={true}
                   onPageChange={setPage}
-                  onRowClick={(item) => {
+                  onRowClick={(item: LoggedInGame) => {
                     gameModal.showModal(item.gameId)
                   }}
                   actions={isMobile ? [
                     {
-                      onClick: (item) => gameModal.showModal(item.gameId),
+                      onClick: (item: LoggedInGame) => gameModal.showModal(item.gameId),
                       label: 'View',
                       variant: 'filled'
                     }
                   ] : [
                     {
-                      onClick: (item) => gameModal.showModal(item.gameId),
+                      onClick: (item: LoggedInGame) => gameModal.showModal(item.gameId),
                       label: 'Game Modal',
                       variant: 'filled'
                     },
                     {
-                      onClick: (item) => router.push(`/game/${item.gameId}`),
+                      onClick: (item: LoggedInGame) => router.push(`/game/${item.gameId}`),
                       label: 'Game Page',
                       variant: 'filled'
                     }

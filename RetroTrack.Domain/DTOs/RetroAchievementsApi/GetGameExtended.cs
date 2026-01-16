@@ -43,6 +43,9 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         [JsonProperty("NumDistinctPlayersCasual")]
         public int Players { get; set; }
 
+        [JsonProperty("ParentGameID")]
+        public int? ParentGameId { get; set; }
+
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
 
