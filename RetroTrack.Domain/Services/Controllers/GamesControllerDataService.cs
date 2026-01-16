@@ -199,6 +199,42 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var game = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
 
+            // Fetch subset games (games where ParentGameId == gameId)
+            var subsetGames = await context.Games
+                .Where(x => x.ParentGameId == gameId && x.HasAchievements)
+                .ToListAsync();
+
+            var subsets = new List<SubsetGame>();
+            foreach (var subset in subsetGames)
+            {
+                var achievements = await context.Achievements
+                    .Where(x => x.GameId == subset.Id)
+                    .OrderBy(x => x.DisplayOrder)
+                    .Select(x => new SubsetAchievement
+                    {
+                        Id = x.Id,
+                        Title = x.AchievementName,
+                        Description = x.AchievementDescription,
+                        Points = x.Points,
+                        BadgeName = x.AchievementIcon + ".png",
+                        Type = x.AchievementType,
+                        AchievementOrder = x.DisplayOrder,
+                        DateEarnedSoftcore = null,
+                        DateEarnedHardcore = null
+                    })
+                    .ToListAsync();
+
+                subsets.Add(new SubsetGame
+                {
+                    GameId = subset.Id,
+                    Title = subset.Title,
+                    GameImage = subset.ImageIcon,
+                    AchievementCount = subset.AchievementCount,
+                    Points = subset.Points,
+                    Achievements = achievements
+                });
+            }
+
             return new GetPublicSpecificGameInfoResponse
             {
                 GameId = data.Id,
@@ -227,7 +263,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 MedianTimeToBeatHardcoreSeconds = game?.MedianTimeToBeatHardcore,
                 MedianTimeToBeatHardcoreFormatted = game?.MedianTimeToBeatHardcore.ToReadableTime(),
                 MedianTimeToMasterSeconds = game?.MedianTimeToMaster,
-                MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime()
+                MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime(),
+                Subsets = subsets
             };
         }
 
@@ -262,6 +299,47 @@ namespace RetroTrack.Domain.Services.Controllers
                 }));
 
                 var game = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
+                // Fetch subset games with user progress
+                var subsetGames = await context.Games
+                    .Where(x => x.ParentGameId == gameId && x.HasAchievements)
+                    .ToListAsync();
+
+                var subsets = new List<SubsetGame>();
+                foreach (var subset in subsetGames)
+                {
+                    var userProgress = await context.UserGameProgress
+                        .FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == subset.Id);
+
+                    var subsetAchievements = await context.Achievements
+                        .Where(x => x.GameId == subset.Id)
+                        .OrderBy(x => x.DisplayOrder)
+                        .Select(x => new SubsetAchievement
+                        {
+                            Id = x.Id,
+                            Title = x.AchievementName,
+                            Description = x.AchievementDescription,
+                            Points = x.Points,
+                            BadgeName = x.AchievementIcon + ".png",
+                            Type = x.AchievementType,
+                            AchievementOrder = x.DisplayOrder,
+                            DateEarnedSoftcore = null,
+                            DateEarnedHardcore = null
+                        })
+                        .ToListAsync();
+
+                    subsets.Add(new SubsetGame
+                    {
+                        GameId = subset.Id,
+                        Title = subset.Title,
+                        GameImage = subset.ImageIcon,
+                        AchievementCount = subset.AchievementCount,
+                        Points = subset.Points,
+                        AchievementsUnlocked = userProgress?.AchievementsGained ?? 0,
+                        PercentageComplete = userProgress?.GamePercentage ?? 0,
+                        Achievements = subsetAchievements
+                    });
+                }
 
                 return new GetLoggedInSpecificGameInfoResponse
                 {
@@ -298,7 +376,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     MedianTimeToBeatHardcoreSeconds = game?.MedianTimeToBeatHardcore,
                     MedianTimeToBeatHardcoreFormatted = game?.MedianTimeToBeatHardcore.ToReadableTime(),
                     MedianTimeToMasterSeconds = game?.MedianTimeToMaster,
-                    MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime()
+                    MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime(),
+                    Subsets = subsets
                 };
             }
 
@@ -363,6 +442,74 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var gameData = await context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
 
+            // Fetch subset games with user progress
+            var subsetGamesWithProgress = await context.Games
+                .Where(x => x.ParentGameId == gameId && x.HasAchievements)
+                .ToListAsync();
+
+            var subsetsWithProgress = new List<SubsetGame>();
+            foreach (var subset in subsetGamesWithProgress)
+            {
+                var userProgress = await context.UserGameProgress
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == subset.Id);
+
+                // Fetch user's achievement progress for this subset game
+                var subsetUserData = await raApiService.GetSpecificGameInfoAndUserProgress(user.LoginUsername, user.RAUserUlid, subset.Id);
+
+                List<SubsetAchievement> subsetAchievements;
+
+                if (subsetUserData != null && subsetUserData.Achievements != null)
+                {
+                    subsetAchievements = subsetUserData.Achievements
+                        .OrderBy(x => x.Value.DisplayOrder)
+                        .Select(x => new SubsetAchievement
+                        {
+                            Id = x.Value.Id,
+                            Title = x.Value.Title,
+                            Description = x.Value.Description,
+                            Points = x.Value.Points,
+                            BadgeName = (x.Value.DateEarned != null ? x.Value.BadgeName : x.Value.BadgeName + "_lock") + ".png",
+                            Type = x.Value.Type,
+                            AchievementOrder = x.Value.DisplayOrder,
+                            DateEarnedSoftcore = x.Value.DateEarned.ToHumanizedStringWithTime(),
+                            DateEarnedHardcore = x.Value.DateEarnedHardcore.ToHumanizedStringWithTime()
+                        })
+                        .ToList();
+                }
+                else
+                {
+                    // Fallback to database achievements if API call fails
+                    subsetAchievements = await context.Achievements
+                        .Where(x => x.GameId == subset.Id)
+                        .OrderBy(x => x.DisplayOrder)
+                        .Select(x => new SubsetAchievement
+                        {
+                            Id = x.Id,
+                            Title = x.AchievementName,
+                            Description = x.AchievementDescription,
+                            Points = x.Points,
+                            BadgeName = x.AchievementIcon + ".png",
+                            Type = x.AchievementType,
+                            AchievementOrder = x.DisplayOrder,
+                            DateEarnedSoftcore = null,
+                            DateEarnedHardcore = null
+                        })
+                        .ToListAsync();
+                }
+
+                subsetsWithProgress.Add(new SubsetGame
+                {
+                    GameId = subset.Id,
+                    Title = subset.Title,
+                    GameImage = subset.ImageIcon,
+                    AchievementCount = subset.AchievementCount,
+                    Points = subset.Points,
+                    AchievementsUnlocked = userProgress?.AchievementsGained ?? 0,
+                    PercentageComplete = userProgress?.GamePercentage ?? 0,
+                    Achievements = subsetAchievements
+                });
+            }
+
             return new GetLoggedInSpecificGameInfoResponse
             {
                 GameId = data.Id,
@@ -403,7 +550,8 @@ namespace RetroTrack.Domain.Services.Controllers
                 MedianTimeToBeatHardcoreSeconds = gameData?.MedianTimeToBeatHardcore,
                 MedianTimeToBeatHardcoreFormatted = gameData?.MedianTimeToBeatHardcore.ToReadableTime(),
                 MedianTimeToMasterSeconds = gameData?.MedianTimeToMaster,
-                MedianTimeToMasterFormatted = gameData?.MedianTimeToMaster.ToReadableTime()
+                MedianTimeToMasterFormatted = gameData?.MedianTimeToMaster.ToReadableTime(),
+                Subsets = subsetsWithProgress
             };
         }
 

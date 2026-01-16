@@ -42,6 +42,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public string? MedianTimeToBeatHardcoreFormatted { get; set; }
         public long? MedianTimeToMasterSeconds { get; set; }
         public string? MedianTimeToMasterFormatted { get; set; }
+        public List<SubsetGame> Subsets { get; set; } = new List<SubsetGame>();
     }
 
     public class UserAchievement

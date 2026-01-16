@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react'
 import { Badge, Button, Center, Container, Group, Loader, Paper, Select, Text, Title, TextInput, ActionIcon, Card, SimpleGrid } from '@mantine/core'
-import PaginatedTable, { Column, SortOption } from '../../shared/PaginatedTable'
+import PaginatedTable, { Column, SortOption } from '@/components/shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
@@ -27,7 +27,7 @@ const baseColumns: Column<Game>[] = [
   {
     title: '',
     key: 'gameImageUrl',
-    render: (item) => {
+    render: (item: Game) => {
       // Note: responsive sizing is handled via CSS classes
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
@@ -51,12 +51,12 @@ const baseColumns: Column<Game>[] = [
     title: 'Genre',
     key: 'gameGenre',
     sortable: true,
-    render: (item) => {
-      const genres = item.gameGenre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+    render: (item: Game) => {
+      const genres = item.gameGenre.split(',').map((g: string) => g.trim()).filter((g: string) => g.length > 0)
       return (
         <div style={{ minWidth: '140px', maxWidth: '200px' }}>
           <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            {genres.map((genre, index) => (
+            {genres.map((genre: string, index: number) => (
               <Badge key={index} color="blue" variant="light" size="sm">
                 {genre}
               </Badge>
@@ -89,14 +89,14 @@ const baseColumns: Column<Game>[] = [
     key: 'medianTimeToBeatHardcoreSeconds',
     sortable: true,
     toggleDescFirst: true,
-    render: (item) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
+    render: (item: Game) => item.medianTimeToBeatHardcoreFormatted ?? 'N/A'
   },
   {
     title: 'Time to Master',
     key: 'medianTimeToMasterSeconds',
     sortable: true,
     toggleDescFirst: true,
-    render: (item) => item.medianTimeToMasterFormatted ?? 'N/A'
+    render: (item: Game) => item.medianTimeToMasterFormatted ?? 'N/A'
   },
 
 ]
@@ -125,12 +125,12 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
     if (genreColIndex !== -1) {
       cols[genreColIndex] = {
         ...cols[genreColIndex],
-        render: (item) => {
-          const genres = item.gameGenre.split(',').map(g => g.trim()).filter(g => g.length > 0)
+        render: (item: Game) => {
+          const genres = item.gameGenre.split(',').map((g: string) => g.trim()).filter((g: string) => g.length > 0)
           return (
             <div style={{ minWidth: '140px', maxWidth: '200px' }}>
               <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                {genres.map((genre, index) => (
+                {genres.map((genre: string, index: number) => (
                   <Badge
                     key={index}
                     color="blue"
@@ -358,16 +358,16 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
                 page={page}
                 total={totalPages}
                 sortOption={sortOption}
-                onSortChange={(opt) => {
+                onSortChange={(opt: SortOption<Game>) => {
                   setPage(1)
                   setSortOption(opt)
                 }}
                 onPageChange={setPage}
-                onRowClick={(item) => {
+                onRowClick={(item: Game) => {
                   gameModal.showModal(item.gameId)
                 }}
                 pageSize={pageSize}
-                onPageSizeChange={(newPageSize) => {
+                onPageSizeChange={(newPageSize: number) => {
                   setPageSize(newPageSize)
                   setPage(1) // Reset to first page when changing page size
                 }}
@@ -375,12 +375,12 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
                 showPageSizeSelector={true}
                 actions={[
                   {
-                    onClick: (item) => gameModal.showModal(item.gameId),
+                    onClick: (item: Game) => gameModal.showModal(item.gameId),
                     label: 'Game Modal',
                     variant: 'filled'
                   },
                   {
-                    onClick: (item) => router.push(`/game/${item.gameId}`),
+                    onClick: (item: Game) => router.push(`/game/${item.gameId}`),
                     label: 'Game Page',
                     variant: 'filled'
                   }

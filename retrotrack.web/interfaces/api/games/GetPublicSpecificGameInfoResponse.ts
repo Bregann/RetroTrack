@@ -19,9 +19,29 @@ export interface GetPublicSpecificGameInfoResponse {
     medianTimeToBeatHardcoreFormatted: string | null
     medianTimeToMasterSeconds: number | null
     medianTimeToMasterFormatted: string | null
+    subsets: PublicSubsetGame[]
 }
 
 export interface Achievement {
+    id: number
+    title: string
+    description: string
+    points: number
+    badgeName: string
+    type: AchievementType | null
+    achievementOrder: number
+}
+
+export interface PublicSubsetGame {
+    gameId: number
+    title: string
+    gameImage: string
+    achievementCount: number
+    points: number
+    achievements: PublicSubsetAchievement[]
+}
+
+export interface PublicSubsetAchievement {
     id: number
     title: string
     description: string

@@ -49,6 +49,8 @@ namespace RetroTrack.Domain.Database.Models
         public string? GameGenre { get; set; }
         public int? Players { get; set; }
 
+        public int? ParentGameId { get; set; }
+
         [Required]
         public required bool HasAchievements { get; set; }
 

@@ -3,49 +3,26 @@
 import {
   Modal,
   Group,
-  Stack,
   Text,
-  Card,
   Image,
-  ThemeIcon,
-  SimpleGrid,
   Button,
   Divider,
-  Progress,
   Box,
-  Checkbox,
-  Tooltip,
-  Paper,
-  ActionIcon,
-  Textarea,
-  Select,
+  Accordion,
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
-import {
-  IconTrophy,
-  IconStar,
-  IconDeviceGamepad,
-  IconUsers,
-  IconCheck,
-  IconAward,
-  IconBuilding,
-  IconTools,
-  IconExclamationMark,
-  IconRefresh,
-  IconInfoCircle,
-  IconPlus,
-  IconClock,
-} from '@tabler/icons-react'
+import { IconCheck } from '@tabler/icons-react'
 import styles from '@/css/components/gameModal.module.scss'
-import { AchievementType } from '@/enums/achievementType'
 import { useEffect, useRef, useState } from 'react'
 import notificationHelper from '@/helpers/notificationHelper'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse'
-import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
-import { AddGameToPlaylistRequest } from '@/interfaces/api/playlists/AddGameToPlaylistRequest'
-import Link from 'next/link'
+import { GameScreenshots } from '../pages/games/shared/GameScreenshots'
+import { GameStatsCards } from '../pages/games/logged-in/GameStatsCards'
+import { MainAchievementSet } from '../pages/games/logged-in/MainAchievementSet'
+import { SubsetAchievementSet } from '../pages/games/logged-in/SubsetAchievementSet'
+import { GameModalFooter } from '../pages/games/logged-in/GameModalFooter'
 
 interface LoggedInGameModalProps {
   gameId: number
@@ -54,7 +31,6 @@ interface LoggedInGameModalProps {
 
 export function LoggedInGameModal(props: LoggedInGameModalProps) {
   const isSmall = useMediaQuery('(max-width: 1100px)')
-  const queryClient = useQueryClient()
 
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: ['getGameInfoForUser', props.gameId],
@@ -62,37 +38,11 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
     queryFn: async () => await doQueryGet<GetLoggedInSpecificGameInfoResponse>(`/api/games/GetGameInfoForUser/${props.gameId}`)
   })
 
-  const { mutateAsync: trackedGameMutation } = useMutationApiData({
-    url: data?.gameTracked === true ? `/api/trackedgames/DeleteTrackedGame/${props.gameId}` : `/api/trackedgames/AddTrackedGame/${props.gameId}`,
-    invalidateQuery: false,
-    queryKey: ['getGameInfoForUser', props.gameId],
-    apiMethod: data?.gameTracked === true ? 'DELETE' : 'POST',
-    onSuccess: async () => {
-      // set the query data to the opposite of what it is currently
-      queryClient.setQueryData(['getGameInfoForUser', props.gameId], (oldData: GetLoggedInSpecificGameInfoResponse | undefined) => {
-        if (oldData === undefined) return oldData
-        return {
-          ...oldData,
-          gameTracked: !oldData.gameTracked
-        }
-      })
-
-      queryClient.invalidateQueries({ queryKey: ['getTrackedGames'] })
-
-      notificationHelper.showSuccessNotification('Success', data?.gameTracked === true ? 'Game untracked.' : 'Game tracked.', 3000, <IconCheck size={16} />)
-    },
-    onError: () => {
-      notificationHelper.showErrorNotification('Error', 'Failed to update tracked game.', 3000, <IconInfoCircle size={16} />)
-    }
-  })
-
-  const [userNotes, setUserNotes] = useState<string | null>(null)
   const [hideUnlockedAchievements, setHideUnlockedAchievements] = useState(false)
   const [showProgressionOnly, setShowProgressionOnly] = useState(false)
   const [showMissableOnly, setShowMissableOnly] = useState(false)
   const [autoUpdateChecked, setAutoUpdateChecked] = useState(false)
   const [disabled, setDisabled] = useState(false)
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null)
   const gameAutoUpdateTimerRef = useRef<NodeJS.Timeout | null>(null)
   const gameUpdateButtonTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -103,53 +53,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
     gameUpdateButtonTimerRef.current = setTimeout(() => {
       setDisabled(false)
     }, 30000)
-  }
-
-  const { mutateAsync: handleSaveNotes } = useMutationApiData<string, null>({
-    url: `/api/games/UpdateUserGameNotes/${props.gameId}`,
-    invalidateQuery: false,
-    queryKey: ['getGameInfoForUser', props.gameId],
-    apiMethod: 'POST',
-    onSuccess: async () => {
-      notificationHelper.showSuccessNotification('Success', 'User notes updated.', 3000, <IconCheck size={16} />)
-    },
-    onError: () => {
-      notificationHelper.showErrorNotification('Error', 'Failed to update user notes.', 3000, <IconInfoCircle size={16} />)
-    }
-  })
-
-  // Transform user playlists into dropdown format
-  const playlistOptions = (data?.playlists ?? []).map(playlist => ({
-    value: playlist.id,
-    label: playlist.name
-  }))
-
-  const { mutateAsync: addToPlaylistMutation } = useMutationApiData<AddGameToPlaylistRequest, null>({
-    url: '/api/playlists/AddGameToPlaylist',
-    invalidateQuery: true,
-    queryKey: ['getGameInfoForUser', props.gameId],
-    apiMethod: 'POST',
-    onSuccess: async () => {
-      notificationHelper.showSuccessNotification('Success', 'Game added to playlist successfully!', 3000, <IconCheck size={16} />)
-      setSelectedPlaylistId(null)
-    },
-    onError: () => {
-      notificationHelper.showErrorNotification('Error', 'Failed to add game to playlist.', 3000, <IconInfoCircle size={16} />)
-    }
-  })
-
-  const handleAddToPlaylist = async () => {
-    if (selectedPlaylistId === null || selectedPlaylistId === undefined || selectedPlaylistId.trim() === '') {
-      notificationHelper.showErrorNotification('Error', 'Please select a playlist first.', 3000, <IconInfoCircle size={16} />)
-      return
-    }
-
-    const requestData: AddGameToPlaylistRequest = {
-      gameId: props.gameId,
-      playlistId: selectedPlaylistId
-    }
-
-    await addToPlaylistMutation(requestData)
   }
 
   useEffect(() => {
@@ -172,12 +75,7 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       gameAutoUpdateTimerRef.current = null
       notificationHelper.showSuccessNotification('Disabled', 'Achievement auto updates disabled', 3000, <IconCheck />)
     }
-
   }, [autoUpdateChecked, refetch])
-
-  useEffect(() => {
-    setUserNotes(data?.userNotes ?? null)
-  }, [data])
 
   return (
     <Modal
@@ -187,7 +85,6 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       padding="sm"
       radius="sm"
       title={
-        // If gameQuery is loading, show a loading state
         isLoading ? (
           <Text>Loading...</Text>
         ) : isError ? (
@@ -211,400 +108,67 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
         )
       }
     >
-      {/* If gameQuery is loading, show a loading state */}
-      {isLoading &&
-        <Text>Loading game details...</Text>
-      }
+      {isLoading && <Text>Loading game details...</Text>}
+      {isError && <Text c="red">Error loading game info</Text>}
 
-      {isError &&
-        <Text c="red">Error loading game info</Text>
-      }
-
-      {data !== undefined &&
+      {data !== undefined && (
         <>
-          <SimpleGrid cols={isSmall ? 1 : 3} mb="md" mt={20}>
-            <Image
-              src={`https://media.retroachievements.org${data.imageInGame}`}
-              alt="In-Game Screenshot"
-              radius="sm"
-              className={styles.gameScreenshot}
-            />
-            <Image
-              src={`https://media.retroachievements.org${data.imageTitle}`}
-              alt="Title Screen"
-              radius="sm"
-              className={styles.gameScreenshot}
-            />
-            <Box className={styles.gameCoverBox}>
-              <Image
-                src={`https://media.retroachievements.org${data.imageBoxArt}`}
-                alt="Box Art"
-                radius="sm"
-                className={styles.gameCoverArt}
-              />
-            </Box>
-          </SimpleGrid>
+          <GameScreenshots gameId={props.gameId} isSmall={isSmall} />
 
           <Divider my="sm" label="Summary" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
 
-          <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} mb="md">
-            <Card withBorder>
-              <Stack align="center" gap={6}>
-                <ThemeIcon size="xl" radius="md" color="yellow">
-                  <IconTrophy size={24} />
-                </ThemeIcon>
-                <Text fw={700} ta={'center'}>Progress</Text>
-                <Stack gap="xs" justify="center" ta={'center'}>
-                  <Text size="sm" fw={600}>
-                    {data.achievementsAwardedTotal.toLocaleString()}/{data.achievementCount.toLocaleString()} Achievements
-                  </Text>
-                  <Text size="sm" fw={600}>
-                    {data.pointsAwardedTotal.toLocaleString()}/{data.totalGamePoints.toLocaleString()} Points
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    {((data.achievementsAwardedTotal / data.achievementCount) * 100).toFixed(2)}% complete
-                  </Text>
-                  {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Text size="sm" c="cyan">SC: {data.achievementsAwardedSoftcore}</Text>}
-                  {data.achievementsAwardedHardcore !== 0 && <Text size="sm" c="orange">HC: {data.achievementsAwardedHardcore}</Text>}
-                </Stack>
-              </Stack>
-            </Card>
+          <GameStatsCards gameId={props.gameId} />
 
-            <Card withBorder radius="md" p="md">
-              <Stack align="center" gap="sm">
-                <ThemeIcon size="xl" radius="md" color="violet">
-                  <IconDeviceGamepad size={24} />
-                </ThemeIcon>
-                <Text fw={700}>Game Info</Text>
+          <Divider my="sm" label="Sets & Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
 
-                <Group gap="xl" align="flex-start" justify="center" style={{ width: '100%' }}>
-                  <Stack gap="4">
-                    <Group gap="xs">
-                      <IconDeviceGamepad size={16} />
-                      <Text size="sm">{data.consoleName}</Text>
-                    </Group>
-                    <Group gap="xs">
-                      <IconStar size={16} />
-                      <Text size="sm">{data.genre !== '' || 'Not Set'}</Text>
-                    </Group>
-                  </Stack>
-
-                  <Stack gap="4">
-                    <Group gap="xs">
-                      <IconBuilding size={16} />
-                      <Text size="sm">Publisher: {data.publisher !== '' || 'Not Set'}</Text>
-                    </Group>
-                    <Group gap="xs">
-                      <IconTools size={16} />
-                      <Text size="sm">Developer: {data.developer !== '' || 'Not Set'}</Text>
-                    </Group>
-                  </Stack>
-                </Group>
-
-                <Group gap="xs">
-                  <IconUsers size={16} />
-                  <Text size="sm">{data.players} Players</Text>
-                </Group>
-              </Stack>
-            </Card>
-
-            <Card withBorder>
-              <Stack align="center" gap={6}>
-                <ThemeIcon size="xl" radius="md" color="teal">
-                  <IconCheck size={24} />
-                </ThemeIcon>
-                <Text fw={700} ta={'center'}>Completion State</Text>
-                <Stack gap={4}>
-                  <Group gap="6" justify='center'>
-                    <IconDeviceGamepad size={16} />
-                    <Text>Date Beaten:</Text>
-                  </Group>
-
-                  <Text size="sm" c="dimmed" ta={'center'}>
-                    {data.dateBeatenHardcore === null && data.dateBeatenSoftcore === null
-                      ? 'N/A'
-                      : data.dateBeatenHardcore ?? data.dateBeatenSoftcore}
-                  </Text>
-
-                  <Group gap="6" justify='center' mt={10}>
-                    <IconDeviceGamepad size={16} />
-                    <Text>Date Completed/Mastered:</Text>
-                  </Group>
-                  <Text size="sm" c="dimmed" ta={'center'}>
-                    {data.dateMastered === null && data.dateCompleted === null
-                      ? 'N/A'
-                      : data.dateMastered ?? data.dateCompleted}
-                  </Text>
-                </Stack>
-              </Stack>
-            </Card>
-
-            <Card withBorder>
-              <Stack align="center" justify="center" h="100%" gap="sm">
-                <ThemeIcon size="xl" radius="md" color="grape">
-                  <IconClock size={24} />
-                </ThemeIcon>
-                <Text fw={700} ta="center">Time Stats</Text>
-                {(data.medianTimeToBeatHardcoreFormatted !== null || data.medianTimeToMasterFormatted !== null) ? (
-                  <Stack gap="xs" ta="center">
-                    <Text size="sm">Median Time to Beat: {data.medianTimeToBeatHardcoreFormatted ?? 'N/A'}</Text>
-                    <Text size="sm">Median Time to Master: {data.medianTimeToMasterFormatted ?? 'N/A'}</Text>
-                  </Stack>
-                ) : (
-                  <Text size="sm" c="dimmed" ta="center">Not enough data recorded</Text>
-                )}
-              </Stack>
-            </Card>
-          </SimpleGrid>
-
-          <Divider my="sm" label="Achievements" labelPosition="center" styles={{ label: { fontSize: 15 } }} />
-          <Progress.Root size={20} className={styles.progressBar}>
-            {data.achievementsAwardedHardcore != 0 && <Progress.Section value={data.achievementsAwardedHardcore} color="orange">
-              <Progress.Label>Hardcore ({data.achievementsAwardedHardcore})</Progress.Label>
-            </Progress.Section>}
-            {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && <Progress.Section value={data.achievementsAwardedSoftcore} color="cyan">
-              <Progress.Label>Softcore ({data.achievementsAwardedSoftcore})</Progress.Label>
-            </Progress.Section>}
-            <Progress.Section value={data.achievementCount - data.achievementsAwardedTotal} color="grey">
-              <Progress.Label>Locked ({data.achievementCount - data.achievementsAwardedTotal})</Progress.Label>
-            </Progress.Section>
-          </Progress.Root>
-          <Group>
-            <Checkbox
-              label="Hide Unlocked Achievements"
-              checked={hideUnlockedAchievements}
-              onChange={(e) => setHideUnlockedAchievements(e.currentTarget.checked)}
+          <Accordion variant="separated" mb="md" defaultValue="main-set">
+            <MainAchievementSet
+              gameId={props.gameId}
+              isSmall={isSmall}
+              hideUnlocked={hideUnlockedAchievements}
+              showProgressionOnly={showProgressionOnly}
+              showMissableOnly={showMissableOnly}
+              onHideUnlockedChange={setHideUnlockedAchievements}
+              onShowProgressionOnlyChange={setShowProgressionOnly}
+              onShowMissableOnlyChange={setShowMissableOnly}
             />
-            <Checkbox
-              label="Show Progression Achievements Only"
-              checked={showProgressionOnly}
-              onChange={(e) => setShowProgressionOnly(e.currentTarget.checked)}
-            />
-            <Checkbox
-              label="Show Missable Achievements Only"
-              checked={showMissableOnly}
-              onChange={(e) => setShowMissableOnly(e.currentTarget.checked)}
-            />
-          </Group>
 
-          <Stack gap="xs" mb="md" mt="sm">
-            <Text fw={500}>Your Notes</Text>
-            <Textarea
-              placeholder="Write your notes here..."
-              minRows={3}
-              autosize
-              value={userNotes ?? ''}
-              onChange={(e) => setUserNotes(e.currentTarget.value)}
-            />
-            <Group justify="right">
-              <Button onClick={async () => { await handleSaveNotes(userNotes ?? '') }}>Save Notes</Button>
+            {data.subsets && data.subsets.length > 0 && data.subsets.map((subset) => (
+              <SubsetAchievementSet
+                key={subset.gameId}
+                subset={subset}
+                isSmall={isSmall}
+                hideUnlocked={hideUnlockedAchievements}
+                showProgressionOnly={showProgressionOnly}
+                showMissableOnly={showMissableOnly}
+                onUpdateGame={handleGameUpdate}
+              />
+            ))}
+          </Accordion>
+
+          {data.subsets && data.subsets.length > 0 && (
+            <Group justify="center" mb="md">
+              <Button
+                size="lg"
+                variant="filled"
+                color="green"
+                onClick={handleGameUpdate}
+              >
+                Update All Sets
+              </Button>
             </Group>
-          </Stack>
+          )}
 
-          <SimpleGrid cols={isSmall ? 1 : 2} mb="md" mt={10}>
-            {data.achievements
-              .sort((a, b) => {
-                // Sort by unlock status first (unlocked first)
-                const aUnlocked = a.dateEarnedSoftcore !== null || a.dateEarnedHardcore !== null
-                const bUnlocked = b.dateEarnedSoftcore !== null || b.dateEarnedHardcore !== null
-                if (aUnlocked !== bUnlocked) {
-                  return aUnlocked ? -1 : 1
-                }
-                // Then sort by achievement order, or by id if achievement order is 0
-                const aSort = a.achievementOrder !== 0 ? a.achievementOrder : a.id
-                const bSort = b.achievementOrder !== 0 ? b.achievementOrder : b.id
-                return aSort - bSort
-              })
-              .filter((x) => {
-                if (hideUnlockedAchievements) {
-                  return x.dateEarnedSoftcore === null || x.dateEarnedHardcore === null
-                }
-                return true
-              })
-              .filter((x) => {
-                if (showProgressionOnly && showMissableOnly) {
-                  return (
-                    x.type === AchievementType.Progression ||
-                    x.type === AchievementType.Missable ||
-                    x.type === AchievementType.Win_Condition
-                  )
-                }
-                if (showProgressionOnly) {
-                  return (
-                    x.type === AchievementType.Progression ||
-                    x.type === AchievementType.Win_Condition
-                  )
-                }
-                if (showMissableOnly) {
-                  return x.type === AchievementType.Missable
-                }
-                return true
-              }).map((achievement) => {
-                return (
-                  <Card
-                    key={achievement.id}
-                    withBorder
-                    radius="sm"
-                    p="sm"
-                    style={{
-                      position: 'relative',
-                      borderWidth: 2,
-                      backgroundColor: achievement.dateEarnedSoftcore !== null || achievement.dateEarnedHardcore !== null
-                        ? 'light-dark(#e8f5e9, #1b3a29)' // Light green/dark green background for unlocked
-                        : 'light-dark(#f9f9f9, #263042)',
-                      borderColor:
-                        achievement.type === AchievementType.Missable
-                          ? 'var(--mantine-color-orange-filled)'
-                          : achievement.type === AchievementType.Progression
-                            ? 'var(--mantine-color-cyan-filled)'
-                            : achievement.type === AchievementType.Win_Condition
-                              ? 'var(--mantine-color-green-filled)'
-                              : 'transparent',
-                      opacity: achievement.dateEarnedSoftcore !== null || achievement.dateEarnedHardcore !== null ? 1 : 0.8
-                    }}
-                  >
-                    {/* Achievement Icon and Details */}
-                    <Group align="center" gap="md">
-                      <Box className={styles.iconBox}>
-                        <Image
-                          src={`https://media.retroachievements.org/Badge/${achievement.badgeName}`}
-                          alt="Achievement Icon"
-                          width={64}
-                          height={64}
-                          radius="sm"
-                          style={{ objectFit: 'contain' }}
-                        />
-                      </Box>
-
-                      <Stack gap={2} style={{ flex: 1 }}>
-                        <Text fw={500}>{achievement.title}</Text>
-                        <Text size="sm" c="dimmed">{achievement.description}</Text>
-                        {achievement.dateEarnedSoftcore !== null && <Text size="xs" c="dimmed" mt={5}>Unlocked: {achievement.dateEarnedSoftcore}</Text>}
-                      </Stack>
-
-                      <Text fw={600} size="lg" c="yellow" mb={20}>{achievement.points}</Text>
-                    </Group>
-                    {(() => {
-                      switch (achievement.type) {
-                        case AchievementType.Progression:
-                          return (
-                            <Tooltip label="Progression Achievement" position="top" withArrow>
-                              <Box className={styles.achievementIconTypeBox}>
-                                <ThemeIcon color="cyan" size="sm" radius="xl">
-                                  <IconCheck size={16} />
-                                </ThemeIcon>
-                              </Box>
-                            </Tooltip>
-                          )
-                        case AchievementType.Missable:
-                          return (
-                            <Tooltip label="Missable Achievement" position="top" withArrow>
-                              <Box className={styles.achievementIconTypeBox}>
-                                <ThemeIcon color="orange" size="sm" radius="xl">
-                                  <IconExclamationMark size={16} />
-                                </ThemeIcon>
-                              </Box>
-                            </Tooltip>
-                          )
-                        case AchievementType.Win_Condition:
-                          return (
-                            <Tooltip label="Win Condition" position="top" withArrow>
-                              <Box className={styles.achievementIconTypeBox}>
-                                <ThemeIcon color="green" size="sm" radius="xl">
-                                  <IconAward size={16} />
-                                </ThemeIcon>
-                              </Box>
-                            </Tooltip>
-                          )
-                        default:
-                          return null
-                      }
-                    })()}
-                  </Card>
-                )
-              })
-            }
-          </SimpleGrid>
-          <Paper className={styles.footer}>
-            <Group justify="space-between" gap="xs" wrap="nowrap">
-              {/* Left side - Update button and Track Game */}
-              <Group gap="xs">
-                <Tooltip label="Update game">
-                  <ActionIcon
-                    size="lg"
-                    onClick={async () => { await handleGameUpdate() }} disabled={disabled}
-                    visibleFrom='sm'
-                    color="green">
-                    <IconRefresh />
-                  </ActionIcon>
-                </Tooltip>
-                <Button
-                  onClick={async () => { await trackedGameMutation({}) }}
-                  color={data.gameTracked ? 'red' : 'blue'}
-                >
-                  {data.gameTracked ? 'Untrack Game' : 'Track Game'}
-                </Button>
-              </Group>
-
-              {/* Center - Playlist Controls (only show if user has playlists) */}
-              {playlistOptions.length > 0 && (
-                <Group gap="xs" style={{ flex: 1, justifyContent: 'center' }}>
-                  <Select
-                    placeholder="Select a playlist"
-                    data={playlistOptions}
-                    value={selectedPlaylistId}
-                    onChange={setSelectedPlaylistId}
-                    style={{ minWidth: 180 }}
-                    clearable
-                    size="sm"
-                  />
-                  <Button
-                    leftSection={<IconPlus size={14} />}
-                    onClick={handleAddToPlaylist}
-                    disabled={selectedPlaylistId === null || selectedPlaylistId === undefined || selectedPlaylistId.trim() === ''}
-                    color="green"
-                    variant="light"
-                    size="sm"
-                  >
-                    Add to Playlist
-                  </Button>
-                </Group>
-              )}
-
-              {/* Right side - External links and Auto Update */}
-              <Group gap="xs">
-                <Button
-                  component="a"
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
-                  target="_blank"
-                  style={{ ':hover': { color: 'white' } }}
-                  href={'https://retroachievements.org/game/' + data.gameId}
-                  size="sm"
-                >
-                  RA Page
-                </Button>
-                <Button
-                  component={Link}
-                  variant="gradient"
-                  gradient={{ from: 'teal', to: 'lime', deg: 105 }}
-                  href={'/game/'.concat(data.gameId.toString()) }
-                  onClick={() => props.onClose()}
-                  size="sm"
-                >
-                  RetroTrack Page
-                </Button>
-                <Checkbox
-                  label="Auto Update Achievements"
-                  checked={autoUpdateChecked}
-                  onChange={(e) => setAutoUpdateChecked(e.currentTarget.checked)}
-                />
-              </Group>
-            </Group>
-          </Paper>
-
+          <GameModalFooter
+            gameId={props.gameId}
+            disabled={disabled}
+            autoUpdateChecked={autoUpdateChecked}
+            onAutoUpdateChange={setAutoUpdateChecked}
+            onUpdateGame={handleGameUpdate}
+            onClose={props.onClose}
+          />
         </>
-      }
+      )}
     </Modal>
   )
 }

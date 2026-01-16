@@ -33,6 +33,7 @@ export interface GetLoggedInSpecificGameInfoResponse {
     medianTimeToBeatHardcoreFormatted: string | null
     medianTimeToMasterSeconds: number | null
     medianTimeToMasterFormatted: string | null
+    subsets: SubsetGame[]
 }
 
 export interface UserAchievement {
@@ -45,4 +46,27 @@ export interface UserAchievement {
     dateEarnedHardcore: null | string
     type: number | null
     achievementOrder: number
+}
+
+export interface SubsetGame {
+    gameId: number
+    title: string
+    gameImage: string
+    achievementCount: number
+    points: number
+    achievementsUnlocked: number
+    percentageComplete: number
+    achievements: SubsetAchievement[]
+}
+
+export interface SubsetAchievement {
+    id: number
+    title: string
+    description: string
+    points: number
+    badgeName: string
+    type: number | null
+    achievementOrder: number
+    dateEarnedSoftcore: string | null
+    dateEarnedHardcore: string | null
 }

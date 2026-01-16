@@ -93,6 +93,7 @@ namespace RetroTrack.Domain.Services
                     ConsoleName = gameFromDb.GameConsole.ConsoleName,
                     Genre = gameFromDb.GameGenre ?? "",
                     Players = gameFromDb.Players ?? 0,
+                    ParentGameId = gameFromDb.ParentGameId,
                     Id = gameId,
                     Title = gameFromDb.Title,
                 };
@@ -143,6 +144,7 @@ namespace RetroTrack.Domain.Services
             context.Games.Where(x => x.Id == gameId)
                 .ExecuteUpdate(x => x
                     .SetProperty(y => y.Players, data.Players)
+                    .SetProperty(y => y.ParentGameId, data.ParentGameId)
                     .SetProperty(y => y.ImageIcon, data.ImageIcon)
                     .SetProperty(y => y.ImageInGame, data.ImageInGame)
                     .SetProperty(y => y.ImageTitle, data.ImageTitle)
