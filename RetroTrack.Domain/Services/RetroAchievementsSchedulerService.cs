@@ -271,10 +271,12 @@ namespace RetroTrack.Domain.Services
             // Get all games that were released over a month ago and haven't had their median times processed yet
             int[] eligibleGames;
 
+            var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+
             if (!processEntireDatabase)
             {
                 eligibleGames = await context.Games
-                    .Where(x => !x.MedianTimesProcessed && x.SetReleasedDate < DateTime.UtcNow.AddMonths(-1) && x.HasAchievements)
+                    .Where(x => !x.MedianTimesProcessed && x.SetReleasedDate < oneMonthAgo && x.HasAchievements)
                     .Select(x => x.Id)
                     .ToArrayAsync();
                 Log.Information("[RetroAchievements] Processing only unprocessed games released over a month ago.");
