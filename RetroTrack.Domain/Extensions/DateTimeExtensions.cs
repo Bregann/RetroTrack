@@ -20,6 +20,7 @@
 
         public static string? ToReadableTime(this long? seconds)
         {
+            // Treat both null and 0 seconds as "no data" and return null to indicate absence of a meaningful duration.
             if (!seconds.HasValue || seconds == 0)
             {
                 return null;
