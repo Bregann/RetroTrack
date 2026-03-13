@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import type { LibraryModalMode } from './LibraryModals';
+import GeneralSettingsModal from './modals/GeneralSettingsModal';
 
 interface DropdownMenu {
   label: string;
@@ -9,10 +11,13 @@ interface TopMenuBarProps {
   onLogout: () => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onManageEmulators: () => void;
+  onLibraryAction: (action: LibraryModalMode) => void;
 }
 
-export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBarProps) {
+export default function TopMenuBar({ onLogout, theme, onToggleTheme, onManageEmulators, onLibraryAction }: TopMenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [showGeneralSettings, setShowGeneralSettings] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
   const menus: DropdownMenu[] = [
@@ -26,17 +31,16 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBa
     {
       label: 'Library',
       items: [
-        { label: 'Add Single Game', icon: '➕' },
-        { label: 'Add Folder', icon: '📁' },
-        { label: 'Manage Folders', icon: '🗂️' },
-        { label: 'Scan All Folders', icon: '🔄' },
+        { label: 'Add Single Game', icon: '➕', onClick: () => onLibraryAction('add-game') },
+        { label: 'Add Folder', icon: '📁', onClick: () => onLibraryAction('add-folder') },
+        { label: 'Manage Folders', icon: '🗂️', onClick: () => onLibraryAction('manage-folders') },
+        { label: 'Scan All Folders', icon: '🔄', onClick: () => onLibraryAction('scan-all') },
       ],
     },
     {
       label: 'Emulators',
       items: [
-        { label: 'Manage Emulators', icon: '⚙️' },
-        { label: 'Functionality', icon: '🔧' },
+        { label: 'Manage Emulators', icon: '⚙️', onClick: onManageEmulators }
       ],
     },
   ];
@@ -56,6 +60,7 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBa
   };
 
   return (
+    <>
     <div className="top-menu-bar" ref={menuBarRef}>
       <div className="menu-left">
         <span className="title-bar-logo">🎮</span>
@@ -103,9 +108,6 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBa
           <input type="text" placeholder="Search" className="search-input" />
           <span className="search-icon">🔍</span>
         </div>
-        <button type="button" className="header-icon-btn" title="Notifications">
-          🔔<span className="notif-badge">1</span>
-        </button>
 
         {/* Settings dropdown with theme toggle */}
         <div className="menu-dropdown-wrapper">
@@ -130,13 +132,13 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBa
                 <span className="menu-item-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
                 {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               </button>
-              <button type="button" className="menu-dropdown-item">
-                <span className="menu-item-icon">📂</span>
-                ROM Directories
-              </button>
-              <button type="button" className="menu-dropdown-item">
-                <span className="menu-item-icon">🔗</span>
-                RetroTrack Connection
+              <button
+                type="button"
+                className="menu-dropdown-item"
+                onClick={() => { setOpenMenu(null); setShowGeneralSettings(true); }}
+              >
+                <span className="menu-item-icon">⚙️</span>
+                General Settings
               </button>
             </div>
           )}
@@ -171,5 +173,10 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme }: TopMenuBa
         </div>
       </div>
     </div>
+
+    {showGeneralSettings && (
+      <GeneralSettingsModal onClose={() => setShowGeneralSettings(false)} />
+    )}
+  </>
   );
 }

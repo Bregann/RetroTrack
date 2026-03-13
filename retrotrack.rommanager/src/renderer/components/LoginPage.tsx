@@ -62,8 +62,8 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         </form>
         <p className="login-footer">
           Don&apos;t have an account?{' '}
-          <a href="https://retrotrack.app" target="_blank" rel="noreferrer">
-            Sign up at retrotrack.app
+          <a href="https://retrotrack.bregan.me" target="_blank" rel="noreferrer">
+            Sign up at retrotrack.bregan.me
           </a>
         </p>
       </div>

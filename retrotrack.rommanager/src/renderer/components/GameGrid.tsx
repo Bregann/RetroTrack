@@ -1,171 +1,162 @@
-import React from 'react';
+import { useCallback, useState } from 'react';
 import {
-  GAMES,
   CONSOLES,
   CUSTOM_CATEGORIES,
   PLAYLISTS,
   getTrackedGames,
   getGamesByConsole,
   getGameById,
-  getInProgressGames,
   type Game,
 } from '../mockData';
+import { DEFAULT_VIEW_CONFIG, type ViewConfig } from './game-grid/viewConfig';
+import GameSection, { SectionHeader } from './game-grid/GameSection';
+import HomeView from './game-grid/HomeView';
 
 interface GameGridProps {
   selectedView: string;
+  onGameClick?: (gameId: number) => void;
+  onSelectView?: (view: string) => void;
 }
 
-function GameCard({ game, size = 'normal' }: { game: Game; size?: 'normal' | 'small' }) {
-  return (
-    <div className={`game-card ${size}`}>
-      <div
-        className="game-card-cover"
-        style={{ backgroundColor: game.coverColor }}
-      >
-        <span className="game-card-cover-text">{game.title}</span>
-        {game.lastPlayed && (
-          <span className="game-card-last-played">
-            Last Played {game.lastPlayed}
-          </span>
-        )}
-        {game.consoleShort && (
-          <span className="game-card-console-badge">{game.consoleShort}</span>
-        )}
-      </div>
-      <div className="game-card-info">
-        <span className="game-card-title">{game.title}</span>
-        {game.achievementPercent !== undefined && (
-          <div className="game-card-achievement">
-            <div className="achievement-bar">
-              <div
-                className="achievement-bar-fill"
-                style={{ width: `${game.achievementPercent}%` }}
-              />
-            </div>
-            <span className="achievement-text">
-              {game.achievementPercent === 100
-                ? '✅ Complete'
-                : `Achievement: ${game.achievementPercent}%`}
-            </span>
-          </div>
-        )}
-        {game.lastPlayed && !game.achievementPercent && (
-          <span className="game-card-meta">Last Played: {game.lastPlayed}</span>
-        )}
-      </div>
-    </div>
+function SectionView({ children }: { children: React.ReactNode }) {
+  return <div className="game-grid-container">{children}</div>;
+}
+
+export default function GameGrid({ selectedView, onGameClick, onSelectView }: GameGridProps) {
+  const [viewConfigs, setViewConfigs] = useState<Record<string, ViewConfig>>({});
+
+  const getConfig = useCallback(
+    (key: string): ViewConfig => viewConfigs[key] ?? DEFAULT_VIEW_CONFIG,
+    [viewConfigs],
   );
-}
 
-function SectionHeader({ title, count }: { title: string; count?: number }) {
-  return (
-    <div className="section-header">
-      <h2>
-        {title}
-        {count !== undefined && <span className="section-count"> ({count} GAMES)</span>}
-      </h2>
-      <button type="button" className="section-filter-btn" title="Filter">
-        ⚙️
-      </button>
-    </div>
+  const setConfig = useCallback(
+    (key: string) => (cfg: ViewConfig) =>
+      setViewConfigs((prev) => ({ ...prev, [key]: cfg })),
+    [],
   );
-}
 
-export default function GameGrid({ selectedView }: GameGridProps) {
-  // Determine what to show
   if (selectedView === 'home' || selectedView === '') {
-    return <HomeView />;
+    return <HomeView onGameClick={onGameClick} onSelectView={onSelectView} />;
   }
 
-  // Console view
+  if (selectedView === 'consoles') {
+    return (
+      <SectionView>
+        <SectionHeader title="All Consoles" count={CONSOLES.length} />
+        <div className="browse-card-grid">
+          {CONSOLES.map((c) => (
+            <button
+              key={c.shortName}
+              type="button"
+              className="browse-card"
+              onClick={() => onSelectView?.(`console-${c.shortName}`)}
+            >
+              <span className="browse-card-icon">{c.icon}</span>
+              <span className="browse-card-name">{c.name}</span>
+              <span className="browse-card-meta">{getGamesByConsole(c.name).length} games</span>
+            </button>
+          ))}
+        </div>
+      </SectionView>
+    );
+  }
+
+  if (selectedView === 'playlists') {
+    return (
+      <SectionView>
+        <SectionHeader title="RetroTrack Playlists" count={PLAYLISTS.length} />
+        <div className="browse-card-grid">
+          {PLAYLISTS.map((pl) => (
+            <button
+              key={pl.id}
+              type="button"
+              className="browse-card"
+              onClick={() => onSelectView?.(`playlist-${pl.id}`)}
+            >
+              <span className="browse-card-icon">{pl.icon}</span>
+              <span className="browse-card-name">{pl.name}</span>
+              <span className="browse-card-meta">{pl.gameIds.length} games</span>
+            </button>
+          ))}
+        </div>
+      </SectionView>
+    );
+  }
+
+  if (selectedView === 'tracked') {
+    return (
+      <SectionView>
+        <GameSection
+          title="MY TRACKED GAMES"
+          games={getTrackedGames()}
+          config={getConfig('tracked')}
+          onConfigChange={setConfig('tracked')}
+          onGameClick={onGameClick}
+        />
+      </SectionView>
+    );
+  }
+
   const consoleMatch = selectedView.match(/^console-(.+)$/);
   if (consoleMatch) {
     const shortName = consoleMatch[1];
     const consoleInfo = CONSOLES.find((c) => c.shortName === shortName);
     if (consoleInfo) {
-      const games = getGamesByConsole(consoleInfo.name);
+      const cfgKey = `console-${shortName}`;
       return (
-        <div className="game-grid-container">
-          <SectionHeader title={`CONSOLES: ${consoleInfo.name}`} count={games.length} />
-          <div className="game-grid">
-            {games.map((g) => (
-              <GameCard key={g.id} game={g} />
-            ))}
-          </div>
-        </div>
+        <SectionView>
+          <GameSection
+            title={`CONSOLES: ${consoleInfo.name}`}
+            games={getGamesByConsole(consoleInfo.name)}
+            config={getConfig(cfgKey)}
+            onConfigChange={setConfig(cfgKey)}
+            onGameClick={onGameClick}
+          />
+        </SectionView>
       );
     }
   }
 
-  // Category view
   const catMatch = selectedView.match(/^cat-(\d+)$/);
   if (catMatch) {
     const cat = CUSTOM_CATEGORIES.find((c) => c.id === Number(catMatch[1]));
     if (cat) {
       const games = cat.gameIds.map((id) => getGameById(id)).filter(Boolean) as Game[];
+      const cfgKey = `cat-${cat.id}`;
       return (
-        <div className="game-grid-container">
-          <SectionHeader title={`${cat.icon} ${cat.name}`} count={games.length} />
-          <div className="game-grid">
-            {games.map((g) => (
-              <GameCard key={g.id} game={g} />
-            ))}
-          </div>
-        </div>
+        <SectionView>
+          <GameSection
+            title={`${cat.icon} ${cat.name}`}
+            games={games}
+            config={getConfig(cfgKey)}
+            onConfigChange={setConfig(cfgKey)}
+            onGameClick={onGameClick}
+          />
+        </SectionView>
       );
     }
   }
 
-  // Playlist view
   const plMatch = selectedView.match(/^playlist-(\d+)$/);
   if (plMatch) {
     const pl = PLAYLISTS.find((p) => p.id === Number(plMatch[1]));
     if (pl) {
       const games = pl.gameIds.map((id) => getGameById(id)).filter(Boolean) as Game[];
+      const cfgKey = `playlist-${pl.id}`;
       return (
-        <div className="game-grid-container">
-          <SectionHeader title={`${pl.icon} ${pl.name}`} count={games.length} />
-          <div className="game-grid">
-            {games.map((g) => (
-              <GameCard key={g.id} game={g} />
-            ))}
-          </div>
-        </div>
+        <SectionView>
+          <GameSection
+            title={`${pl.icon} ${pl.name}`}
+            games={games}
+            config={getConfig(cfgKey)}
+            onConfigChange={setConfig(cfgKey)}
+            onGameClick={onGameClick}
+          />
+        </SectionView>
       );
     }
   }
 
-  return <HomeView />;
-}
-
-function HomeView() {
-  const trackedGames = getTrackedGames();
-  const totalGames = GAMES.length;
-
-  return (
-    <div className="game-grid-container">
-      {/* My Tracked Games Section */}
-      <SectionHeader title="MY TRACKED GAMES" />
-      <div className="game-grid game-grid-featured">
-        {trackedGames.slice(0, 3).map((g) => (
-          <GameCard key={g.id} game={g} size="normal" />
-        ))}
-      </div>
-
-      {/* All games per console */}
-      {CONSOLES.map((console) => {
-        const games = getGamesByConsole(console.name);
-        return (
-          <div key={console.name}>
-            <SectionHeader title={`CONSOLES: ${console.name}`} />
-            <div className="game-grid">
-              {games.map((g) => (
-                <GameCard key={g.id} game={g} size="small" />
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return <HomeView onGameClick={onGameClick} onSelectView={onSelectView} />;
 }

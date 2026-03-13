@@ -3,13 +3,19 @@ import LoginPage from './components/LoginPage';
 import TopMenuBar from './components/TopMenuBar';
 import Sidebar from './components/Sidebar';
 import GameGrid from './components/GameGrid';
-import './App.css';
+import GameDetailPage from './components/GameDetail';
+import EmulatorSettings from './components/EmulatorSettings';
+import LibraryModals, { LibraryModalMode } from './components/LibraryModals';
+import './styles/main.scss';
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [selectedView, setSelectedView] = useState('home');
+  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [showEmulatorSettings, setShowEmulatorSettings] = useState(false);
+  const [libraryModal, setLibraryModal] = useState<LibraryModalMode>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -24,10 +30,21 @@ export default function App() {
     setLoggedIn(false);
     setUsername('');
     setSelectedView('home');
+    setSelectedGameId(null);
   };
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const handleSelectView = (view: string) => {
+    setSelectedView(view);
+    if (view.startsWith('game-')) {
+      const id = parseInt(view.replace('game-', ''), 10);
+      if (!isNaN(id)) setSelectedGameId(id);
+    } else {
+      setSelectedGameId(null);
+    }
   };
 
   if (!loggedIn) {
@@ -36,13 +53,34 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <TopMenuBar onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
+      <TopMenuBar
+        onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onManageEmulators={() => setShowEmulatorSettings(true)}
+        onLibraryAction={(action: LibraryModalMode) => setLibraryModal(action)}
+      />
       <div className="app-body">
-        <Sidebar selectedView={selectedView} onSelectView={setSelectedView} />
+        <Sidebar selectedView={selectedView} onSelectView={handleSelectView} />
         <main className="main-content">
-          <GameGrid selectedView={selectedView} />
+          {selectedGameId !== null ? (
+            <GameDetailPage
+              gameId={selectedGameId}
+              onBack={() => setSelectedGameId(null)}
+            />
+          ) : (
+            <GameGrid
+              selectedView={selectedView}
+              onGameClick={(id) => setSelectedGameId(id)}
+              onSelectView={handleSelectView}
+            />
+          )}
         </main>
       </div>
+      {showEmulatorSettings && (
+        <EmulatorSettings onClose={() => setShowEmulatorSettings(false)} />
+      )}
+      <LibraryModals mode={libraryModal} onClose={() => setLibraryModal(null)} />
     </div>
   );
 }

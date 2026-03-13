@@ -1,0 +1,324 @@
+/*
+ * Sidebar — navigation, sections, profile card
+ */
+
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: 200px;
+  max-width: 600px;
+  background: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle.dragging {
+  background: var(--accent-blue);
+}
+
+.sidebar-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+  }
+
+  &.active {
+    color: var(--accent-blue);
+    background: rgba(26, 159, 255, 0.08);
+  }
+}
+
+.sidebar-home-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--bg-light);
+  border-radius: 3px;
+}
+
+.sidebar-section {
+  margin-bottom: 4px;
+}
+
+.sidebar-section-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 1.2px;
+  padding: 12px 16px 6px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sidebar-section-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar-section-toggle:hover {
+  color: var(--text-primary);
+}
+
+.sidebar-chevron {
+  font-size: 12px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.sidebar-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.badge-info {
+  font-weight: 400;
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 16px;
+  text-align: left;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  transition: background 0.1s;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-item.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-white);
+}
+
+.sidebar-item-status {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.sidebar-item-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+
+.sidebar-item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-item-badges {
+  font-size: 10px;
+  letter-spacing: -2px;
+}
+
+.sidebar-expand-icon {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.sidebar-sub-items {
+  padding-left: 32px;
+}
+
+.sidebar-sub-item {
+  display: block;
+  width: 100%;
+  padding: 4px 16px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: color 0.1s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-tracked-game {
+  padding-left: 20px;
+}
+
+
+
+.sidebar-sub-item:hover {
+  color: var(--text-bright);
+}
+
+.sidebar-sub-item.active {
+  color: var(--text-white);
+}
+
+.sidebar-item-add {
+  color: var(--accent-teal);
+  font-size: 12px;
+  justify-content: center;
+  margin: 4px 12px;
+  padding: 8px;
+  background: rgba(102, 192, 244, 0.08);
+  border-radius: 3px;
+  width: calc(100% - 24px);
+}
+
+.sidebar-item-add:hover {
+  background: rgba(102, 192, 244, 0.15);
+}
+
+/* Console row — split clickable name vs expand arrow */
+.sidebar-console-name {
+  flex: 1;
+  text-align: left;
+  font-size: 12.5px;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sidebar-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  transition: background 0.12s, color 0.12s;
+}
+
+.sidebar-expand-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-bright);
+}
+
+/* Sidebar Profile */
+.sidebar-profile {
+  border-top: 1px solid var(--border-color);
+  padding: 12px 16px;
+  background: var(--bg-darkest);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.profile-achievements {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.profile-edit-btn {
+  width: 100%;
+  padding: 6px;
+  background: var(--bg-medium);
+  border-radius: 3px;
+  font-size: 12px;
+  color: var(--text-primary);
+  transition: background 0.15s;
+  border: 1px solid var(--border-color);
+}
+
+.profile-edit-btn:hover {
+  background: var(--bg-light);
+  color: var(--text-white);
+}
+
+/* Light mode overrides */
+[data-theme="light"] .sidebar-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .sidebar-item.active {
+  background: rgba(0, 0, 0, 0.07);
+}
