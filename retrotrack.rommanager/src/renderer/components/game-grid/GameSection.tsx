@@ -1,4 +1,4 @@
-import type { Game } from '../../mockData';
+import type { LibraryTrackedGame } from '../../helpers/libraryTypes';
 import GameCard from './GameCard';
 import GameListView from './GameListView';
 import SectionToolbar from './SectionToolbar';
@@ -15,9 +15,15 @@ export function SectionHeader({ title, count }: { title: string; count?: number 
   );
 }
 
-const STATUS_ORDER: Record<string, number> = { completed: 2, 'in-progress': 1, 'not-started': 0 };
+function deriveStatus(game: LibraryTrackedGame): 'completed' | 'in-progress' | 'not-started' {
+  if (game.percentageComplete === 100) return 'completed';
+  if (game.achievementsEarned > 0) return 'in-progress';
+  return 'not-started';
+}
 
-function sortGames(games: Game[], field: SortField, dir: 'asc' | 'desc'): Game[] {
+const STATUS_ORDER = { completed: 2, 'in-progress': 1, 'not-started': 0 } as const;
+
+function sortGames(games: LibraryTrackedGame[], field: SortField, dir: 'asc' | 'desc'): LibraryTrackedGame[] {
   return [...games].sort((a, b) => {
     let cmp = 0;
     switch (field) {
@@ -25,18 +31,15 @@ function sortGames(games: Game[], field: SortField, dir: 'asc' | 'desc'): Game[]
         cmp = a.title.localeCompare(b.title);
         break;
       case 'console':
-        cmp = a.console.localeCompare(b.console);
-        break;
-      case 'lastPlayed':
-        cmp = (a.lastPlayed ?? '').localeCompare(b.lastPlayed ?? '');
+        cmp = a.consoleName.localeCompare(b.consoleName);
         break;
       case 'achievementPercent':
-        cmp = (a.achievementPercent ?? -1) - (b.achievementPercent ?? -1);
+        cmp = a.percentageComplete - b.percentageComplete;
         break;
       case 'status':
-        cmp =
-          (STATUS_ORDER[a.status ?? 'not-started'] ?? 0) -
-          (STATUS_ORDER[b.status ?? 'not-started'] ?? 0);
+        cmp = STATUS_ORDER[deriveStatus(a)] - STATUS_ORDER[deriveStatus(b)];
+        break;
+      default:
         break;
     }
     return dir === 'asc' ? cmp : -cmp;
@@ -45,7 +48,7 @@ function sortGames(games: Game[], field: SortField, dir: 'asc' | 'desc'): Game[]
 
 interface GameSectionProps {
   title: string;
-  games: Game[];
+  games: LibraryTrackedGame[];
   config: ViewConfig;
   onConfigChange: (c: ViewConfig) => void;
   onGameClick?: (gameId: number) => void;
@@ -88,7 +91,7 @@ export default function GameSection({
       ) : (
         <div className="game-grid">
           {sorted.map((g) => (
-            <GameCard key={g.id} game={g} onClick={() => onGameClick?.(g.id)} />
+            <GameCard key={g.gameId} game={g} onClick={() => onGameClick?.(g.gameId)} />
           ))}
         </div>
       )}

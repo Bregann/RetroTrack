@@ -1,41 +1,46 @@
-import type { Game } from '../../mockData';
+import type { LibraryTrackedGame } from '../../helpers/libraryTypes';
+
+const RA_BASE = 'https://media.retroachievements.org';
 
 interface GameCardProps {
-  game: Game;
+  game: LibraryTrackedGame;
   onClick?: () => void;
 }
 
 export default function GameCard({ game, onClick }: GameCardProps) {
+  const coverUrl = game.imageBoxArt
+    ? `${RA_BASE}${game.imageBoxArt}`
+    : game.imageIcon
+      ? `${RA_BASE}${game.imageIcon}`
+      : null;
+
   return (
     <button type="button" className="game-card" onClick={onClick}>
-      <div className="game-card-cover" style={{ backgroundColor: game.coverColor }}>
-        <span className="game-card-cover-text">{game.title}</span>
-        {game.lastPlayed && (
-          <span className="game-card-last-played">Last Played {game.lastPlayed}</span>
-        )}
-        {game.consoleShort && (
-          <span className="game-card-console-badge">{game.consoleShort}</span>
+      <div className="game-card-cover">
+        {coverUrl
+          ? <img src={coverUrl} alt={game.title} />
+          : <span className="game-card-cover-text">{game.title}</span>
+        }
+        {game.consoleName && (
+          <span className="game-card-console-badge">{game.consoleName}</span>
         )}
       </div>
       <div className="game-card-info">
         <span className="game-card-title">{game.title}</span>
-        {game.achievementPercent !== undefined && (
+        {game.achievementCount > 0 && (
           <div className="game-card-achievement">
             <div className="achievement-bar">
               <div
                 className="achievement-bar-fill"
-                style={{ width: `${game.achievementPercent}%` }}
+                style={{ width: `${game.percentageComplete}%` }}
               />
             </div>
             <span className="achievement-text">
-              {game.achievementPercent === 100
+              {game.percentageComplete === 100
                 ? '✅ Complete'
-                : `Achievement: ${game.achievementPercent}%`}
+                : `${game.achievementsEarned}/${game.achievementCount} achievements`}
             </span>
           </div>
-        )}
-        {game.lastPlayed && game.achievementPercent === undefined && (
-          <span className="game-card-meta">Last Played: {game.lastPlayed}</span>
         )}
       </div>
     </button>

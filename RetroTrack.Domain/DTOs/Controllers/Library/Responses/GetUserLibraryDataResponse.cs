@@ -6,6 +6,11 @@ namespace RetroTrack.Domain.DTOs.Controllers.Library.Responses
     {
         public required LibraryConsole[] Consoles { get; set; }
         public required LibraryTrackedGame[] TrackedGames { get; set; }
+        public required LibraryPlaylist[] Playlists { get; set; }
+        public required string RaUsername { get; set; }
+        public required string ProfileImageUrl { get; set; }
+        public required long HardcorePoints { get; set; }
+        public required int AchievementsEarnedHardcore { get; set; }
     }
 
     public class LibraryConsole
@@ -28,5 +33,12 @@ namespace RetroTrack.Domain.DTOs.Controllers.Library.Responses
         public int AchievementsEarned { get; set; }
         public double PercentageComplete { get; set; }
         public HighestAwardKind? HighestAward { get; set; }
+    }
+
+    public class LibraryPlaylist
+    {
+        public required string PlaylistId { get; set; }
+        public required string Name { get; set; }
+        public required int[] GameIds { get; set; }
     }
 }

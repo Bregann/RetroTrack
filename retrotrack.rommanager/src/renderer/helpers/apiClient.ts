@@ -5,6 +5,42 @@ const API_BASE_URL =
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
+// In-memory access token — read from the accessToken cookie after login/refresh.
+// Sent as Authorization: Bearer on every request (the server reads JWT from this header).
+let accessToken: string | null = null
+
+export function loadAccessTokenFromCookie(): void {
+  const match = document.cookie
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith('accessToken='))
+  accessToken = match ? decodeURIComponent(match.slice('accessToken='.length)) : null
+}
+
+// Singleton promise to prevent concurrent refresh token calls.
+// All 401 retries wait for the same in-flight refresh instead of each firing their own.
+let refreshTokenPromise: Promise<boolean> | null = null
+
+function refreshAccessToken(): Promise<boolean> {
+  if (refreshTokenPromise !== null) return refreshTokenPromise
+  refreshTokenPromise = fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+    .then((res) => {
+      if (res.ok) {
+        loadAccessTokenFromCookie()
+        return true
+      }
+      return false
+    })
+    .catch(() => false)
+    .finally(() => {
+      refreshTokenPromise = null
+    })
+  return refreshTokenPromise
+}
+
 export interface FetchResponse<T> {
   data?: T
   status: number
@@ -34,23 +70,24 @@ async function doRequest<T>(
 
   while (attempt < MAX_RETRIES) {
     try {
+      const authHeaders: HeadersInit = accessToken
+        ? { Authorization: `Bearer ${accessToken}` }
+        : {}
+
       const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method,
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
           ...headers,
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
       })
 
       if (res.status === 401 && retry) {
-        const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
-          method: 'POST',
-          credentials: 'include',
-        })
-
-        if (refreshRes.ok) {
+        const refreshed = await refreshAccessToken()
+        if (refreshed) {
           return doRequest<T>(method, endpoint, { body, headers, retry: false })
         } else {
           return { data: undefined, status: res.status, ok: false }

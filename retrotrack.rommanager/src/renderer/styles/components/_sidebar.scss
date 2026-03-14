@@ -109,6 +109,17 @@
   color: var(--text-primary);
 }
 
+.sidebar-section-count {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--bg-light);
+  color: var(--text-secondary);
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 .sidebar-chevron {
   font-size: 12px;
   line-height: 1;

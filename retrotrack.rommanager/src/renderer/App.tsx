@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
+import { useRefreshLibrary } from './helpers/useLibraryData';
 import TopMenuBar from './components/TopMenuBar';
 import { useAuth } from './context/authContext';
 import Sidebar from './components/Sidebar';
@@ -11,6 +12,7 @@ import './styles/main.scss';
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
+  const refreshLibrary = useRefreshLibrary();
   const [selectedView, setSelectedView] = useState('home');
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -49,6 +51,7 @@ export default function App() {
     <div className="app-shell">
       <TopMenuBar
         onLogout={handleLogout}
+        onSyncLibrary={refreshLibrary}
         theme={theme}
         onToggleTheme={toggleTheme}
         onManageEmulators={() => setShowEmulatorSettings(true)}

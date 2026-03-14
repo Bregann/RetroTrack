@@ -1,13 +1,10 @@
 import { useCallback, useState } from 'react';
 import {
-  CONSOLES,
   CUSTOM_CATEGORIES,
-  PLAYLISTS,
-  getTrackedGames,
-  getGamesByConsole,
   getGameById,
-  type Game,
 } from '../mockData';
+import { useLibraryData } from '../helpers/useLibraryData';
+import { getConsoleTypeIcon } from '../enums/consoleType';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from './game-grid/viewConfig';
 import GameSection, { SectionHeader } from './game-grid/GameSection';
 import HomeView from './game-grid/HomeView';
@@ -24,6 +21,7 @@ function SectionView({ children }: { children: React.ReactNode }) {
 
 export default function GameGrid({ selectedView, onGameClick, onSelectView }: GameGridProps) {
   const [viewConfigs, setViewConfigs] = useState<Record<string, ViewConfig>>({});
+  const { data: libraryData } = useLibraryData();
 
   const getConfig = useCallback(
     (key: string): ViewConfig => viewConfigs[key] ?? DEFAULT_VIEW_CONFIG,
@@ -41,20 +39,20 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
   }
 
   if (selectedView === 'consoles') {
+    const consoles = libraryData?.consoles ?? [];
     return (
       <SectionView>
-        <SectionHeader title="All Consoles" count={CONSOLES.length} />
+        <SectionHeader title="All Consoles" count={consoles.length} />
         <div className="browse-card-grid">
-          {CONSOLES.map((c) => (
+          {consoles.map((c) => (
             <button
-              key={c.shortName}
+              key={c.consoleId}
               type="button"
               className="browse-card"
-              onClick={() => onSelectView?.(`console-${c.shortName}`)}
+              onClick={() => onSelectView?.(`console-${c.consoleId}`)}
             >
-              <span className="browse-card-icon">{c.icon}</span>
-              <span className="browse-card-name">{c.name}</span>
-              <span className="browse-card-meta">{getGamesByConsole(c.name).length} games</span>
+              <span className="browse-card-icon">{getConsoleTypeIcon(c.consoleType)}</span>
+              <span className="browse-card-name">{c.consoleName}</span>
             </button>
           ))}
         </div>
@@ -63,16 +61,17 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
   }
 
   if (selectedView === 'playlists') {
+    const playlists = libraryData?.playlists ?? [];
     return (
       <SectionView>
-        <SectionHeader title="RetroTrack Playlists" count={PLAYLISTS.length} />
+        <SectionHeader title="RetroTrack Playlists" count={playlists.length} />
         <div className="browse-card-grid">
-          {PLAYLISTS.map((pl) => (
+          {playlists.map((pl) => (
             <button
-              key={pl.id}
+              key={pl.playlistId}
               type="button"
               className="browse-card"
-              onClick={() => onSelectView?.(`playlist-${pl.id}`)}
+              onClick={() => onSelectView?.(`playlist-${pl.playlistId}`)}
             >
               <span className="browse-card-icon">{pl.icon}</span>
               <span className="browse-card-name">{pl.name}</span>
@@ -89,7 +88,7 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
       <SectionView>
         <GameSection
           title="MY TRACKED GAMES"
-          games={getTrackedGames()}
+          games={libraryData?.trackedGames ?? []}
           config={getConfig('tracked')}
           onConfigChange={setConfig('tracked')}
           onGameClick={onGameClick}
@@ -98,17 +97,18 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
     );
   }
 
-  const consoleMatch = selectedView.match(/^console-(.+)$/);
+  const consoleMatch = selectedView.match(/^console-(\d+)$/);
   if (consoleMatch) {
-    const shortName = consoleMatch[1];
-    const consoleInfo = CONSOLES.find((c) => c.shortName === shortName);
+    const consoleId = Number(consoleMatch[1]);
+    const consoleInfo = libraryData?.consoles.find((c) => c.consoleId === consoleId);
     if (consoleInfo) {
-      const cfgKey = `console-${shortName}`;
+      const cfgKey = `console-${consoleId}`;
+      const games = (libraryData?.trackedGames ?? []).filter((g) => g.consoleId === consoleId);
       return (
         <SectionView>
           <GameSection
-            title={`CONSOLES: ${consoleInfo.name}`}
-            games={getGamesByConsole(consoleInfo.name)}
+            title={`${getConsoleTypeIcon(consoleInfo.consoleType)} ${consoleInfo.consoleName}`}
+            games={games}
             config={getConfig(cfgKey)}
             onConfigChange={setConfig(cfgKey)}
             onGameClick={onGameClick}
@@ -140,10 +140,13 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
 
   const plMatch = selectedView.match(/^playlist-(\d+)$/);
   if (plMatch) {
-    const pl = PLAYLISTS.find((p) => p.id === Number(plMatch[1]));
+    const plId = Number(plMatch[1]);
+    const pl = libraryData?.playlists.find((p) => p.playlistId === plId);
     if (pl) {
-      const games = pl.gameIds.map((id) => getGameById(id)).filter(Boolean) as Game[];
-      const cfgKey = `playlist-${pl.id}`;
+      const games = (libraryData?.trackedGames ?? []).filter((g) =>
+        pl.gameIds.includes(g.gameId),
+      );
+      const cfgKey = `playlist-${plId}`;
       return (
         <SectionView>
           <GameSection

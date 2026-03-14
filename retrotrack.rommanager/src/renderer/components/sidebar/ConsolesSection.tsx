@@ -1,15 +1,5 @@
 import { useLibraryData } from '../../helpers/useLibraryData';
-
-const CONSOLE_TYPE_ICONS: Record<string, string> = {
-  Nintendo: '🎮',
-  Sony: '🎲',
-  Sega: '🎯',
-  Atari: '🕹️',
-  NEC: '💿',
-  SNK: '🃏',
-  Other: '🖥️',
-  NotSet: '🖥️',
-};
+import { getConsoleTypeIcon } from '../../enums/consoleType';
 
 interface Props {
   selectedView: string;
@@ -48,21 +38,16 @@ export default function ConsolesSection({
         <>
           {isLoading && <div className="sidebar-loading">Loading...</div>}
           {consoles.map((c) => (
-            <div key={c.consoleId}>
-              <div
-                className={`sidebar-item ${selectedView === `console-${c.consoleId}` ? 'active' : ''}`}
-              >
-                <span className="sidebar-item-icon">
-                  {CONSOLE_TYPE_ICONS[c.consoleType] ?? '🖥️'}
-                </span>
-                <button
-                  type="button"
-                  className="sidebar-console-name"
-                  onClick={() => onSelectView(`console-${c.consoleId}`)}
-                >
-                  {c.consoleName}
-                </button>
-              </div>
+            <div
+              key={c.consoleId}
+              className={`sidebar-item ${selectedView === `console-${c.consoleId}` ? 'active' : ''}`}
+              onClick={() => onSelectView(`console-${c.consoleId}`)}
+              style={{ cursor: 'pointer' }}
+            >
+              <span className="sidebar-item-icon">
+                {getConsoleTypeIcon(c.consoleType)}
+              </span>
+              <span className="sidebar-console-name">{c.consoleName}</span>
             </div>
           ))}
         </>

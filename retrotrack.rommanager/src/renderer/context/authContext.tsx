@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { doPost } from '../helpers/apiClient'
+import { doPost, loadAccessTokenFromCookie } from '../helpers/apiClient'
 
 type User = {
   username: string
@@ -31,10 +31,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const parsed = JSON.parse(stored) as User
       // Optimistically restore the user, then validate the session is still alive
       setUser(parsed)
-      doPost('/api/auth/RefreshToken', {}).then((res) => {
+      doPost('/api/auth/RefreshToken', { retry: false }).then((res) => {
         if (!res.ok) {
           localStorage.removeItem(STORAGE_KEY)
           setUser(null)
+        } else {
+          loadAccessTokenFromCookie()
         }
         setLoading(false)
       })
@@ -47,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (username: string, password: string): Promise<boolean> => {
     const res = await doPost('/api/auth/LoginUser', { body: { username, password } })
     if (res.status === 200) {
+      loadAccessTokenFromCookie()
       const newUser: User = { username }
       setUser(newUser)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser))

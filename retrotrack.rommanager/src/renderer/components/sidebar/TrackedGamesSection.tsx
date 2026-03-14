@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getTrackedGames } from '../../mockData';
+import { useLibraryData } from '../../helpers/useLibraryData';
 import GameContextMenu from '../GameContextMenu';
 
 interface Props {
@@ -15,7 +15,8 @@ export default function TrackedGamesSection({
   collapsed,
   onToggleCollapse,
 }: Props) {
-  const trackedGames = getTrackedGames();
+  const { data } = useLibraryData();
+  const trackedGames = data?.trackedGames ?? [];
   const [contextMenu, setContextMenu] = useState<{ gameId: number; x: number; y: number } | null>(null);
 
   const openContextMenu = (e: React.MouseEvent, gameId: number) => {
@@ -39,14 +40,15 @@ export default function TrackedGamesSection({
         >
           MY TRACKED GAMES
         </button>
+        <span className="sidebar-section-count">{trackedGames.length}</span>
       </h3>
       {!collapsed && trackedGames.map((game) => (
         <button
-          key={game.id}
+          key={game.gameId}
           type="button"
-          className={`sidebar-sub-item sidebar-tracked-game ${selectedView === `game-${game.id}` ? 'active' : ''}`}
-          onClick={() => onSelectView(`game-${game.id}`)}
-          onContextMenu={(e) => openContextMenu(e, game.id)}
+          className={`sidebar-sub-item sidebar-tracked-game ${selectedView === `game-${game.gameId}` ? 'active' : ''}`}
+          onClick={() => onSelectView(`game-${game.gameId}`)}
+          onContextMenu={(e) => openContextMenu(e, game.gameId)}
         >
           {game.title}
         </button>

@@ -1,7 +1,7 @@
 export interface LibraryConsole {
   consoleId: number;
   consoleName: string;
-  consoleType: string;
+  consoleType: number;
 }
 
 export interface LibraryTrackedGame {
@@ -18,7 +18,18 @@ export interface LibraryTrackedGame {
   highestAward: string | null;
 }
 
+export interface LibraryPlaylist {
+  playlistId: string;
+  name: string;
+  gameIds: number[];
+}
+
 export interface LibraryData {
   consoles: LibraryConsole[];
   trackedGames: LibraryTrackedGame[];
+  playlists: LibraryPlaylist[];
+  raUsername: string;
+  profileImageUrl: string;
+  hardcorePoints: number;
+  achievementsEarnedHardcore: number;
 }

@@ -9,6 +9,8 @@ namespace RetroTrack.Domain.Services.Controllers
     {
         public async Task<GetUserLibraryDataResponse> GetUserLibraryData(int userId)
         {
+            var user = await context.Users.FindAsync(userId);
+
             var consoles = await context.GameConsoles
                 .Where(x => x.DisplayOnSite)
                 .OrderBy(x => x.ConsoleName)
@@ -49,10 +51,28 @@ namespace RetroTrack.Domain.Services.Controllers
                 };
             }).ToArray();
 
+            var playlistEntities = await context.UserPlaylists
+                .Where(x => x.UserIdOwner == userId)
+                .Include(x => x.PlaylistGames)
+                .OrderBy(x => x.PlaylistName)
+                .ToArrayAsync();
+
+            var libraryPlaylists = playlistEntities.Select(pl => new LibraryPlaylist
+            {
+                PlaylistId = pl.Id,
+                Name = pl.PlaylistName,
+                GameIds = pl.PlaylistGames.OrderBy(g => g.OrderIndex).Select(g => g.GameId).ToArray()
+            }).ToArray();
+
             return new GetUserLibraryDataResponse
             {
                 Consoles = consoles,
-                TrackedGames = trackedGames
+                TrackedGames = trackedGames,
+                Playlists = libraryPlaylists,
+                RaUsername = user!.RAUsername,
+                ProfileImageUrl = $"https://media.retroachievements.org/UserPic/{user.RAUsername}.png",
+                HardcorePoints = user.UserPointsHardcore,
+                AchievementsEarnedHardcore = progress.Sum(p => p.AchievementsGainedHardcore)
             };
         }
     }

@@ -7,6 +7,8 @@ import {
   setSyncMeta,
   getSyncMeta,
   clearUserData,
+  upsertPlaylists,
+  getAllPlaylists,
 } from './database';
 
 export function registerIpcHandlers(): void {
@@ -17,4 +19,6 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('db:set-sync-meta', (_event, key, value) => setSyncMeta(key, value));
   ipcMain.handle('db:get-sync-meta', (_event, key) => getSyncMeta(key));
   ipcMain.handle('db:clear-user-data', () => clearUserData());
+  ipcMain.handle('db:upsert-playlists', (_event, playlists) => upsertPlaylists(playlists));
+  ipcMain.handle('db:get-playlists', () => getAllPlaylists());
 }

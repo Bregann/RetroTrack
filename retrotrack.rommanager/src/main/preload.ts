@@ -33,6 +33,9 @@ const electronHandler = {
       ipcRenderer.invoke('db:set-sync-meta', key, value),
     getSyncMeta: (key: string) => ipcRenderer.invoke('db:get-sync-meta', key),
     clearUserData: () => ipcRenderer.invoke('db:clear-user-data'),
+    upsertPlaylists: (playlists: unknown[]) =>
+      ipcRenderer.invoke('db:upsert-playlists', playlists),
+    getPlaylists: () => ipcRenderer.invoke('db:get-playlists'),
   },
 };
 

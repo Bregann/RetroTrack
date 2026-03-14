@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { PLAYLISTS, getGameById } from '../../mockData';
-import GameContextMenu from '../GameContextMenu';
+import { useLibraryData } from '../../helpers/useLibraryData';
 
 interface Props {
   selectedView: string;
@@ -15,16 +14,13 @@ export default function PlaylistsSection({
   collapsed,
   onToggleCollapse,
 }: Props) {
-  const [expandedPlaylists, setExpandedPlaylists] = useState<Record<number, boolean>>({});
-  const [contextMenu, setContextMenu] = useState<{ gameId: number; playlistId: number; x: number; y: number } | null>(null);
+  const { data } = useLibraryData();
+  const playlists = Array.isArray(data?.playlists) ? data.playlists : [];
+  const trackedGames = data?.trackedGames ?? [];
+  const [expandedPlaylists, setExpandedPlaylists] = useState<Record<string, boolean>>({});
 
-  const togglePlaylist = (id: number) => {
+  const togglePlaylist = (id: string) => {
     setExpandedPlaylists((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const openContextMenu = (e: React.MouseEvent, gameId: number, playlistId: number) => {
-    e.preventDefault();
-    setContextMenu({ gameId, playlistId, x: e.clientX, y: e.clientY });
   };
 
   return (
@@ -43,27 +39,27 @@ export default function PlaylistsSection({
         >
           RETROTRACK PLAYLISTS
         </button>
+        <span className="sidebar-section-count">{playlists.length}</span>
       </h3>
-      {!collapsed && PLAYLISTS.map((pl) => {
-        const isExpanded = expandedPlaylists[pl.id];
+      {!collapsed && playlists.map((pl) => {
+        const isExpanded = expandedPlaylists[pl.playlistId];
         return (
-          <div key={pl.id}>
+          <div key={pl.playlistId}>
             <div
-              className={`sidebar-item ${selectedView === `playlist-${pl.id}` ? 'active' : ''}`}
+              className={`sidebar-item ${selectedView === `playlist-${pl.playlistId}` ? 'active' : ''}`}
               style={{ cursor: 'default' }}
             >
-              <span className="sidebar-item-icon">{pl.icon}</span>
               <button
                 type="button"
                 className="sidebar-console-name"
-                onClick={() => onSelectView(`playlist-${pl.id}`)}
+                onClick={() => onSelectView(`playlist-${pl.playlistId}`)}
               >
                 {pl.name}
               </button>
               <button
                 type="button"
                 className="sidebar-expand-btn"
-                onClick={() => togglePlaylist(pl.id)}
+                onClick={() => togglePlaylist(pl.playlistId)}
               >
                 <span className="sidebar-expand-icon">
                   {isExpanded ? '▾' : '▸'}
@@ -73,14 +69,13 @@ export default function PlaylistsSection({
             {isExpanded && (
               <div className="sidebar-sub-items">
                 {pl.gameIds.map((gid) => {
-                  const game = getGameById(gid);
+                  const game = trackedGames.find((g) => g.gameId === gid);
                   return game ? (
                     <button
                       key={gid}
                       type="button"
                       className={`sidebar-sub-item ${selectedView === `game-${gid}` ? 'active' : ''}`}
                       onClick={() => onSelectView(`game-${gid}`)}
-                      onContextMenu={(e) => openContextMenu(e, gid, pl.id)}
                     >
                       {game.title}
                     </button>
@@ -91,24 +86,6 @@ export default function PlaylistsSection({
           </div>
         );
       })}
-      {!collapsed && (
-        <button
-          type="button"
-          className="sidebar-item sidebar-item-add"
-          onClick={() => {}}
-        >
-          Create New Playlist
-        </button>
-      )}
-      {contextMenu && (
-        <GameContextMenu
-          gameId={contextMenu.gameId}
-          playlistId={contextMenu.playlistId}
-          x={contextMenu.x}
-          y={contextMenu.y}
-          onClose={() => setContextMenu(null)}
-        />
-      )}
     </div>
   );
 }

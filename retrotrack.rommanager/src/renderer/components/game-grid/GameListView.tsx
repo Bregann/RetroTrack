@@ -1,4 +1,4 @@
-import { getGameDetail, type Game } from '../../mockData';
+import type { LibraryTrackedGame } from '../../helpers/libraryTypes';
 import type { ListColumn, SortConfig, SortField } from './viewConfig';
 import { ALL_COLUMNS } from './viewConfig';
 
@@ -7,60 +7,60 @@ const SORTABLE: Partial<Record<ListColumn, SortField>> = {
   console: 'console',
   status: 'status',
   achievementPercent: 'achievementPercent',
-  lastPlayed: 'lastPlayed',
 };
 
 interface Props {
-  games: Game[];
+  games: LibraryTrackedGame[];
   columns: ListColumn[];
   sort: SortConfig;
   onSortChange: (field: SortField) => void;
   onGameClick?: (gameId: number) => void;
 }
 
-function formatStatus(status?: string) {
-  if (status === 'in-progress') return 'In Progress';
-  if (status === 'completed') return 'Completed';
+function deriveStatus(game: LibraryTrackedGame): 'completed' | 'in-progress' | 'not-started' {
+  if (game.percentageComplete === 100) return 'completed';
+  if (game.achievementsEarned > 0) return 'in-progress';
+  return 'not-started';
+}
+
+function formatStatus(game: LibraryTrackedGame) {
+  const s = deriveStatus(game);
+  if (s === 'in-progress') return 'In Progress';
+  if (s === 'completed') return 'Completed';
   return 'Not Started';
 }
 
-function statusClass(status?: string) {
-  if (status === 'in-progress') return 'gl-status gl-status-progress';
-  if (status === 'completed') return 'gl-status gl-status-complete';
+function statusClass(game: LibraryTrackedGame) {
+  const s = deriveStatus(game);
+  if (s === 'in-progress') return 'gl-status gl-status-progress';
+  if (s === 'completed') return 'gl-status gl-status-complete';
   return 'gl-status gl-status-not-started';
 }
 
-function CellValue({ game, col }: { game: Game; col: ListColumn }) {
-  const detail = (col === 'achievementsUnlocked' || col === 'achievementsTotal')
-    ? getGameDetail(game.id)
-    : null;
-
+function CellValue({ game, col }: { game: LibraryTrackedGame; col: ListColumn }) {
   switch (col) {
     case 'title':
       return <span className="gl-cell-title">{game.title}</span>;
     case 'console':
-      return <span>{game.console}</span>;
+      return <span>{game.consoleName}</span>;
     case 'status':
-      return <span className={statusClass(game.status)}>{formatStatus(game.status)}</span>;
-    case 'achievementsUnlocked': {
-      if (!detail || detail.achievements.length === 0) return <span className="gl-cell-na">—</span>;
-      const unlocked = detail.achievements.filter((a) => a.unlocked).length;
-      return <span>{unlocked}</span>;
-    }
-    case 'achievementsTotal': {
-      if (!detail || detail.achievements.length === 0) return <span className="gl-cell-na">—</span>;
-      return <span>{detail.achievements.length}</span>;
-    }
+      return <span className={statusClass(game)}>{formatStatus(game)}</span>;
+    case 'achievementsUnlocked':
+      return game.achievementCount === 0
+        ? <span className="gl-cell-na">—</span>
+        : <span>{game.achievementsEarned}</span>;
+    case 'achievementsTotal':
+      return game.achievementCount === 0
+        ? <span className="gl-cell-na">—</span>
+        : <span>{game.achievementCount}</span>;
     case 'achievementPercent':
-      return game.achievementPercent !== undefined ? (
-        <span>{game.achievementPercent}%</span>
-      ) : (
-        <span className="gl-cell-na">—</span>
-      );
+      return game.achievementCount > 0
+        ? <span>{game.percentageComplete}%</span>
+        : <span className="gl-cell-na">—</span>;
     case 'lastPlayed':
-      return <span>{game.lastPlayed || '—'}</span>;
+      return <span className="gl-cell-na">—</span>;
     case 'favorite':
-      return <span>{game.favorite ? '★' : ''}</span>;
+      return <span>—</span>;
     default:
       return <span>—</span>;
   }
@@ -95,9 +95,9 @@ export default function GameListView({ games, columns, sort, onSortChange, onGam
         <tbody>
           {games.map((game) => (
             <tr
-              key={game.id}
+              key={game.gameId}
               className="gl-row"
-              onClick={() => onGameClick?.(game.id)}
+              onClick={() => onGameClick?.(game.gameId)}
             >
               {columns.map((col) => (
                 <td key={col} className={`gl-td gl-td-${col}`}>

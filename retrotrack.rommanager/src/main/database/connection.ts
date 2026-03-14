@@ -14,7 +14,7 @@ export function initDatabase(): void {
     CREATE TABLE IF NOT EXISTS consoles (
       console_id    INTEGER PRIMARY KEY,
       console_name  TEXT NOT NULL,
-      console_type  TEXT NOT NULL
+      console_type  INTEGER NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS tracked_games (
@@ -34,6 +34,17 @@ export function initDatabase(): void {
     CREATE TABLE IF NOT EXISTS sync_metadata (
       key   TEXT PRIMARY KEY,
       value TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS playlists (
+      playlist_id TEXT PRIMARY KEY,
+      name        TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS playlist_games (
+      playlist_id TEXT NOT NULL,
+      game_id     INTEGER NOT NULL,
+      PRIMARY KEY (playlist_id, game_id)
     );
   `);
 }

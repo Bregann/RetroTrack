@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { doGet } from './apiClient';
-import type { LibraryData, LibraryConsole, LibraryTrackedGame } from './libraryTypes';
+import { queryClient } from './queryClient';
+import type { LibraryData, LibraryConsole, LibraryTrackedGame, LibraryPlaylist } from './libraryTypes';
 
 const LIBRARY_QUERY_KEY = ['library-data'];
 
@@ -8,7 +9,7 @@ interface ApiLibraryResponse {
   consoles: Array<{
     consoleId: number;
     consoleName: string;
-    consoleType: string;
+    consoleType: number;
   }>;
   trackedGames: Array<{
     gameId: number;
@@ -23,6 +24,15 @@ interface ApiLibraryResponse {
     percentageComplete: number;
     highestAward: string | null;
   }>;
+  playlists: Array<{
+    playlistId: string;
+    name: string;
+    gameIds: number[];
+  }>;
+  raUsername: string;
+  profileImageUrl: string;
+  hardcorePoints: number;
+  achievementsEarnedHardcore: number;
 }
 
 async function loadFromLocal(): Promise<LibraryData | null> {
@@ -31,10 +41,16 @@ async function loadFromLocal(): Promise<LibraryData | null> {
 
   const consoles = (await db.getConsoles()) as LibraryConsole[];
   const trackedGames = (await db.getTrackedGames()) as LibraryTrackedGame[];
+  const playlistsRaw = await db.getPlaylists();
+  const playlists = Array.isArray(playlistsRaw) ? (playlistsRaw as LibraryPlaylist[]) : [];
+  const raUsername = ((await db.getSyncMeta('raUsername')) as string) ?? '';
+  const profileImageUrl = ((await db.getSyncMeta('profileImageUrl')) as string) ?? '';
+  const hardcorePoints = parseInt((await db.getSyncMeta('hardcorePoints') as string) ?? '0', 10);
+  const achievementsEarnedHardcore = parseInt((await db.getSyncMeta('achievementsEarnedHardcore') as string) ?? '0', 10);
 
   if (consoles.length === 0) return null;
 
-  return { consoles, trackedGames };
+  return { consoles, trackedGames, playlists, raUsername, profileImageUrl, hardcorePoints, achievementsEarnedHardcore };
 }
 
 async function syncFromApi(): Promise<LibraryData> {
@@ -45,16 +61,21 @@ async function syncFromApi(): Promise<LibraryData> {
     throw new Error(res.statusMessage ?? 'Failed to fetch library data');
   }
 
-  const { consoles, trackedGames } = res.data;
+  const { consoles, trackedGames, playlists, raUsername, profileImageUrl, hardcorePoints, achievementsEarnedHardcore } = res.data;
 
   // Persist to local SQLite
   if (db !== undefined) {
     await db.upsertConsoles(consoles);
     await db.upsertTrackedGames(trackedGames);
+    await db.upsertPlaylists(playlists ?? []);
     await db.setSyncMeta('lastSync', new Date().toISOString());
+    await db.setSyncMeta('raUsername', raUsername);
+    await db.setSyncMeta('profileImageUrl', profileImageUrl);
+    await db.setSyncMeta('hardcorePoints', String(hardcorePoints));
+    await db.setSyncMeta('achievementsEarnedHardcore', String(achievementsEarnedHardcore));
   }
 
-  return { consoles, trackedGames };
+  return { consoles, trackedGames, playlists: playlists ?? [], raUsername, profileImageUrl, hardcorePoints, achievementsEarnedHardcore };
 }
 
 async function fetchLibraryData(): Promise<LibraryData> {
@@ -68,9 +89,11 @@ async function fetchLibraryData(): Promise<LibraryData> {
   });
 
   if (local !== null) {
-    // Return local data immediately, API sync will update the cache
-    apiPromise.then(() => {
-      // QueryClient will pick up the next refetch
+    // Return local data immediately, then update cache when API sync finishes
+    apiPromise.then((fresh) => {
+      if (fresh !== null) {
+        queryClient.setQueryData(LIBRARY_QUERY_KEY, fresh);
+      }
     });
     return local;
   }

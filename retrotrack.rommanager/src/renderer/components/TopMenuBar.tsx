@@ -9,13 +9,14 @@ interface DropdownMenu {
 
 interface TopMenuBarProps {
   onLogout: () => void;
+  onSyncLibrary: () => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
   onManageEmulators: () => void;
   onLibraryAction: (action: LibraryModalMode) => void;
 }
 
-export default function TopMenuBar({ onLogout, theme, onToggleTheme, onManageEmulators, onLibraryAction }: TopMenuBarProps) {
+export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleTheme, onManageEmulators, onLibraryAction }: TopMenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showGeneralSettings, setShowGeneralSettings] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
@@ -24,7 +25,7 @@ export default function TopMenuBar({ onLogout, theme, onToggleTheme, onManageEmu
     {
       label: 'Account',
       items: [
-        { label: 'Update Profile', icon: '👤' },
+        { label: 'Sync Library Data', icon: '🔄', onClick: onSyncLibrary },
         { label: 'Log out', icon: '🚪', onClick: onLogout },
       ],
     },
