@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
 import { useLibraryData } from '../../helpers/useLibraryData';
+import { useInvalidateScannedGames } from '../../helpers/useScannedGames';
 import type { SavedFolder, ScanResult, ScanProgress } from './libraryModalTypes';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
   const { data: libraryData } = useLibraryData();
   const consoles = libraryData?.consoles ?? [];
+  const invalidateScannedGames = useInvalidateScannedGames();
   const [folderPath, setFolderPath] = useState('');
   const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -76,6 +78,7 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
 
     setScanning(false);
     setDone(true);
+    invalidateScannedGames();
 
     onFolderAdded({
       path: folderPath,

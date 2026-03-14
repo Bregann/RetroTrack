@@ -43,21 +43,41 @@ interface ApiHashMatch {
 
 function collectRomFiles(dirPath: string): string[] {
   const results: string[] = [];
+  collectRomFilesRecursive(dirPath, results);
+
+  // For disc-based games, a .cue file describes the disc layout and references
+  // one or more .bin files. rcheevos hashes through the .cue, so when a .cue
+  // exists in a directory we skip the .bin files there to avoid duplicates.
+  const dirsWithCue = new Set<string>();
+  for (const f of results) {
+    if (path.extname(f).toLowerCase() === '.cue') {
+      dirsWithCue.add(path.dirname(f));
+    }
+  }
+  if (dirsWithCue.size > 0) {
+    return results.filter((f) => {
+      if (path.extname(f).toLowerCase() !== '.bin') return true;
+      return !dirsWithCue.has(path.dirname(f));
+    });
+  }
+  return results;
+}
+
+function collectRomFilesRecursive(dirPath: string, results: string[]): void {
   let entries: fs.Dirent[];
   try {
     entries = fs.readdirSync(dirPath, { withFileTypes: true });
   } catch {
-    return results;
+    return;
   }
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
-      results.push(...collectRomFiles(fullPath));
+      collectRomFilesRecursive(fullPath, results);
     } else if (ROM_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
       results.push(fullPath);
     }
   }
-  return results;
 }
 
 async function hashFile(filePath: string, consoleId: number): Promise<string | null> {
@@ -136,7 +156,7 @@ export async function scanFolder(
   for (const r of validHashes) {
     const list = hashToFiles.get(r.hash!) ?? [];
     list.push(r);
-    hashToFiles.set(r.hash!, list);
+    hashToFiles.set(r.hash!.toLowerCase(), list);
   }
 
   const allMatches = new Map<string, ApiHashMatch>();

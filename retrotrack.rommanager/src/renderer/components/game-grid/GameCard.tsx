@@ -27,7 +27,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       </div>
       <div className="game-card-info">
         <span className="game-card-title">{game.title}</span>
-        {game.achievementCount > 0 && (
+        {game.achievementsEarned > 0 && (
           <div className="game-card-achievement">
             <div className="achievement-bar">
               <div

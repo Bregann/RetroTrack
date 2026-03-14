@@ -1,34 +1,71 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { LibraryTrackedGame } from './libraryTypes';
 
 interface ScannedGameRow {
-  consoleId: number;
   gameId: number;
+  title: string;
+  consoleId: number;
+  consoleName: string;
+  imageIcon: string;
+  imageBoxArt: string;
+}
+
+export const SCANNED_GAMES_QUERY_KEY = ['scanned-games'];
+
+function useScannedGamesData(): ScannedGameRow[] {
+  const { data } = useQuery<ScannedGameRow[]>({
+    queryKey: SCANNED_GAMES_QUERY_KEY,
+    queryFn: async () => {
+      const rows = await window.electron.scanner.getScannedGames();
+      return rows as ScannedGameRow[];
+    },
+    staleTime: Infinity,
+  });
+  return data ?? [];
 }
 
 /** Returns the set of consoleIds that have at least one scanned game in SQLite. */
 export function useScannedConsoleIds(): Set<number> {
-  const [ids, setIds] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    window.electron.scanner.getScannedGames().then((rows: unknown) => {
-      const games = rows as ScannedGameRow[];
-      setIds(new Set(games.map((g) => g.consoleId)));
-    });
-  }, []);
-
-  return ids;
+  const games = useScannedGamesData();
+  return new Set(games.map((g) => g.consoleId));
 }
 
 /** Returns the set of gameIds (RA game IDs) that have at least one scanned ROM. */
 export function useScannedGameIds(): Set<number> {
-  const [ids, setIds] = useState<Set<number>>(new Set());
+  const games = useScannedGamesData();
+  return new Set(games.map((g) => g.gameId));
+}
 
-  useEffect(() => {
-    window.electron.scanner.getScannedGames().then((rows: unknown) => {
-      const games = rows as ScannedGameRow[];
-      setIds(new Set(games.map((g) => g.gameId)));
+/**
+ * Returns unique scanned games as LibraryTrackedGame objects (progress fields zeroed).
+ * Multiple ROM files for the same gameId are deduplicated.
+ */
+export function useScannedGamesAsLibrary(): LibraryTrackedGame[] {
+  const games = useScannedGamesData();
+  const seen = new Set<number>();
+  const result: LibraryTrackedGame[] = [];
+  for (const g of games) {
+    if (seen.has(g.gameId)) continue;
+    seen.add(g.gameId);
+    result.push({
+      gameId: g.gameId,
+      title: g.title,
+      consoleId: g.consoleId,
+      consoleName: g.consoleName,
+      imageIcon: g.imageIcon,
+      imageBoxArt: g.imageBoxArt,
+      achievementCount: 0,
+      points: 0,
+      achievementsEarned: 0,
+      percentageComplete: 0,
+      highestAward: null,
     });
-  }, []);
+  }
+  return result;
+}
 
-  return ids;
+/** Call after a scan completes to refresh all components that depend on scanned data. */
+export function useInvalidateScannedGames() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: SCANNED_GAMES_QUERY_KEY });
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
+import { useInvalidateScannedGames } from '../../helpers/useScannedGames';
 import type { SavedFolder, ScanProgress } from './libraryModalTypes';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ScanAllModal({ onClose, folders, onScanComplete }: Props) {
+  const invalidateScannedGames = useInvalidateScannedGames();
   const [confirmed, setConfirmed] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
@@ -65,6 +67,7 @@ export default function ScanAllModal({ onClose, folders, onScanComplete }: Props
     setLogs((prev) => [...prev, '', '✔ Scan complete.']);
     setScanning(false);
     setDone(true);
+    invalidateScannedGames();
     onScanComplete();
   };
 

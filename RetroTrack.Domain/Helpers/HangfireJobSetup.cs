@@ -10,7 +10,6 @@ namespace RetroTrack.Domain.Helpers
         {
 #if DEBUG
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");
-            RecurringJob.AddOrUpdate<IRetroAchievementsSchedulerService>("GetGamesFromConsoleIdsJob", service => service.GetGamesFromConsoleIds(), "0 */6 * * *");
 
             Log.Information("[Hangfire] Jobs have been registered successfully in DEBUG mode.");
 #else

@@ -16,6 +16,11 @@ import { resolveHtmlPath } from './util';
 import { initDatabase } from './database';
 import { registerIpcHandlers } from './ipc';
 
+// Dev API uses a self-signed cert — allow Node's fetch to reach it
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';

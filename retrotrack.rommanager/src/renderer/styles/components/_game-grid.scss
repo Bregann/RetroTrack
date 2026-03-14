@@ -212,7 +212,8 @@
   padding: 0;
   text-align: left;
   width: 100%;
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 .game-card:hover {
@@ -221,12 +222,13 @@
 }
 
 .game-card.small .game-card-cover {
-  height: 180px;
+  min-height: 140px;
 }
 
 .game-card-cover {
   position: relative;
-  height: 220px;
+  flex: 1;
+  min-height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,12 +267,14 @@
   top: 8px;
   right: 8px;
   font-size: 9px;
-  background: rgba(0, 0, 0, 0.5);
-  color: var(--text-secondary);
-  padding: 2px 6px;
-  border-radius: 2px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.78);
+  color: var(--accent-teal);
+  padding: 3px 7px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .game-card-info {

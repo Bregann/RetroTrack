@@ -1,5 +1,5 @@
 import { useLibraryData } from '../../helpers/useLibraryData';
-import { useScannedGameIds, useScannedConsoleIds } from '../../helpers/useScannedGames';
+import { useScannedGameIds, useScannedConsoleIds, useScannedGamesAsLibrary } from '../../helpers/useScannedGames';
 import { getConsoleTypeIcon } from '../../enums/consoleType';
 import GameCard from './GameCard';
 import { SectionHeader } from './GameSection';
@@ -13,6 +13,7 @@ export default function HomeView({ onGameClick, onSelectView }: HomeViewProps) {
   const { data: libraryData } = useLibraryData();
   const scannedGameIds = useScannedGameIds();
   const scannedConsoleIds = useScannedConsoleIds();
+  const scannedGames = useScannedGamesAsLibrary();
 
   const allTracked = libraryData?.trackedGames ?? [];
   const consoles = libraryData?.consoles ?? [];
@@ -21,15 +22,19 @@ export default function HomeView({ onGameClick, onSelectView }: HomeViewProps) {
   // Only show games that have a scanned ROM
   const trackedGames = allTracked.filter((g) => scannedGameIds.has(g.gameId));
 
+  // Merge scanned games with tracked data — tracked takes priority (has progress)
+  const trackedMap = new Map(trackedGames.map((g) => [g.gameId, g]));
+  const allGames = scannedGames.map((g) => trackedMap.get(g.gameId) ?? g);
+
   // Most recently added = last N by position in the list
-  const recentlyAdded = trackedGames.slice(0, 6);
+  const recentlyAdded = allGames.slice(0, 6);
   // In-progress games sorted by completion desc
   const inProgress = trackedGames
     .filter((g) => g.achievementsEarned > 0 && g.percentageComplete < 100)
     .sort((a, b) => b.percentageComplete - a.percentageComplete)
     .slice(0, 6);
 
-  const hasAnything = trackedGames.length > 0;
+  const hasAnything = allGames.length > 0;
 
   if (!hasAnything) {
     return (

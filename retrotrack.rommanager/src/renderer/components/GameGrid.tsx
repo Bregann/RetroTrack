@@ -4,7 +4,7 @@ import {
   getGameById,
 } from '../mockData';
 import { useLibraryData } from '../helpers/useLibraryData';
-import { useScannedGameIds, useScannedConsoleIds } from '../helpers/useScannedGames';
+import { useScannedGameIds, useScannedConsoleIds, useScannedGamesAsLibrary } from '../helpers/useScannedGames';
 import { getConsoleTypeIcon } from '../enums/consoleType';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from './game-grid/viewConfig';
 import GameSection, { SectionHeader } from './game-grid/GameSection';
@@ -25,6 +25,7 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
   const { data: libraryData } = useLibraryData();
   const scannedGameIds = useScannedGameIds();
   const scannedConsoleIds = useScannedConsoleIds();
+  const scannedGames = useScannedGamesAsLibrary();
 
   const trackedGames = (libraryData?.trackedGames ?? []).filter((g) => scannedGameIds.has(g.gameId));
 
@@ -110,22 +111,27 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
   const consoleMatch = selectedView.match(/^console-(\d+)$/);
   if (consoleMatch) {
     const consoleId = Number(consoleMatch[1]);
+    const consoleScanned = scannedGames.filter((g) => g.consoleId === consoleId);
+
+    // Prefer library data for console info (has icon type), fall back to scanned game data
     const consoleInfo = libraryData?.consoles.find((c) => c.consoleId === consoleId);
-    if (consoleInfo) {
-      const cfgKey = `console-${consoleId}`;
-      const games = trackedGames.filter((g) => g.consoleId === consoleId);
-      return (
-        <SectionView>
-          <GameSection
-            title={`${getConsoleTypeIcon(consoleInfo.consoleType)} ${consoleInfo.consoleName}`}
-            games={games}
-            config={getConfig(cfgKey)}
-            onConfigChange={setConfig(cfgKey)}
-            onGameClick={onGameClick}
-          />
-        </SectionView>
-      );
-    }
+    const consoleName = consoleInfo?.consoleName ?? consoleScanned[0]?.consoleName ?? `Console ${consoleId}`;
+    const consoleIcon = consoleInfo ? getConsoleTypeIcon(consoleInfo.consoleType) : '🎮';
+
+    const cfgKey = `console-${consoleId}`;
+    const trackedMap = new Map(trackedGames.map((g) => [g.gameId, g]));
+    const games = consoleScanned.map((g) => trackedMap.get(g.gameId) ?? g);
+    return (
+      <SectionView>
+        <GameSection
+          title={`${consoleIcon} ${consoleName}`}
+          games={games}
+          config={getConfig(cfgKey)}
+          onConfigChange={setConfig(cfgKey)}
+          onGameClick={onGameClick}
+        />
+      </SectionView>
+    );
   }
 
   const catMatch = selectedView.match(/^cat-(\d+)$/);

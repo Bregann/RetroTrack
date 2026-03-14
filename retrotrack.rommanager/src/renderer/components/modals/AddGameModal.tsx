@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
 import { useLibraryData } from '../../helpers/useLibraryData';
+import { useInvalidateScannedGames } from '../../helpers/useScannedGames';
 import type { ScanResult } from './libraryModalTypes';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 export default function AddGameModal({ onClose }: Props) {
   const { data: libraryData } = useLibraryData();
   const consoles = libraryData?.consoles ?? [];
+  const invalidateScannedGames = useInvalidateScannedGames();
   const [filePath, setFilePath] = useState('');
   const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -39,6 +41,7 @@ export default function AddGameModal({ onClose }: Props) {
       title: res.title,
     });
     setScanning(false);
+    if (res.matched) invalidateScannedGames();
   };
 
   return (
