@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
 import type { SavedFolder } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
   folders: SavedFolder[];
-  onRemoveFolder: (path: string) => void;
-  onRescanFolder: (path: string) => void;
+  onRemoveFolder: (path: string, consoleId: number) => void;
+  onRescanFolder: (path: string, consoleId: number, matched: number) => void;
 }
 
 export default function ManageFoldersModal({
@@ -14,13 +15,22 @@ export default function ManageFoldersModal({
   onRemoveFolder,
   onRescanFolder,
 }: Props) {
-  const [rescanningPath, setRescanningPath] = useState<string | null>(null);
+  const [rescanningKey, setRescanningKey] = useState<string | null>(null);
 
-  const handleRescan = async (path: string) => {
-    setRescanningPath(path);
-    await new Promise((res) => setTimeout(res, 1500 + Math.random() * 1000));
-    onRescanFolder(path);
-    setRescanningPath(null);
+  const handleRescan = async (folderPath: string, consoleId: number) => {
+    const token = getAccessToken();
+    if (!token) return;
+
+    const key = `${folderPath}::${consoleId}`;
+    setRescanningKey(key);
+    const { matched } = await window.electron.scanner.scanFolder(
+      folderPath,
+      consoleId,
+      API_BASE_URL,
+      token,
+    );
+    onRescanFolder(folderPath, consoleId, matched);
+    setRescanningKey(null);
   };
 
   return (
@@ -40,34 +50,37 @@ export default function ManageFoldersModal({
             </div>
           ) : (
             <div className="lib-folder-list">
-              {folders.map((f) => (
-                <div key={f.path} className="lib-folder-item">
-                  <div className="lib-folder-info">
-                    <span className="lib-folder-path">📁 {f.path}</span>
-                    <span className="lib-folder-meta">
-                      {f.gameCount} game{f.gameCount !== 1 ? 's' : ''} · Added {f.addedAt}
-                    </span>
+              {folders.map((f) => {
+                const key = `${f.path}::${f.consoleId}`;
+                return (
+                  <div key={key} className="lib-folder-item">
+                    <div className="lib-folder-info">
+                      <span className="lib-folder-path">📁 {f.path}</span>
+                      <span className="lib-folder-meta">
+                        {f.consoleName} · {f.gameCount} game{f.gameCount !== 1 ? 's' : ''} · Added {f.addedAt}
+                      </span>
+                    </div>
+                    <div className="lib-folder-actions">
+                      <button
+                        type="button"
+                        className="lib-btn-secondary"
+                        disabled={rescanningKey === key}
+                        onClick={() => handleRescan(f.path, f.consoleId)}
+                      >
+                        {rescanningKey === key ? 'Scanning...' : '🔄 Re-scan'}
+                      </button>
+                      <button
+                        type="button"
+                        className="lib-btn-danger"
+                        disabled={rescanningKey !== null}
+                        onClick={() => onRemoveFolder(f.path, f.consoleId)}
+                      >
+                        🗑️ Remove
+                      </button>
+                    </div>
                   </div>
-                  <div className="lib-folder-actions">
-                    <button
-                      type="button"
-                      className="lib-btn-secondary"
-                      disabled={rescanningPath === f.path}
-                      onClick={() => handleRescan(f.path)}
-                    >
-                      {rescanningPath === f.path ? 'Scanning...' : '🔄 Re-scan'}
-                    </button>
-                    <button
-                      type="button"
-                      className="lib-btn-danger"
-                      disabled={rescanningPath !== null}
-                      onClick={() => onRemoveFolder(f.path)}
-                    >
-                      🗑️ Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { simulateFolderScan, type SavedFolder, type ScanResult } from './libraryModalTypes';
+import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
+import { useLibraryData } from '../../helpers/useLibraryData';
+import type { SavedFolder, ScanResult, ScanProgress } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
@@ -7,7 +9,10 @@ interface Props {
 }
 
 export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
+  const { data: libraryData } = useLibraryData();
+  const consoles = libraryData?.consoles ?? [];
   const [folderPath, setFolderPath] = useState('');
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
   const [scanning, setScanning] = useState(false);
   const [results, setResults] = useState<ScanResult[]>([]);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -20,29 +25,62 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
     }
   }, [results]);
 
-  const handleBrowse = () => {
-    setFolderPath('C:\\ROMs\\RetroCollection');
-    setResults([]);
-    setDone(false);
+  useEffect(() => {
+    if (!scanning) return;
+    const unsub = window.electron.scanner.onProgress((raw) => {
+      const p = raw as ScanProgress;
+      setProgress({ current: p.current, total: p.total });
+      if (p.fileName) {
+        setResults((prev) => [
+          ...prev,
+          {
+            fileName: p.fileName!,
+            matched: !!p.matched,
+            consoleName: p.consoleName,
+            title: p.title,
+          },
+        ]);
+      }
+    });
+    return () => { unsub(); };
+  }, [scanning]);
+
+  const handleBrowse = async () => {
+    const selected = await window.electron.scanner.browseFolder();
+    if (selected) {
+      setFolderPath(selected);
+      setResults([]);
+      setDone(false);
+    }
   };
 
   const handleScan = async () => {
-    if (!folderPath) return;
+    if (!folderPath || selectedConsoleId === null) return;
+    const token = getAccessToken();
+    if (!token) return;
+
+    const consoleName = consoles.find((c) => c.consoleId === selectedConsoleId)?.consoleName ?? '';
+
     setScanning(true);
     setResults([]);
     setDone(false);
 
-    const allResults = await simulateFolderScan((result, idx, total) => {
-      setProgress({ current: idx + 1, total });
-      setResults((prev) => [...prev, result]);
-    });
+    await window.electron.scanner.addFolder(folderPath, selectedConsoleId, consoleName);
+
+    const { matched } = await window.electron.scanner.scanFolder(
+      folderPath,
+      selectedConsoleId,
+      API_BASE_URL,
+      token,
+    );
 
     setScanning(false);
     setDone(true);
 
-    const matched = allResults.filter((r) => r.matched).length;
     onFolderAdded({
       path: folderPath,
+      consoleId: selectedConsoleId,
+      consoleName,
       addedAt: new Date().toLocaleDateString(),
       gameCount: matched,
     });
@@ -59,7 +97,8 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
         </div>
         <div className="lib-modal-content">
           <p className="lib-modal-desc">
-            Select a folder to scan for ROMs. The folder will be saved so it can be re-scanned later.
+            Select a folder and choose the console/system the ROMs belong to. The same folder
+            can be added multiple times for different systems.
           </p>
           <div className="lib-path-row">
             <input
@@ -73,10 +112,20 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
               Browse
             </button>
           </div>
+          <select
+            className="lib-select"
+            value={selectedConsoleId ?? ''}
+            onChange={(e) => setSelectedConsoleId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">— Select system —</option>
+            {consoles.map((c) => (
+              <option key={c.consoleId} value={c.consoleId}>{c.consoleName}</option>
+            ))}
+          </select>
           <button
             type="button"
             className="lib-action-btn"
-            disabled={!folderPath || scanning}
+            disabled={!folderPath || selectedConsoleId === null || scanning}
             onClick={handleScan}
           >
             {scanning ? 'Scanning...' : 'Scan Folder'}
@@ -106,7 +155,7 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
                     <span className="lib-log-file">{r.fileName}</span>
                     {r.matched && (
                       <span className="lib-log-title">
-                        {r.title} ({r.console})
+                        {r.title} ({r.consoleName})
                       </span>
                     )}
                   </div>

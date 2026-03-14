@@ -116,7 +116,7 @@ namespace RetroTrack.Domain.Services
                     }
 
                     // Process game hashes
-                    if (game.Hashes != null && game.Hashes.Any())
+                    if (game.Hashes != null && game.Hashes.Count != 0)
                     {
                         var existingHashes = await context.GameHashes
                             .Where(x => x.GameId == game.Id)

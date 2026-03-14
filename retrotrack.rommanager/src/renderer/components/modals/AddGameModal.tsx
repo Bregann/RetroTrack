@@ -1,28 +1,43 @@
 import { useState } from 'react';
-import { MOCK_RA_GAMES, simulateSingleScan, type ScanResult } from './libraryModalTypes';
+import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
+import { useLibraryData } from '../../helpers/useLibraryData';
+import type { ScanResult } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
 }
 
 export default function AddGameModal({ onClose }: Props) {
+  const { data: libraryData } = useLibraryData();
+  const consoles = libraryData?.consoles ?? [];
   const [filePath, setFilePath] = useState('');
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
 
-  const handleBrowse = () => {
-    const files = [...Object.keys(MOCK_RA_GAMES), 'readme.txt', 'cover.jpg'];
-    const picked = files[Math.floor(Math.random() * files.length)];
-    setFilePath(`C:\\ROMs\\${picked}`);
-    setResult(null);
+  const handleBrowse = async () => {
+    const selected = await window.electron.scanner.browseFile();
+    if (selected) {
+      setFilePath(selected);
+      setResult(null);
+    }
   };
 
   const handleScan = async () => {
-    if (!filePath) return;
+    if (!filePath || selectedConsoleId === null) return;
+    const token = getAccessToken();
+    if (!token) return;
+
     setScanning(true);
     setResult(null);
-    const res = await simulateSingleScan(filePath);
-    setResult(res);
+
+    const res = await window.electron.scanner.scanFile(filePath, selectedConsoleId, API_BASE_URL, token);
+    setResult({
+      fileName: res.fileName,
+      matched: res.matched,
+      consoleName: res.consoleName,
+      title: res.title,
+    });
     setScanning(false);
   };
 
@@ -35,7 +50,7 @@ export default function AddGameModal({ onClose }: Props) {
         </div>
         <div className="lib-modal-content">
           <p className="lib-modal-desc">
-            Select a ROM file to scan and check if it's recognised by RetroAchievements.
+            Select a ROM file and choose its system to check if it's recognised by RetroAchievements.
           </p>
           <div className="lib-path-row">
             <input
@@ -49,10 +64,20 @@ export default function AddGameModal({ onClose }: Props) {
               Browse
             </button>
           </div>
+          <select
+            className="lib-select"
+            value={selectedConsoleId ?? ''}
+            onChange={(e) => setSelectedConsoleId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">— Select system —</option>
+            {consoles.map((c) => (
+              <option key={c.consoleId} value={c.consoleId}>{c.consoleName}</option>
+            ))}
+          </select>
           <button
             type="button"
             className="lib-action-btn"
-            disabled={!filePath || scanning}
+            disabled={!filePath || selectedConsoleId === null || scanning}
             onClick={handleScan}
           >
             {scanning ? 'Scanning...' : 'Scan File'}
@@ -65,7 +90,7 @@ export default function AddGameModal({ onClose }: Props) {
                   <span className="lib-result-icon">✅</span>
                   <div>
                     <strong>{result.title}</strong>
-                    <span className="lib-result-console">{result.console}</span>
+                    <span className="lib-result-console">{result.consoleName}</span>
                     <p className="lib-result-note">Game recognised — added to your library.</p>
                   </div>
                 </>

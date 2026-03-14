@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useLibraryData } from '../../helpers/useLibraryData';
+import { useScannedGameIds } from '../../helpers/useScannedGames';
 import GameContextMenu from '../GameContextMenu';
+import Tooltip from '../Tooltip';
 
 interface Props {
   selectedView: string;
@@ -16,6 +18,7 @@ export default function TrackedGamesSection({
   onToggleCollapse,
 }: Props) {
   const { data } = useLibraryData();
+  const scannedGameIds = useScannedGameIds();
   const trackedGames = data?.trackedGames ?? [];
   const [contextMenu, setContextMenu] = useState<{ gameId: number; x: number; y: number } | null>(null);
 
@@ -42,17 +45,25 @@ export default function TrackedGamesSection({
         </button>
         <span className="sidebar-section-count">{trackedGames.length}</span>
       </h3>
-      {!collapsed && trackedGames.map((game) => (
-        <button
-          key={game.gameId}
-          type="button"
-          className={`sidebar-sub-item sidebar-tracked-game ${selectedView === `game-${game.gameId}` ? 'active' : ''}`}
-          onClick={() => onSelectView(`game-${game.gameId}`)}
-          onContextMenu={(e) => openContextMenu(e, game.gameId)}
-        >
-          {game.title}
-        </button>
-      ))}
+      {!collapsed && trackedGames.map((game) => {
+        const isScanned = scannedGameIds.has(game.gameId);
+        const btn = (
+          <button
+            key={game.gameId}
+            type="button"
+            className={`sidebar-sub-item sidebar-tracked-game${!isScanned ? ' sidebar-sub-item--unscanned' : ''}${selectedView === `game-${game.gameId}` ? ' active' : ''}`}
+            onClick={isScanned ? () => onSelectView(`game-${game.gameId}`) : undefined}
+            onContextMenu={isScanned ? (e) => openContextMenu(e, game.gameId) : undefined}
+          >
+            {game.title}
+          </button>
+        );
+        return isScanned ? btn : (
+          <Tooltip key={game.gameId} text="Game not found — scan a folder containing this ROM">
+            {btn}
+          </Tooltip>
+        );
+      })}
       {contextMenu && (
         <GameContextMenu
           gameId={contextMenu.gameId}

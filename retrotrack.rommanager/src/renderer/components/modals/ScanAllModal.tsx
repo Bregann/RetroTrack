@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { MOCK_RA_GAMES, type SavedFolder } from './libraryModalTypes';
+import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
+import type { SavedFolder, ScanProgress } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
@@ -20,27 +21,45 @@ export default function ScanAllModal({ onClose, folders, onScanComplete }: Props
     }
   }, [logs]);
 
+  // Listen for progress events while scanning
+  useEffect(() => {
+    if (!scanning) return;
+    const unsub = window.electron.scanner.onProgress((raw) => {
+      const p = raw as ScanProgress;
+      if (p.fileName && p.matched) {
+        setLogs((prev) => [
+          ...prev,
+          `   ✅ ${p.fileName} → ${p.title} (${p.consoleName})`,
+        ]);
+      } else if (p.phase === 'hashing' && p.fileName) {
+        setLogs((prev) => [...prev, `   Hashing ${p.fileName}... (${p.current}/${p.total})`]);
+      }
+    });
+    return () => { unsub(); };
+  }, [scanning]);
+
   const handleConfirm = async () => {
+    const token = getAccessToken();
+    if (!token) return;
+
     setConfirmed(true);
     setScanning(true);
     setLogs([]);
 
     for (const folder of folders) {
       setLogs((prev) => [...prev, `📁 Scanning folder: ${folder.path}`]);
-      await new Promise((res) => setTimeout(res, 600));
 
-      const files = Object.keys(MOCK_RA_GAMES).slice(0, 3 + Math.floor(Math.random() * 4));
-      for (const file of files) {
-        const match = MOCK_RA_GAMES[file.toLowerCase()];
-        await new Promise((res) => setTimeout(res, 250 + Math.random() * 300));
-        setLogs((prev) => [
-          ...prev,
-          match
-            ? `   ✅ ${file} → ${match.title} (${match.console})`
-            : `   ⬜ ${file} — not recognised`,
-        ]);
-      }
-      setLogs((prev) => [...prev, `   Done — ${files.length} files checked.`]);
+      const { matched, total } = await window.electron.scanner.scanFolder(
+        folder.path,
+        folder.consoleId,
+        API_BASE_URL,
+        token,
+      );
+
+      setLogs((prev) => [
+        ...prev,
+        `   Done — ${total} files checked, ${matched} game${matched !== 1 ? 's' : ''} matched.`,
+      ]);
     }
 
     setLogs((prev) => [...prev, '', '✔ Scan complete.']);
@@ -76,9 +95,9 @@ export default function ScanAllModal({ onClose, folders, onScanComplete }: Props
                 </p>
                 <div className="lib-confirm-folders">
                   {folders.map((f) => (
-                    <div key={f.path} className="lib-confirm-folder-row">
+                    <div key={`${f.path}::${f.consoleId}`} className="lib-confirm-folder-row">
                       📁 {f.path}{' '}
-                      <span className="lib-folder-meta">({f.gameCount} games)</span>
+                      <span className="lib-folder-meta">({f.consoleName} · {f.gameCount} games)</span>
                     </div>
                   ))}
                 </div>

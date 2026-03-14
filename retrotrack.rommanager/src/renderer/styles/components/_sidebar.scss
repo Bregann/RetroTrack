@@ -223,6 +223,40 @@
   color: var(--text-white);
 }
 
+.sidebar-sub-item--unscanned {
+  opacity: 0.35;
+  cursor: default;
+
+  &:hover {
+    color: var(--text-secondary);
+  }
+}
+
+.sidebar-tooltip {
+  position: fixed;
+  transform: translateY(-50%);
+  background: var(--bg-elevated);
+  color: var(--text-bright);
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.sidebar-tooltip-arrow {
+  position: fixed;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--border-color);
+  pointer-events: none;
+  z-index: 10000;
+}
+
 .sidebar-item-add {
   color: var(--accent-teal);
   font-size: 12px;

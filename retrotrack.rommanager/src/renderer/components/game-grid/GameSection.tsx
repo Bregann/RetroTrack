@@ -80,7 +80,12 @@ export default function GameSection({
         config={config}
         onConfigChange={onConfigChange}
       />
-      {config.mode === 'list' ? (
+      {games.length === 0 ? (
+        <div className="empty-section">
+          <span className="empty-section__icon">📂</span>
+          <p className="empty-section__text">No games found — scan a folder to add ROMs to your library.</p>
+        </div>
+      ) : config.mode === 'list' ? (
         <GameListView
           games={sorted}
           columns={config.columns}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { type SavedFolder } from './modals/libraryModalTypes';
 import AddGameModal from './modals/AddGameModal';
 import AddFolderModal from './modals/AddFolderModal';
@@ -17,29 +17,65 @@ interface LibraryModalsProps {
   onClose: () => void;
 }
 
+interface ScanFolderRow {
+  path: string;
+  consoleId: number;
+  consoleName: string;
+  addedAt: string;
+}
+
 export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
-  const [folders, setFolders] = useState<SavedFolder[]>([
-    { path: 'C:\\ROMs\\SNES', addedAt: '12/01/2025', gameCount: 14 },
-    { path: 'C:\\ROMs\\Genesis', addedAt: '12/01/2025', gameCount: 8 },
-  ]);
+  const [folders, setFolders] = useState<SavedFolder[]>([]);
+
+  const loadFolders = useCallback(async () => {
+    const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
+    const allGames: { folderPath: string; consoleId: number }[] =
+      await window.electron.scanner.getScannedGames();
+    const countMap = new Map<string, number>();
+    for (const g of allGames) {
+      const key = `${g.folderPath}::${g.consoleId}`;
+      countMap.set(key, (countMap.get(key) ?? 0) + 1);
+    }
+    setFolders(
+      rows.map((r) => ({
+        path: r.path,
+        consoleId: r.consoleId,
+        consoleName: r.consoleName,
+        addedAt: new Date(r.addedAt).toLocaleDateString(),
+        gameCount: countMap.get(`${r.path}::${r.consoleId}`) ?? 0,
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (mode) {
+      loadFolders();
+    }
+  }, [mode, loadFolders]);
 
   const handleFolderAdded = (folder: SavedFolder) => {
     setFolders((prev) => {
-      if (prev.some((f) => f.path === folder.path)) return prev;
+      const existing = prev.find(
+        (f) => f.path === folder.path && f.consoleId === folder.consoleId,
+      );
+      if (existing) {
+        return prev.map((f) =>
+          f.path === folder.path && f.consoleId === folder.consoleId ? folder : f,
+        );
+      }
       return [...prev, folder];
     });
   };
 
-  const handleRemoveFolder = (path: string) => {
-    setFolders((prev) => prev.filter((f) => f.path !== path));
+  const handleRemoveFolder = async (path: string, consoleId: number) => {
+    await window.electron.scanner.removeFolder(path, consoleId);
+    setFolders((prev) => prev.filter((f) => !(f.path === path && f.consoleId === consoleId)));
   };
 
-  const handleRescanFolder = (path: string) => {
+  const handleRescanFolder = (path: string, consoleId: number, matched: number) => {
     setFolders((prev) =>
       prev.map((f) =>
-        f.path === path
-          ? { ...f, gameCount: f.gameCount + Math.floor(Math.random() * 3) }
-          : f,
+        f.path === path && f.consoleId === consoleId ? { ...f, gameCount: matched } : f,
       ),
     );
   };
@@ -65,7 +101,7 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
         <ScanAllModal
           onClose={onClose}
           folders={folders}
-          onScanComplete={() => {}}
+          onScanComplete={loadFolders}
         />
       );
     default:

@@ -107,6 +107,28 @@
   border-color: var(--accent);
 }
 
+.lib-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-darker, #1a1d23);
+  color: var(--text-bright);
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 12px;
+  cursor: pointer;
+
+  &:focus {
+    border-color: var(--accent);
+  }
+
+  option {
+    background: var(--bg-darker, #1a1d23);
+    color: var(--text-bright);
+  }
+}
+
 .lib-browse-btn {
   padding: 8px 16px;
   border-radius: 4px;
@@ -414,6 +436,10 @@
 }
 
 [data-theme="light"] .lib-input {
+  background: #fff;
+}
+
+[data-theme="light"] .lib-select {
   background: #fff;
 }
 

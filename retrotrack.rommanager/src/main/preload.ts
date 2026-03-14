@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close';
+export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close' | 'scan:progress';
 
 const electronHandler = {
   ipcRenderer: {
@@ -36,6 +36,27 @@ const electronHandler = {
     upsertPlaylists: (playlists: unknown[]) =>
       ipcRenderer.invoke('db:upsert-playlists', playlists),
     getPlaylists: () => ipcRenderer.invoke('db:get-playlists'),
+  },
+  scanner: {
+    browseFolder: () => ipcRenderer.invoke('scan:browse-folder') as Promise<string | null>,
+    browseFile: () => ipcRenderer.invoke('scan:browse-file') as Promise<string | null>,
+    addFolder: (folderPath: string, consoleId: number, consoleName: string) =>
+      ipcRenderer.invoke('scan:add-folder', folderPath, consoleId, consoleName),
+    getFolders: () => ipcRenderer.invoke('scan:get-folders'),
+    removeFolder: (folderPath: string, consoleId: number) =>
+      ipcRenderer.invoke('scan:remove-folder', folderPath, consoleId),
+    scanFolder: (folderPath: string, consoleId: number, apiBaseUrl: string, accessToken: string) =>
+      ipcRenderer.invoke('scan:scan-folder', folderPath, consoleId, apiBaseUrl, accessToken) as Promise<{ matched: number; total: number }>,
+    scanFile: (filePath: string, consoleId: number, apiBaseUrl: string, accessToken: string) =>
+      ipcRenderer.invoke('scan:scan-file', filePath, consoleId, apiBaseUrl, accessToken) as Promise<{ fileName: string; matched: boolean; title?: string; consoleName?: string; gameId?: number }>,
+    getScannedGames: () => ipcRenderer.invoke('scan:get-scanned-games'),
+    getScannedGamesByFolder: (folderPath: string) =>
+      ipcRenderer.invoke('scan:get-scanned-games-by-folder', folderPath),
+    onProgress: (callback: (progress: unknown) => void) => {
+      const sub = (_event: IpcRendererEvent, progress: unknown) => callback(progress);
+      ipcRenderer.on('scan:progress', sub);
+      return () => ipcRenderer.removeListener('scan:progress', sub);
+    },
   },
 };
 

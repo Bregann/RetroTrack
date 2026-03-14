@@ -15,7 +15,7 @@ if (
   const electronVersion = JSON.parse(
     fs.readFileSync(electronPkgPath, 'utf8'),
   ).version;
-  const electronRebuildCmd = `../../node_modules/.bin/electron-rebuild --force --types prod,dev,optional --module-dir . --version ${electronVersion}`;
+  const electronRebuildCmd = `../../node_modules/.bin/electron-rebuild --force --types prod,dev,optional --module-dir . --version ${electronVersion} --only better-sqlite3`;
   const cmd =
     process.platform === 'win32'
       ? electronRebuildCmd.replace(/\//g, '\\')

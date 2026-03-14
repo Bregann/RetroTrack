@@ -183,7 +183,7 @@ namespace RetroTrack.Domain.Services
         public async Task<List<GetGameList>?> GetGameListFromConsoleId(int consoleId)
         {
             var client = new RestClient(_baseUrl);
-            var request = new RestRequest($"API_GetGameList.php?z={_apiUsername}&y={_apiKey}&i={consoleId}", Method.Get);
+            var request = new RestRequest($"API_GetGameList.php?z={_apiUsername}&y={_apiKey}&i={consoleId}&h=1", Method.Get);
             var response = await client.ExecuteAsync(request);
 
             if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)

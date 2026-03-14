@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useLibraryData } from '../../helpers/useLibraryData';
+import { useScannedGameIds } from '../../helpers/useScannedGames';
+import Tooltip from '../Tooltip';
 
 interface Props {
   selectedView: string;
@@ -15,8 +17,9 @@ export default function PlaylistsSection({
   onToggleCollapse,
 }: Props) {
   const { data } = useLibraryData();
+  const scannedGameIds = useScannedGameIds();
   const playlists = Array.isArray(data?.playlists) ? data.playlists : [];
-  const trackedGames = data?.trackedGames ?? [];
+  const allTrackedGames = data?.trackedGames ?? [];
   const [expandedPlaylists, setExpandedPlaylists] = useState<Record<string, boolean>>({});
 
   const togglePlaylist = (id: string) => {
@@ -69,17 +72,24 @@ export default function PlaylistsSection({
             {isExpanded && (
               <div className="sidebar-sub-items">
                 {pl.gameIds.map((gid) => {
-                  const game = trackedGames.find((g) => g.gameId === gid);
-                  return game ? (
+                  const game = allTrackedGames.find((g) => g.gameId === gid);
+                  if (!game) return null;
+                  const isScanned = scannedGameIds.has(gid);
+                  const btn = (
                     <button
                       key={gid}
                       type="button"
-                      className={`sidebar-sub-item ${selectedView === `game-${gid}` ? 'active' : ''}`}
-                      onClick={() => onSelectView(`game-${gid}`)}
+                      className={`sidebar-sub-item${!isScanned ? ' sidebar-sub-item--unscanned' : ''}${selectedView === `game-${gid}` ? ' active' : ''}`}
+                      onClick={isScanned ? () => onSelectView(`game-${gid}`) : undefined}
                     >
                       {game.title}
                     </button>
-                  ) : null;
+                  );
+                  return isScanned ? btn : (
+                    <Tooltip key={gid} text="Game not found — scan a folder containing this ROM">
+                      {btn}
+                    </Tooltip>
+                  );
                 })}
               </div>
             )}

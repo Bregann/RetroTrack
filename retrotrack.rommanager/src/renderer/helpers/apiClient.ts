@@ -1,4 +1,4 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NODE_ENV === 'development'
     ? 'https://localhost:7248'
     : 'https://rtapi.bregan.me'
@@ -8,6 +8,10 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 // In-memory access token — read from the accessToken cookie after login/refresh.
 // Sent as Authorization: Bearer on every request (the server reads JWT from this header).
 let accessToken: string | null = null
+
+export function getAccessToken(): string | null {
+  return accessToken
+}
 
 export function loadAccessTokenFromCookie(): void {
   const match = document.cookie

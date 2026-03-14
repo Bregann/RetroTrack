@@ -4,6 +4,7 @@ import {
   getGameById,
 } from '../mockData';
 import { useLibraryData } from '../helpers/useLibraryData';
+import { useScannedGameIds, useScannedConsoleIds } from '../helpers/useScannedGames';
 import { getConsoleTypeIcon } from '../enums/consoleType';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from './game-grid/viewConfig';
 import GameSection, { SectionHeader } from './game-grid/GameSection';
@@ -22,6 +23,10 @@ function SectionView({ children }: { children: React.ReactNode }) {
 export default function GameGrid({ selectedView, onGameClick, onSelectView }: GameGridProps) {
   const [viewConfigs, setViewConfigs] = useState<Record<string, ViewConfig>>({});
   const { data: libraryData } = useLibraryData();
+  const scannedGameIds = useScannedGameIds();
+  const scannedConsoleIds = useScannedConsoleIds();
+
+  const trackedGames = (libraryData?.trackedGames ?? []).filter((g) => scannedGameIds.has(g.gameId));
 
   const getConfig = useCallback(
     (key: string): ViewConfig => viewConfigs[key] ?? DEFAULT_VIEW_CONFIG,
@@ -44,17 +49,22 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
       <SectionView>
         <SectionHeader title="All Consoles" count={consoles.length} />
         <div className="browse-card-grid">
-          {consoles.map((c) => (
-            <button
-              key={c.consoleId}
-              type="button"
-              className="browse-card"
-              onClick={() => onSelectView?.(`console-${c.consoleId}`)}
-            >
-              <span className="browse-card-icon">{getConsoleTypeIcon(c.consoleType)}</span>
-              <span className="browse-card-name">{c.consoleName}</span>
-            </button>
-          ))}
+          {consoles.map((c) => {
+            const hasGames = scannedConsoleIds.has(c.consoleId);
+            return (
+              <button
+                key={c.consoleId}
+                type="button"
+                className={`browse-card ${!hasGames ? 'browse-card--disabled' : ''}`}
+                title={!hasGames ? 'No games are scanned for this console' : undefined}
+                onClick={() => hasGames && onSelectView?.(`console-${c.consoleId}`)}
+                style={!hasGames ? { cursor: 'default' } : undefined}
+              >
+                <span className="browse-card-icon">{getConsoleTypeIcon(c.consoleType)}</span>
+                <span className="browse-card-name">{c.consoleName}</span>
+              </button>
+            );
+          })}
         </div>
       </SectionView>
     );
@@ -88,7 +98,7 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
       <SectionView>
         <GameSection
           title="MY TRACKED GAMES"
-          games={libraryData?.trackedGames ?? []}
+          games={trackedGames}
           config={getConfig('tracked')}
           onConfigChange={setConfig('tracked')}
           onGameClick={onGameClick}
@@ -103,7 +113,7 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
     const consoleInfo = libraryData?.consoles.find((c) => c.consoleId === consoleId);
     if (consoleInfo) {
       const cfgKey = `console-${consoleId}`;
-      const games = (libraryData?.trackedGames ?? []).filter((g) => g.consoleId === consoleId);
+      const games = trackedGames.filter((g) => g.consoleId === consoleId);
       return (
         <SectionView>
           <GameSection
@@ -143,9 +153,7 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
     const plId = Number(plMatch[1]);
     const pl = libraryData?.playlists.find((p) => p.playlistId === plId);
     if (pl) {
-      const games = (libraryData?.trackedGames ?? []).filter((g) =>
-        pl.gameIds.includes(g.gameId),
-      );
+      const games = trackedGames.filter((g) => pl.gameIds.includes(g.gameId));
       const cfgKey = `playlist-${plId}`;
       return (
         <SectionView>

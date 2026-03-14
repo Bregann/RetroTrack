@@ -5,5 +5,6 @@ namespace RetroTrack.Domain.Interfaces.Controllers
     public interface ILibraryControllerDataService
     {
         Task<GetUserLibraryDataResponse> GetUserLibraryData(int userId);
+        Task<ValidateGameHashesResponse> ValidateGameHashes(string[] hashes);
     }
 }

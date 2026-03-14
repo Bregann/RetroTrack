@@ -75,5 +75,24 @@ namespace RetroTrack.Domain.Services.Controllers
                 AchievementsEarnedHardcore = progress.Sum(p => p.AchievementsGainedHardcore)
             };
         }
+
+        public async Task<ValidateGameHashesResponse> ValidateGameHashes(string[] hashes)
+        {
+            var matchingHashes = await context.GameHashes
+                .Where(gh => hashes.Contains(gh.Md5))
+                .Select(gh => new HashMatch
+                {
+                    Md5 = gh.Md5,
+                    GameId = gh.GameId,
+                    Title = gh.Game.Title,
+                    ConsoleId = gh.Game.ConsoleId,
+                    ConsoleName = gh.Game.GameConsole.ConsoleName,
+                    ImageIcon = gh.Game.ImageIcon,
+                    ImageBoxArt = gh.Game.ImageBoxArt
+                })
+                .ToArrayAsync();
+
+            return new ValidateGameHashesResponse { Matches = matchingHashes };
+        }
     }
 }

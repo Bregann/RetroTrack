@@ -1,4 +1,5 @@
 import { useLibraryData } from '../../helpers/useLibraryData';
+import { useScannedConsoleIds } from '../../helpers/useScannedGames';
 import { getConsoleTypeIcon } from '../../enums/consoleType';
 
 interface Props {
@@ -15,7 +16,8 @@ export default function ConsolesSection({
   onToggleCollapse,
 }: Props) {
   const { data, isLoading } = useLibraryData();
-  const consoles = data?.consoles ?? [];
+  const scannedConsoleIds = useScannedConsoleIds();
+  const consoles = (data?.consoles ?? []).filter((c) => scannedConsoleIds.has(c.consoleId));
 
   return (
     <div className="sidebar-section">
