@@ -8,6 +8,7 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsole> GameConsoles { get; set; }
         public DbSet<Game> Games { get; set; }
+        public DbSet<GameHash> GameHashes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TrackedGame> TrackedGames { get; set; }
         public DbSet<UserGameNote> UserGameNotes { get; set; }

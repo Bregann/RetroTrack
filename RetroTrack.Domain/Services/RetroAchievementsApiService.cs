@@ -353,5 +353,27 @@ namespace RetroTrack.Domain.Services
 
             return JsonConvert.DeserializeObject<GetGameProgression>(response.Content);
         }
+
+        /// <summary>
+        /// Gets the game hashes (ROM checksums) for a specific game ID from the RetroAchievements API.
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <returns></returns>
+        public async Task<GetGameHashes?> GetGameHashes(int gameId)
+        {
+            var client = new RestClient(_baseUrl);
+            var request = new RestRequest($"API_GetGameHashes.php?z={_apiUsername}&y={_apiKey}&i={gameId}", Method.Get);
+
+            //Get the response and Deserialize
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == "" || response.Content == null || response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Warning($"[RetroAchievements] Error getting game hashes for game id {gameId}. Status code {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GetGameHashes>(response.Content);
+        }
     }
 }

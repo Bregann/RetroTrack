@@ -1,6 +1,15 @@
-import { useState } from 'react';
-import { CONSOLES, getGamesByConsole } from '../../mockData';
-import GameContextMenu from '../GameContextMenu';
+import { useLibraryData } from '../../helpers/useLibraryData';
+
+const CONSOLE_TYPE_ICONS: Record<string, string> = {
+  Nintendo: '🎮',
+  Sony: '🎲',
+  Sega: '🎯',
+  Atari: '🕹️',
+  NEC: '💿',
+  SNK: '🃏',
+  Other: '🖥️',
+  NotSet: '🖥️',
+};
 
 interface Props {
   selectedView: string;
@@ -15,17 +24,8 @@ export default function ConsolesSection({
   collapsed,
   onToggleCollapse,
 }: Props) {
-  const [expandedConsoles, setExpandedConsoles] = useState<Record<string, boolean>>({});
-  const [contextMenu, setContextMenu] = useState<{ gameId: number; x: number; y: number } | null>(null);
-
-  const toggleConsole = (shortName: string) => {
-    setExpandedConsoles((prev) => ({ ...prev, [shortName]: !prev[shortName] }));
-  };
-
-  const openContextMenu = (e: React.MouseEvent, gameId: number) => {
-    e.preventDefault();
-    setContextMenu({ gameId, x: e.clientX, y: e.clientY });
-  };
+  const { data, isLoading } = useLibraryData();
+  const consoles = data?.consoles ?? [];
 
   return (
     <div className="sidebar-section">
@@ -44,58 +44,28 @@ export default function ConsolesSection({
           CONSOLES
         </button>
       </h3>
-      {!collapsed && CONSOLES.map((c) => {
-        const consoleGames = getGamesByConsole(c.name);
-        const isExpanded = expandedConsoles[c.shortName];
-        return (
-          <div key={c.shortName}>
-            <div
-              className={`sidebar-item ${selectedView === `console-${c.shortName}` ? 'active' : ''}`}
-              style={{ cursor: 'default' }}
-            >
-              <span className="sidebar-item-icon">{c.icon}</span>
-              <button
-                type="button"
-                className="sidebar-console-name"
-                onClick={() => onSelectView(`console-${c.shortName}`)}
+      {!collapsed && (
+        <>
+          {isLoading && <div className="sidebar-loading">Loading...</div>}
+          {consoles.map((c) => (
+            <div key={c.consoleId}>
+              <div
+                className={`sidebar-item ${selectedView === `console-${c.consoleId}` ? 'active' : ''}`}
               >
-                {c.name}
-              </button>
-              <button
-                type="button"
-                className="sidebar-expand-btn"
-                onClick={() => toggleConsole(c.shortName)}
-              >
-                <span className="sidebar-expand-icon">
-                  {isExpanded ? '▾' : '▸'}
+                <span className="sidebar-item-icon">
+                  {CONSOLE_TYPE_ICONS[c.consoleType] ?? '🖥️'}
                 </span>
-              </button>
-            </div>
-            {isExpanded && (
-              <div className="sidebar-sub-items">
-                {consoleGames.map((game) => (
-                  <button
-                    key={game.id}
-                    type="button"
-                    className={`sidebar-sub-item ${selectedView === `game-${game.id}` ? 'active' : ''}`}
-                    onClick={() => onSelectView(`game-${game.id}`)}
-                    onContextMenu={(e) => openContextMenu(e, game.id)}
-                  >
-                    {game.title}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  className="sidebar-console-name"
+                  onClick={() => onSelectView(`console-${c.consoleId}`)}
+                >
+                  {c.consoleName}
+                </button>
               </div>
-            )}
-          </div>
-        );
-      })}
-      {contextMenu && (
-        <GameContextMenu
-          gameId={contextMenu.gameId}
-          x={contextMenu.x}
-          y={contextMenu.y}
-          onClose={() => setContextMenu(null)}
-        />
+            </div>
+          ))}
+        </>
       )}
     </div>
   );

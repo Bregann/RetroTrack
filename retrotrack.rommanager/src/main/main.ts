@@ -13,6 +13,8 @@ import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
+import { initDatabase } from './database';
+import { registerIpcHandlers } from './ipc';
 
 class AppUpdater {
   constructor() {
@@ -44,6 +46,8 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => {
   mainWindow?.close();
 });
+
+registerIpcHandlers();
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -144,6 +148,7 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    initDatabase();
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

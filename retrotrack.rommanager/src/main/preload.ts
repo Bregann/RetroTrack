@@ -22,6 +22,18 @@ const electronHandler = {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
+  db: {
+    upsertConsoles: (consoles: unknown[]) =>
+      ipcRenderer.invoke('db:upsert-consoles', consoles),
+    getConsoles: () => ipcRenderer.invoke('db:get-consoles'),
+    upsertTrackedGames: (games: unknown[]) =>
+      ipcRenderer.invoke('db:upsert-tracked-games', games),
+    getTrackedGames: () => ipcRenderer.invoke('db:get-tracked-games'),
+    setSyncMeta: (key: string, value: string) =>
+      ipcRenderer.invoke('db:set-sync-meta', key, value),
+    getSyncMeta: (key: string) => ipcRenderer.invoke('db:get-sync-meta', key),
+    clearUserData: () => ipcRenderer.invoke('db:clear-user-data'),
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

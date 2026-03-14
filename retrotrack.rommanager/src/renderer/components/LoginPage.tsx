@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useAuth } from '../context/authContext';
 
-interface LoginPageProps {
-  onLogin: (username: string) => void;
-}
-
-export default function LoginPage({ onLogin }: LoginPageProps) {
+export default function LoginPage() {
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password.');
@@ -18,11 +17,11 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     }
     setLoading(true);
     setError('');
-    // Simulate login delay
-    setTimeout(() => {
-      setLoading(false);
-      onLogin(username);
-    }, 800);
+    const success = await login(username.trim(), password);
+    setLoading(false);
+    if (!success) {
+      setError('Invalid username or password.');
+    }
   };
 
   return (
@@ -47,13 +46,24 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           </div>
           <div className="login-field">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
+            <div className="login-password-wrap">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="login-password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           {error && <div className="login-error">{error}</div>}
           <button type="submit" className="login-btn" disabled={loading}>

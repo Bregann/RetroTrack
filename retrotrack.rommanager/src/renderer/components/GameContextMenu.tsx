@@ -52,7 +52,7 @@ export default function GameContextMenu({ gameId, playlistId, x, y, onClose }: P
         </button>
       )}
       <button className="context-menu-item" onClick={act('Add to Playlist')}>
-        +&nbsp;&nbsp;Add to Playlist…
+        +&nbsp;&nbsp;Add to Playlist...
       </button>
       {playlistId !== undefined && (
         <button className="context-menu-item" onClick={act('Remove from Playlist')}>
