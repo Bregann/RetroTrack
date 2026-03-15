@@ -32,9 +32,16 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var progressByGameId = progress.ToDictionary(p => p.GameId);
 
+            var activity = await context.UserGameActivities
+                .Where(x => x.UserId == userId)
+                .ToArrayAsync();
+
+            var activityByGameId = activity.ToDictionary(a => a.GameId);
+
             var trackedGames = trackedGamesList.Select(tg =>
             {
                 progressByGameId.TryGetValue(tg.GameId, out var p);
+                activityByGameId.TryGetValue(tg.GameId, out var act);
                 return new LibraryTrackedGame
                 {
                     GameId = tg.Game.Id,
@@ -47,7 +54,8 @@ namespace RetroTrack.Domain.Services.Controllers
                     Points = tg.Game.Points,
                     AchievementsEarned = p?.AchievementsGainedHardcore ?? 0,
                     PercentageComplete = p?.GamePercentageHardcore ?? 0,
-                    HighestAward = p?.HighestAwardKind
+                    HighestAward = p?.HighestAwardKind,
+                    LastPlayedUtc = act?.LastPlayedUtc
                 };
             }).ToArray();
 
@@ -88,7 +96,9 @@ namespace RetroTrack.Domain.Services.Controllers
                     ConsoleId = gh.Game.ConsoleId,
                     ConsoleName = gh.Game.GameConsole.ConsoleName,
                     ImageIcon = gh.Game.ImageIcon,
-                    ImageBoxArt = gh.Game.ImageBoxArt
+                    ImageBoxArt = gh.Game.ImageBoxArt,
+                    AchievementCount = gh.Game.AchievementCount,
+                    Points = gh.Game.Points
                 })
                 .ToArrayAsync();
 

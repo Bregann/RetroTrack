@@ -26,6 +26,7 @@ export {
   getAllScannedGames,
   getScannedGamesByGameId,
   removeScannedGamesByFolder,
+  removeScannedGamesByGameId,
   clearScannedGames,
   type ScannedGameRow,
 } from './scannedGames';

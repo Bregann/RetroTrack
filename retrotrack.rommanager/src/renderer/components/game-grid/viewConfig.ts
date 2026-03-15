@@ -1,6 +1,6 @@
 export type ViewMode = 'grid' | 'list';
 
-export type SortField = 'title' | 'console' | 'lastPlayed' | 'achievementPercent' | 'status';
+export type SortField = 'title' | 'console' | 'lastPlayed' | 'achievementPercent' | 'status' | 'achievementsUnlocked' | 'achievementsTotal';
 export type SortDir = 'asc' | 'desc';
 
 export interface SortConfig {

@@ -2,8 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { doGet } from './apiClient';
 import { queryClient } from './queryClient';
 import type { LibraryData, LibraryConsole, LibraryTrackedGame, LibraryPlaylist } from './libraryTypes';
-
-const LIBRARY_QUERY_KEY = ['library-data'];
+import { QueryKeys } from './queryKeys';
 
 interface ApiLibraryResponse {
   consoles: Array<{
@@ -23,6 +22,7 @@ interface ApiLibraryResponse {
     achievementsEarned: number;
     percentageComplete: number;
     highestAward: string | null;
+    lastPlayedUtc: string | null;
   }>;
   playlists: Array<{
     playlistId: string;
@@ -92,7 +92,7 @@ async function fetchLibraryData(): Promise<LibraryData> {
     // Return local data immediately, then update cache when API sync finishes
     apiPromise.then((fresh) => {
       if (fresh !== null) {
-        queryClient.setQueryData(LIBRARY_QUERY_KEY, fresh);
+        queryClient.setQueryData([QueryKeys.LibraryData], fresh);
       }
     });
     return local;
@@ -108,7 +108,7 @@ async function fetchLibraryData(): Promise<LibraryData> {
 
 export function useLibraryData() {
   return useQuery<LibraryData>({
-    queryKey: LIBRARY_QUERY_KEY,
+    queryKey: [QueryKeys.LibraryData],
     queryFn: fetchLibraryData,
     staleTime: 5 * 60 * 1000, // consider data fresh for 5 minutes
   });
@@ -119,7 +119,7 @@ export function useRefreshLibrary() {
 
   return async () => {
     const data = await syncFromApi();
-    queryClient.setQueryData(LIBRARY_QUERY_KEY, data);
+    queryClient.setQueryData([QueryKeys.LibraryData], data);
     return data;
   };
 }

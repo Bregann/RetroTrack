@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { LibraryTrackedGame } from './libraryTypes';
+import { QueryKeys } from './queryKeys';
 
 interface ScannedGameRow {
   gameId: number;
@@ -8,13 +9,13 @@ interface ScannedGameRow {
   consoleName: string;
   imageIcon: string;
   imageBoxArt: string;
+  achievementCount: number;
+  points: number;
 }
-
-export const SCANNED_GAMES_QUERY_KEY = ['scanned-games'];
 
 function useScannedGamesData(): ScannedGameRow[] {
   const { data } = useQuery<ScannedGameRow[]>({
-    queryKey: SCANNED_GAMES_QUERY_KEY,
+    queryKey: [QueryKeys.ScannedGames],
     queryFn: async () => {
       const rows = await window.electron.scanner.getScannedGames();
       return rows as ScannedGameRow[];
@@ -54,11 +55,12 @@ export function useScannedGamesAsLibrary(): LibraryTrackedGame[] {
       consoleName: g.consoleName,
       imageIcon: g.imageIcon,
       imageBoxArt: g.imageBoxArt,
-      achievementCount: 0,
-      points: 0,
+      achievementCount: g.achievementCount,
+      points: g.points,
       achievementsEarned: 0,
       percentageComplete: 0,
       highestAward: null,
+      lastPlayedUtc: null,
     });
   }
   return result;
@@ -67,5 +69,5 @@ export function useScannedGamesAsLibrary(): LibraryTrackedGame[] {
 /** Call after a scan completes to refresh all components that depend on scanned data. */
 export function useInvalidateScannedGames() {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: SCANNED_GAMES_QUERY_KEY });
+  return () => queryClient.invalidateQueries({ queryKey: [QueryKeys.ScannedGames] });
 }

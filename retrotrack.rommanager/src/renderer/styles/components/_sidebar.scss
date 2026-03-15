@@ -235,10 +235,12 @@
 
 .sidebar-sub-item:hover {
   color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-sub-item.active {
   color: var(--text-white);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-sub-item--unscanned {

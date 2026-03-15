@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
 import {
   upsertConsoles,
   getAllConsoles,
@@ -15,6 +15,8 @@ import {
   getAllScannedGames,
   getScannedGamesByFolder,
   removeScannedGamesByFolder,
+  removeScannedGamesByGameId,
+  getScannedGamesByGameId,
   getAllEmulatorSettings,
   upsertAllEmulatorSettings,
   getGameEmulatorPref,
@@ -180,4 +182,31 @@ export function registerIpcHandlers(): void {
     };
   });
   ipcMain.handle('session:force-end', () => forceEndSession());
+
+  // File operations
+  ipcMain.handle('shell:show-item-in-folder', (_event, filePath: string) => {
+    shell.showItemInFolder(filePath);
+  });
+
+  ipcMain.handle('scan:get-game-file-paths', (_event, gameId: number) => {
+    return getScannedGamesByGameId(gameId).map((r) => r.filePath);
+  });
+
+  ipcMain.handle('scan:remove-scanned-game', (_event, gameId: number) => {
+    removeScannedGamesByGameId(gameId);
+  });
+
+  ipcMain.handle('shell:delete-files', async (_event, filePaths: string[]) => {
+    const fs = await import('fs');
+    let deleted = 0;
+    for (const fp of filePaths) {
+      try {
+        if (fs.existsSync(fp)) {
+          fs.unlinkSync(fp);
+          deleted++;
+        }
+      } catch { /* skip files that can't be deleted */ }
+    }
+    return deleted;
+  });
 }

@@ -73,6 +73,7 @@ export default function TrackedGamesSection({
           x={contextMenu.x}
           y={contextMenu.y}
           onClose={() => setContextMenu(null)}
+          onPlay={() => { setContextMenu(null); onSelectView(`game-${contextMenu.gameId}`); }}
         />
       )}
     </div>

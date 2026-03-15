@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { doQueryGet } from './apiClient';
+import { QueryKeys } from './queryKeys';
 
 export interface GameDetailAchievement {
   id: number;
@@ -85,11 +86,9 @@ export interface GameDetailData {
   totalSecondsPlayed: number;
 }
 
-export const GAME_DETAIL_QUERY_KEY = 'game-detail';
-
 export function useGameDetail(gameId: number) {
   return useQuery<GameDetailData>({
-    queryKey: [GAME_DETAIL_QUERY_KEY, gameId],
+    queryKey: [QueryKeys.GameDetail, gameId],
     queryFn: () =>
       doQueryGet<GameDetailData>(
         `/api/Games/GetGameInfoForUser/${gameId}`,

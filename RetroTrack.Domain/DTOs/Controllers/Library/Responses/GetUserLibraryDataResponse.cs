@@ -33,6 +33,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Library.Responses
         public int AchievementsEarned { get; set; }
         public double PercentageComplete { get; set; }
         public HighestAwardKind? HighestAward { get; set; }
+        public DateTime? LastPlayedUtc { get; set; }
     }
 
     public class LibraryPlaylist

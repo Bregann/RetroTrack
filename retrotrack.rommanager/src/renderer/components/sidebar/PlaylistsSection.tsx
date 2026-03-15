@@ -3,6 +3,7 @@ import { useLibraryData } from '../../helpers/useLibraryData';
 import { useScannedGameIds } from '../../helpers/useScannedGames';
 import { raImageUrl } from '../../helpers/imageUrl';
 import Tooltip from '../Tooltip';
+import GameContextMenu from '../GameContextMenu';
 
 interface Props {
   selectedView: string;
@@ -22,9 +23,15 @@ export default function PlaylistsSection({
   const playlists = Array.isArray(data?.playlists) ? data.playlists : [];
   const allTrackedGames = data?.trackedGames ?? [];
   const [expandedPlaylists, setExpandedPlaylists] = useState<Record<string, boolean>>({});
+  const [contextMenu, setContextMenu] = useState<{ gameId: number; playlistId: string; x: number; y: number } | null>(null);
 
   const togglePlaylist = (id: string) => {
     setExpandedPlaylists((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const openContextMenu = (e: React.MouseEvent, gameId: number, plId: string) => {
+    e.preventDefault();
+    setContextMenu({ gameId, playlistId: plId, x: e.clientX, y: e.clientY });
   };
 
   return (
@@ -83,6 +90,7 @@ export default function PlaylistsSection({
                       type="button"
                       className={`sidebar-sub-item${!isScanned ? ' sidebar-sub-item--unscanned' : ''}${selectedView === `game-${gid}` ? ' active' : ''}`}
                       onClick={isScanned ? () => onSelectView(`game-${gid}`) : undefined}
+                      onContextMenu={isScanned ? (e) => openContextMenu(e, gid, pl.playlistId) : undefined}
                     >
                       {iconUrl && <img src={iconUrl} alt="" className="sidebar-game-icon" />}
                       <span className="sidebar-game-title">{game.title}</span>
@@ -99,6 +107,16 @@ export default function PlaylistsSection({
           </div>
         );
       })}
+      {contextMenu && (
+        <GameContextMenu
+          gameId={contextMenu.gameId}
+          playlistId={contextMenu.playlistId}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onPlay={() => { setContextMenu(null); onSelectView(`game-${contextMenu.gameId}`); }}
+        />
+      )}
     </div>
   );
 }

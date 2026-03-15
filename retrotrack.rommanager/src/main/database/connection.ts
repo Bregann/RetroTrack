@@ -59,7 +59,8 @@ export function initDatabase(): void {
       points               INTEGER NOT NULL DEFAULT 0,
       achievements_earned  INTEGER NOT NULL DEFAULT 0,
       percentage_complete  REAL NOT NULL DEFAULT 0,
-      highest_award        TEXT
+      highest_award        TEXT,
+      last_played          TEXT
     );
 
     CREATE TABLE IF NOT EXISTS sync_metadata (
@@ -98,6 +99,8 @@ export function initDatabase(): void {
       image_box_art TEXT NOT NULL,
       folder_path  TEXT NOT NULL,
       added_at     TEXT NOT NULL,
+      achievement_count INTEGER NOT NULL DEFAULT 0,
+      points       INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (hash, file_path)
     );
 

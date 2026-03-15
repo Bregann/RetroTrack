@@ -14,5 +14,7 @@ namespace RetroTrack.Domain.DTOs.Controllers.Library.Responses
         public required string ConsoleName { get; set; }
         public required string ImageIcon { get; set; }
         public required string ImageBoxArt { get; set; }
+        public required int AchievementCount { get; set; }
+        public required int Points { get; set; }
     }
 }

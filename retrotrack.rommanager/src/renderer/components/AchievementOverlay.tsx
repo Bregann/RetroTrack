@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Achievement } from '../mockData';
+import type { Achievement } from '../helpers/achievementTypes';
 
 interface AchievementOverlayProps {
   achievements: Achievement[];
@@ -7,7 +7,7 @@ interface AchievementOverlayProps {
   onClose: () => void;
 }
 
-type Filter = 'all' | 'unlocked' | 'locked' | 'missable' | 'win';
+type Filter = 'all' | 'unlocked' | 'locked' | 'missable' | 'progression' | 'win';
 
 export default function AchievementOverlay({
   achievements,
@@ -16,18 +16,20 @@ export default function AchievementOverlay({
 }: AchievementOverlayProps) {
   const [filter, setFilter] = useState<Filter>('all');
 
-  const unlocked = achievements.filter((a) => a.unlocked);
-  const missable = achievements.filter((a) => a.type === 'missable');
-  const winCond  = achievements.filter((a) => a.type === 'win');
+  const unlocked    = achievements.filter((a) => a.unlocked);
+  const missable    = achievements.filter((a) => a.type === 'missable');
+  const progression = achievements.filter((a) => a.type === 'progression');
+  const winCond     = achievements.filter((a) => a.type === 'win');
   const totalPoints  = achievements.reduce((sum, a) => sum + a.points, 0);
   const earnedPoints = unlocked.reduce((sum, a) => sum + a.points, 0);
 
   const filtered =
-    filter === 'all'      ? achievements :
-    filter === 'unlocked' ? achievements.filter((a) => a.unlocked) :
-    filter === 'locked'   ? achievements.filter((a) => !a.unlocked) :
-    filter === 'missable' ? achievements.filter((a) => a.type === 'missable') :
-                            achievements.filter((a) => a.type === 'win');
+    filter === 'all'         ? achievements :
+    filter === 'unlocked'    ? achievements.filter((a) => a.unlocked) :
+    filter === 'locked'      ? achievements.filter((a) => !a.unlocked) :
+    filter === 'missable'    ? achievements.filter((a) => a.type === 'missable') :
+    filter === 'progression' ? achievements.filter((a) => a.type === 'progression') :
+                               achievements.filter((a) => a.type === 'win');
 
   const rarityLabel: Record<string, string> = {
     common:      'Common',
@@ -37,11 +39,12 @@ export default function AchievementOverlay({
   };
 
   const filterTabs: { key: Filter; label: string }[] = [
-    { key: 'all',      label: `All (${achievements.length})` },
-    { key: 'unlocked', label: `Unlocked (${unlocked.length})` },
-    { key: 'locked',   label: `Locked (${achievements.length - unlocked.length})` },
-    { key: 'missable', label: `Missable (${missable.length})` },
-    { key: 'win',      label: `Win Conditions (${winCond.length})` },
+    { key: 'all',         label: `All (${achievements.length})` },
+    { key: 'unlocked',    label: `Unlocked (${unlocked.length})` },
+    { key: 'locked',      label: `Locked (${achievements.length - unlocked.length})` },
+    { key: 'missable',    label: `⚠ Missable (${missable.length})` },
+    { key: 'progression', label: `✅ Progression (${progression.length})` },
+    { key: 'win',         label: `🏆 Win Conditions (${winCond.length})` },
   ];
 
   return (
@@ -84,6 +87,10 @@ export default function AchievementOverlay({
             <span className="summary-stat-label">Missable</span>
           </div>
           <div className="achievement-summary-stat">
+            <span className="summary-stat-value ach-stat-progression">{progression.length}</span>
+            <span className="summary-stat-label">Progression</span>
+          </div>
+          <div className="achievement-summary-stat">
             <span className="summary-stat-value ach-stat-win">{winCond.length}</span>
             <span className="summary-stat-label">Win Cond.</span>
           </div>
@@ -97,8 +104,6 @@ export default function AchievementOverlay({
               className={`achievement-filter-btn filter-${key} ${filter === key ? 'active' : ''}`}
               onClick={() => setFilter(key)}
             >
-              {key === 'missable' && <span className="filter-dot filter-dot-missable">⚠️</span>}
-              {key === 'win'      && <span className="filter-dot filter-dot-win">🏆</span>}
               {label}
             </button>
           ))}
@@ -124,12 +129,12 @@ export default function AchievementOverlay({
                   {ach.type === 'missable' && (
                     <span className="ach-type-badge ach-type-missable" title="Missable">⚠ Missable</span>
                   )}
+                  {ach.type === 'progression' && (
+                    <span className="ach-type-badge ach-type-progression" title="Progression">✅ Progression</span>
+                  )}
                   {ach.type === 'win' && (
                     <span className="ach-type-badge ach-type-win" title="Win Condition">★ Win</span>
                   )}
-                  <span className={`achievement-rarity rarity-${ach.rarity}`}>
-                    {rarityLabel[ach.rarity]}
-                  </span>
                 </div>
                 <p className="achievement-item-desc">{ach.description}</p>
                 {ach.unlocked && ach.unlockedDate && (

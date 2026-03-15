@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { doPost } from './apiClient';
-import { GAME_DETAIL_QUERY_KEY } from './useGameDetail';
+import { QueryKeys } from './queryKeys';
 
 /**
  * Hook that listens for game session end events from the main process
@@ -23,8 +23,8 @@ export function useSessionReporter() {
       })
         .then(() => {
           // Invalidate the game detail query so hours/lastPlayed update
-          queryClient.invalidateQueries({ queryKey: [GAME_DETAIL_QUERY_KEY, gameId] });
-          queryClient.invalidateQueries({ queryKey: ['library-data'] });
+          queryClient.invalidateQueries({ queryKey: [QueryKeys.GameDetail, gameId] });
+          queryClient.invalidateQueries({ queryKey: [QueryKeys.LibraryData] });
         })
         .catch(() => {
           // API call failed — session data is lost, but don't crash

@@ -16,10 +16,12 @@ export default function App() {
   const refreshLibrary = useRefreshLibrary();
   useSessionReporter();
   const [selectedView, setSelectedView] = useState('home');
+  const [previousView, setPreviousView] = useState('home');
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [showEmulatorSettings, setShowEmulatorSettings] = useState(false);
   const [libraryModal, setLibraryModal] = useState<LibraryModalMode>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -36,13 +38,14 @@ export default function App() {
   };
 
   const handleSelectView = (view: string) => {
-    setSelectedView(view);
     if (view.startsWith('game-')) {
+      if (!selectedView.startsWith('game-')) setPreviousView(selectedView);
       const id = parseInt(view.replace('game-', ''), 10);
       if (!isNaN(id)) setSelectedGameId(id);
     } else {
       setSelectedGameId(null);
     }
+    setSelectedView(view);
   };
 
   if (!isAuthenticated) {
@@ -58,6 +61,8 @@ export default function App() {
         onToggleTheme={toggleTheme}
         onManageEmulators={() => setShowEmulatorSettings(true)}
         onLibraryAction={(action: LibraryModalMode) => setLibraryModal(action)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
       <div className="app-body">
         <Sidebar selectedView={selectedView} onSelectView={handleSelectView} />
@@ -65,13 +70,14 @@ export default function App() {
           {selectedGameId !== null ? (
             <GameDetailPage
               gameId={selectedGameId}
-              onBack={() => setSelectedGameId(null)}
+              onBack={() => handleSelectView(previousView)}
             />
           ) : (
             <GameGrid
               selectedView={selectedView}
-              onGameClick={(id) => setSelectedGameId(id)}
+              onGameClick={(id) => handleSelectView(`game-${id}`)}
               onSelectView={handleSelectView}
+              searchQuery={searchQuery}
             />
           )}
         </main>

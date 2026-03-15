@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useGameDetail, type GameDetailAchievement, GAME_DETAIL_QUERY_KEY } from '../helpers/useGameDetail';
-import { doPost, doDelete } from '../helpers/apiClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { useGameDetail, type GameDetailAchievement } from '../helpers/useGameDetail';
+import { useMutationPost } from '../helpers/mutations/useMutationPost';
+import { useMutationDelete } from '../helpers/mutations/useMutationDelete';
+import { QueryKeys } from '../helpers/queryKeys';
 import { raImageUrl } from '../helpers/imageUrl';
-import type { Achievement } from '../mockData';
+import type { Achievement } from '../helpers/achievementTypes';
 import AchievementOverlay from './AchievementOverlay';
 import EmulatorPickerModal from './game-detail/EmulatorPickerModal';
 import GameDetailHero from './game-detail/GameDetailHero';
@@ -20,14 +22,16 @@ interface GameDetailProps {
 /** Map an achievement type number from the API to the local string union */
 function mapAchievementType(
   type: number | null,
-): 'normal' | 'missable' | 'win' | undefined {
+): 'normal' | 'missable' | 'win' | 'progression' | undefined {
   if (type === null || type === undefined) return undefined;
-  // AchievementType enum: 0 = Normal (progression), 1 = Win_Condition, 2 = Missable
+  // AchievementType enum: 0 = Missable, 1 = Progression, 2 = Win_Condition, 3 = Unknown
   switch (type) {
-    case 1:
-      return 'win';
-    case 2:
+    case 0:
       return 'missable';
+    case 1:
+      return 'progression';
+    case 2:
+      return 'win';
     default:
       return 'normal';
   }
@@ -79,21 +83,23 @@ export default function GameDetailPage({ gameId, onBack }: GameDetailProps) {
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useGameDetail(gameId);
 
-  const trackMutation = useMutation({
-    mutationFn: () => doPost(`/api/TrackedGames/AddTrackedGame/${gameId}`),
+  const trackMutation = useMutationPost<void, void>({
+    url: `/api/TrackedGames/AddTrackedGame/${gameId}`,
+    queryKey: [QueryKeys.LibraryData],
+    invalidateQuery: true,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['library-data'] });
-      queryClient.setQueryData([GAME_DETAIL_QUERY_KEY, gameId], (old: typeof data) =>
+      queryClient.setQueryData([QueryKeys.GameDetail, gameId], (old: typeof data) =>
         old ? { ...old, gameTracked: true } : old,
       );
     },
   });
 
-  const untrackMutation = useMutation({
-    mutationFn: () => doDelete(`/api/TrackedGames/DeleteTrackedGame/${gameId}`),
+  const untrackMutation = useMutationDelete<void, void>({
+    url: `/api/TrackedGames/DeleteTrackedGame/${gameId}`,
+    queryKey: [QueryKeys.LibraryData],
+    invalidateQuery: true,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['library-data'] });
-      queryClient.setQueryData([GAME_DETAIL_QUERY_KEY, gameId], (old: typeof data) =>
+      queryClient.setQueryData([QueryKeys.GameDetail, gameId], (old: typeof data) =>
         old ? { ...old, gameTracked: false } : old,
       );
     },

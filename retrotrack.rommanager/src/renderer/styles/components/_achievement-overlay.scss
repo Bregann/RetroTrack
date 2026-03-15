@@ -284,14 +284,21 @@
   border: 1px solid rgba(245, 124, 0, 0.4);
 }
 
+.ach-type-progression {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+  border: 1px solid rgba(33, 150, 243, 0.4);
+}
+
 .ach-type-win {
   background: rgba(46, 125, 50, 0.2);
   color: #66bb6a;
   border: 1px solid rgba(46, 125, 50, 0.4);
 }
 
-.ach-stat-missable { color: #ff9800 !important; }
-.ach-stat-win      { color: #66bb6a !important; }
+.ach-stat-missable   { color: #ff9800 !important; }
+.ach-stat-progression { color: #64b5f6 !important; }
+.ach-stat-win        { color: #66bb6a !important; }
 
 /* Light mode overrides */
 [data-theme="light"] .achievement-overlay {

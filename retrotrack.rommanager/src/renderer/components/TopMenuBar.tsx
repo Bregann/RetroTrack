@@ -14,9 +14,11 @@ interface TopMenuBarProps {
   onToggleTheme: () => void;
   onManageEmulators: () => void;
   onLibraryAction: (action: LibraryModalMode) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
-export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleTheme, onManageEmulators, onLibraryAction }: TopMenuBarProps) {
+export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleTheme, onManageEmulators, onLibraryAction, searchQuery, onSearchChange }: TopMenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showGeneralSettings, setShowGeneralSettings] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
@@ -106,7 +108,23 @@ export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleThe
       </div>
       <div className="menu-right">
         <div className="header-search">
-          <input type="text" placeholder="Search" className="search-input" />
+          <input
+            type="text"
+            placeholder="Search games..."
+            className="search-input"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => onSearchChange('')}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
           <span className="search-icon">🔍</span>
         </div>
 

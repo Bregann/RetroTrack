@@ -7,7 +7,10 @@ const SORTABLE: Partial<Record<ListColumn, SortField>> = {
   title: 'title',
   console: 'console',
   status: 'status',
+  achievementsUnlocked: 'achievementsUnlocked',
+  achievementsTotal: 'achievementsTotal',
   achievementPercent: 'achievementPercent',
+  lastPlayed: 'lastPlayed',
 };
 
 interface Props {
@@ -16,6 +19,7 @@ interface Props {
   sort: SortConfig;
   onSortChange: (field: SortField) => void;
   onGameClick?: (gameId: number) => void;
+  onGameContextMenu?: (e: React.MouseEvent, gameId: number) => void;
 }
 
 function deriveStatus(game: LibraryTrackedGame): 'completed' | 'in-progress' | 'not-started' {
@@ -63,10 +67,26 @@ function CellValue({ game, col }: { game: LibraryTrackedGame; col: ListColumn })
         : <span>{game.achievementCount}</span>;
     case 'achievementPercent':
       return game.achievementCount > 0
-        ? <span>{game.percentageComplete}%</span>
+        ? <span>{Math.round(game.percentageComplete * 10) / 10}%</span>
         : <span className="gl-cell-na">—</span>;
-    case 'lastPlayed':
-      return <span className="gl-cell-na">—</span>;
+    case 'lastPlayed': {
+      if (!game.lastPlayedUtc) return <span className="gl-cell-na">—</span>;
+      const d = new Date(game.lastPlayedUtc);
+      const now = new Date();
+      const diffMs = now.getTime() - d.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      let label: string;
+      if (diffMins < 2) label = 'just now';
+      else if (diffMins < 60) label = `${diffMins} minutes ago`;
+      else if (diffHours < 2) label = '1 hour ago';
+      else if (diffHours < 24) label = `${diffHours} hours ago`;
+      else if (diffDays === 1) label = 'yesterday';
+      else if (diffDays < 30) label = `${diffDays} days ago`;
+      else label = d.toLocaleDateString();
+      return <span title={d.toLocaleString()}>{label}</span>;
+    }
     case 'favourite':
       return <span>—</span>;
     default:
@@ -74,7 +94,7 @@ function CellValue({ game, col }: { game: LibraryTrackedGame; col: ListColumn })
   }
 }
 
-export default function GameListView({ games, columns, sort, onSortChange, onGameClick }: Props) {
+export default function GameListView({ games, columns, sort, onSortChange, onGameClick, onGameContextMenu }: Props) {
   const colDefs = columns.map((key) => ALL_COLUMNS.find((c) => c.key === key)!);
 
   return (
@@ -106,6 +126,7 @@ export default function GameListView({ games, columns, sort, onSortChange, onGam
               key={game.gameId}
               className="gl-row"
               onClick={() => onGameClick?.(game.gameId)}
+              onContextMenu={(e) => { e.preventDefault(); onGameContextMenu?.(e, game.gameId); }}
             >
               {columns.map((col) => (
                 <td key={col} className={`gl-td gl-td-${col}`}>

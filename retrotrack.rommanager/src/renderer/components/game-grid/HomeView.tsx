@@ -7,9 +7,10 @@ import { SectionHeader } from './GameSection';
 interface HomeViewProps {
   onGameClick?: (gameId: number) => void;
   onSelectView?: (view: string) => void;
+  onGameContextMenu?: (e: React.MouseEvent, gameId: number) => void;
 }
 
-export default function HomeView({ onGameClick, onSelectView }: HomeViewProps) {
+export default function HomeView({ onGameClick, onSelectView, onGameContextMenu }: HomeViewProps) {
   const { data: libraryData } = useLibraryData();
   const scannedGameIds = useScannedGameIds();
   const scannedConsoleIds = useScannedConsoleIds();
@@ -61,7 +62,12 @@ export default function HomeView({ onGameClick, onSelectView }: HomeViewProps) {
           <SectionHeader title="IN PROGRESS" />
           <div className="game-grid">
             {inProgress.map((g) => (
-              <GameCard key={g.gameId} game={g} onClick={() => onGameClick?.(g.gameId)} />
+              <GameCard
+                key={g.gameId}
+                game={g}
+                onClick={() => onGameClick?.(g.gameId)}
+                onContextMenu={(e) => { e.preventDefault(); onGameContextMenu?.(e, g.gameId); }}
+              />
             ))}
           </div>
         </>
@@ -72,7 +78,12 @@ export default function HomeView({ onGameClick, onSelectView }: HomeViewProps) {
           <SectionHeader title="RECENTLY ADDED" />
           <div className="game-grid">
             {recentlyAdded.map((g) => (
-              <GameCard key={g.gameId} game={g} onClick={() => onGameClick?.(g.gameId)} />
+              <GameCard
+                key={g.gameId}
+                game={g}
+                onClick={() => onGameClick?.(g.gameId)}
+                onContextMenu={(e) => { e.preventDefault(); onGameContextMenu?.(e, g.gameId); }}
+              />
             ))}
           </div>
         </>

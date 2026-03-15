@@ -60,6 +60,10 @@ const electronHandler = {
       ipcRenderer.on('scan:progress', sub);
       return () => ipcRenderer.removeListener('scan:progress', sub);
     },
+    getGameFilePaths: (gameId: number) =>
+      ipcRenderer.invoke('scan:get-game-file-paths', gameId) as Promise<string[]>,
+    removeScannedGame: (gameId: number) =>
+      ipcRenderer.invoke('scan:remove-scanned-game', gameId) as Promise<void>,
   },
   cache: {
     clearImageCache: () => ipcRenderer.invoke('cache:clear-image-cache') as Promise<number>,
@@ -80,6 +84,12 @@ const electronHandler = {
       ipcRenderer.invoke('launch:get-context', gameId, consoleId, apiEmulators) as Promise<unknown>,
     launchGame: (request: unknown, apiEmulators: unknown) =>
       ipcRenderer.invoke('launch:launch-game', request, apiEmulators) as Promise<string | true>,
+  },
+  shell: {
+    showItemInFolder: (filePath: string) =>
+      ipcRenderer.invoke('shell:show-item-in-folder', filePath) as Promise<void>,
+    deleteFiles: (filePaths: string[]) =>
+      ipcRenderer.invoke('shell:delete-files', filePaths) as Promise<number>,
   },
   session: {
     getActive: () =>

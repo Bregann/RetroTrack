@@ -12,13 +12,15 @@ export interface ScannedGameRow {
   imageBoxArt: string;
   folderPath: string;
   addedAt: string;
+  achievementCount: number;
+  points: number;
 }
 
 export function upsertScannedGames(games: ScannedGameRow[]): void {
   const db = getDb();
   const upsert = db.prepare(`
-    INSERT INTO scanned_games (hash, file_path, file_name, game_id, title, console_id, console_name, image_icon, image_box_art, folder_path, added_at)
-    VALUES (@hash, @filePath, @fileName, @gameId, @title, @consoleId, @consoleName, @imageIcon, @imageBoxArt, @folderPath, @addedAt)
+    INSERT INTO scanned_games (hash, file_path, file_name, game_id, title, console_id, console_name, image_icon, image_box_art, folder_path, added_at, achievement_count, points)
+    VALUES (@hash, @filePath, @fileName, @gameId, @title, @consoleId, @consoleName, @imageIcon, @imageBoxArt, @folderPath, @addedAt, @achievementCount, @points)
     ON CONFLICT(hash, file_path) DO UPDATE SET
       file_name = excluded.file_name,
       game_id = excluded.game_id,
@@ -27,7 +29,9 @@ export function upsertScannedGames(games: ScannedGameRow[]): void {
       console_name = excluded.console_name,
       image_icon = excluded.image_icon,
       image_box_art = excluded.image_box_art,
-      folder_path = excluded.folder_path
+      folder_path = excluded.folder_path,
+      achievement_count = excluded.achievement_count,
+      points = excluded.points
   `);
 
   db.transaction((items: ScannedGameRow[]) => {
@@ -40,7 +44,8 @@ export function getScannedGamesByFolder(folderPath: string): ScannedGameRow[] {
     .prepare(
       `SELECT hash, file_path as filePath, file_name as fileName, game_id as gameId, title,
               console_id as consoleId, console_name as consoleName, image_icon as imageIcon,
-              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt
+              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt,
+              achievement_count as achievementCount, points
        FROM scanned_games WHERE folder_path = ? ORDER BY title`,
     )
     .all(folderPath) as ScannedGameRow[];
@@ -51,7 +56,8 @@ export function getAllScannedGames(): ScannedGameRow[] {
     .prepare(
       `SELECT hash, file_path as filePath, file_name as fileName, game_id as gameId, title,
               console_id as consoleId, console_name as consoleName, image_icon as imageIcon,
-              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt
+              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt,
+              achievement_count as achievementCount, points
        FROM scanned_games ORDER BY title`,
     )
     .all() as ScannedGameRow[];
@@ -59,6 +65,10 @@ export function getAllScannedGames(): ScannedGameRow[] {
 
 export function removeScannedGamesByFolder(folderPath: string): void {
   getDb().prepare('DELETE FROM scanned_games WHERE folder_path = ?').run(folderPath);
+}
+
+export function removeScannedGamesByGameId(gameId: number): void {
+  getDb().prepare('DELETE FROM scanned_games WHERE game_id = ?').run(gameId);
 }
 
 export function clearScannedGames(): void {
@@ -70,7 +80,8 @@ export function getScannedGamesByGameId(gameId: number): ScannedGameRow[] {
     .prepare(
       `SELECT hash, file_path as filePath, file_name as fileName, game_id as gameId, title,
               console_id as consoleId, console_name as consoleName, image_icon as imageIcon,
-              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt
+              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt,
+              achievement_count as achievementCount, points
        FROM scanned_games WHERE game_id = ? ORDER BY added_at`,
     )
     .all(gameId) as ScannedGameRow[];

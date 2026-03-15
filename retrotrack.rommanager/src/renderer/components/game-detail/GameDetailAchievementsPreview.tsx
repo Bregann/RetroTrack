@@ -1,4 +1,4 @@
-import type { Achievement } from '../../mockData';
+import type { Achievement } from '../../helpers/achievementTypes';
 
 interface Props {
   achievements: Achievement[];

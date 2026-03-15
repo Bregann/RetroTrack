@@ -39,6 +39,8 @@ interface ApiHashMatch {
   consoleName: string;
   imageIcon: string;
   imageBoxArt: string;
+  achievementCount: number;
+  points: number;
 }
 
 function collectRomFiles(dirPath: string): string[] {
@@ -195,6 +197,8 @@ export async function scanFolder(
           imageBoxArt: match.imageBoxArt,
           folderPath: folderPath,
           addedAt: now,
+          achievementCount: match.achievementCount,
+          points: match.points,
         });
 
         onProgress?.({
@@ -259,6 +263,8 @@ export async function scanFile(
       imageBoxArt: match.imageBoxArt,
       folderPath: path.dirname(filePath),
       addedAt: now,
+      achievementCount: match.achievementCount,
+      points: match.points,
     },
   ]);
 

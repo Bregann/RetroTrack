@@ -39,6 +39,18 @@ function sortGames(games: LibraryTrackedGame[], field: SortField, dir: 'asc' | '
       case 'status':
         cmp = STATUS_ORDER[deriveStatus(a)] - STATUS_ORDER[deriveStatus(b)];
         break;
+      case 'achievementsUnlocked':
+        cmp = a.achievementsEarned - b.achievementsEarned;
+        break;
+      case 'achievementsTotal':
+        cmp = a.achievementCount - b.achievementCount;
+        break;
+      case 'lastPlayed': {
+        const at = a.lastPlayedUtc ? new Date(a.lastPlayedUtc).getTime() : 0;
+        const bt = b.lastPlayedUtc ? new Date(b.lastPlayedUtc).getTime() : 0;
+        cmp = at - bt;
+        break;
+      }
       default:
         break;
     }
@@ -52,6 +64,7 @@ interface GameSectionProps {
   config: ViewConfig;
   onConfigChange: (c: ViewConfig) => void;
   onGameClick?: (gameId: number) => void;
+  onGameContextMenu?: (e: React.MouseEvent, gameId: number) => void;
 }
 
 export default function GameSection({
@@ -60,6 +73,7 @@ export default function GameSection({
   config,
   onConfigChange,
   onGameClick,
+  onGameContextMenu,
 }: GameSectionProps) {
   const sorted = sortGames(games, config.sort.field, config.sort.dir);
 
@@ -92,11 +106,17 @@ export default function GameSection({
           sort={config.sort}
           onSortChange={handleSortChange}
           onGameClick={onGameClick}
+          onGameContextMenu={onGameContextMenu}
         />
       ) : (
         <div className="game-grid">
           {sorted.map((g) => (
-            <GameCard key={g.gameId} game={g} onClick={() => onGameClick?.(g.gameId)} />
+            <GameCard
+              key={g.gameId}
+              game={g}
+              onClick={() => onGameClick?.(g.gameId)}
+              onContextMenu={(e) => { e.preventDefault(); onGameContextMenu?.(e, g.gameId); }}
+            />
           ))}
         </div>
       )}

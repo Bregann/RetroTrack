@@ -4,13 +4,14 @@ import { raImageUrl } from '../../helpers/imageUrl';
 interface GameCardProps {
   game: LibraryTrackedGame;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
-export default function GameCard({ game, onClick }: GameCardProps) {
+export default function GameCard({ game, onClick, onContextMenu }: GameCardProps) {
   const coverUrl = raImageUrl(game.imageBoxArt) ?? raImageUrl(game.imageIcon);
 
   return (
-    <button type="button" className="game-card" onClick={onClick}>
+    <button type="button" className="game-card" onClick={onClick} onContextMenu={onContextMenu}>
       <div className="game-card-cover">
         {coverUrl
           ? <img src={coverUrl} alt={game.title} />
@@ -22,7 +23,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       </div>
       <div className="game-card-info">
         <span className="game-card-title">{game.title}</span>
-        {game.achievementsEarned > 0 && (
+        {game.achievementCount > 0 && (
           <div className="game-card-achievement">
             <div className="achievement-bar">
               <div
