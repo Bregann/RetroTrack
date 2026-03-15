@@ -12,5 +12,6 @@ namespace RetroTrack.Domain.Interfaces.Controllers
         Task<GetUserProgressForConsoleResponse> GetUserProgressForConsole(int userId, GetUserProgressForConsoleRequest request);
         Task<GetLeaderboardsFromGameIdResponse?> GetLeaderboardsFromGameId(int gameId);
         Task UpdateUserNotes(int userId, int gameId, string notes);
+        Task UpdateGameActivity(int userId, int gameId, long sessionSeconds);
     }
 }

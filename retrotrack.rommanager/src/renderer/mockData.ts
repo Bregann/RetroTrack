@@ -44,7 +44,7 @@ export interface Game {
   status?: 'in-progress' | 'completed' | 'not-started';
   achievementPercent?: number;
   lastPlayed?: string;
-  favorite?: boolean;
+  favourite?: boolean;
 }
 
 export interface ConsoleInfo {
@@ -137,7 +137,7 @@ export const TRACKED_GAME_IDS = [1, 19, 4, 14, 12, 26, 31];
 
 // ---- Custom Categories ----
 export const CUSTOM_CATEGORIES: CustomCategory[] = [
-  { id: 1, name: 'RPG Favorites', icon: '❤️', gameIds: [14, 15, 22, 25, 9], expanded: false },
+  { id: 1, name: 'RPG Favourites', icon: '❤️', gameIds: [14, 15, 22, 25, 9], expanded: false },
   { id: 2, name: 'Multiplayer Night', icon: '🎮', gameIds: [8, 6, 21, 7], expanded: false },
   { id: 3, name: 'Speedrun Practice', icon: '⏱️', gameIds: [1, 11, 13, 19], expanded: false },
 ];

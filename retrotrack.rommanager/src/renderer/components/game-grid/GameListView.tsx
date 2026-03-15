@@ -67,7 +67,7 @@ function CellValue({ game, col }: { game: LibraryTrackedGame; col: ListColumn })
         : <span className="gl-cell-na">—</span>;
     case 'lastPlayed':
       return <span className="gl-cell-na">—</span>;
-    case 'favorite':
+    case 'favourite':
       return <span>—</span>;
     default:
       return <span>—</span>;

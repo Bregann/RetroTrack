@@ -79,7 +79,7 @@ namespace RetroTrack.Domain.Services.Controllers
         public async Task<ValidateGameHashesResponse> ValidateGameHashes(string[] hashes)
         {
             var matchingHashes = await context.GameHashes
-                .Where(gh => hashes.Contains(gh.Md5.ToLower()))
+                .Where(gh => hashes.Contains(gh.Md5.ToLower()) && gh.Game.HasAchievements)
                 .Select(gh => new HashMatch
                 {
                     Md5 = gh.Md5.ToLower(),

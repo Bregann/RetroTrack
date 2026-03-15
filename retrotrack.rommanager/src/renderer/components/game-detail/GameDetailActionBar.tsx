@@ -1,7 +1,14 @@
-import type { Game } from '../../mockData';
+import { useState } from 'react';
+
+interface GameSummary {
+  status?: 'in-progress' | 'completed' | 'not-started';
+  lastPlayed?: string;
+}
 
 interface Props {
-  game: Game;
+  game: GameSummary;
+  gameTracked: boolean;
+  onTrackToggle: () => void;
   hoursPlayed: number;
   unlockedCount: number;
   totalCount: number;
@@ -11,12 +18,16 @@ interface Props {
 
 export default function GameDetailActionBar({
   game,
+  gameTracked,
+  onTrackToggle,
   hoursPlayed,
   unlockedCount,
   totalCount,
   achievementPct,
   onShowAchievements,
 }: Props) {
+  const [trackHovered, setTrackHovered] = useState(false);
+
   const statusLabel =
     game.status === 'in-progress'
       ? 'In Progress'
@@ -31,9 +42,14 @@ export default function GameDetailActionBar({
       </button>
       <button
         type="button"
-        className={`gd-fav-btn ${game.favorite ? 'is-fav' : ''}`}
+        className={`gd-track-btn ${gameTracked ? 'is-tracked' : ''}`}
+        onClick={onTrackToggle}
+        onMouseEnter={() => setTrackHovered(true)}
+        onMouseLeave={() => setTrackHovered(false)}
       >
-        {game.favorite ? '★ Favorited' : '☆ Add to Favorites'}
+        {gameTracked
+          ? trackHovered ? '✕ Untrack' : '✓ Tracked'
+          : '+ Track Game'}
       </button>
       <div className="gd-action-divider" />
       <div className="gd-action-stat">

@@ -15,7 +15,7 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public int ConsoleId { get; set; }
 
         [JsonProperty("ForumTopicID")]
-        public int ForumTopicId { get; set; }
+        public int? ForumTopicId { get; set; }
 
         [JsonProperty("Flags")]
         public int? Flags { get; set; }

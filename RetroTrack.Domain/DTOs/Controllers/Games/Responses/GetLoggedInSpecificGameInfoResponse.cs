@@ -43,6 +43,9 @@ namespace RetroTrack.Domain.DTOs.Controllers.Games.Responses
         public long? MedianTimeToMasterSeconds { get; set; }
         public string? MedianTimeToMasterFormatted { get; set; }
         public List<SubsetGame> Subsets { get; set; } = new List<SubsetGame>();
+
+        public DateTime? LastPlayedUtc { get; set; }
+        public long TotalSecondsPlayed { get; set; }
     }
 
     public class UserAchievement

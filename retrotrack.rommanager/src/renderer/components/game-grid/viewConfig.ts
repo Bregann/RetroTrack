@@ -16,7 +16,7 @@ export type ListColumn =
   | 'achievementsUnlocked'
   | 'achievementsTotal'
   | 'lastPlayed'
-  | 'favorite';
+  | 'favourite';
 
 export const ALL_COLUMNS: { key: ListColumn; label: string }[] = [
   { key: 'title', label: 'Title' },
@@ -26,7 +26,7 @@ export const ALL_COLUMNS: { key: ListColumn; label: string }[] = [
   { key: 'achievementsTotal', label: 'Total' },
   { key: 'achievementPercent', label: '% Done' },
   { key: 'lastPlayed', label: 'Last Played' },
-  { key: 'favorite', label: 'Favorite' },
+  { key: 'favourite', label: 'Favourite' },
 ];
 
 export const DEFAULT_COLUMNS: ListColumn[] = [

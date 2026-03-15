@@ -1,19 +1,24 @@
 import { useState } from 'react';
-import type { GameScreenshot } from '../../mockData';
 
-interface Props {
-  screenshotColors: GameScreenshot[];
+interface CarouselImage {
+  id: number;
+  label: string;
+  url: string;
 }
 
-export default function GameDetailCarousel({ screenshotColors }: Props) {
+interface Props {
+  images: CarouselImage[];
+}
+
+export default function GameDetailCarousel({ images }: Props) {
   const [carouselIdx, setCarouselIdx] = useState(0);
 
-  if (screenshotColors.length === 0) return null;
+  if (images.length === 0) return null;
 
   const prev = () =>
-    setCarouselIdx((i) => (i <= 0 ? screenshotColors.length - 1 : i - 1));
+    setCarouselIdx((i) => (i <= 0 ? images.length - 1 : i - 1));
   const next = () =>
-    setCarouselIdx((i) => (i >= screenshotColors.length - 1 ? 0 : i + 1));
+    setCarouselIdx((i) => (i >= images.length - 1 ? 0 : i + 1));
 
   return (
     <div className="gd-section">
@@ -23,13 +28,13 @@ export default function GameDetailCarousel({ screenshotColors }: Props) {
           ‹
         </button>
         <div className="gd-carousel-viewport">
-          <div
-            className="gd-carousel-main"
-            style={{ backgroundColor: screenshotColors[carouselIdx]?.color }}
-          >
-            <span className="gd-carousel-main-label">
-              {screenshotColors[carouselIdx]?.label}
-            </span>
+          <div className="gd-carousel-main">
+            <img
+              key={images[carouselIdx]?.url}
+              src={images[carouselIdx]?.url}
+              alt={images[carouselIdx]?.label}
+              className="gd-carousel-img"
+            />
           </div>
         </div>
         <button type="button" className="gd-carousel-arrow gd-carousel-next" onClick={next}>
@@ -37,15 +42,15 @@ export default function GameDetailCarousel({ screenshotColors }: Props) {
         </button>
       </div>
       <div className="gd-carousel-thumbs">
-        {screenshotColors.map((ss, idx) => (
+        {images.map((img, idx) => (
           <button
-            key={ss.id}
+            key={img.id}
             type="button"
             className={`gd-carousel-thumb ${idx === carouselIdx ? 'active' : ''}`}
-            style={{ backgroundColor: ss.color }}
             onClick={() => setCarouselIdx(idx)}
           >
-            <span className="gd-carousel-thumb-label">{ss.label}</span>
+            <img src={img.url} alt={img.label} className="gd-carousel-thumb-img" />
+            <span className="gd-carousel-thumb-label">{img.label}</span>
           </button>
         ))}
       </div>

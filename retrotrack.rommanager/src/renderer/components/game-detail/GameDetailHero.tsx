@@ -1,7 +1,10 @@
-import type { Game } from '../../mockData';
+interface GameSummary {
+  title: string;
+  console: string;
+}
 
 interface Props {
-  game: Game;
+  game: GameSummary;
   headerColor: string;
   categories: string[];
   onBack: () => void;
@@ -25,9 +28,6 @@ export default function GameDetailHero({ game, headerColor, categories, onBack }
             </span>
           ))}
         </div>
-      )}
-      {game.favorite && (
-        <span className="gd-hero-fav-badge">★ Favorite</span>
       )}
     </div>
   );

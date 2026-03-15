@@ -42,7 +42,7 @@ export default function GameContextMenu({ gameId, playlistId, x, y, onClose }: P
         ▶&nbsp;&nbsp;Play
       </button>
       <div className="context-menu-separator" />
-      {game.favorite ? (
+      {game.favourite ? (
         <button className="context-menu-item" onClick={act('Remove from Favourites')}>
           ★&nbsp;&nbsp;Remove from Favourites
         </button>
