@@ -194,7 +194,7 @@ const createWindow = async () => {
   });
 
   // Remove this if your app does not use auto updates
-   
+
   new AppUpdater();
 };
 
