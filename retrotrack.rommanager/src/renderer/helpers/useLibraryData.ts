@@ -115,11 +115,11 @@ export function useLibraryData() {
 }
 
 export function useRefreshLibrary() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
 
   return async () => {
     const data = await syncFromApi();
-    queryClient.setQueryData([QueryKeys.LibraryData], data);
+    qc.setQueryData([QueryKeys.LibraryData], data);
     return data;
   };
 }

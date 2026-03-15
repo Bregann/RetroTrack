@@ -31,9 +31,68 @@ class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = true;
+
+    autoUpdater.on('update-available', (info) => {
+      mainWindow?.webContents.send('updater:status', {
+        status: 'update-available',
+        version: info.version,
+      });
+    });
+
+    autoUpdater.on('update-not-available', () => {
+      mainWindow?.webContents.send('updater:status', {
+        status: 'up-to-date',
+      });
+    });
+
+    autoUpdater.on('download-progress', (progress) => {
+      mainWindow?.webContents.send('updater:status', {
+        status: 'downloading',
+        percent: Math.round(progress.percent),
+      });
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+      mainWindow?.webContents.send('updater:status', {
+        status: 'ready',
+      });
+    });
+
+    autoUpdater.on('error', (err) => {
+      mainWindow?.webContents.send('updater:status', {
+        status: 'error',
+        message: err.message,
+      });
+    });
+
+    // Check for updates on launch (silently)
+    autoUpdater.checkForUpdates().catch(() => {});
   }
 }
+
+// IPC handlers for updater
+ipcMain.handle('updater:check', async () => {
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    return result?.updateInfo.version ?? null;
+  } catch {
+    return null;
+  }
+});
+
+ipcMain.handle('updater:download', async () => {
+  await autoUpdater.downloadUpdate();
+});
+
+ipcMain.handle('updater:install', () => {
+  autoUpdater.quitAndInstall();
+});
+
+ipcMain.handle('updater:get-version', () => {
+  return app.getVersion();
+});
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -141,7 +200,7 @@ const createWindow = async () => {
   });
 
   // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
+   
   new AppUpdater();
 };
 

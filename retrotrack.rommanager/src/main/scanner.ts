@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { BrowserWindow } from 'electron';
 import { upsertScannedGames, type ScannedGameRow } from './database';
 
 // ROM file extensions we care about — covers the most common RA-supported systems
@@ -85,7 +84,7 @@ function collectRomFilesRecursive(dirPath: string, results: string[]): void {
 async function hashFile(filePath: string, consoleId: number): Promise<string | null> {
   try {
     // node-rcheevos is a native module — require it at runtime
-    // eslint-disable-next-line global-require
+
     const { rhash } = require('node-rcheevos');
     return rhash(consoleId, filePath) as string;
   } catch {

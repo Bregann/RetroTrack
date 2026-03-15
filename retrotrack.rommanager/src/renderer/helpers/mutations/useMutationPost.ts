@@ -1,15 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { doPost, FetchResponse } from '../apiClient'
 
-interface MutationPostOptions<TOutput> {
-  url: string | ((_input: any) => string)
+interface MutationPostOptions<TInput, TOutput> {
+  url: string | ((_input: TInput) => string)
   queryKey: string[]
   invalidateQuery: boolean
   onError?: (_error: Error) => void
   onSuccess?: (_data: TOutput | undefined) => void
 }
 
-export function useMutationPost<TInput, TOutput>(options: MutationPostOptions<TOutput>) {
+export function useMutationPost<TInput, TOutput>(options: MutationPostOptions<TInput, TOutput>) {
   const queryClient = useQueryClient()
 
   return useMutation({

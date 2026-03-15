@@ -134,11 +134,47 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--accent-blue);
     color: #fff;
     border-color: var(--accent-blue);
   }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  &--available {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+
+    &:hover {
+      filter: brightness(1.15);
+    }
+  }
+
+  &--ready {
+    background: var(--accent-green, #4caf50);
+    color: #fff;
+    border-color: var(--accent-green, #4caf50);
+
+    &:hover {
+      filter: brightness(1.15);
+    }
+  }
+}
+
+.gs-update-error-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gs-update-error {
+  font-size: 12px;
+  color: #e57373;
 }
 
 .gs-github-btn {

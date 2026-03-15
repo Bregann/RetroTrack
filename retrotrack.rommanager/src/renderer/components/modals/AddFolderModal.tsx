@@ -18,7 +18,7 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
   const [scanning, setScanning] = useState(false);
   const [results, setResults] = useState<ScanResult[]>([]);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
-  const [done, setDone] = useState(false);
+  const [, setDone] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

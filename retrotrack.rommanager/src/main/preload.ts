@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close' | 'scan:progress' | 'session:ended';
+export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close' | 'scan:progress' | 'session:ended' | 'updater:status';
 
 const electronHandler = {
   ipcRenderer: {
@@ -100,6 +100,17 @@ const electronHandler = {
       const sub = (_event: IpcRendererEvent, data: { gameId: number; sessionSeconds: number }) => callback(data);
       ipcRenderer.on('session:ended', sub);
       return () => { ipcRenderer.removeListener('session:ended', sub); };
+    },
+  },
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check') as Promise<string | null>,
+    download: () => ipcRenderer.invoke('updater:download') as Promise<void>,
+    install: () => ipcRenderer.invoke('updater:install') as Promise<void>,
+    getVersion: () => ipcRenderer.invoke('updater:get-version') as Promise<string>,
+    onStatus: (callback: (data: { status: string; version?: string; percent?: number; message?: string }) => void) => {
+      const sub = (_event: IpcRendererEvent, data: { status: string; version?: string; percent?: number; message?: string }) => callback(data);
+      ipcRenderer.on('updater:status', sub);
+      return () => { ipcRenderer.removeListener('updater:status', sub); };
     },
   },
 };

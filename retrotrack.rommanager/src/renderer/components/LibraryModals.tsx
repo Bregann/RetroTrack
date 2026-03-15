@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { type SavedFolder } from './modals/libraryModalTypes';
 import AddGameModal from './modals/AddGameModal';
 import AddFolderModal from './modals/AddFolderModal';
@@ -29,31 +29,33 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
   const [folders, setFolders] = useState<SavedFolder[]>([]);
   const invalidateScannedGames = useInvalidateScannedGames();
 
-  const loadFolders = useCallback(async () => {
-    const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
-    const allGames: { folderPath: string; consoleId: number }[] =
-      await window.electron.scanner.getScannedGames();
-    const countMap = new Map<string, number>();
-    for (const g of allGames) {
-      const key = `${g.folderPath}::${g.consoleId}`;
-      countMap.set(key, (countMap.get(key) ?? 0) + 1);
-    }
-    setFolders(
-      rows.map((r) => ({
-        path: r.path,
-        consoleId: r.consoleId,
-        consoleName: r.consoleName,
-        addedAt: new Date(r.addedAt).toLocaleDateString(),
-        gameCount: countMap.get(`${r.path}::${r.consoleId}`) ?? 0,
-      })),
-    );
-  }, []);
-
   useEffect(() => {
-    if (mode) {
-      loadFolders();
-    }
-  }, [mode, loadFolders]);
+    if (!mode) return;
+    let cancelled = false;
+
+    (async () => {
+      const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
+      const allGames: { folderPath: string; consoleId: number }[] =
+        await window.electron.scanner.getScannedGames();
+      if (cancelled) return;
+      const countMap = new Map<string, number>();
+      for (const g of allGames) {
+        const key = `${g.folderPath}::${g.consoleId}`;
+        countMap.set(key, (countMap.get(key) ?? 0) + 1);
+      }
+      setFolders(
+        rows.map((r) => ({
+          path: r.path,
+          consoleId: r.consoleId,
+          consoleName: r.consoleName,
+          addedAt: new Date(r.addedAt).toLocaleDateString(),
+          gameCount: countMap.get(`${r.path}::${r.consoleId}`) ?? 0,
+        })),
+      );
+    })();
+
+    return () => { cancelled = true; };
+  }, [mode]);
 
   const handleFolderAdded = (folder: SavedFolder) => {
     setFolders((prev) => {

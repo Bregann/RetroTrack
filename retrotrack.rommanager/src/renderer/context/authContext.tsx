@@ -17,33 +17,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 const STORAGE_KEY = 'retrotrack_user'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      return stored ? JSON.parse(stored) as User : null
+    } catch {
+      return null
+    }
+  })
+  const [loading, setLoading] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY) !== null
+  })
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === null) {
-      setLoading(false)
-      return
-    }
+    if (stored === null) return
 
-    try {
-      const parsed = JSON.parse(stored) as User
-      // Optimistically restore the user, then validate the session is still alive
-      setUser(parsed)
-      doPost('/api/auth/RefreshToken', { retry: false }).then((res) => {
-        if (!res.ok) {
-          localStorage.removeItem(STORAGE_KEY)
-          setUser(null)
-        } else {
-          loadAccessTokenFromCookie()
-        }
-        setLoading(false)
-      })
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
+    doPost('/api/auth/RefreshToken', { retry: false }).then((res) => {
+      if (!res.ok) {
+        localStorage.removeItem(STORAGE_KEY)
+        setUser(null)
+      } else {
+        loadAccessTokenFromCookie()
+      }
       setLoading(false)
-    }
+    }).catch(() => {
+      localStorage.removeItem(STORAGE_KEY)
+      setUser(null)
+      setLoading(false)
+    })
   }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {

@@ -12,6 +12,17 @@
   user-select: none;
 }
 
+.login-window-controls {
+  position: fixed;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: stretch;
+  height: 32px;
+  z-index: 100;
+  -webkit-app-region: no-drag;
+}
+
 .login-card {
   background: var(--bg-dark);
   border: 1px solid var(--border-color);

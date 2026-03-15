@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import type { Channels } from '../../main/preload';
 import type { LibraryModalMode } from './LibraryModals';
 import GeneralSettingsModal from './modals/GeneralSettingsModal';
 
@@ -21,6 +22,7 @@ interface TopMenuBarProps {
 export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleTheme, onManageEmulators, onLibraryAction, searchQuery, onSearchChange }: TopMenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showGeneralSettings, setShowGeneralSettings] = useState(false);
+  const [hasUpdate, setHasUpdate] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
   const menus: DropdownMenu[] = [
@@ -58,8 +60,16 @@ export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleThe
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    return window.electron.updater.onStatus((data) => {
+      if (data.status === 'update-available' || data.status === 'ready') {
+        setHasUpdate(true);
+      }
+    });
+  }, []);
+
   const handleWindowControl = (action: string) => {
-    window.electron?.ipcRenderer.sendMessage(action as any);
+    window.electron?.ipcRenderer.sendMessage(action as Channels);
   };
 
   return (
@@ -137,6 +147,7 @@ export default function TopMenuBar({ onLogout, onSyncLibrary, theme, onToggleThe
             onClick={() => setOpenMenu(openMenu === 'settings' ? null : 'settings')}
           >
             ⚙️
+            {hasUpdate && <span className="update-badge" />}
           </button>
           {openMenu === 'settings' && (
             <div className="menu-dropdown menu-dropdown-right">

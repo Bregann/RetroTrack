@@ -136,7 +136,7 @@ export function launchGame(
   const emulatorName = apiEmu?.name?.toLowerCase() ?? '';
 
   // 3) Build command args based on emulator type
-  const args = buildLaunchArgs(emulatorName, local, romPath, coreId, apiEmu, exePath);
+  const args = buildLaunchArgs(emulatorName, local, romPath, coreId, apiEmu);
 
   // 4) Spawn the process
   try {
@@ -161,7 +161,6 @@ function buildLaunchArgs(
   romPath: string,
   coreId: number | null,
   apiEmu?: { cores: { id: number; coreFileName: string }[] },
-  exePath?: string,
 ): string[] {
   // If user has custom args with {file} placeholder, use those
   if (local.args && local.args.trim()) {

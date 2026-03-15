@@ -34,34 +34,32 @@ export default function EmulatorPickerModal({ gameId, gameTitle, consoleId, cons
   const [error, setError] = useState<string | null>(null);
   const [autoLaunching, setAutoLaunching] = useState(false);
 
-  // Auto-launch helper (used for saved pref or single-emulator shortcut)
-  const doAutoLaunch = async (emulatorId: number, coreId: number | null) => {
-    if (!config?.emulators) return;
-    setAutoLaunching(true);
-    setLaunching(true);
-    try {
-      const result = await window.electron.launcher.launchGame(
-        { gameId, emulatorId, coreId, gameTitle, consoleName, imageIcon },
-        config.emulators,
-      );
-      if (result === true) {
-        onClose();
-      } else {
-        // Auto-launch failed — fall back to showing the picker
-        setAutoLaunching(false);
-        setError(result);
-        setLaunching(false);
-      }
-    } catch {
-      setAutoLaunching(false);
-      setError('An unexpected error occurred while launching the game.');
-      setLaunching(false);
-    }
-  };
-
   // Load launch context
   useEffect(() => {
     if (!config?.emulators) return;
+
+    const autoLaunch = async (emulatorId: number, coreId: number | null) => {
+      if (!config?.emulators) return;
+      setAutoLaunching(true);
+      setLaunching(true);
+      try {
+        const result = await window.electron.launcher.launchGame(
+          { gameId, emulatorId, coreId, gameTitle, consoleName, imageIcon },
+          config.emulators,
+        );
+        if (result === true) {
+          onClose();
+        } else {
+          setAutoLaunching(false);
+          setError(result);
+          setLaunching(false);
+        }
+      } catch {
+        setAutoLaunching(false);
+        setError('An unexpected error occurred while launching the game.');
+        setLaunching(false);
+      }
+    };
 
     (async () => {
       const ctx = (await window.electron.launcher.getContext(
@@ -75,7 +73,7 @@ export default function EmulatorPickerModal({ gameId, gameTitle, consoleId, cons
       if (ctx.savedPref) {
         const prefEmu = ctx.availableEmulators.find((e) => e.emulatorId === ctx.savedPref!.emulatorId);
         if (prefEmu) {
-          doAutoLaunch(ctx.savedPref.emulatorId, ctx.savedPref.coreId);
+          autoLaunch(ctx.savedPref.emulatorId, ctx.savedPref.coreId);
           return;
         }
         // Pref emulator not available anymore — fall through to manual selection
@@ -85,7 +83,7 @@ export default function EmulatorPickerModal({ gameId, gameTitle, consoleId, cons
       if (ctx.romFiles.length > 0 && ctx.availableEmulators.length === 1) {
         const only = ctx.availableEmulators[0];
         const coreId = only.coreAssignments[consoleId] ?? null;
-        doAutoLaunch(only.emulatorId, coreId);
+        autoLaunch(only.emulatorId, coreId);
         return;
       }
 
@@ -97,7 +95,7 @@ export default function EmulatorPickerModal({ gameId, gameTitle, consoleId, cons
         setSelectedCoreId(assignedCore ?? null);
       }
     })();
-  }, [gameId, consoleId, config]);
+  }, [gameId, consoleId, config, gameTitle, consoleName, imageIcon, onClose]);
 
   // Get cores for selected emulator from API data
   const selectedApiEmu = config?.emulators.find((e: ApiEmulator) => e.id === selectedEmulatorId);
@@ -138,7 +136,7 @@ export default function EmulatorPickerModal({ gameId, gameTitle, consoleId, cons
       } else {
         setError(result);
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred while launching the game.');
     } finally {
       setLaunching(false);

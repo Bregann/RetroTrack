@@ -31,13 +31,6 @@ export default function AchievementOverlay({
     filter === 'progression' ? achievements.filter((a) => a.type === 'progression') :
                                achievements.filter((a) => a.type === 'win');
 
-  const rarityLabel: Record<string, string> = {
-    common:      'Common',
-    uncommon:    'Uncommon',
-    rare:        'Rare',
-    'ultra-rare':'Ultra Rare',
-  };
-
   const filterTabs: { key: Filter; label: string }[] = [
     { key: 'all',         label: `All (${achievements.length})` },
     { key: 'unlocked',    label: `Unlocked (${unlocked.length})` },

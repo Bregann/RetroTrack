@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
 }
 
-const APP_VERSION = '1.0.0';
-const LAST_UPDATED = 'March 13, 2026';
+type UpdateStatus = 'idle' | 'checking' | 'up-to-date' | 'update-available' | 'downloading' | 'ready' | 'error';
+
 const BUILD_TARGET = 'Electron + React + TypeScript';
 const DATA_SOURCE = 'RetroAchievements API';
 const LICENSE = 'MIT';
@@ -14,6 +14,54 @@ const GITHUB_URL = 'https://github.com/retrotrack/retrotrack.rommanager';
 export default function GeneralSettingsModal({ onClose }: Props) {
   const [cacheStatus, setCacheStatus] = useState<'idle' | 'confirming' | 'clearing' | 'done'>('idle');
   const [clearedCount, setClearedCount] = useState(0);
+  const [appVersion, setAppVersion] = useState('');
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
+  const [updateVersion, setUpdateVersion] = useState('');
+  const [downloadPercent, setDownloadPercent] = useState(0);
+  const [updateError, setUpdateError] = useState('');
+
+  useEffect(() => {
+    window.electron.updater.getVersion().then(setAppVersion);
+    const unsub = window.electron.updater.onStatus((data) => {
+      switch (data.status) {
+        case 'update-available':
+          setUpdateStatus('update-available');
+          setUpdateVersion(data.version ?? '');
+          break;
+        case 'up-to-date':
+          setUpdateStatus('up-to-date');
+          break;
+        case 'downloading':
+          setUpdateStatus('downloading');
+          setDownloadPercent(data.percent ?? 0);
+          break;
+        case 'ready':
+          setUpdateStatus('ready');
+          break;
+        case 'error':
+          setUpdateStatus('error');
+          setUpdateError(data.message ?? 'Unknown error');
+          break;
+      }
+    });
+    return unsub;
+  }, []);
+
+  const handleCheckForUpdates = async () => {
+    setUpdateStatus('checking');
+    setUpdateError('');
+    await window.electron.updater.check();
+  };
+
+  const handleDownload = async () => {
+    setUpdateStatus('downloading');
+    setDownloadPercent(0);
+    await window.electron.updater.download();
+  };
+
+  const handleInstall = () => {
+    window.electron.updater.install();
+  };
 
   const handleClearCache = async () => {
     setCacheStatus('clearing');
@@ -41,11 +89,7 @@ export default function GeneralSettingsModal({ onClose }: Props) {
           <div className="gs-info-grid">
             <div className="gs-info-row">
               <span className="gs-info-label">Version</span>
-              <span className="gs-info-value">v{APP_VERSION}</span>
-            </div>
-            <div className="gs-info-row">
-              <span className="gs-info-label">Last Updated</span>
-              <span className="gs-info-value">{LAST_UPDATED}</span>
+              <span className="gs-info-value">v{appVersion}</span>
             </div>
             <div className="gs-info-row">
               <span className="gs-info-label">Built With</span>
@@ -62,9 +106,44 @@ export default function GeneralSettingsModal({ onClose }: Props) {
           </div>
 
           <div className="gs-action-row">
-            <button type="button" className="gs-update-btn">
-              🔄 Check for Updates
-            </button>
+            {updateStatus === 'idle' && (
+              <button type="button" className="gs-update-btn" onClick={handleCheckForUpdates}>
+                🔄 Check for Updates
+              </button>
+            )}
+            {updateStatus === 'checking' && (
+              <button type="button" className="gs-update-btn" disabled>
+                Checking...
+              </button>
+            )}
+            {updateStatus === 'up-to-date' && (
+              <button type="button" className="gs-update-btn" disabled>
+                ✅ You're up to date
+              </button>
+            )}
+            {updateStatus === 'update-available' && (
+              <button type="button" className="gs-update-btn gs-update-btn--available" onClick={handleDownload}>
+                ⬇️ Download v{updateVersion}
+              </button>
+            )}
+            {updateStatus === 'downloading' && (
+              <button type="button" className="gs-update-btn" disabled>
+                Downloading... {downloadPercent}%
+              </button>
+            )}
+            {updateStatus === 'ready' && (
+              <button type="button" className="gs-update-btn gs-update-btn--ready" onClick={handleInstall}>
+                🚀 Restart &amp; Install Update
+              </button>
+            )}
+            {updateStatus === 'error' && (
+              <div className="gs-update-error-row">
+                <button type="button" className="gs-update-btn" onClick={handleCheckForUpdates}>
+                  🔄 Retry
+                </button>
+                <span className="gs-update-error">❌ {updateError}</span>
+              </div>
+            )}
             <button
               type="button"
               className="gs-github-btn"

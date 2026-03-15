@@ -21,7 +21,7 @@ function ensureCacheDir() {
 
 /** Convert an RA image path (e.g. /Images/012345.png) to a safe local file path. */
 function localPath(imagePath: string): string {
-  const sanitised = imagePath.replace(/^[\/]+/, '').replace(/\.\./g, '');
+  const sanitised = imagePath.replace(/^[/]+/, '').replace(/\.\./g, '');
   return path.join(cacheDir, sanitised);
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/authContext';
+import type { Channels } from '../../../main/preload';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -24,8 +25,30 @@ export default function LoginPage() {
     }
   };
 
+  const handleWindowControl = (action: string) => {
+    window.electron?.ipcRenderer.sendMessage(action as Channels);
+  };
+
   return (
     <div className="login-page">
+      <div className="login-window-controls">
+        <button
+          type="button"
+          className="window-ctrl-btn"
+          title="Minimize"
+          onClick={() => handleWindowControl('window-minimize')}
+        >
+          ─
+        </button>
+        <button
+          type="button"
+          className="window-ctrl-btn window-ctrl-close"
+          title="Close"
+          onClick={() => handleWindowControl('window-close')}
+        >
+          ✕
+        </button>
+      </div>
       <div className="login-card">
         <div className="login-logo">
           <span className="login-logo-icon">🎮</span>

@@ -1,0 +1,46 @@
+name: Release ROM Manager
+
+on:
+  push:
+    tags:
+      - 'rommanager-v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#rommanager-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set app version
+        shell: bash
+        run: |
+          cd retrotrack.rommanager/release/app
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: retrotrack.rommanager/package-lock.json
+
+      - name: Install root dependencies
+        working-directory: retrotrack.rommanager
+        run: npm ci
+
+      - name: Install app dependencies
+        working-directory: retrotrack.rommanager/release/app
+        run: npm ci
+
+      - name: Build & Publish
+        working-directory: retrotrack.rommanager
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx ts-node ./.erb/scripts/clean.js dist ; npm run build ; npx electron-builder build --publish always

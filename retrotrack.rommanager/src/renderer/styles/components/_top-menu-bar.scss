@@ -166,6 +166,18 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
+.update-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green, #4caf50);
+  border: 1.5px solid var(--bg-dark);
+  pointer-events: none;
+}
+
 .notif-badge {
   position: absolute;
   top: -2px;
