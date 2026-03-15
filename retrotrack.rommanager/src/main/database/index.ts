@@ -24,10 +24,24 @@ export {
   upsertScannedGames,
   getScannedGamesByFolder,
   getAllScannedGames,
+  getScannedGamesByGameId,
   removeScannedGamesByFolder,
   clearScannedGames,
   type ScannedGameRow,
 } from './scannedGames';
+export {
+  getEmulatorSetting,
+  getAllEmulatorSettings,
+  upsertEmulatorSetting,
+  upsertAllEmulatorSettings,
+  type EmulatorSettingRow,
+} from './emulatorSettings';
+export {
+  getGameEmulatorPref,
+  setGameEmulatorPref,
+  clearGameEmulatorPref,
+  type GameEmulatorPrefRow,
+} from './gameEmulatorPrefs';
 
 import { clearTrackedGames } from './trackedGames';
 import { clearSyncMeta } from './syncMeta';

@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close' | 'scan:progress';
+export type Channels = 'ipc-example' | 'window-minimize' | 'window-maximize' | 'window-close' | 'scan:progress' | 'session:ended';
 
 const electronHandler = {
   ipcRenderer: {
@@ -40,6 +40,9 @@ const electronHandler = {
   scanner: {
     browseFolder: () => ipcRenderer.invoke('scan:browse-folder') as Promise<string | null>,
     browseFile: () => ipcRenderer.invoke('scan:browse-file') as Promise<string | null>,
+    browseExecutable: () => ipcRenderer.invoke('scan:browse-executable') as Promise<string | null>,
+    autoDetectExe: (folderPath: string, defaultExe: string) =>
+      ipcRenderer.invoke('scan:auto-detect-exe', folderPath, defaultExe) as Promise<string | null>,
     addFolder: (folderPath: string, consoleId: number, consoleName: string) =>
       ipcRenderer.invoke('scan:add-folder', folderPath, consoleId, consoleName),
     getFolders: () => ipcRenderer.invoke('scan:get-folders'),
@@ -60,6 +63,34 @@ const electronHandler = {
   },
   cache: {
     clearImageCache: () => ipcRenderer.invoke('cache:clear-image-cache') as Promise<number>,
+  },
+  emulators: {
+    getSettings: () => ipcRenderer.invoke('emu:get-settings') as Promise<unknown[]>,
+    saveSettings: (settings: unknown[]) =>
+      ipcRenderer.invoke('emu:save-settings', settings) as Promise<void>,
+    getGamePref: (gameId: number) =>
+      ipcRenderer.invoke('emu:get-game-pref', gameId) as Promise<{ game_id: number; emulator_id: number; core_id: number | null } | undefined>,
+    setGamePref: (gameId: number, emulatorId: number, coreId: number | null) =>
+      ipcRenderer.invoke('emu:set-game-pref', gameId, emulatorId, coreId) as Promise<void>,
+    clearGamePref: (gameId: number) =>
+      ipcRenderer.invoke('emu:clear-game-pref', gameId) as Promise<void>,
+  },
+  launcher: {
+    getContext: (gameId: number, consoleId: number, apiEmulators: unknown) =>
+      ipcRenderer.invoke('launch:get-context', gameId, consoleId, apiEmulators) as Promise<unknown>,
+    launchGame: (request: unknown, apiEmulators: unknown) =>
+      ipcRenderer.invoke('launch:launch-game', request, apiEmulators) as Promise<string | true>,
+  },
+  session: {
+    getActive: () =>
+      ipcRenderer.invoke('session:get-active') as Promise<{ gameId: number; gameTitle: string; consoleName: string; startedAt: number } | null>,
+    forceEnd: () =>
+      ipcRenderer.invoke('session:force-end') as Promise<void>,
+    onSessionEnded: (callback: (data: { gameId: number; sessionSeconds: number }) => void) => {
+      const sub = (_event: IpcRendererEvent, data: { gameId: number; sessionSeconds: number }) => callback(data);
+      ipcRenderer.on('session:ended', sub);
+      return () => { ipcRenderer.removeListener('session:ended', sub); };
+    },
   },
 };
 

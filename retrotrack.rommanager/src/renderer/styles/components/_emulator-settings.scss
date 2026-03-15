@@ -261,6 +261,21 @@
   user-select: none;
 }
 
+.emu-toggle-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.emu-config-notice {
+  font-size: 11px;
+  color: #e8a838;
+  margin: -4px 0 12px;
+  padding: 6px 10px;
+  background: rgba(232, 168, 56, 0.08);
+  border: 1px solid rgba(232, 168, 56, 0.25);
+  border-radius: 4px;
+}
+
 .emu-toggle-input {
   display: none;
 }

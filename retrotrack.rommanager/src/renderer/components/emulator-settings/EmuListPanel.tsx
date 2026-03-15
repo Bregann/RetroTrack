@@ -1,10 +1,9 @@
-import { EMULATOR_PRESETS } from '../../mockData';
 import type { EmulatorEntry } from './emulatorSettingsTypes';
 
 interface Props {
   emulators: EmulatorEntry[];
-  selectedId: string;
-  onSelect: (presetId: string) => void;
+  selectedId: number | null;
+  onSelect: (emulatorId: number) => void;
 }
 
 export default function EmuListPanel({ emulators, selectedId, onSelect }: Props) {
@@ -13,10 +12,10 @@ export default function EmuListPanel({ emulators, selectedId, onSelect }: Props)
       <div className="emu-list-scroll">
         {emulators.map((emu) => (
           <button
-            key={emu.presetId}
+            key={emu.emulatorId}
             type="button"
-            className={`emu-list-item ${emu.presetId === selectedId ? 'active' : ''}`}
-            onClick={() => onSelect(emu.presetId)}
+            className={`emu-list-item ${emu.emulatorId === selectedId ? 'active' : ''}`}
+            onClick={() => onSelect(emu.emulatorId)}
           >
             <div className="emu-list-item-top">
               <span className="emu-list-item-name">{emu.name}</span>
@@ -26,7 +25,7 @@ export default function EmuListPanel({ emulators, selectedId, onSelect }: Props)
               />
             </div>
             <span className="emu-list-item-consoles">
-              {EMULATOR_PRESETS.find((p) => p.id === emu.presetId)?.supportedConsoles.join(', ') || '—'}
+              {emu.supportedConsoles.map((c) => c.consoleName).join(', ') || '—'}
             </span>
           </button>
         ))}

@@ -16,6 +16,8 @@ import { resolveHtmlPath } from './util';
 import { initDatabase } from './database';
 import { registerIpcHandlers } from './ipc';
 import { registerCacheScheme, registerCacheProtocol } from './imageCache';
+import { forceEndSession } from './sessionTracker';
+import { setIdlePresence, destroyDiscordPresence } from './discordPresence';
 
 // Dev API uses a self-signed cert — allow Node's fetch to reach it
 if (process.env.NODE_ENV === 'development') {
@@ -121,6 +123,7 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+    setIdlePresence();
   });
 
   mainWindow.on('closed', () => {
@@ -147,6 +150,9 @@ const createWindow = async () => {
  */
 
 app.on('window-all-closed', () => {
+  // End any active gaming session and clean up Discord
+  forceEndSession();
+  destroyDiscordPresence();
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {

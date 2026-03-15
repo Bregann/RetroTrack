@@ -126,6 +126,7 @@ builder.Services.AddScoped<ISitemapDataService, SitemapDataService>();
 builder.Services.AddScoped<IPlaylistControllerDataService, PlaylistControllerDataService>();
 builder.Services.AddScoped<ISearchControllerDataService, SearchControllerDataService>();
 builder.Services.AddScoped<ILibraryControllerDataService, LibraryControllerDataService>();
+builder.Services.AddScoped<IEmulatorControllerDataService, EmulatorControllerDataService>();
 
 // hangfire
 builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));

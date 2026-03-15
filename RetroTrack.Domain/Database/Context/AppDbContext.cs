@@ -22,5 +22,9 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<EnvironmentalSetting> EnvironmentalSettings { get; set; }
         public DbSet<UserGameActivity> UserGameActivities { get; set; }
+        public DbSet<Emulator> Emulators { get; set; }
+        public DbSet<EmulatorConsole> EmulatorConsoles { get; set; }
+        public DbSet<EmulatorCore> EmulatorCores { get; set; }
+        public DbSet<EmulatorCoreConsole> EmulatorCoreConsoles { get; set; }
     }
 }

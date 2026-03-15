@@ -1,29 +1,31 @@
-import { ALL_CONSOLE_OPTIONS, type EmulatorPreset } from '../../mockData';
 import type { EmulatorEntry } from './emulatorSettingsTypes';
 import EmuCoreAssignments from './EmuCoreAssignments';
 
 interface Props {
   selected: EmulatorEntry;
-  preset: EmulatorPreset;
   onUpdate: (patch: Partial<EmulatorEntry>) => void;
   onToggleEnabled: () => void;
 }
 
-const consoleName = (short: string) =>
-  ALL_CONSOLE_OPTIONS.find((c) => c.shortName === short)?.name || short;
+export default function EmuConfigPanel({ selected, onUpdate, onToggleEnabled }: Props) {
+  const hasCores = selected.cores.length > 0;
+  const canEnable = selected.installDir.trim() !== '' && selected.executablePath.trim() !== '';
 
-export default function EmuConfigPanel({ selected, preset, onUpdate, onToggleEnabled }: Props) {
   return (
     <div className="emu-config-panel">
       {/* Enable toggle + name header */}
       <div className="emu-config-header">
-        <h3 className="emu-config-title">{preset.name}</h3>
-        <label className="emu-toggle-label">
+        <h3 className="emu-config-title">{selected.name}</h3>
+        <label
+          className={`emu-toggle-label${!canEnable && !selected.enabled ? ' emu-toggle-disabled' : ''}`}
+          title={!canEnable ? 'Set the installation folder and executable before enabling' : undefined}
+        >
           <input
             type="checkbox"
             className="emu-toggle-input"
             checked={selected.enabled}
             onChange={onToggleEnabled}
+            disabled={!canEnable && !selected.enabled}
           />
           <span className="emu-toggle-switch" />
           <span className="emu-toggle-text">
@@ -31,11 +33,14 @@ export default function EmuConfigPanel({ selected, preset, onUpdate, onToggleEna
           </span>
         </label>
       </div>
+      {!canEnable && !selected.enabled && (
+        <p className="emu-config-notice">Set the installation folder and executable to enable this emulator.</p>
+      )}
 
       {/* Supported consoles */}
       <div className="emu-console-tags">
-        {preset.supportedConsoles.map((c) => (
-          <span key={c} className="emu-console-tag">{consoleName(c)}</span>
+        {selected.supportedConsoles.map((c) => (
+          <span key={c.consoleId} className="emu-console-tag">{c.consoleName}</span>
         ))}
       </div>
 
@@ -47,9 +52,22 @@ export default function EmuConfigPanel({ selected, preset, onUpdate, onToggleEna
             className="emu-input"
             value={selected.installDir}
             onChange={(e) => onUpdate({ installDir: e.target.value })}
-            placeholder={`C:\\Emulators\\${preset.name}`}
+            placeholder={`C:\\Emulators\\${selected.name}`}
           />
-          <button type="button" className="emu-browse-btn" title="Browse">📁</button>
+          <button
+            type="button"
+            className="emu-browse-btn"
+            title="Browse"
+            onClick={async () => {
+              const folder = await window.electron.scanner.browseFolder();
+              if (folder) {
+                onUpdate({ installDir: folder });
+                // Auto-detect executable in the chosen folder
+                const detected = await window.electron.scanner.autoDetectExe(folder, selected.defaultExe);
+                if (detected) onUpdate({ installDir: folder, executablePath: detected });
+              }
+            }}
+          >📁</button>
         </div>
       </div>
 
@@ -61,9 +79,17 @@ export default function EmuConfigPanel({ selected, preset, onUpdate, onToggleEna
             className="emu-input"
             value={selected.executablePath}
             onChange={(e) => onUpdate({ executablePath: e.target.value })}
-            placeholder={preset.defaultExe}
+            placeholder={selected.defaultExe}
           />
-          <button type="button" className="emu-browse-btn" title="Browse">📁</button>
+          <button
+            type="button"
+            className="emu-browse-btn"
+            title="Browse"
+            onClick={async () => {
+              const file = await window.electron.scanner.browseExecutable();
+              if (file) onUpdate({ executablePath: file });
+            }}
+          >📁</button>
         </div>
       </div>
 
@@ -79,13 +105,14 @@ export default function EmuConfigPanel({ selected, preset, onUpdate, onToggleEna
         <span className="emu-field-hint">Use {'{file}'} for the ROM path</span>
       </div>
 
-      {/* RetroArch Core Assignments */}
-      {preset.id === 'retroarch' && (
+      {/* Core Assignments (only for emulators with cores defined) */}
+      {hasCores && (
         <EmuCoreAssignments
-          supportedConsoles={preset.supportedConsoles}
+          supportedConsoles={selected.supportedConsoles}
+          cores={selected.cores}
           coreAssignments={selected.coreAssignments}
-          onSetCore={(consoleShort, coreId) =>
-            onUpdate({ coreAssignments: { ...selected.coreAssignments, [consoleShort]: coreId } })
+          onSetCore={(consoleId, coreId) =>
+            onUpdate({ coreAssignments: { ...selected.coreAssignments, [consoleId]: coreId } })
           }
         />
       )}

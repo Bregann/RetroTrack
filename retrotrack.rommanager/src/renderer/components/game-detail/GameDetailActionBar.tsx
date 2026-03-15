@@ -14,6 +14,7 @@ interface Props {
   totalCount: number;
   achievementPct: number;
   onShowAchievements: () => void;
+  onPlay: () => void;
 }
 
 export default function GameDetailActionBar({
@@ -25,6 +26,7 @@ export default function GameDetailActionBar({
   totalCount,
   achievementPct,
   onShowAchievements,
+  onPlay,
 }: Props) {
   const [trackHovered, setTrackHovered] = useState(false);
 
@@ -37,7 +39,7 @@ export default function GameDetailActionBar({
 
   return (
     <div className="gd-action-bar">
-      <button type="button" className="gd-play-btn">
+      <button type="button" className="gd-play-btn" onClick={onPlay}>
         Play
       </button>
       <button

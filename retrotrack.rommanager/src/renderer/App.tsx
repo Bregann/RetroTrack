@@ -8,11 +8,13 @@ import GameGrid from './components/GameGrid';
 import GameDetailPage from './components/GameDetail';
 import EmulatorSettings from './components/EmulatorSettings';
 import LibraryModals, { LibraryModalMode } from './components/LibraryModals';
+import { useSessionReporter } from './helpers/useSessionReporter';
 import './styles/main.scss';
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
   const refreshLibrary = useRefreshLibrary();
+  useSessionReporter();
   const [selectedView, setSelectedView] = useState('home');
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');

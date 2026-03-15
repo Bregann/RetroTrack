@@ -61,6 +61,7 @@
     "@svgr/webpack": "^8.1.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/discord-rpc": "^4.0.10",
     "@types/node": "25.4.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

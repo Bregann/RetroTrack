@@ -18,12 +18,6 @@ type MigrationFn = (db: Database.Database) => void;
 const MIGRATIONS: MigrationFn[] = [
   // 0 → 1: initial schema (tables created via CREATE TABLE IF NOT EXISTS below)
   () => {},
-
-  // Example of a future migration — uncomment and fill in when needed:
-  // 1 → 2:
-  // (db) => {
-  //   db.exec('ALTER TABLE tracked_games ADD COLUMN notes TEXT');
-  // },
 ];
 
 function runMigrations(database: Database.Database): void {
@@ -105,6 +99,21 @@ export function initDatabase(): void {
       folder_path  TEXT NOT NULL,
       added_at     TEXT NOT NULL,
       PRIMARY KEY (hash, file_path)
+    );
+
+    CREATE TABLE IF NOT EXISTS emulator_settings (
+      emulator_id     INTEGER PRIMARY KEY,
+      enabled         INTEGER NOT NULL DEFAULT 0,
+      install_dir     TEXT NOT NULL DEFAULT '',
+      executable_path TEXT NOT NULL DEFAULT '',
+      args            TEXT NOT NULL DEFAULT '',
+      core_assignments TEXT NOT NULL DEFAULT '{}'
+    );
+
+    CREATE TABLE IF NOT EXISTS game_emulator_prefs (
+      game_id      INTEGER PRIMARY KEY,
+      emulator_id  INTEGER NOT NULL,
+      core_id      INTEGER
     );
   `);
 

@@ -1,33 +1,31 @@
-import { RETROARCH_CORES, ALL_CONSOLE_OPTIONS } from '../../mockData';
+import type { ApiEmulatorConsole, ApiEmulatorCore } from './emulatorSettingsTypes';
 
 interface Props {
-  supportedConsoles: string[];
-  coreAssignments: Record<string, string>;
-  onSetCore: (consoleShort: string, coreId: string) => void;
+  supportedConsoles: ApiEmulatorConsole[];
+  cores: ApiEmulatorCore[];
+  coreAssignments: Record<number, number>;
+  onSetCore: (consoleId: number, coreId: number) => void;
 }
 
-const consoleName = (short: string) =>
-  ALL_CONSOLE_OPTIONS.find((c) => c.shortName === short)?.name || short;
-
-export default function EmuCoreAssignments({ supportedConsoles, coreAssignments, onSetCore }: Props) {
+export default function EmuCoreAssignments({ supportedConsoles, cores, coreAssignments, onSetCore }: Props) {
   return (
     <div className="emu-field">
       <label className="emu-label">Core per Console</label>
       <div className="emu-core-list">
         {supportedConsoles.map((c) => {
-          const cores = RETROARCH_CORES.filter((core) => core.consoles.includes(c));
+          const availableCores = cores.filter((core) => core.supportedConsoleIds.includes(c.consoleId));
           return (
-            <div key={c} className="emu-core-row">
-              <span className="emu-core-console">{consoleName(c)}</span>
+            <div key={c.consoleId} className="emu-core-row">
+              <span className="emu-core-console">{c.consoleName}</span>
               <select
                 className="emu-select emu-core-select"
-                value={coreAssignments[c] || ''}
-                onChange={(e) => onSetCore(c, e.target.value)}
+                value={coreAssignments[c.consoleId] ?? ''}
+                onChange={(e) => onSetCore(c.consoleId, Number(e.target.value))}
               >
                 <option value="">— Select core —</option>
-                {cores.map((core) => (
+                {availableCores.map((core) => (
                   <option key={core.id} value={core.id}>
-                    {core.name}
+                    {core.coreName}
                   </option>
                 ))}
               </select>

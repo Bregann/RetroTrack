@@ -64,3 +64,14 @@ export function removeScannedGamesByFolder(folderPath: string): void {
 export function clearScannedGames(): void {
   getDb().exec('DELETE FROM scanned_games');
 }
+
+export function getScannedGamesByGameId(gameId: number): ScannedGameRow[] {
+  return getDb()
+    .prepare(
+      `SELECT hash, file_path as filePath, file_name as fileName, game_id as gameId, title,
+              console_id as consoleId, console_name as consoleName, image_icon as imageIcon,
+              image_box_art as imageBoxArt, folder_path as folderPath, added_at as addedAt
+       FROM scanned_games WHERE game_id = ? ORDER BY added_at`,
+    )
+    .all(gameId) as ScannedGameRow[];
+}

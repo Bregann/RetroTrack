@@ -5,6 +5,7 @@ import { doPost, doDelete } from '../helpers/apiClient';
 import { raImageUrl } from '../helpers/imageUrl';
 import type { Achievement } from '../mockData';
 import AchievementOverlay from './AchievementOverlay';
+import EmulatorPickerModal from './game-detail/EmulatorPickerModal';
 import GameDetailHero from './game-detail/GameDetailHero';
 import GameDetailActionBar from './game-detail/GameDetailActionBar';
 import GameDetailAchievementsPreview from './game-detail/GameDetailAchievementsPreview';
@@ -74,6 +75,7 @@ function formatLastPlayed(utcDate: string | null): string | undefined {
 
 export default function GameDetailPage({ gameId, onBack }: GameDetailProps) {
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showEmulatorPicker, setShowEmulatorPicker] = useState(false);
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useGameDetail(gameId);
 
@@ -190,6 +192,7 @@ export default function GameDetailPage({ gameId, onBack }: GameDetailProps) {
         totalCount={totalCount}
         achievementPct={achievementPct}
         onShowAchievements={() => setShowAchievements(true)}
+        onPlay={() => setShowEmulatorPicker(true)}
       />
 
       <div className="gd-content">
@@ -218,6 +221,17 @@ export default function GameDetailPage({ gameId, onBack }: GameDetailProps) {
           achievements={achievements}
           gameTitle={data.title}
           onClose={() => setShowAchievements(false)}
+        />
+      )}
+
+      {showEmulatorPicker && (
+        <EmulatorPickerModal
+          gameId={data.gameId}
+          gameTitle={data.title}
+          consoleId={data.consoleId}
+          consoleName={data.consoleName}
+          imageIcon={data.gameImage}
+          onClose={() => setShowEmulatorPicker(false)}
         />
       )}
     </div>
