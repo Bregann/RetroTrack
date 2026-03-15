@@ -114,6 +114,44 @@ namespace RetroTrack.Domain.Services
                         Log.Information($"[RetroAchievements] Added new game: {newGame.Id} - {newGame.Title}");
                         await context.SaveChangesAsync();
                     }
+
+                    // Process game hashes
+                    if (game.Hashes != null && game.Hashes.Count != 0)
+                    {
+                        var existingHashes = await context.GameHashes
+                            .Where(x => x.GameId == game.Id)
+                            .ToListAsync();
+
+                        // Remove hashes that are no longer in the API response
+                        var hashesToRemove = existingHashes
+                            .Where(x => !game.Hashes.Contains(x.Md5))
+                            .ToList();
+
+                        foreach (var hash in hashesToRemove)
+                        {
+                            context.GameHashes.Remove(hash);
+                            Log.Information($"[RetroAchievements] Removed hash {hash.Md5} from game {game.Id}");
+                        }
+
+                        // Add new hashes that don't exist in the database
+                        var existingMd5s = existingHashes.Select(x => x.Md5).ToList();
+                        var newHashes = game.Hashes
+                            .Where(x => !existingMd5s.Contains(x))
+                            .ToList();
+
+                        foreach (var hash in newHashes)
+                        {
+                            await context.GameHashes.AddAsync(new Database.Models.GameHash
+                            {
+                                Md5 = hash,
+                                GameId = game.Id,
+                                DateAdded = DateTime.UtcNow
+                            });
+                            Log.Information($"[RetroAchievements] Added new hash {hash} to game {game.Id}");
+                        }
+
+                        await context.SaveChangesAsync();
+                    }
                 }
 
                 // Update the request status to processed
@@ -254,6 +292,52 @@ namespace RetroTrack.Domain.Services
                 await context.SaveChangesAsync();
 
                 Log.Information($"[RetroAchievements] Game {game.Id} ({game.Title}) has been updated with extra data, setting ExtraDataProcessed to true.");
+
+                // Process game hashes
+                var gameHashes = await raApiService.GetGameHashes(game.Id);
+
+                if (gameHashes != null && gameHashes.Results.Any())
+                {
+                    var existingHashes = await context.GameHashes
+                        .Where(x => x.GameId == game.Id)
+                        .ToListAsync();
+
+                    // Remove hashes that are no longer in the API response
+                    var hashMd5s = gameHashes.Results.Select(x => x.Md5).ToList();
+                    var hashesToRemove = existingHashes
+                        .Where(x => !hashMd5s.Contains(x.Md5))
+                        .ToList();
+
+                    foreach (var hash in hashesToRemove)
+                    {
+                        context.GameHashes.Remove(hash);
+                        Log.Information($"[RetroAchievements] Removed hash {hash.Md5} from game {game.Id}");
+                    }
+
+                    // Add new hashes that don't exist in the database
+                    var existingMd5s = existingHashes.Select(x => x.Md5).ToList();
+                    var newHashes = gameHashes.Results
+                        .Where(x => !existingMd5s.Contains(x.Md5))
+                        .ToList();
+
+                    foreach (var hash in newHashes)
+                    {
+                        await context.GameHashes.AddAsync(new Database.Models.GameHash
+                        {
+                            Md5 = hash.Md5,
+                            GameId = game.Id,
+                            DateAdded = DateTime.UtcNow
+                        });
+                        Log.Information($"[RetroAchievements] Added new hash {hash.Md5} to game {game.Id}");
+                    }
+
+                    await context.SaveChangesAsync();
+                    Log.Information($"[RetroAchievements] Successfully processed {gameHashes.Results.Count} game hashes for game {game.Id}");
+                }
+                else
+                {
+                    Log.Information($"[RetroAchievements] No hashes returned for game {game.Id}");
+                }
 
                 // update the request status to processed
                 request.ProcessingStatus = ProcessingStatus.Processed;

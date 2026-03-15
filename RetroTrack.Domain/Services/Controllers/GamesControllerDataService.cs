@@ -341,6 +341,9 @@ namespace RetroTrack.Domain.Services.Controllers
                     });
                 }
 
+                var fallbackActivity = await context.UserGameActivities
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == gameId);
+
                 return new GetLoggedInSpecificGameInfoResponse
                 {
                     AchievementCount = loggedOutData.AchievementCount,
@@ -377,7 +380,9 @@ namespace RetroTrack.Domain.Services.Controllers
                     MedianTimeToBeatHardcoreFormatted = game?.MedianTimeToBeatHardcore.ToReadableTime(),
                     MedianTimeToMasterSeconds = game?.MedianTimeToMaster,
                     MedianTimeToMasterFormatted = game?.MedianTimeToMaster.ToReadableTime(),
-                    Subsets = subsets
+                    Subsets = subsets,
+                    LastPlayedUtc = fallbackActivity?.LastPlayedUtc,
+                    TotalSecondsPlayed = fallbackActivity?.TotalSecondsPlayed ?? 0
                 };
             }
 
@@ -425,7 +430,7 @@ namespace RetroTrack.Domain.Services.Controllers
             string? gameCompletedDate = null;
             string? gameMasteredDate = null;
 
-            if (data.NumAwardedToUser == data.AchievementCount)
+            if (data.NumAwardedToUser == data.AchievementCount && data.AchievementCount != 0)
             {
                 var lastAchievement = data.Achievements
                     .OrderByDescending(x => x.Value.DateEarned)
@@ -510,6 +515,9 @@ namespace RetroTrack.Domain.Services.Controllers
                 });
             }
 
+            var activity = await context.UserGameActivities
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == gameId);
+
             return new GetLoggedInSpecificGameInfoResponse
             {
                 GameId = data.Id,
@@ -551,7 +559,9 @@ namespace RetroTrack.Domain.Services.Controllers
                 MedianTimeToBeatHardcoreFormatted = gameData?.MedianTimeToBeatHardcore.ToReadableTime(),
                 MedianTimeToMasterSeconds = gameData?.MedianTimeToMaster,
                 MedianTimeToMasterFormatted = gameData?.MedianTimeToMaster.ToReadableTime(),
-                Subsets = subsetsWithProgress
+                Subsets = subsetsWithProgress,
+                LastPlayedUtc = activity?.LastPlayedUtc,
+                TotalSecondsPlayed = activity?.TotalSecondsPlayed ?? 0
             };
         }
 
@@ -798,6 +808,30 @@ namespace RetroTrack.Domain.Services.Controllers
                     UserId = userId,
                     GameId = gameId,
                     Notes = notes
+                });
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task UpdateGameActivity(int userId, int gameId, long sessionSeconds)
+        {
+            var existing = await context.UserGameActivities
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.GameId == gameId);
+
+            if (existing != null)
+            {
+                existing.LastPlayedUtc = DateTime.UtcNow;
+                existing.TotalSecondsPlayed += sessionSeconds;
+            }
+            else
+            {
+                await context.UserGameActivities.AddAsync(new UserGameActivity
+                {
+                    UserId = userId,
+                    GameId = gameId,
+                    LastPlayedUtc = DateTime.UtcNow,
+                    TotalSecondsPlayed = sessionSeconds
                 });
             }
 

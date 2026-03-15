@@ -28,7 +28,7 @@ export default function Loading() {
 
         {/* Friendly loading text */}
         <Text size="lg" c="gray.4" fw={500}>
-          Loading RetroTrack…
+          Loading RetroTrack...
         </Text>
       </Stack>
 

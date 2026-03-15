@@ -5,6 +5,7 @@ namespace RetroTrack.Domain.Interfaces
     public interface IRetroAchievementsApiService
     {
         Task<List<ConsoleIDs>?> GetConsoleIds();
+        Task<GetGameHashes?> GetGameHashes(int gameId);
         Task<GetGameLeaderboards?> GetGameLeaderboards(int gameId, int skipAmount = 0, int count = 500);
         Task<List<GetGameList>?> GetGameListFromConsoleId(int consoleId);
         Task<GetGameProgression?> GetGameProgression(int gameId);

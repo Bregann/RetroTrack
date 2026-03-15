@@ -4,7 +4,6 @@ using RetroTrack.Domain.DTOs.Controllers.Games.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 using RetroTrack.Domain.Interfaces.Helpers;
-
 namespace RetroTrack.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
@@ -75,6 +74,15 @@ namespace RetroTrack.Api.Controllers
             var user = userContextHelper.GetUserId();
 
             await gamesControllerData.UpdateUserNotes(user, gameId, request);
+        }
+
+        [HttpPost("{gameId}")]
+        [Authorize]
+        public async Task UpdateGameActivity([FromRoute] int gameId, [FromBody] UpdateGameActivityRequest request)
+        {
+            var user = userContextHelper.GetUserId();
+
+            await gamesControllerData.UpdateGameActivity(user, gameId, request.SessionSeconds);
         }
     }
 }

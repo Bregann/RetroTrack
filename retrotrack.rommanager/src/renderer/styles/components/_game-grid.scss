@@ -1,0 +1,329 @@
+/*
+ * Game Grid — main content area, section headers, game grid, game cards
+ */
+
+/* Main content scrollable area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--main-bg);
+}
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: var(--bg-darkest);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: var(--bg-light);
+  border-radius: 4px;
+}
+
+.game-grid-container {
+  padding: 20px 24px;
+}
+
+/* Empty states */
+.empty-library {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 12px;
+  color: var(--text-secondary);
+
+  &__icon {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  &__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin: 0;
+  }
+
+  &__desc {
+    font-size: 14px;
+    max-width: 420px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: 13px;
+    color: var(--text-muted, var(--text-secondary));
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 16px;
+    margin-top: 4px;
+  }
+}
+
+.empty-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 24px;
+  color: var(--text-secondary);
+  text-align: center;
+
+  &__icon {
+    font-size: 36px;
+    opacity: 0.4;
+  }
+
+  &__text {
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-header:first-child {
+  margin-top: 0;
+}
+
+.section-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-count {
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.section-filter-btn {
+  font-size: 14px;
+  padding: 4px 8px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.section-filter-btn:hover {
+  opacity: 1;
+}
+
+/* Game Grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.game-grid-featured {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* Browse cards (consoles / playlists overview) */
+.browse-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.browse-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+
+  &:hover {
+    background: var(--bg-light);
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+  }
+
+  &--disabled {
+    opacity: 0.35;
+    filter: grayscale(0.6);
+
+    &:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-color);
+      transform: none;
+    }
+  }
+}
+
+.browse-card-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.browse-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  text-align: center;
+}
+
+.browse-card-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  gap: 16px;
+}
+
+/* Game Card */
+.game-card {
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  /* button reset */
+  border: none;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.game-card.small .game-card-cover {
+  min-height: 140px;
+}
+
+.game-card-cover {
+  position: relative;
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #1a1c22;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.game-card-cover-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  line-height: 1.3;
+}
+
+.game-card-last-played {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--text-primary);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.game-card-console-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.78);
+  color: var(--accent-teal);
+  padding: 3px 7px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.game-card-info {
+  padding: 10px 12px;
+}
+
+.game-card-title {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-card-achievement {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.achievement-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-medium);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.achievement-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal));
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.achievement-text {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.game-card-meta {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* Light mode overrides */
+[data-theme="light"] .game-card-cover-text {
+  color: rgba(255, 255, 255, 0.95);
+}

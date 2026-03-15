@@ -1,0 +1,57 @@
+/*
+ * RetroTrack ROM Manager — Theme Variables (CSS Custom Properties)
+ */
+
+:root,
+[data-theme="dark"] {
+  --bg-darkest: #15171C;
+  --bg-dark: #1D2026;
+  --bg-medium: #23272E;
+  --bg-light: #2F333B;
+  --bg-card: #263042;
+  --bg-elevated: #2A2F38;
+  --bg-hover: #38465f;
+  --bg-input: #2F333B;
+  --text-primary: #C3C7CD;
+  --text-secondary: #9BA1A9;
+  --text-bright: #DFE2E6;
+  --text-white: #F3F4F6;
+  --accent-blue: #1a9fff;
+  --accent-green: #5ba32b;
+  --accent-teal: #66c0f4;
+  --accent-orange: #cf6a32;
+  --border-color: #2F333B;
+  --sidebar-width: 320px;
+  --topbar-height: 42px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --login-bg: linear-gradient(135deg, #15171C 0%, #23272E 50%, #15171C 100%);
+  --topbar-bg: linear-gradient(180deg, #263042 0%, #1D2026 100%);
+  --main-bg: linear-gradient(180deg, #1D2026 0%, #15171C 100%);
+  --dropdown-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] {
+  --bg-darkest: #e8edf2;
+  --bg-dark: #f0f3f7;
+  --bg-medium: #d5dde5;
+  --bg-light: #c4ced8;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0f4f8;
+  --bg-hover: #d0dae4;
+  --bg-input: #ffffff;
+  --text-primary: #3b4a5a;
+  --text-secondary: #7a8a9a;
+  --text-bright: #1e2d3d;
+  --text-white: #0e1e2e;
+  --accent-blue: #1a82db;
+  --accent-green: #4d8f24;
+  --accent-teal: #2190d0;
+  --accent-orange: #c75f2a;
+  --border-color: #c8d4df;
+  --login-bg: linear-gradient(135deg, #d5dde5 0%, #e8edf2 50%, #d5dde5 100%);
+  --topbar-bg: linear-gradient(180deg, #cdd7e0 0%, #b8c6d4 100%);
+  --main-bg: linear-gradient(180deg, #e8edf2 0%, #dde3ea 100%);
+  --dropdown-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+}

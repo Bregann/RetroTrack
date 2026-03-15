@@ -1,0 +1,292 @@
+/*
+ * General Settings / About Modal
+ */
+
+.gs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.gs-modal {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: min(92vw, 440px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.2s ease;
+}
+
+.gs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin: 0;
+  }
+}
+
+.gs-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-bright);
+  }
+}
+
+.gs-content {
+  padding: 24px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gs-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gs-logo {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.gs-app-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.gs-app-tagline {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.gs-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.gs-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.gs-info-label {
+  color: var(--text-secondary);
+}
+
+.gs-info-value {
+  color: var(--text-bright);
+  font-weight: 500;
+}
+
+.gs-action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gs-update-btn {
+  align-self: flex-start;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  &--available {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+
+    &:hover {
+      filter: brightness(1.15);
+    }
+  }
+
+  &--ready {
+    background: var(--accent-green, #4caf50);
+    color: #fff;
+    border-color: var(--accent-green, #4caf50);
+
+    &:hover {
+      filter: brightness(1.15);
+    }
+  }
+}
+
+.gs-update-error-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gs-update-error {
+  font-size: 12px;
+  color: #e57373;
+}
+
+.gs-github-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #24292f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 13px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #3a4048;
+  }
+}
+
+.gs-github-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.gs-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.gs-danger-section {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(220, 60, 60, 0.35);
+  border-radius: 6px;
+  background: rgba(220, 60, 60, 0.04);
+}
+
+.gs-danger-header {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.gs-danger-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.gs-danger-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gs-danger-confirm-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.gs-danger-warning {
+  font-size: 12px;
+  color: #f0a040;
+}
+
+.gs-danger-success {
+  font-size: 12px;
+  color: var(--accent-green);
+}
+
+.gs-clear-btn {
+  align-self: flex-start;
+  background: rgba(220, 60, 60, 0.12);
+  border: 1px solid rgba(220, 60, 60, 0.45);
+  border-radius: 5px;
+  color: #e05555;
+  font-size: 13px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(220, 60, 60, 0.25);
+    border-color: rgba(220, 60, 60, 0.7);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.gs-close-btn {
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 7px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}

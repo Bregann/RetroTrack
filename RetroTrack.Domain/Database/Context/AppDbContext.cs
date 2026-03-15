@@ -8,6 +8,7 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<UserGameProgress> UserGameProgress { get; set; }
         public DbSet<GameConsole> GameConsoles { get; set; }
         public DbSet<Game> Games { get; set; }
+        public DbSet<GameHash> GameHashes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TrackedGame> TrackedGames { get; set; }
         public DbSet<UserGameNote> UserGameNotes { get; set; }
@@ -20,5 +21,10 @@ namespace RetroTrack.Domain.Database.Context
         public DbSet<DataCaching> DataCaching { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<EnvironmentalSetting> EnvironmentalSettings { get; set; }
+        public DbSet<UserGameActivity> UserGameActivities { get; set; }
+        public DbSet<Emulator> Emulators { get; set; }
+        public DbSet<EmulatorConsole> EmulatorConsoles { get; set; }
+        public DbSet<EmulatorCore> EmulatorCores { get; set; }
+        public DbSet<EmulatorCoreConsole> EmulatorCoreConsoles { get; set; }
     }
 }

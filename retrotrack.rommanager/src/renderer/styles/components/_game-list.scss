@@ -1,0 +1,304 @@
+/*
+ * Section Toolbar — view toggle, sort, column picker
+ */
+
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-toolbar:first-child {
+  margin-top: 0;
+}
+
+.section-toolbar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* View toggle buttons */
+.st-view-toggle {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.st-view-btn {
+  padding: 4px 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1;
+
+  &:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+  }
+
+  &:hover {
+    color: var(--text-bright);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.active {
+    color: var(--text-bright);
+    background: var(--bg-light);
+  }
+}
+
+/* Shared toolbar button */
+.st-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--text-bright);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Dropdown wrapper */
+.st-dropdown-wrap {
+  position: relative;
+}
+
+.st-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 170px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: var(--dropdown-shadow);
+  padding: 4px 0;
+  z-index: 500;
+}
+
+.st-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-bright);
+  }
+
+  &.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+}
+
+.st-sort-arrow {
+  font-size: 11px;
+  margin-left: 6px;
+}
+
+/* Column picker items */
+.st-column-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--accent-blue);
+  }
+}
+
+/*
+ * Game List View — table mode
+ */
+.gl-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+
+    &:hover {
+      background: var(--text-secondary);
+    }
+  }
+}
+
+.gl-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gl-th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.gl-th-sortable {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+.gl-th-active {
+  color: var(--accent-blue);
+}
+
+.gl-sort-arrow {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.gl-row {
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  &:not(:last-child) .gl-td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}
+
+.gl-td {
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.gl-cell-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.gl-game-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.gl-cell-na {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.gl-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gl-status-progress {
+  background: rgba(26, 159, 255, 0.15);
+  color: var(--accent-blue);
+}
+
+.gl-status-complete {
+  background: rgba(91, 163, 43, 0.15);
+  color: var(--accent-green);
+}
+
+.gl-status-not-started {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+/* Column widths */
+.gl-th-title,
+.gl-td-title {
+  width: 40%;
+  min-width: 200px;
+}
+
+/* Light mode */
+[data-theme="light"] {
+  .gl-row:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .gl-row:not(:last-child) .gl-td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .gl-status-not-started {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .st-view-btn:hover,
+  .st-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}

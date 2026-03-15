@@ -1,0 +1,61 @@
+/*
+ * App Shell — layout wrapper, title bar logo, window controls
+ */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Title Bar Logo */
+.title-bar-logo {
+  font-size: 18px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* Window Controls */
+.window-controls {
+  display: flex;
+  align-items: stretch;
+  height: var(--topbar-height);
+  margin-left: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.window-ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: var(--font-family);
+}
+
+.window-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.window-ctrl-close:hover {
+  background: #e81123;
+  color: white;
+}
+
+/* Light mode overrides */
+[data-theme="light"] .window-ctrl-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}

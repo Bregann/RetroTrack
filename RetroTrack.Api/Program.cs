@@ -29,6 +29,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -55,12 +56,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+var allowedOrigins = new List<string>()
+{
+    "http://localhost:3000",
+    "http://localhost:1212",
+    "https://retrotrack.bregan.me"
+};
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendLocalhost", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000", "https://retrotrack.bregan.me")
+            // "null" covers Electron production builds (file:// sends Origin: null)
+            .SetIsOriginAllowed(origin => allowedOrigins.Contains(origin) || origin == "null")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -116,6 +125,8 @@ builder.Services.AddScoped<IUsersControllerDataService, UsersControllerDataServi
 builder.Services.AddScoped<ISitemapDataService, SitemapDataService>();
 builder.Services.AddScoped<IPlaylistControllerDataService, PlaylistControllerDataService>();
 builder.Services.AddScoped<ISearchControllerDataService, SearchControllerDataService>();
+builder.Services.AddScoped<ILibraryControllerDataService, LibraryControllerDataService>();
+builder.Services.AddScoped<IEmulatorControllerDataService, EmulatorControllerDataService>();
 
 // hangfire
 builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(10));
