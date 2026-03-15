@@ -197,7 +197,9 @@
 }
 
 .sidebar-sub-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 4px 16px;
   text-align: left;
@@ -211,6 +213,22 @@
 
 .sidebar-tracked-game {
   padding-left: 20px;
+}
+
+.sidebar-game-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.sidebar-game-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 

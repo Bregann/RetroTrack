@@ -233,8 +233,19 @@
 }
 
 .gl-cell-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   color: var(--text-bright);
+}
+
+.gl-game-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  object-fit: cover;
 }
 
 .gl-cell-na {

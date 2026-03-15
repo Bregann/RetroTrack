@@ -17,6 +17,7 @@ import {
   removeScannedGamesByFolder,
 } from './database';
 import { scanFolder, scanFile, type ScanProgress } from './scanner';
+import { clearImageCache } from './imageCache';
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('db:upsert-consoles', (_event, consoles) => upsertConsoles(consoles));
@@ -84,4 +85,6 @@ export function registerIpcHandlers(): void {
       return scanFolder(folderPath, consoleId, apiBaseUrl, accessToken, onProgress);
     },
   );
+
+  ipcMain.handle('cache:clear-image-cache', () => clearImageCache());
 }

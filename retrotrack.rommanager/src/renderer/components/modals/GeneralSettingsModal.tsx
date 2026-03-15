@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 interface Props {
   onClose: () => void;
 }
@@ -10,6 +12,15 @@ const LICENSE = 'MIT';
 const GITHUB_URL = 'https://github.com/retrotrack/retrotrack.rommanager';
 
 export default function GeneralSettingsModal({ onClose }: Props) {
+  const [cacheStatus, setCacheStatus] = useState<'idle' | 'confirming' | 'clearing' | 'done'>('idle');
+  const [clearedCount, setClearedCount] = useState(0);
+
+  const handleClearCache = async () => {
+    setCacheStatus('clearing');
+    const count = await window.electron.cache.clearImageCache();
+    setClearedCount(count);
+    setCacheStatus('done');
+  };
   return (
     <div className="gs-backdrop" onClick={onClose}>
       <div className="gs-modal" onClick={(e) => e.stopPropagation()}>
@@ -64,6 +75,39 @@ export default function GeneralSettingsModal({ onClose }: Props) {
               </svg>
               View on GitHub
             </button>
+          </div>
+
+          <div className="gs-danger-section">
+            <div className="gs-danger-header">Image Cache</div>
+            <p className="gs-danger-desc">
+              Game icons and box art are cached locally to avoid re-downloading them every time.
+              Clear the cache if images look outdated or corrupted — they will be re-fetched from
+              RetroAchievements the next time they are displayed.
+            </p>
+            {cacheStatus === 'confirming' ? (
+              <div className="gs-danger-confirm">
+                <span className="gs-danger-warning">⚠️ This will delete all cached images. They will be re-downloaded as you browse.</span>
+                <div className="gs-danger-confirm-btns">
+                  <button type="button" className="gs-clear-btn" onClick={handleClearCache}>
+                    Yes, Clear Cache
+                  </button>
+                  <button type="button" className="gs-update-btn" onClick={() => setCacheStatus('idle')}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : cacheStatus === 'clearing' ? (
+              <button type="button" className="gs-clear-btn" disabled>Clearing...</button>
+            ) : cacheStatus === 'done' ? (
+              <div className="gs-danger-confirm">
+                <span className="gs-danger-success">✅ Cleared {clearedCount} cached image{clearedCount !== 1 ? 's' : ''}.</span>
+                <button type="button" className="gs-update-btn" onClick={() => setCacheStatus('idle')}>Dismiss</button>
+              </div>
+            ) : (
+              <button type="button" className="gs-clear-btn" onClick={() => setCacheStatus('confirming')}>
+                🗑️ Clear Image Cache
+              </button>
+            )}
           </div>
         </div>
 

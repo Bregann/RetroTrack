@@ -4,6 +4,7 @@ import AddGameModal from './modals/AddGameModal';
 import AddFolderModal from './modals/AddFolderModal';
 import ManageFoldersModal from './modals/ManageFoldersModal';
 import ScanAllModal from './modals/ScanAllModal';
+import { useInvalidateScannedGames } from '../helpers/useScannedGames';
 
 export type LibraryModalMode =
   | 'add-game'
@@ -26,6 +27,7 @@ interface ScanFolderRow {
 
 export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
   const [folders, setFolders] = useState<SavedFolder[]>([]);
+  const invalidateScannedGames = useInvalidateScannedGames();
 
   const loadFolders = useCallback(async () => {
     const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
@@ -70,6 +72,7 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
   const handleRemoveFolder = async (path: string, consoleId: number) => {
     await window.electron.scanner.removeFolder(path, consoleId);
     setFolders((prev) => prev.filter((f) => !(f.path === path && f.consoleId === consoleId)));
+    invalidateScannedGames();
   };
 
   const handleRescanFolder = (path: string, consoleId: number, matched: number) => {

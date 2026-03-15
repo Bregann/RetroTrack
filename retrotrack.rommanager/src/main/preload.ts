@@ -58,6 +58,9 @@ const electronHandler = {
       return () => ipcRenderer.removeListener('scan:progress', sub);
     },
   },
+  cache: {
+    clearImageCache: () => ipcRenderer.invoke('cache:clear-image-cache') as Promise<number>,
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

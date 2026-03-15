@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLibraryData } from '../../helpers/useLibraryData';
 import { useScannedGameIds } from '../../helpers/useScannedGames';
+import { raImageUrl } from '../../helpers/imageUrl';
 import Tooltip from '../Tooltip';
 
 interface Props {
@@ -75,6 +76,7 @@ export default function PlaylistsSection({
                   const game = allTrackedGames.find((g) => g.gameId === gid);
                   if (!game) return null;
                   const isScanned = scannedGameIds.has(gid);
+                  const iconUrl = raImageUrl(game.imageIcon);
                   const btn = (
                     <button
                       key={gid}
@@ -82,7 +84,8 @@ export default function PlaylistsSection({
                       className={`sidebar-sub-item${!isScanned ? ' sidebar-sub-item--unscanned' : ''}${selectedView === `game-${gid}` ? ' active' : ''}`}
                       onClick={isScanned ? () => onSelectView(`game-${gid}`) : undefined}
                     >
-                      {game.title}
+                      {iconUrl && <img src={iconUrl} alt="" className="sidebar-game-icon" />}
+                      <span className="sidebar-game-title">{game.title}</span>
                     </button>
                   );
                   return isScanned ? btn : (

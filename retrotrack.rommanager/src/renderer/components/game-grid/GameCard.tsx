@@ -1,6 +1,5 @@
 import type { LibraryTrackedGame } from '../../helpers/libraryTypes';
-
-const RA_BASE = 'https://media.retroachievements.org';
+import { raImageUrl } from '../../helpers/imageUrl';
 
 interface GameCardProps {
   game: LibraryTrackedGame;
@@ -8,11 +7,7 @@ interface GameCardProps {
 }
 
 export default function GameCard({ game, onClick }: GameCardProps) {
-  const coverUrl = game.imageBoxArt
-    ? `${RA_BASE}${game.imageBoxArt}`
-    : game.imageIcon
-      ? `${RA_BASE}${game.imageIcon}`
-      : null;
+  const coverUrl = raImageUrl(game.imageBoxArt) ?? raImageUrl(game.imageIcon);
 
   return (
     <button type="button" className="game-card" onClick={onClick}>

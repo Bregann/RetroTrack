@@ -154,9 +154,9 @@ export default function GameGrid({ selectedView, onGameClick, onSelectView }: Ga
     }
   }
 
-  const plMatch = selectedView.match(/^playlist-(\d+)$/);
+  const plMatch = selectedView.match(/^playlist-(.+)$/);
   if (plMatch) {
-    const plId = Number(plMatch[1]);
+    const plId = plMatch[1];
     const pl = libraryData?.playlists.find((p) => p.playlistId === plId);
     if (pl) {
       const games = trackedGames.filter((g) => pl.gameIds.includes(g.gameId));

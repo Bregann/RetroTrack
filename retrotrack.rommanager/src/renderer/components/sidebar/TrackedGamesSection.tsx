@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLibraryData } from '../../helpers/useLibraryData';
 import { useScannedGameIds } from '../../helpers/useScannedGames';
+import { raImageUrl } from '../../helpers/imageUrl';
 import GameContextMenu from '../GameContextMenu';
 import Tooltip from '../Tooltip';
 
@@ -47,6 +48,7 @@ export default function TrackedGamesSection({
       </h3>
       {!collapsed && trackedGames.map((game) => {
         const isScanned = scannedGameIds.has(game.gameId);
+        const iconUrl = raImageUrl(game.imageIcon);
         const btn = (
           <button
             key={game.gameId}
@@ -55,7 +57,8 @@ export default function TrackedGamesSection({
             onClick={isScanned ? () => onSelectView(`game-${game.gameId}`) : undefined}
             onContextMenu={isScanned ? (e) => openContextMenu(e, game.gameId) : undefined}
           >
-            {game.title}
+            {iconUrl && <img src={iconUrl} alt="" className="sidebar-game-icon" />}
+            <span className="sidebar-game-title">{game.title}</span>
           </button>
         );
         return isScanned ? btn : (

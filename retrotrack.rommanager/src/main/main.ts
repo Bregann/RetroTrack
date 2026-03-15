@@ -15,11 +15,15 @@ import log from 'electron-log';
 import { resolveHtmlPath } from './util';
 import { initDatabase } from './database';
 import { registerIpcHandlers } from './ipc';
+import { registerCacheScheme, registerCacheProtocol } from './imageCache';
 
 // Dev API uses a self-signed cert — allow Node's fetch to reach it
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
+
+// Must register custom schemes before app is ready
+registerCacheScheme();
 
 class AppUpdater {
   constructor() {
@@ -154,6 +158,7 @@ app
   .whenReady()
   .then(() => {
     initDatabase();
+    registerCacheProtocol();
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

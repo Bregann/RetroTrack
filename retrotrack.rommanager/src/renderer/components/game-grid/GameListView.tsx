@@ -1,4 +1,5 @@
 import type { LibraryTrackedGame } from '../../helpers/libraryTypes';
+import { raImageUrl } from '../../helpers/imageUrl';
 import type { ListColumn, SortConfig, SortField } from './viewConfig';
 import { ALL_COLUMNS } from './viewConfig';
 
@@ -39,8 +40,15 @@ function statusClass(game: LibraryTrackedGame) {
 
 function CellValue({ game, col }: { game: LibraryTrackedGame; col: ListColumn }) {
   switch (col) {
-    case 'title':
-      return <span className="gl-cell-title">{game.title}</span>;
+    case 'title': {
+      const iconUrl = raImageUrl(game.imageIcon);
+      return (
+        <span className="gl-cell-title">
+          {iconUrl && <img src={iconUrl} alt="" className="gl-game-icon" />}
+          {game.title}
+        </span>
+      );
+    }
     case 'console':
       return <span>{game.consoleName}</span>;
     case 'status':
