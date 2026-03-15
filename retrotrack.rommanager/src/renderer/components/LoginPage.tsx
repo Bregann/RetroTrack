@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/authContext';
-import type { Channels } from '../../../main/preload';
+import type { Channels } from '../../main/preload';
 
 export default function LoginPage() {
   const { login } = useAuth();

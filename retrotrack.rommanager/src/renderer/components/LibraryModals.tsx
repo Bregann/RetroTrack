@@ -29,31 +29,33 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
   const [folders, setFolders] = useState<SavedFolder[]>([]);
   const invalidateScannedGames = useInvalidateScannedGames();
 
+  const fetchFolderData = async (): Promise<SavedFolder[]> => {
+    const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
+    const allGames: { folderPath: string; consoleId: number }[] =
+      await window.electron.scanner.getScannedGames();
+    const countMap = new Map<string, number>();
+    for (const g of allGames) {
+      const key = `${g.folderPath}::${g.consoleId}`;
+      countMap.set(key, (countMap.get(key) ?? 0) + 1);
+    }
+    return rows.map((r) => ({
+      path: r.path,
+      consoleId: r.consoleId,
+      consoleName: r.consoleName,
+      addedAt: new Date(r.addedAt).toLocaleDateString(),
+      gameCount: countMap.get(`${r.path}::${r.consoleId}`) ?? 0,
+    }));
+  };
+
+  // Used by ScanAllModal.onScanComplete — called from user interaction, not an effect
+  const loadFolders = () => fetchFolderData().then(setFolders).catch(() => {});
+
   useEffect(() => {
     if (!mode) return;
     let cancelled = false;
-
-    (async () => {
-      const rows: ScanFolderRow[] = await window.electron.scanner.getFolders();
-      const allGames: { folderPath: string; consoleId: number }[] =
-        await window.electron.scanner.getScannedGames();
-      if (cancelled) return;
-      const countMap = new Map<string, number>();
-      for (const g of allGames) {
-        const key = `${g.folderPath}::${g.consoleId}`;
-        countMap.set(key, (countMap.get(key) ?? 0) + 1);
-      }
-      setFolders(
-        rows.map((r) => ({
-          path: r.path,
-          consoleId: r.consoleId,
-          consoleName: r.consoleName,
-          addedAt: new Date(r.addedAt).toLocaleDateString(),
-          gameCount: countMap.get(`${r.path}::${r.consoleId}`) ?? 0,
-        })),
-      );
-    })();
-
+    fetchFolderData()
+      .then((data) => { if (!cancelled) setFolders(data); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, [mode]);
 
