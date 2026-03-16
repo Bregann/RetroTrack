@@ -92,7 +92,7 @@ const electronHandler = {
       ipcRenderer.invoke('shell:delete-files', filePaths) as Promise<number>,
   },
   auth: {
-    getAccessToken: () => ipcRenderer.invoke('auth:get-access-token') as Promise<string | null>,
+    getAccessToken: (apiBaseUrl: string) => ipcRenderer.invoke('auth:get-access-token', apiBaseUrl) as Promise<string | null>,
   },
   discord: {
     refreshIdle: () => ipcRenderer.invoke('discord:refresh-idle') as Promise<void>,

@@ -16,6 +16,10 @@ export interface TrackedGameRow {
   isTracked: boolean;
 }
 
+interface DbTrackedGameRow extends Omit<TrackedGameRow, 'isTracked'> {
+  isTracked: 0 | 1;
+}
+
 export function upsertTrackedGames(games: TrackedGameRow[]): void {
   const db = getDb();
   const upsert = db.prepare(`
@@ -43,12 +47,15 @@ export function upsertTrackedGames(games: TrackedGameRow[]): void {
   `);
 
   db.transaction((items: TrackedGameRow[]) => {
-    for (const item of items) upsert.run(item);
+    for (const item of items) {
+      const dbRow: DbTrackedGameRow = { ...item, isTracked: item.isTracked ? 1 : 0 };
+      upsert.run(dbRow);
+    }
   })(games);
 }
 
 export function getAllTrackedGames(): TrackedGameRow[] {
-  return getDb()
+  const rows = getDb()
     .prepare(`
       SELECT
         game_id as gameId, title, console_id as consoleId, console_name as consoleName,
@@ -59,7 +66,8 @@ export function getAllTrackedGames(): TrackedGameRow[] {
         is_tracked as isTracked
       FROM tracked_games ORDER BY title
     `)
-    .all() as TrackedGameRow[];
+    .all() as DbTrackedGameRow[];
+  return rows.map((row) => ({ ...row, isTracked: !!row.isTracked }));
 }
 
 export function clearTrackedGames(): void {

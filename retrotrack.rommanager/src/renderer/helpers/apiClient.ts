@@ -17,7 +17,10 @@ export async function loadAccessTokenFromCookie(): Promise<void> {
   // Prefer reading via Electron's main-process session API — the accessToken
   // cookie is scoped to the API domain (rtapi.bregan.me) and is not visible
   // to document.cookie on a different origin (localhost or app://).
-  const token = await (window as Window & { electron?: { auth?: { getAccessToken?: () => Promise<string | null> } } }).electron?.auth?.getAccessToken?.() ?? null
+  const token =
+    (await (window as Window & {
+      electron?: { auth?: { getAccessToken?: (apiBaseUrl: string) => Promise<string | null> } }
+    }).electron?.auth?.getAccessToken?.(API_BASE_URL)) ?? null
   if (token !== null) {
     accessToken = token
     return

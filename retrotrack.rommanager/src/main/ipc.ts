@@ -213,9 +213,14 @@ export function registerIpcHandlers(): void {
 
   // Read the accessToken cookie stored by the API domain so the renderer can
   // use it as a Bearer token (document.cookie can't read cross-origin cookies).
-  ipcMain.handle('auth:get-access-token', async () => {
+  // The renderer passes the API base URL; we whitelist it to prevent SSRF.
+  const ALLOWED_API_HOSTS = new Set(['https://rtapi.bregan.me', 'https://localhost:7248']);
+  ipcMain.handle('auth:get-access-token', async (_event, apiBaseUrl: unknown) => {
+    if (typeof apiBaseUrl !== 'string' || !ALLOWED_API_HOSTS.has(apiBaseUrl)) {
+      return null;
+    }
     const cookies = await session.defaultSession.cookies.get({
-      url: 'https://rtapi.bregan.me',
+      url: apiBaseUrl,
       name: 'accessToken',
     });
     return cookies[0]?.value ?? null;
@@ -224,6 +229,11 @@ export function registerIpcHandlers(): void {
   // Let the renderer refresh idle Discord presence (e.g. after login when
   // the username becomes available for the profile button).
   ipcMain.handle('discord:refresh-idle', () => {
+    // Avoid overwriting an active "playing" presence.
+     if (getActiveSession()) {
+       return;
+     }
+
     const raUsername = getSyncMeta('raUsername') ?? null;
     setIdlePresence(raUsername);
   });
