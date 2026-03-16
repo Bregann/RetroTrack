@@ -19,8 +19,8 @@ const MIGRATIONS: MigrationFn[] = [
   // 0 → 1: initial schema (tables created via CREATE TABLE IF NOT EXISTS below)
   () => {},
   // 1 → 2: add is_tracked column to tracked_games
-  (db) => {
-    db.exec(`ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`);
+  (database) => {
+    database.exec(`ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`);
   },
 ];
 

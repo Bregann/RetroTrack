@@ -173,13 +173,13 @@ export function registerIpcHandlers(): void {
 
   // Session tracking
   ipcMain.handle('session:get-active', () => {
-    const session = getActiveSession();
-    if (!session) return null;
+    const activeSession = getActiveSession();
+    if (!activeSession) return null;
     return {
-      gameId: session.gameId,
-      gameTitle: session.gameTitle,
-      consoleName: session.consoleName,
-      startedAt: session.startedAt,
+      gameId: activeSession.gameId,
+      gameTitle: activeSession.gameTitle,
+      consoleName: activeSession.consoleName,
+      startedAt: activeSession.startedAt,
     };
   });
   ipcMain.handle('session:force-end', () => forceEndSession());
