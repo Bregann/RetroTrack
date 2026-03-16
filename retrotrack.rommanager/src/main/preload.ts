@@ -91,6 +91,12 @@ const electronHandler = {
     deleteFiles: (filePaths: string[]) =>
       ipcRenderer.invoke('shell:delete-files', filePaths) as Promise<number>,
   },
+  auth: {
+    getAccessToken: () => ipcRenderer.invoke('auth:get-access-token') as Promise<string | null>,
+  },
+  discord: {
+    refreshIdle: () => ipcRenderer.invoke('discord:refresh-idle') as Promise<void>,
+  },
   session: {
     getActive: () =>
       ipcRenderer.invoke('session:get-active') as Promise<{ gameId: number; gameTitle: string; consoleName: string; startedAt: number } | null>,

@@ -36,7 +36,7 @@ export default function GameContextMenu({ gameId, playlistId, x, y, onClose, onP
 
   const trackedGames = libraryData?.trackedGames ?? [];
   const playlists = libraryData?.playlists ?? [];
-  const isTracked = trackedGames.some((g) => g.gameId === gameId);
+  const isTracked = trackedGames.some((g) => g.gameId === gameId && g.isTracked);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

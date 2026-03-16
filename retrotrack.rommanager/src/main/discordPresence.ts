@@ -13,6 +13,8 @@ interface PresenceInfo {
   consoleName: string;
   imageIcon: string | null; // e.g. "/Images/012345.png"
   startedAt: number;        // Date.now() timestamp
+  gameId: number;
+  raUsername: string | null;
 }
 
 /**
@@ -57,6 +59,13 @@ export async function setDiscordPresence(info: PresenceInfo): Promise<void> {
       ? `${RA_IMAGE_BASE}${info.imageIcon.startsWith('/') ? '' : '/'}${info.imageIcon}`
       : 'retrotrack';
 
+    const buttons: { label: string; url: string }[] = [
+      { label: 'View Game', url: `https://retrotrack.bregan.me/game/${info.gameId}` },
+    ];
+    if (info.raUsername) {
+      buttons.push({ label: 'View Profile', url: `https://retrotrack.bregan.me/profile/${info.raUsername}` });
+    }
+
     await rpcClient.setActivity({
       details: info.gameTitle,
       state: `Playing on ${info.consoleName}`,
@@ -65,6 +74,7 @@ export async function setDiscordPresence(info: PresenceInfo): Promise<void> {
       largeImageText: info.gameTitle,
       smallImageKey: 'retrotrack',
       smallImageText: 'RetroTrack',
+      buttons,
       instance: false,
     });
   } catch {
@@ -75,15 +85,20 @@ export async function setDiscordPresence(info: PresenceInfo): Promise<void> {
 /**
  * Set Discord Rich Presence to the idle "browsing" state.
  */
-export async function setIdlePresence(): Promise<void> {
+export async function setIdlePresence(raUsername?: string | null): Promise<void> {
   const ok = await ensureConnected();
   if (!ok || !rpcClient) return;
 
   try {
+    const buttons = raUsername
+      ? [{ label: 'View Profile', url: `https://retrotrack.bregan.me/profile/${raUsername}` }]
+      : undefined;
+
     await rpcClient.setActivity({
       details: 'Selecting a game',
       largeImageKey: 'retrotrack',
       largeImageText: 'RetroTrack',
+      buttons,
       instance: false,
     });
   } catch {
@@ -109,6 +124,11 @@ export async function clearDiscordPresence(): Promise<void> {
  */
 export async function destroyDiscordPresence(): Promise<void> {
   if (rpcClient) {
+    try {
+      await rpcClient.clearActivity();
+    } catch {
+      // Silently handle
+    }
     try {
       await rpcClient.destroy();
     } catch {

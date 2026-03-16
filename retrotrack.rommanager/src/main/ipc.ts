@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
+import { ipcMain, dialog, BrowserWindow, shell, session } from 'electron';
 import {
   upsertConsoles,
   getAllConsoles,
@@ -27,6 +27,7 @@ import { scanFolder, scanFile, type ScanProgress } from './scanner';
 import { clearImageCache } from './imageCache';
 import { getLaunchContext, launchGame, type LaunchRequest } from './launcher';
 import { startSession, getActiveSession, forceEndSession } from './sessionTracker';
+import { setIdlePresence } from './discordPresence';
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('db:upsert-consoles', (_event, consoles) => upsertConsoles(consoles));
@@ -208,5 +209,22 @@ export function registerIpcHandlers(): void {
       } catch { /* skip files that can't be deleted */ }
     }
     return deleted;
+  });
+
+  // Read the accessToken cookie stored by the API domain so the renderer can
+  // use it as a Bearer token (document.cookie can't read cross-origin cookies).
+  ipcMain.handle('auth:get-access-token', async () => {
+    const cookies = await session.defaultSession.cookies.get({
+      url: 'https://rtapi.bregan.me',
+      name: 'accessToken',
+    });
+    return cookies[0]?.value ?? null;
+  });
+
+  // Let the renderer refresh idle Discord presence (e.g. after login when
+  // the username becomes available for the profile button).
+  ipcMain.handle('discord:refresh-idle', () => {
+    const raUsername = getSyncMeta('raUsername') ?? null;
+    setIdlePresence(raUsername);
   });
 }

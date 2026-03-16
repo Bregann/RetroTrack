@@ -33,12 +33,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) return
 
-    doPost('/api/auth/RefreshToken', { retry: false }).then((res) => {
+    doPost('/api/auth/RefreshToken', { retry: false }).then(async (res) => {
       if (!res.ok) {
         localStorage.removeItem(STORAGE_KEY)
         setUser(null)
       } else {
-        loadAccessTokenFromCookie()
+        await loadAccessTokenFromCookie()
       }
       setLoading(false)
     }).catch(() => {
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (username: string, password: string): Promise<boolean> => {
     const res = await doPost('/api/auth/LoginUser', { body: { username, password } })
     if (res.status === 200) {
-      loadAccessTokenFromCookie()
+      await loadAccessTokenFromCookie()
       const newUser: User = { username }
       setUser(newUser)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser))

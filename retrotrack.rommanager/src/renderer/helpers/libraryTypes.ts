@@ -17,6 +17,7 @@ export interface LibraryTrackedGame {
   percentageComplete: number;
   highestAward: string | null;
   lastPlayedUtc: string | null;
+  isTracked: boolean;
 }
 
 export interface LibraryPlaylist {

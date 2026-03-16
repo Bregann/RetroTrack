@@ -23,6 +23,7 @@ interface ApiLibraryResponse {
     percentageComplete: number;
     highestAward: string | null;
     lastPlayedUtc: string | null;
+    isTracked: boolean;
   }>;
   playlists: Array<{
     playlistId: string;
@@ -73,6 +74,9 @@ async function syncFromApi(): Promise<LibraryData> {
     await db.setSyncMeta('profileImageUrl', profileImageUrl);
     await db.setSyncMeta('hardcorePoints', String(hardcorePoints));
     await db.setSyncMeta('achievementsEarnedHardcore', String(achievementsEarnedHardcore));
+
+    // Refresh Discord idle presence now that the username is available for buttons
+    window.electron?.discord?.refreshIdle();
   }
 
   return { consoles, trackedGames, playlists: playlists ?? [], raUsername, profileImageUrl, hardcorePoints, achievementsEarnedHardcore };
