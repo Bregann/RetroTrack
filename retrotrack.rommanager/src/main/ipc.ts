@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
+import { ipcMain, dialog, BrowserWindow, shell, session } from 'electron';
 import {
   upsertConsoles,
   getAllConsoles,
@@ -27,6 +27,7 @@ import { scanFolder, scanFile, type ScanProgress } from './scanner';
 import { clearImageCache } from './imageCache';
 import { getLaunchContext, launchGame, type LaunchRequest } from './launcher';
 import { startSession, getActiveSession, forceEndSession } from './sessionTracker';
+import { setIdlePresence } from './discordPresence';
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('db:upsert-consoles', (_event, consoles) => upsertConsoles(consoles));
@@ -172,13 +173,13 @@ export function registerIpcHandlers(): void {
 
   // Session tracking
   ipcMain.handle('session:get-active', () => {
-    const session = getActiveSession();
-    if (!session) return null;
+    const activeSession = getActiveSession();
+    if (!activeSession) return null;
     return {
-      gameId: session.gameId,
-      gameTitle: session.gameTitle,
-      consoleName: session.consoleName,
-      startedAt: session.startedAt,
+      gameId: activeSession.gameId,
+      gameTitle: activeSession.gameTitle,
+      consoleName: activeSession.consoleName,
+      startedAt: activeSession.startedAt,
     };
   });
   ipcMain.handle('session:force-end', () => forceEndSession());
@@ -208,5 +209,32 @@ export function registerIpcHandlers(): void {
       } catch { /* skip files that can't be deleted */ }
     }
     return deleted;
+  });
+
+  // Read the accessToken cookie stored by the API domain so the renderer can
+  // use it as a Bearer token (document.cookie can't read cross-origin cookies).
+  // The renderer passes the API base URL; we whitelist it to prevent SSRF.
+  const ALLOWED_API_HOSTS = new Set(['https://rtapi.bregan.me', 'https://localhost:7248']);
+  ipcMain.handle('auth:get-access-token', async (_event, apiBaseUrl: unknown) => {
+    if (typeof apiBaseUrl !== 'string' || !ALLOWED_API_HOSTS.has(apiBaseUrl)) {
+      return null;
+    }
+    const cookies = await session.defaultSession.cookies.get({
+      url: apiBaseUrl,
+      name: 'accessToken',
+    });
+    return cookies[0]?.value ?? null;
+  });
+
+  // Let the renderer refresh idle Discord presence (e.g. after login when
+  // the username becomes available for the profile button).
+  ipcMain.handle('discord:refresh-idle', () => {
+    // Avoid overwriting an active "playing" presence.
+     if (getActiveSession()) {
+       return;
+     }
+
+    const raUsername = getSyncMeta('raUsername') ?? null;
+    setIdlePresence(raUsername);
   });
 }

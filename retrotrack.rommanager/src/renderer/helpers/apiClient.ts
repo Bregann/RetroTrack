@@ -13,7 +13,19 @@ export function getAccessToken(): string | null {
   return accessToken
 }
 
-export function loadAccessTokenFromCookie(): void {
+export async function loadAccessTokenFromCookie(): Promise<void> {
+  // Prefer reading via Electron's main-process session API — the accessToken
+  // cookie is scoped to the API domain (rtapi.bregan.me) and is not visible
+  // to document.cookie on a different origin (localhost or app://).
+  const token =
+    (await (window as Window & {
+      electron?: { auth?: { getAccessToken?: (apiBaseUrl: string) => Promise<string | null> } }
+    }).electron?.auth?.getAccessToken?.(API_BASE_URL)) ?? null
+  if (token !== null) {
+    accessToken = token
+    return
+  }
+  // Fallback for same-origin contexts
   const match = document.cookie
     .split(';')
     .map((c) => c.trim())
@@ -31,9 +43,9 @@ function refreshAccessToken(): Promise<boolean> {
     method: 'POST',
     credentials: 'include',
   })
-    .then((res) => {
+    .then(async (res) => {
       if (res.ok) {
-        loadAccessTokenFromCookie()
+        await loadAccessTokenFromCookie()
         return true
       }
       return false

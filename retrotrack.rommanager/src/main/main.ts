@@ -18,10 +18,13 @@ import { registerIpcHandlers } from './ipc';
 import { registerCacheScheme, registerCacheProtocol } from './imageCache';
 import { forceEndSession } from './sessionTracker';
 import { setIdlePresence, destroyDiscordPresence } from './discordPresence';
+import { getSyncMeta } from './database';
 
 // Dev API uses a self-signed cert — allow Node's fetch to reach it
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  // Use a separate userData folder so dev and prod don't share the same DB/cache
+  app.setName(`${app.getName()}-test`);
 }
 
 // Must register custom schemes before app is ready
@@ -176,7 +179,7 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
-    setIdlePresence();
+    setIdlePresence(getSyncMeta('raUsername') ?? null);
   });
 
   mainWindow.on('closed', () => {
@@ -202,10 +205,10 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   // End any active gaming session and clean up Discord
   forceEndSession();
-  destroyDiscordPresence();
+  await destroyDiscordPresence();
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {

@@ -11,13 +11,17 @@ let db: Database.Database;
 // NEVER edit a past migration — always append a new one.
 // Bump SCHEMA_VERSION by 1 each time you add a migration.
 // ---------------------------------------------------------------------------
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 type MigrationFn = (db: Database.Database) => void;
 
 const MIGRATIONS: MigrationFn[] = [
   // 0 → 1: initial schema (tables created via CREATE TABLE IF NOT EXISTS below)
   () => {},
+  // 1 → 2: add is_tracked column to tracked_games
+  (database) => {
+    database.exec(`ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`);
+  },
 ];
 
 function runMigrations(database: Database.Database): void {
@@ -60,7 +64,8 @@ export function initDatabase(): void {
       achievements_earned  INTEGER NOT NULL DEFAULT 0,
       percentage_complete  REAL NOT NULL DEFAULT 0,
       highest_award        TEXT,
-      last_played          TEXT
+      last_played          TEXT,
+      is_tracked           INTEGER NOT NULL DEFAULT 1
     );
 
     CREATE TABLE IF NOT EXISTS sync_metadata (

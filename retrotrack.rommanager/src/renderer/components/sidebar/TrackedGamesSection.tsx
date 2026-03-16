@@ -20,7 +20,7 @@ export default function TrackedGamesSection({
 }: Props) {
   const { data } = useLibraryData();
   const scannedGameIds = useScannedGameIds();
-  const trackedGames = data?.trackedGames ?? [];
+  const trackedGames = (data?.trackedGames ?? []).filter((g) => g.isTracked);
   const [contextMenu, setContextMenu] = useState<{ gameId: number; x: number; y: number } | null>(null);
 
   const openContextMenu = (e: React.MouseEvent, gameId: number) => {

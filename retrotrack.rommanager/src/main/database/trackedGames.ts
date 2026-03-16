@@ -13,6 +13,11 @@ export interface TrackedGameRow {
   percentageComplete: number;
   highestAward: string | null;
   lastPlayedUtc: string | null;
+  isTracked: boolean;
+}
+
+interface DbTrackedGameRow extends Omit<TrackedGameRow, 'isTracked'> {
+  isTracked: 0 | 1;
 }
 
 export function upsertTrackedGames(games: TrackedGameRow[]): void {
@@ -20,11 +25,11 @@ export function upsertTrackedGames(games: TrackedGameRow[]): void {
   const upsert = db.prepare(`
     INSERT INTO tracked_games (
       game_id, title, console_id, console_name, image_icon, image_box_art,
-      achievement_count, points, achievements_earned, percentage_complete, highest_award, last_played
+      achievement_count, points, achievements_earned, percentage_complete, highest_award, last_played, is_tracked
     )
     VALUES (
       @gameId, @title, @consoleId, @consoleName, @imageIcon, @imageBoxArt,
-      @achievementCount, @points, @achievementsEarned, @percentageComplete, @highestAward, @lastPlayedUtc
+      @achievementCount, @points, @achievementsEarned, @percentageComplete, @highestAward, @lastPlayedUtc, @isTracked
     )
     ON CONFLICT(game_id) DO UPDATE SET
       title = excluded.title,
@@ -37,26 +42,32 @@ export function upsertTrackedGames(games: TrackedGameRow[]): void {
       achievements_earned = excluded.achievements_earned,
       percentage_complete = excluded.percentage_complete,
       highest_award = excluded.highest_award,
-      last_played = excluded.last_played
+      last_played = excluded.last_played,
+      is_tracked = excluded.is_tracked
   `);
 
   db.transaction((items: TrackedGameRow[]) => {
-    for (const item of items) upsert.run(item);
+    for (const item of items) {
+      const dbRow: DbTrackedGameRow = { ...item, isTracked: item.isTracked ? 1 : 0 };
+      upsert.run(dbRow);
+    }
   })(games);
 }
 
 export function getAllTrackedGames(): TrackedGameRow[] {
-  return getDb()
+  const rows = getDb()
     .prepare(`
       SELECT
         game_id as gameId, title, console_id as consoleId, console_name as consoleName,
         image_icon as imageIcon, image_box_art as imageBoxArt,
         achievement_count as achievementCount, points,
         achievements_earned as achievementsEarned, percentage_complete as percentageComplete,
-        highest_award as highestAward, last_played as lastPlayedUtc
+        highest_award as highestAward, last_played as lastPlayedUtc,
+        is_tracked as isTracked
       FROM tracked_games ORDER BY title
     `)
-    .all() as TrackedGameRow[];
+    .all() as DbTrackedGameRow[];
+  return rows.map((row) => ({ ...row, isTracked: !!row.isTracked }));
 }
 
 export function clearTrackedGames(): void {

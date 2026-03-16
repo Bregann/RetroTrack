@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { setDiscordPresence, setIdlePresence } from './discordPresence';
+import { getSyncMeta } from './database';
 
 export interface GameSession {
   gameId: number;
@@ -29,11 +30,14 @@ export function startSession(session: Omit<GameSession, 'startedAt'>): void {
   activeSession = { ...session, startedAt: Date.now() };
 
   // Set Discord Rich Presence
+  const raUsername = getSyncMeta('raUsername') ?? null;
   setDiscordPresence({
     gameTitle: session.gameTitle,
     consoleName: session.consoleName,
     imageIcon: session.imageIcon,
     startedAt: activeSession.startedAt,
+    gameId: session.gameId,
+    raUsername,
   });
 
   // Poll the PID to detect when the emulator closes
@@ -59,7 +63,8 @@ export function endSession(): void {
   const { gameId } = activeSession;
 
   // Return to idle Discord presence
-  setIdlePresence();
+  const raUsername = getSyncMeta('raUsername') ?? null;
+  setIdlePresence(raUsername);
 
   // Notify renderer with session data so it can call the API
   const win = BrowserWindow.getAllWindows()[0];

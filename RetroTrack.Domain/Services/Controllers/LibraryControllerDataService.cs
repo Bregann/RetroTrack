@@ -22,9 +22,11 @@ namespace RetroTrack.Domain.Services.Controllers
                 })
                 .ToArrayAsync();
 
-            var trackedGamesList = await context.TrackedGames
+            var trackedGameIds = (await context.TrackedGames
                 .Where(x => x.UserId == userId)
-                .ToArrayAsync();
+                .Select(x => x.GameId)
+                .ToArrayAsync())
+                .ToHashSet();
 
             var progress = await context.UserGameProgress
                 .Where(x => x.UserId == userId)
@@ -38,24 +40,35 @@ namespace RetroTrack.Domain.Services.Controllers
 
             var activityByGameId = activity.ToDictionary(a => a.GameId);
 
-            var trackedGames = trackedGamesList.Select(tg =>
+            // Include all games the user has progress on, plus any tracked games without progress
+            var allGameIds = trackedGameIds
+                .Union(progressByGameId.Keys)
+                .ToHashSet();
+
+            var games = await context.Games
+                .Where(g => allGameIds.Contains(g.Id))
+                .Include(g => g.GameConsole)
+                .ToArrayAsync();
+
+            var trackedGames = games.Select(game =>
             {
-                progressByGameId.TryGetValue(tg.GameId, out var p);
-                activityByGameId.TryGetValue(tg.GameId, out var act);
+                progressByGameId.TryGetValue(game.Id, out var p);
+                activityByGameId.TryGetValue(game.Id, out var act);
                 return new LibraryTrackedGame
                 {
-                    GameId = tg.Game.Id,
-                    Title = tg.Game.Title,
-                    ConsoleId = tg.Game.ConsoleId,
-                    ConsoleName = tg.Game.GameConsole.ConsoleName,
-                    ImageIcon = tg.Game.ImageIcon,
-                    ImageBoxArt = tg.Game.ImageBoxArt,
-                    AchievementCount = tg.Game.AchievementCount,
-                    Points = tg.Game.Points,
+                    GameId = game.Id,
+                    Title = game.Title,
+                    ConsoleId = game.ConsoleId,
+                    ConsoleName = game.GameConsole.ConsoleName,
+                    ImageIcon = game.ImageIcon,
+                    ImageBoxArt = game.ImageBoxArt,
+                    AchievementCount = game.AchievementCount,
+                    Points = game.Points,
                     AchievementsEarned = p?.AchievementsGainedHardcore ?? 0,
                     PercentageComplete = p?.GamePercentageHardcore ?? 0,
                     HighestAward = p?.HighestAwardKind,
-                    LastPlayedUtc = act?.LastPlayedUtc
+                    LastPlayedUtc = act?.LastPlayedUtc,
+                    IsTracked = trackedGameIds.Contains(game.Id)
                 };
             }).ToArray();
 
