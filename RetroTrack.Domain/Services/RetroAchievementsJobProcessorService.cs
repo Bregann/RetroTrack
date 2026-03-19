@@ -293,6 +293,9 @@ namespace RetroTrack.Domain.Services
 
                 Log.Information($"[RetroAchievements] Game {game.Id} ({game.Title}) has been updated with extra data, setting ExtraDataProcessed to true.");
 
+                // delay for a couple seconds to avoid hitting API rate limits
+                await Task.Delay(2000);
+
                 // Process game hashes
                 var gameHashes = await raApiService.GetGameHashes(game.Id);
 
