@@ -14,13 +14,15 @@ export interface ScanResult {
 }
 
 export interface ScanProgress {
-  phase: 'hashing' | 'validating' | 'done';
+  phase: 'hashing' | 'converting' | 'validating' | 'done';
   current: number;
   total: number;
   fileName?: string;
   matched?: boolean;
   title?: string;
   consoleName?: string;
+  warning?: string;
+  cached?: boolean;
 }
 
 

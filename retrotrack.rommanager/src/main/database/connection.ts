@@ -11,7 +11,7 @@ let db: Database.Database;
 // NEVER edit a past migration — always append a new one.
 // Bump SCHEMA_VERSION by 1 each time you add a migration.
 // ---------------------------------------------------------------------------
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 type MigrationFn = (db: Database.Database) => void;
 
@@ -21,6 +21,20 @@ const MIGRATIONS: MigrationFn[] = [
   // 1 → 2: add is_tracked column to tracked_games
   (database) => {
     database.exec(`ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`);
+  },
+  // 2 → 3: add hash_cache table for caching expensive hashes (e.g. rvz/gcz conversion)
+  (database) => {
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS hash_cache (
+        file_path   TEXT NOT NULL,
+        console_id  INTEGER NOT NULL,
+        file_size   INTEGER NOT NULL,
+        file_mtime  INTEGER NOT NULL,
+        hash        TEXT NOT NULL,
+        created_at  TEXT NOT NULL,
+        PRIMARY KEY (file_path, console_id)
+      )
+    `);
   },
 ];
 

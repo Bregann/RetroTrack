@@ -43,6 +43,10 @@ export {
   clearGameEmulatorPref,
   type GameEmulatorPrefRow,
 } from './gameEmulatorPrefs';
+export {
+  getCachedHash,
+  setCachedHash,
+} from './hashCache';
 
 import { clearTrackedGames } from './trackedGames';
 import { clearSyncMeta } from './syncMeta';

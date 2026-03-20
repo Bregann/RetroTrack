@@ -31,17 +31,30 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
     if (!scanning) return;
     const unsub = window.electron.scanner.onProgress((raw) => {
       const p = raw as ScanProgress;
-      setProgress({ current: p.current, total: p.total });
-      if (p.fileName) {
+      if (p.warning) {
         setResults((prev) => [
           ...prev,
-          {
-            fileName: p.fileName!,
-            matched: !!p.matched,
-            consoleName: p.consoleName,
-            title: p.title,
-          },
+          { fileName: `\u26a0\ufe0f ${p.warning}`, matched: false },
         ]);
+      } else if (p.phase === 'converting' && p.fileName) {
+        const label = p.cached
+          ? `\u26a1 ${p.fileName} (cached)`
+          : `\ud83d\udd04 Converting ${p.fileName} to ISO...`;
+        setResults((prev) => [...prev, { fileName: label, matched: false }]);
+        setProgress({ current: p.current, total: p.total });
+      } else {
+        setProgress({ current: p.current, total: p.total });
+        if (p.fileName) {
+          setResults((prev) => [
+            ...prev,
+            {
+              fileName: p.fileName!,
+              matched: !!p.matched,
+              consoleName: p.consoleName,
+              title: p.title,
+            },
+          ]);
+        }
       }
     });
     return () => { unsub(); };

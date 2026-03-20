@@ -28,11 +28,18 @@ export default function ScanAllModal({ onClose, folders, onScanComplete }: Props
     if (!scanning) return;
     const unsub = window.electron.scanner.onProgress((raw) => {
       const p = raw as ScanProgress;
-      if (p.fileName && p.matched) {
+      if (p.warning) {
+        setLogs((prev) => [...prev, `   ⚠️ ${p.warning}`]);
+      } else if (p.fileName && p.matched) {
         setLogs((prev) => [
           ...prev,
           `   ✅ ${p.fileName} → ${p.title} (${p.consoleName})`,
         ]);
+      } else if (p.phase === 'converting' && p.fileName) {
+        const label = p.cached
+          ? `   ⚡ ${p.fileName} (cached) (${p.current}/${p.total})`
+          : `   🔄 Converting ${p.fileName} to ISO... (${p.current}/${p.total})`;
+        setLogs((prev) => [...prev, label]);
       } else if (p.phase === 'hashing' && p.fileName) {
         setLogs((prev) => [...prev, `   Hashing ${p.fileName}... (${p.current}/${p.total})`]);
       }

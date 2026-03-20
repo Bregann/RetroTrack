@@ -23,7 +23,7 @@ import {
   setGameEmulatorPref,
   clearGameEmulatorPref,
 } from './database';
-import { scanFolder, scanFile, type ScanProgress } from './scanner';
+import { scanFolder, scanFile, findDolphinTool, type ScanProgress } from './scanner';
 import { clearImageCache } from './imageCache';
 import { getLaunchContext, launchGame, type LaunchRequest } from './launcher';
 import { startSession, getActiveSession, forceEndSession } from './sessionTracker';
@@ -96,7 +96,10 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(
     'scan:scan-file',
     async (_event, filePath: string, consoleId: number, apiBaseUrl: string, accessToken: string) => {
-      return scanFile(filePath, consoleId, apiBaseUrl, accessToken);
+      const emuSettings = getAllEmulatorSettings();
+      const installDirs = emuSettings.map((s) => s.install_dir).filter(Boolean);
+      const dolphinToolPath = findDolphinTool(installDirs);
+      return scanFile(filePath, consoleId, apiBaseUrl, accessToken, dolphinToolPath);
     },
   );
 
@@ -125,7 +128,13 @@ export function registerIpcHandlers(): void {
       const onProgress = (progress: ScanProgress) => {
         win?.webContents.send('scan:progress', progress);
       };
-      return scanFolder(folderPath, consoleId, apiBaseUrl, accessToken, onProgress);
+
+      // Try to find DolphinTool from configured emulator install directories
+      const emuSettings = getAllEmulatorSettings();
+      const installDirs = emuSettings.map((s) => s.install_dir).filter(Boolean);
+      const dolphinToolPath = findDolphinTool(installDirs);
+
+      return scanFolder(folderPath, consoleId, apiBaseUrl, accessToken, onProgress, dolphinToolPath);
     },
   );
 

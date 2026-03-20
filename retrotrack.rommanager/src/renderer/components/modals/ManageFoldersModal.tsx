@@ -23,14 +23,14 @@ export default function ManageFoldersModal({
   onRescanFolder,
 }: Props) {
   const [rescanningKey, setRescanningKey] = useState<string | null>(null);
-  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0, phase: '' });
   const [confirmRemove, setConfirmRemove] = useState<ConfirmRemove | null>(null);
 
   useEffect(() => {
     if (!rescanningKey) return;
     const unsub = window.electron.scanner.onProgress((raw) => {
       const p = raw as ScanProgress;
-      setScanProgress({ current: p.current, total: p.total });
+      setScanProgress({ current: p.current, total: p.total, phase: p.phase });
     });
     return () => { unsub(); };
   }, [rescanningKey]);
@@ -41,7 +41,7 @@ export default function ManageFoldersModal({
 
     const key = `${folderPath}::${consoleId}`;
     setRescanningKey(key);
-    setScanProgress({ current: 0, total: 0 });
+    setScanProgress({ current: 0, total: 0, phase: '' });
     const { matched } = await window.electron.scanner.scanFolder(
       folderPath,
       consoleId,
@@ -96,7 +96,9 @@ export default function ManageFoldersModal({
                 const key = `${f.path}::${f.consoleId}`;
                 const isRescanning = rescanningKey === key;
                 const progressLabel = isRescanning && scanProgress.total > 0
-                  ? `Scanning... (${scanProgress.current}/${scanProgress.total})`
+                  ? scanProgress.phase === 'converting'
+                    ? `Converting... (${scanProgress.current}/${scanProgress.total})`
+                    : `Scanning... (${scanProgress.current}/${scanProgress.total})`
                   : 'Scanning...';
                 return (
                   <div key={key} className="lib-folder-item">
