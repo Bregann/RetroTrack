@@ -225,7 +225,7 @@ export default function LoggedOutPlaylistsComponent() {
           : `Showing ${filteredAndSortedPlaylists.length} of ${data.playlists.length} community playlists`}
       </Text>
 
-      <Grid gutter={8}>
+      <Grid>
         {/* Show login prompt card on first page when no search */}
         {currentPage === 1 && (searchTerm === null || searchTerm.trim() === '') && (
           <Grid.Col span={span}>
