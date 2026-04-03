@@ -289,7 +289,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
             </Card>
           </SimpleGrid>
 
-          <Grid gutter="xl">
+          <Grid>
             <Grid.Col span={isMd ? 8 : 12}>
               <Divider label="Beaten Games Wall" labelPosition="center" mb="md" classNames={{ label: styles.dividerText }} />
               {user.isAuthenticated &&

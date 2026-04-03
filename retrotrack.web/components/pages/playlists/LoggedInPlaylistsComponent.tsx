@@ -220,7 +220,7 @@ export default function LoggedInPlaylistsComponent() {
               : `Showing ${filteredAndSortedPlaylists.length} of ${userPlaylistsData.playlists.length} playlists`}
           </Text>
 
-          <Grid gutter={8}>
+          <Grid>
             {currentPage === 1 && searchQuery.trim() === '' && (
               <Grid.Col span={span}>
                 <Card
@@ -282,7 +282,7 @@ export default function LoggedInPlaylistsComponent() {
               : `Showing ${filteredAndSortedPlaylists.length} of ${publicPlaylistsData.playlists.length} playlists`}
           </Text>
 
-          <Grid gutter={8}>
+          <Grid>
             {paginatedPlaylists.map((playlist) => (
               <Grid.Col key={playlist.id} span={span}>
                 <PlaylistCard
@@ -326,7 +326,7 @@ export default function LoggedInPlaylistsComponent() {
               : `Showing ${filteredAndSortedPlaylists.length} of ${likedPlaylistsData.playlists.length} liked playlists`}
           </Text>
 
-          <Grid gutter={8}>
+          <Grid>
             {paginatedPlaylists.map((playlist) => (
               <Grid.Col key={playlist.id} span={span}>
                 <PlaylistCard

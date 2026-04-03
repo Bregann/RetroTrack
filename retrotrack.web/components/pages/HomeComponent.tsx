@@ -67,7 +67,7 @@ export default function HomeComponent() {
                 label: styles.mainDividerText,
               }}
             />
-            <Grid gutter="xl">
+            <Grid>
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Stack gap="lg">
                   <Divider
@@ -77,7 +77,7 @@ export default function HomeComponent() {
                       label: styles.subDividerText,
                     }}
                   />
-                  <Grid gutter="md">
+                  <Grid>
                     {day.newSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span} key={setIndex}>
@@ -135,7 +135,7 @@ export default function HomeComponent() {
                       label: styles.subDividerText,
                     }}
                   />
-                  <Grid gutter="md">
+                  <Grid>
                     {day.updatedSets.map((set, setIndex) => {
                       return (
                         <Grid.Col span={span} key={setIndex}>
