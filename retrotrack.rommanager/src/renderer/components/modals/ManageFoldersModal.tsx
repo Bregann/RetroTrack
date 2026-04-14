@@ -86,13 +86,22 @@ export default function ManageFoldersModal({
   };
 
   return (
-    <div className="lib-modal-backdrop" onClick={confirmRemove ? undefined : onClose}>
+    <div
+      className="lib-modal-backdrop"
+      onClick={confirmRemove || rescanningKey ? undefined : onClose}
+      style={{ pointerEvents: rescanningKey ? 'none' : 'auto', cursor: rescanningKey ? 'wait' : 'auto' }}
+    >
       <div className="lib-modal lib-modal--md" onClick={(e) => e.stopPropagation()}>
         <div className="lib-modal-header">
           <h2>Manage Folders</h2>
-          <button type="button" className="lib-modal-close" onClick={onClose}>✕</button>
+          <button
+            type="button"
+            className="lib-modal-close"
+            onClick={onClose}
+            disabled={rescanningKey !== null}
+          >✕</button>
         </div>
-        <div className="lib-modal-content">
+        <div className="lib-modal-content" style={{ opacity: rescanningKey ? 0.6 : 1, pointerEvents: rescanningKey ? 'none' : 'auto' }}>
           {confirmRemove ? (
             <div className="lib-empty-state">
               <span className="lib-empty-icon">⚠️</span>
@@ -162,7 +171,14 @@ export default function ManageFoldersModal({
           )}
         </div>
         <div className="lib-modal-footer">
-          <button type="button" className="lib-btn-secondary" onClick={onClose}>Close</button>
+          <button
+            type="button"
+            className="lib-btn-secondary"
+            onClick={onClose}
+            disabled={rescanningKey !== null}
+          >
+            {rescanningKey ? 'Scanning...' : 'Close'}
+          </button>
         </div>
       </div>
     </div>
