@@ -71,6 +71,7 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
       }
       return [...prev, folder];
     });
+    invalidateScannedGames();
   };
 
   const handleRemoveFolder = async (path: string, consoleId: number) => {
@@ -85,6 +86,7 @@ export default function LibraryModals({ mode, onClose }: LibraryModalsProps) {
         f.path === path && f.consoleId === consoleId ? { ...f, gameCount: matched } : f,
       ),
     );
+    invalidateScannedGames();
   };
 
   if (!mode) return null;

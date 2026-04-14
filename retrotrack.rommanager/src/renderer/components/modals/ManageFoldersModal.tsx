@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
-import type { SavedFolder, ScanProgress } from './libraryModalTypes';
+import ScanProgress from './ScanProgress';
+import type { SavedFolder, ScanProgress as ScanProgressType, ScanResult } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
@@ -23,14 +24,39 @@ export default function ManageFoldersModal({
   onRescanFolder,
 }: Props) {
   const [rescanningKey, setRescanningKey] = useState<string | null>(null);
-  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0, phase: '' });
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
+  const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [confirmRemove, setConfirmRemove] = useState<ConfirmRemove | null>(null);
 
   useEffect(() => {
     if (!rescanningKey) return;
     const unsub = window.electron.scanner.onProgress((raw) => {
-      const p = raw as ScanProgress;
-      setScanProgress({ current: p.current, total: p.total, phase: p.phase });
+      const p = raw as ScanProgressType;
+      if (p.warning) {
+        setScanResults((prev) => [
+          ...prev,
+          { fileName: `\u26a0\ufe0f ${p.warning}`, matched: false },
+        ]);
+      } else if (p.phase === 'converting' && p.fileName) {
+        const label = p.cached
+          ? `\u26a1 ${p.fileName} (cached)`
+          : `\ud83d\udd04 Converting ${p.fileName} to ISO...`;
+        setScanResults((prev) => [...prev, { fileName: label, matched: false }]);
+        setScanProgress({ current: p.current, total: p.total });
+      } else {
+        setScanProgress({ current: p.current, total: p.total });
+        if (p.fileName) {
+          setScanResults((prev) => [
+            ...prev,
+            {
+              fileName: p.fileName!,
+              matched: !!p.matched,
+              consoleName: p.consoleName,
+              title: p.title,
+            },
+          ]);
+        }
+      }
     });
     return () => { unsub(); };
   }, [rescanningKey]);
@@ -41,7 +67,8 @@ export default function ManageFoldersModal({
 
     const key = `${folderPath}::${consoleId}`;
     setRescanningKey(key);
-    setScanProgress({ current: 0, total: 0, phase: '' });
+    setScanProgress({ current: 0, total: 0 });
+    setScanResults([]);
     const { matched } = await window.electron.scanner.scanFolder(
       folderPath,
       consoleId,
@@ -95,11 +122,6 @@ export default function ManageFoldersModal({
               {folders.map((f) => {
                 const key = `${f.path}::${f.consoleId}`;
                 const isRescanning = rescanningKey === key;
-                const progressLabel = isRescanning && scanProgress.total > 0
-                  ? scanProgress.phase === 'converting'
-                    ? `Converting... (${scanProgress.current}/${scanProgress.total})`
-                    : `Scanning... (${scanProgress.current}/${scanProgress.total})`
-                  : 'Scanning...';
                 return (
                   <div key={key} className="lib-folder-item">
                     <div className="lib-folder-info">
@@ -115,7 +137,7 @@ export default function ManageFoldersModal({
                         disabled={rescanningKey !== null}
                         onClick={() => handleRescan(f.path, f.consoleId)}
                       >
-                        {isRescanning ? progressLabel : '🔄 Re-scan'}
+                        {isRescanning ? 'Rescanning...' : '🔄 Re-scan'}
                       </button>
                       <button
                         type="button"
@@ -130,6 +152,13 @@ export default function ManageFoldersModal({
                 );
               })}
             </div>
+          )}
+          {rescanningKey && (
+            <ScanProgress
+              scanning={true}
+              results={scanResults}
+              progress={scanProgress}
+            />
           )}
         </div>
         <div className="lib-modal-footer">

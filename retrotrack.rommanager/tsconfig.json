@@ -4,6 +4,7 @@
     "target": "es2022",
     "module": "node16",
     "lib": ["dom", "es2022"],
+    "types": ["node"],
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
@@ -12,7 +13,8 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": ".erb/dll"
+    "outDir": ".erb/dll",
+    "rootDir": "."
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

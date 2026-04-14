@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { API_BASE_URL, getAccessToken } from '../../helpers/apiClient';
 import { useLibraryData } from '../../helpers/useLibraryData';
 import { useInvalidateScannedGames } from '../../helpers/useScannedGames';
-import type { SavedFolder, ScanResult, ScanProgress } from './libraryModalTypes';
+import ScanProgress from './ScanProgress';
+import type { SavedFolder, ScanResult, ScanProgress as ScanProgressType } from './libraryModalTypes';
 
 interface Props {
   onClose: () => void;
@@ -19,18 +20,11 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
   const [results, setResults] = useState<ScanResult[]>([]);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [, setDone] = useState(false);
-  const logRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
-  }, [results]);
 
   useEffect(() => {
     if (!scanning) return;
     const unsub = window.electron.scanner.onProgress((raw) => {
-      const p = raw as ScanProgress;
+      const p = raw as ScanProgressType;
       if (p.warning) {
         setResults((prev) => [
           ...prev,
@@ -102,8 +96,6 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
     });
   };
 
-  const matchedCount = results.filter((r) => r.matched).length;
-
   return (
     <div className="lib-modal-backdrop" onClick={onClose}>
       <div className="lib-modal lib-modal--md" onClick={(e) => e.stopPropagation()}>
@@ -148,36 +140,11 @@ export default function AddFolderModal({ onClose, onFolderAdded }: Props) {
           </button>
 
           {(scanning || results.length > 0) && (
-            <>
-              <div className="lib-progress-bar-container">
-                <div
-                  className="lib-progress-bar-fill"
-                  style={{
-                    width: progress.total
-                      ? `${(progress.current / progress.total) * 100}%`
-                      : '0%',
-                  }}
-                />
-              </div>
-              <div className="lib-progress-text">
-                {scanning
-                  ? `Scanning file ${progress.current} of ${progress.total}...`
-                  : `Done — ${matchedCount} game${matchedCount !== 1 ? 's' : ''} found out of ${results.length} files.`}
-              </div>
-              <div className="lib-scan-log" ref={logRef}>
-                {results.map((r, i) => (
-                  <div key={i} className={`lib-scan-log-entry ${r.matched ? 'matched' : 'unmatched'}`}>
-                    <span className="lib-log-icon">{r.matched ? '✅' : '⬜'}</span>
-                    <span className="lib-log-file">{r.fileName}</span>
-                    {r.matched && (
-                      <span className="lib-log-title">
-                        {r.title} ({r.consoleName})
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
+            <ScanProgress
+              scanning={scanning}
+              results={results}
+              progress={progress}
+            />
           )}
         </div>
         <div className="lib-modal-footer">
