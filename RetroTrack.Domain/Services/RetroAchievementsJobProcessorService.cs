@@ -253,8 +253,8 @@ namespace RetroTrack.Domain.Services
                         existingAchievement.Points = achievement.Value.Points;
                         existingAchievement.DisplayOrder = achievement.Value.DisplayOrder;
                         existingAchievement.AchievementType = achievement.Value.Type;
-                        existingAchievement.NumAwarded = achievement.Value.NumAwarded;
-                        existingAchievement.NumAwardedHardcore = achievement.Value.NumAwardedHardcore;
+                        existingAchievement.NumAwarded = achievement.Value.NumAwarded ?? 0;
+                        existingAchievement.NumAwardedHardcore = achievement.Value.NumAwardedHardcore ?? 0;
                         existingAchievement.Author = achievement.Value.Author;
                         existingAchievement.DateCreated = DateTime.SpecifyKind(achievement.Value.DateCreated, DateTimeKind.Utc);
                         existingAchievement.LastModified = DateTime.SpecifyKind(achievement.Value.DateModified, DateTimeKind.Utc);
@@ -270,8 +270,8 @@ namespace RetroTrack.Domain.Services
                             Points = achievement.Value.Points,
                             DisplayOrder = achievement.Value.DisplayOrder,
                             AchievementType = achievement.Value.Type,
-                            NumAwarded = achievement.Value.NumAwarded,
-                            NumAwardedHardcore = achievement.Value.NumAwardedHardcore,
+                            NumAwarded = achievement.Value.NumAwarded ?? 0,
+                            NumAwardedHardcore = achievement.Value.NumAwardedHardcore ?? 0,
                             GameId = game.Id,
                             Author = achievement.Value.Author,
                             DateCreated = DateTime.SpecifyKind(achievement.Value.DateCreated, DateTimeKind.Utc),
@@ -292,6 +292,9 @@ namespace RetroTrack.Domain.Services
                 await context.SaveChangesAsync();
 
                 Log.Information($"[RetroAchievements] Game {game.Id} ({game.Title}) has been updated with extra data, setting ExtraDataProcessed to true.");
+
+                // delay for a couple seconds to avoid hitting API rate limits
+                await Task.Delay(2000);
 
                 // Process game hashes
                 var gameHashes = await raApiService.GetGameHashes(game.Id);

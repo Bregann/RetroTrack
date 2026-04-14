@@ -59,10 +59,10 @@ namespace RetroTrack.Domain.DTOs.RetroAchievementsApi
         public long Id { get; set; }
 
         [JsonProperty("NumAwarded")]
-        public long NumAwarded { get; set; }
+        public long? NumAwarded { get; set; }
 
         [JsonProperty("NumAwardedHardcore")]
-        public long NumAwardedHardcore { get; set; }
+        public long? NumAwardedHardcore { get; set; }
 
         [JsonProperty("Title")]
         public string Title { get; set; } = "";
