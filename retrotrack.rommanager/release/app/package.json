@@ -1,0 +1,18 @@
+{
+  "name": "retrotrack.rommanager",
+  "version": "0.99.0",
+  "description": "A ROM manager for RetroAchievements and RetroTrack",
+  "license": "MIT",
+  "author": "RetroTrack",
+  "main": "./dist/main/main.js",
+  "scripts": {
+    "rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+    "postinstall": "npm run rebuild && npm run link-modules",
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "discord-rpc": "^4.0.1",
+    "node-rcheevos": "^1.0.1"
+  }
+}
