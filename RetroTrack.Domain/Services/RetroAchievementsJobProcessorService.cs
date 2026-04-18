@@ -489,6 +489,14 @@ namespace RetroTrack.Domain.Services
                     }
                     else
                     {
+                        // check if the game is in the database, if not, skip adding the progress as the game data should be added before the user progress is added, this is to avoid having user progress for games that don't exist in the database
+                        var gameInDb = await context.Games.FirstOrDefaultAsync(x => x.Id == game.GameId);
+                        if (gameInDb == null)
+                        {
+                            Log.Error($"[RetroAchievements] Skipping adding game progress for {user.LoginUsername} on game {game.GameId} ({game.Title}) as the game does not exist in the database.");
+                            continue;
+                        }
+
                         // Add new game progress
                         var newUserGameProgress = new UserGameProgress
                         {
