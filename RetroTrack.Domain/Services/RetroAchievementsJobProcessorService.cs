@@ -55,8 +55,8 @@ namespace RetroTrack.Domain.Services
 
                     if (existingGame != null)
                     {
-                        // check the last modified date, if in the last 6 hours and achievement count is different, set ExtraDataProcessed to false
-                        if (game.DateModified > DateTime.UtcNow.AddHours(-7) && existingGame.AchievementCount != game.AchievementCount)
+                        // if the achievement count is different, set ExtraDataProcessed to false
+                        if (existingGame.AchievementCount != game.AchievementCount)
                         {
                             // check the achievement count, if the new game has achievements and the existing game does not, set ExtraDataProcessed to false & update the set released date
                             if (game.AchievementCount > 0 && existingGame.AchievementCount == 0)
@@ -72,6 +72,14 @@ namespace RetroTrack.Domain.Services
                         }
 
                         // Update existing game
+
+                        // only set the release date if the game has achievements and the existing game does not have a release date,
+                        // this is to avoid overwriting the release date with a new date if the game is updated in the API and it already has a release date
+                        if (game.AchievementCount > 0 && existingGame.SetReleasedDate == new DateTime(0, DateTimeKind.Utc))
+                        {
+                            existingGame.SetReleasedDate = DateTime.UtcNow;
+                        }
+
                         existingGame.Title = game.Title;
                         existingGame.ConsoleId = game.ConsoleId;
                         existingGame.ImageIcon = game.ImageIcon;
@@ -243,7 +251,7 @@ namespace RetroTrack.Domain.Services
                 foreach (var achievement in gameData.Achievements)
                 {
                     // check if the achievement already exists in the database
-                    var existingAchievement = await context.Achievements.FirstOrDefaultAsync(x => x.Id == achievement.Value.Id && x.GameId == game.Id);
+                    var existingAchievement = await context.Achievements.FirstOrDefaultAsync(x => x.Id == achievement.Value.Id);
 
                     if (existingAchievement != null)
                     {
@@ -258,6 +266,13 @@ namespace RetroTrack.Domain.Services
                         existingAchievement.Author = achievement.Value.Author;
                         existingAchievement.DateCreated = DateTime.SpecifyKind(achievement.Value.DateCreated, DateTimeKind.Utc);
                         existingAchievement.LastModified = DateTime.SpecifyKind(achievement.Value.DateModified, DateTimeKind.Utc);
+
+                        // sometimes the achievement could be moved to a new game/subset, so we need to check if the game ID has changed and update it if necessary
+                        if (existingAchievement.GameId != game.Id)
+                        {
+                            existingAchievement.GameId = game.Id;
+                            Log.Information($"[RetroAchievements] Updated achievement {existingAchievement.Id} ({existingAchievement.AchievementName}) to new game ID {game.Id} ({game.Title}).");
+                        }
                     }
                     else
                     {
