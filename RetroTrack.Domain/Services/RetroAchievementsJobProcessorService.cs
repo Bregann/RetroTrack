@@ -78,6 +78,7 @@ namespace RetroTrack.Domain.Services
                         if (game.AchievementCount > 0 && existingGame.SetReleasedDate == new DateTime(0, DateTimeKind.Utc))
                         {
                             existingGame.SetReleasedDate = DateTime.UtcNow;
+                            Log.Information($"[RetroAchievements] Game {existingGame.Id} ({existingGame.Title}) has been updated with achievements, setting SetReleasedDate to now. There was no release date set beforehand");
                         }
 
                         existingGame.Title = game.Title;
