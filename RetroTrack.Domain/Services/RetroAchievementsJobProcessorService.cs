@@ -14,6 +14,11 @@ namespace RetroTrack.Domain.Services
     {
         // This service is responsible for processing the jobs that have been queued by the RetroAchievementsJobDispatcherService
         // It will take the jobs from the queue and process them accordingly
+        // API rate limiting: Delays between requests to avoid hitting the API too hard
+
+        private static readonly SemaphoreSlim _apiThrottle = new SemaphoreSlim(1, 1);
+        private static DateTime _lastApiCallTime = DateTime.MinValue;
+        private const int _minDelayBetweenApiCalls = 1000; // 1 second minimum between API calls
 
         /// <summary>
         /// This method processes the GetGameList job. It retrieves the game list from the JSON data stored in the request, and updates or adds the games to the database.
@@ -309,58 +314,17 @@ namespace RetroTrack.Domain.Services
 
                 Log.Information($"[RetroAchievements] Game {game.Id} ({game.Title}) has been updated with extra data, setting ExtraDataProcessed to true.");
 
-                // delay for a couple seconds to avoid hitting API rate limits
-                await Task.Delay(2000);
-
-                // Process game hashes
-                var gameHashes = await raApiService.GetGameHashes(game.Id);
-
-                if (gameHashes != null && gameHashes.Results.Any())
+                // Queue a job to process game hashes separately to avoid hitting API rate limits
+                var hashJobRequest = new RetroAchievementsLogAndLoadData
                 {
-                    var existingHashes = await context.GameHashes
-                        .Where(x => x.GameId == game.Id)
-                        .ToListAsync();
+                    JobType = JobType.GetGameHashes,
+                    JsonData = game.Id.ToString(),
+                    ProcessingStatus = ProcessingStatus.NotScheduled,
+                    FailedProcessingAttempts = 0,
+                    LastUpdate = DateTime.UtcNow
+                };
 
-                    // Remove hashes that are no longer in the API response
-                    var hashMd5s = gameHashes.Results.Select(x => x.Md5).ToList();
-                    var hashesToRemove = existingHashes
-                        .Where(x => !hashMd5s.Contains(x.Md5))
-                        .ToList();
-
-                    foreach (var hash in hashesToRemove)
-                    {
-                        context.GameHashes.Remove(hash);
-                        Log.Information($"[RetroAchievements] Removed hash {hash.Md5} from game {game.Id}");
-                    }
-
-                    // Add new hashes that don't exist in the database
-                    var existingMd5s = existingHashes.Select(x => x.Md5).ToList();
-                    var newHashes = gameHashes.Results
-                        .Where(x => !existingMd5s.Contains(x.Md5))
-                        .ToList();
-
-                    foreach (var hash in newHashes)
-                    {
-                        await context.GameHashes.AddAsync(new Database.Models.GameHash
-                        {
-                            Md5 = hash.Md5,
-                            GameId = game.Id,
-                            DateAdded = DateTime.UtcNow
-                        });
-                        Log.Information($"[RetroAchievements] Added new hash {hash.Md5} to game {game.Id}");
-                    }
-
-                    await context.SaveChangesAsync();
-                    Log.Information($"[RetroAchievements] Successfully processed {gameHashes.Results.Count} game hashes for game {game.Id}");
-                }
-                else
-                {
-                    Log.Information($"[RetroAchievements] No hashes returned for game {game.Id}");
-                }
-
-                // update the request status to processed
-                request.ProcessingStatus = ProcessingStatus.Processed;
-                request.LastUpdate = DateTime.UtcNow;
+                await context.RetroAchievementsLogAndLoadData.AddAsync(hashJobRequest);
                 await context.SaveChangesAsync();
 
                 Log.Information($"[RetroAchievements] Successfully processed GetExtendedGameData job for request {requestId}");
@@ -391,6 +355,7 @@ namespace RetroTrack.Domain.Services
             try
             {
                 // get the user data from the RetroAchievements API
+                await EnforceApiThrottle();
                 var userData = await raApiService.GetUserCompletionProgress(user.LoginUsername, user.RAUserUlid);
 
                 if (userData == null)
@@ -409,6 +374,7 @@ namespace RetroTrack.Domain.Services
 
                     for (int i = 0; i < timesToProcess; i++)
                     {
+                        await EnforceApiThrottle();
                         var extraData = await raApiService.GetUserCompletionProgress(user.LoginUsername, user.RAUserUlid, skip);
 
                         if (extraData == null || extraData.Results == null)
@@ -427,6 +393,7 @@ namespace RetroTrack.Domain.Services
 
                 // grab the user profile from the api
                 await Task.Delay(1000); // Delay to avoid hitting API rate limits
+                await EnforceApiThrottle();
                 var userProfile = await raApiService.GetUserProfile(user.LoginUsername, user.RAUserUlid);
 
                 if (userProfile == null)
@@ -587,6 +554,87 @@ namespace RetroTrack.Domain.Services
         }
 
         /// <summary>
+        /// This method processes the GetGameHashes job. It retrieves the game hashes from the RetroAchievements API and updates the database.
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        public async Task ProcessGetGameHashesJob(int requestId)
+        {
+            var request = await context.RetroAchievementsLogAndLoadData.FirstAsync(x => x.Id == requestId);
+            request.ProcessingStatus = ProcessingStatus.BeingProcessed;
+            request.LastUpdate = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+
+            Log.Information($"[RetroAchievements] Processing GetGameHashes job for request {requestId}");
+
+            try
+            {
+                // Get the game ID from the JSON data
+                var gameId = int.Parse(request.JsonData);
+
+                // Enforce API throttling to prevent burst requests
+                await EnforceApiThrottle();
+
+                // Process game hashes
+                var gameHashes = await raApiService.GetGameHashes(gameId);
+
+                if (gameHashes != null && gameHashes.Results.Any())
+                {
+                    var existingHashes = await context.GameHashes
+                        .Where(x => x.GameId == gameId)
+                        .ToListAsync();
+
+                    // Remove hashes that are no longer in the API response
+                    var hashMd5s = gameHashes.Results.Select(x => x.Md5).ToList();
+                    var hashesToRemove = existingHashes
+                        .Where(x => !hashMd5s.Contains(x.Md5))
+                        .ToList();
+
+                    foreach (var hash in hashesToRemove)
+                    {
+                        context.GameHashes.Remove(hash);
+                        Log.Information($"[RetroAchievements] Removed hash {hash.Md5} from game {gameId}");
+                    }
+
+                    // Add new hashes that don't exist in the database
+                    var existingMd5s = existingHashes.Select(x => x.Md5).ToList();
+                    var newHashes = gameHashes.Results
+                        .Where(x => !existingMd5s.Contains(x.Md5))
+                        .ToList();
+
+                    foreach (var hash in newHashes)
+                    {
+                        await context.GameHashes.AddAsync(new Database.Models.GameHash
+                        {
+                            Md5 = hash.Md5,
+                            GameId = gameId,
+                            DateAdded = DateTime.UtcNow
+                        });
+                        Log.Information($"[RetroAchievements] Added new hash {hash.Md5} to game {gameId}");
+                    }
+
+                    await context.SaveChangesAsync();
+                    Log.Information($"[RetroAchievements] Successfully processed {gameHashes.Results.Count} game hashes for game {gameId}");
+                }
+                else
+                {
+                    Log.Information($"[RetroAchievements] No hashes returned for game {gameId}");
+                }
+
+                // Update the request status to processed
+                request.ProcessingStatus = ProcessingStatus.Processed;
+                request.LastUpdate = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+
+                Log.Information($"[RetroAchievements] Successfully processed GetGameHashes job for request {requestId}");
+            }
+            catch (Exception ex)
+            {
+                await HandleAndLogException(ex, request.Id, "GetGameHashes");
+            }
+        }
+
+        /// <summary>
         /// Handles exceptions that occur during job processing, logs the error, updates the request status, and records the error in the database.
         /// </summary>
         /// <param name="ex"></param>
@@ -647,6 +695,30 @@ namespace RetroTrack.Domain.Services
                 ErrorTimestamp = DateTime.UtcNow
             });
             await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Enforces API call throttling to prevent burst requests to the RetroAchievements API.
+        /// Uses a semaphore to ensure only one thread can call the API at a time and enforces minimum delay between calls.
+        /// </summary>
+        /// <returns></returns>
+        private async Task EnforceApiThrottle()
+        {
+            await _apiThrottle.WaitAsync();
+            try
+            {
+                var timeSinceLastCall = DateTime.UtcNow - _lastApiCallTime;
+                if (timeSinceLastCall.TotalMilliseconds < _minDelayBetweenApiCalls)
+                {
+                    var delayNeeded = _minDelayBetweenApiCalls - (int)timeSinceLastCall.TotalMilliseconds;
+                    await Task.Delay(delayNeeded);
+                }
+                _lastApiCallTime = DateTime.UtcNow;
+            }
+            finally
+            {
+                _apiThrottle.Release();
+            }
         }
     }
 }

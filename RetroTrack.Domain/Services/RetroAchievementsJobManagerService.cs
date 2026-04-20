@@ -14,9 +14,15 @@ namespace RetroTrack.Domain.Services
         // It will also clean up any jobs that have been processed or are stuck in the scheduled state.
 
         private readonly int _queueLimit = 20;
+        private readonly int _maxConcurrentHashJobs = 1;
+        private readonly int _maxConcurrentExtendedGameDataJobs = 3;
+        private readonly int _maxConcurrentUserUpdateJobs = 5;
+        private readonly int _maxConcurrentGameListJobs = 5;
+        private readonly int _maxConcurrentGameProgressionJobs = 3;
 
         /// <summary>
         /// Queues unscheduled jobs to be processed by the RetroAchievementsJobProcessorService.
+        /// Respects per-job-type concurrency limits to avoid API rate limiting.
         /// </summary>
         /// <returns></returns>
         public async Task QueueUnscheduledJobs()
@@ -49,9 +55,16 @@ namespace RetroTrack.Domain.Services
                 .Take(requestsToQueue)
                 .ToListAsync();
 
-            // Loop through the unscheduled requests, schedule them, and update their status
+            // Queue requests while respecting per-job-type concurrency limits
             foreach (var request in unscheduledRequests)
             {
+                // Check if this job type has reached its concurrency limit
+                if (!await CanQueueJobType(request.JobType))
+                {
+                    Log.Information($"[RetroAchievements] Job type {request.JobType} has reached its concurrency limit, skipping request {request.Id}");
+                    continue;
+                }
+
                 switch (request.JobType)
                 {
                     case JobType.GetGameList:
@@ -66,11 +79,36 @@ namespace RetroTrack.Domain.Services
                     case JobType.GetGameProgression:
                         backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetGameProgressionJob(request.Id));
                         break;
+                    case JobType.GetGameHashes:
+                        backgroundJobClient.Enqueue<IRetroAchievementsJobProcessorService>(processor => processor.ProcessGetGameHashesJob(request.Id));
+                        break;
                 }
 
                 request.ProcessingStatus = ProcessingStatus.Scheduled;
                 await context.SaveChangesAsync();
             }
+        }
+
+        /// <summary>
+        /// Checks if a job type can be queued based on its concurrency limit.
+        /// </summary>
+        /// <param name="jobType"></param>
+        /// <returns></returns>
+        private async Task<bool> CanQueueJobType(JobType jobType)
+        {
+            var currentlyRunning = await context.RetroAchievementsLogAndLoadData
+                .Where(x => x.JobType == jobType && (x.ProcessingStatus == ProcessingStatus.Scheduled || x.ProcessingStatus == ProcessingStatus.BeingProcessed))
+                .CountAsync();
+
+            return jobType switch
+            {
+                JobType.GetGameHashes => currentlyRunning < _maxConcurrentHashJobs,
+                JobType.GetExtendedGameData => currentlyRunning < _maxConcurrentExtendedGameDataJobs,
+                JobType.UserUpdate => currentlyRunning < _maxConcurrentUserUpdateJobs,
+                JobType.GetGameList => currentlyRunning < _maxConcurrentGameListJobs,
+                JobType.GetGameProgression => currentlyRunning < _maxConcurrentGameProgressionJobs,
+                _ => true
+            };
         }
 
         /// <summary>
