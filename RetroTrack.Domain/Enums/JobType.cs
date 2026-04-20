@@ -5,6 +5,7 @@
         GetGameList,
         GetExtendedGameData,
         UserUpdate,
-        GetGameProgression
+        GetGameProgression,
+        GetGameHashes
     }
 }
