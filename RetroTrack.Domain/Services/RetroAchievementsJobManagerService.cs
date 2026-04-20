@@ -15,7 +15,7 @@ namespace RetroTrack.Domain.Services
 
         private readonly int _queueLimit = 20;
         private readonly int _maxConcurrentHashJobs = 1;
-        private readonly int _maxConcurrentExtendedGameDataJobs = 3;
+        private readonly int _maxConcurrentExtendedGameDataJobs = 5;
         private readonly int _maxConcurrentUserUpdateJobs = 5;
         private readonly int _maxConcurrentGameListJobs = 5;
         private readonly int _maxConcurrentGameProgressionJobs = 3;
