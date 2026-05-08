@@ -30,6 +30,13 @@ namespace RetroTrack.Api.Controllers
             return await usersControllerData.CheckUserUpdateCompleted(user);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<GetMobileHomeDataResponse>> GetMobileHomeData()
+        {
+            var userId = userContextHelper.GetUserId();
+            return await usersControllerData.GetMobileHomeData(userId);
+        }
+
         [HttpGet("{username}")]
         [AllowAnonymous]
         public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile([FromRoute] string username)

@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetroTrack.Domain.Database.Context;
+using RetroTrack.Domain.DTOs.Controllers.Games.Responses;
 using RetroTrack.Domain.DTOs.Controllers.Navigation.Responses;
 using RetroTrack.Domain.DTOs.Controllers.Users.Requests;
 using RetroTrack.Domain.DTOs.Controllers.Users.Responses;
 using RetroTrack.Domain.DTOs.RetroAchievementsApi;
 using RetroTrack.Domain.Enums;
 using RetroTrack.Domain.Exceptions;
+using RetroTrack.Domain.Extensions;
 using RetroTrack.Domain.Helpers;
 using RetroTrack.Domain.Interfaces;
 using RetroTrack.Domain.Interfaces.Controllers;
@@ -346,6 +348,85 @@ namespace RetroTrack.Domain.Services.Controllers
             }
 
             Log.Information($"Saved wall positions for user {userId}");
+        }
+
+        public async Task<GetMobileHomeDataResponse> GetMobileHomeData(int userId)
+        {
+            var user = await context.Users.FirstAsync(x => x.Id == userId);
+
+            var trackedGamesCount = await context.TrackedGames
+                .Where(x => x.UserId == userId)
+                .CountAsync();
+
+            var playlistCount = await context.UserPlaylists
+                .Where(x => x.UserIdOwner == userId)
+                .CountAsync();
+
+            var lastPlayed = await context.UserGameProgress
+                .Where(x => x.UserId == userId && x.MostRecentAwardedDate.HasValue)
+                .OrderByDescending(x => x.MostRecentAwardedDate)
+                .Select(x => new MobileLastPlayedGame
+                {
+                    GameId = x.GameId,
+                    Title = x.Game.Title,
+                    GameIcon = x.Game.ImageIcon,
+                    ConsoleName = x.Game.GameConsole.ConsoleName,
+                    ConsoleType = (int)x.Game.GameConsole.ConsoleType,
+                    AchievementCount = x.Game.AchievementCount.ToString(),
+                    Points = x.Game.Points.ToString()
+                })
+                .FirstOrDefaultAsync();
+
+            // Get last 5 days of recently added/updated games
+            var days = new List<DayData>();
+            for (int i = 0; i < 5; i++)
+            {
+                var date = DateTime.UtcNow.AddDays(-i);
+                var newSets = await context.Games
+                    .Where(x => x.SetReleasedDate.Date == date.Date && x.HasAchievements)
+                    .Select(x => new GameData
+                    {
+                        GameId = x.Id,
+                        Title = x.Title,
+                        GameIcon = x.ImageIcon,
+                        ConsoleName = x.GameConsole.ConsoleName,
+                        ConsoleType = x.GameConsole.ConsoleType,
+                        AchievementCount = x.AchievementCount.ToString(),
+                        Points = x.Points.ToString()
+                    }).ToArrayAsync();
+
+                var updatedSets = await context.Games
+                    .Where(x => x.LastModified.Date == date.Date && x.SetReleasedDate != date.Date && x.HasAchievements)
+                    .Select(x => new GameData
+                    {
+                        GameId = x.Id,
+                        Title = x.Title,
+                        GameIcon = x.ImageIcon,
+                        ConsoleName = x.GameConsole.ConsoleName,
+                        ConsoleType = x.GameConsole.ConsoleType,
+                        AchievementCount = x.AchievementCount.ToString(),
+                        Points = x.Points.ToString()
+                    }).ToArrayAsync();
+
+                days.Add(new DayData
+                {
+                    Date = date.ToHumanizedString(),
+                    NewSets = newSets,
+                    UpdatedSets = updatedSets
+                });
+            }
+
+            return new GetMobileHomeDataResponse
+            {
+                Username = user.RAUsername,
+                ProfileImageUrl = $"/UserPic/{user.RAUsername}.png",
+                HardcorePoints = user.UserPointsHardcore,
+                SoftcorePoints = user.UserPointsSoftcore,
+                TrackedGamesCount = trackedGamesCount,
+                PlaylistCount = playlistCount,
+                LastPlayedGame = lastPlayed,
+                RecentDays = days
+            };
         }
     }
 }
