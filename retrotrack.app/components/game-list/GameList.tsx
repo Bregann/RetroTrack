@@ -56,7 +56,7 @@ export function GameList({
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={
           totalPages > 1 ? (
-            <View style={gameListStyles.pagination}>
+            <View style={[gameListStyles.pagination, { paddingBottom: insets.bottom + 8 }]}>
               <TouchableOpacity
                 style={[gameListStyles.pageButton, c && gameListCompact.pageButton, page <= 1 && gameListStyles.pageButtonDisabled]}
                 onPress={() => onPageChange(page - 1)}

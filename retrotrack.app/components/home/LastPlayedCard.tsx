@@ -9,10 +9,9 @@ import { CONSOLE_COLORS } from './consoleColors';
 
 type Props = {
   game: MobileLastPlayedGame;
-  username: string;
 };
 
-export function LastPlayedCard({ game, username }: Props) {
+export function LastPlayedCard({ game }: Props) {
   const router = useRouter();
   const { isCompact } = useResponsive();
   const c = isCompact;
@@ -39,13 +38,6 @@ export function LastPlayedCard({ game, username }: Props) {
           ]}
         >
           <Text style={[homeStyles.consoleBadgeText, c && homeCompact.consoleBadgeText]}>{game.consoleName}</Text>
-        </View>
-        <View style={[homeStyles.profilePill, c && homeCompact.profilePill]}>
-          <Image
-            source={{ uri: getGameIconUrl(`/UserPic/${username}.png`) }}
-            style={[homeStyles.profileAvatar, c && homeCompact.profileAvatar]}
-          />
-          <Text style={[homeStyles.profileName, c && homeCompact.profileName]}>{username}</Text>
         </View>
       </View>
     </TouchableOpacity>

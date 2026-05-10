@@ -44,6 +44,24 @@ function RootLayoutInner() {
               title: '',
             }}
           />
+          <Stack.Screen
+            name="playlist/[id]"
+            options={{
+              headerShown: true,
+              headerStyle: { backgroundColor: '#1A1B1E' },
+              headerTintColor: '#c1c2c5',
+              title: 'Playlist',
+            }}
+          />
+          <Stack.Screen
+            name="consoles/[id]"
+            options={{
+              headerShown: true,
+              headerStyle: { backgroundColor: '#1A1B1E' },
+              headerTintColor: '#c1c2c5',
+              title: 'Console',
+            }}
+          />
         </Stack>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       </ThemeProvider>
