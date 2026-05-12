@@ -152,6 +152,40 @@ namespace RetroTrack.Domain.Services.Controllers
             return newJwtToken;
         }
 
+        public async Task<LoginUserResponseDto> RefreshAppToken(string refreshToken)
+        {
+            var existingToken = await context.UserRefreshTokens.FirstOrDefaultAsync(x => x.Token == refreshToken && x.ExpiresAt > DateTime.UtcNow);
+            if (existingToken == null)
+            {
+                Log.Information($"[Refresh App Token] Invalid or expired refresh token {refreshToken}");
+                throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+            }
+
+            var user = await context.Users.FindAsync(existingToken.UserId);
+
+            if (user == null)
+            {
+                Log.Information($"[Refresh App Token] User not found for refresh token {refreshToken}");
+                throw new KeyNotFoundException("User not found for the provided refresh token.");
+            }
+
+            // Generate new tokens
+            var newAccessToken = GenerateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            // Delete old refresh token and save new one
+            context.UserRefreshTokens.Remove(existingToken);
+            await SaveRefreshToken(newRefreshToken, user.Id);
+
+            Log.Information($"[Refresh App Token] App token refreshed successfully for user {user.LoginUsername}");
+
+            return new LoginUserResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
+        }
+
         public async Task ResetUserPassword(string raUsername, string password, string raApiKey)
         {
             //Validate the API key to make sure that it's the correct username/api key combo

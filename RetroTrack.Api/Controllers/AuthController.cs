@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RetroTrack.Domain.DTOs.Controllers.Auth.Requests;
+using RetroTrack.Domain.DTOs.Controllers.Auth.Responses;
 using RetroTrack.Domain.Interfaces.Controllers;
 
 namespace RetroTrack.Api.Controllers
@@ -15,6 +16,17 @@ namespace RetroTrack.Api.Controllers
             {
                 var loginData = await authDataService.LoginUser(request.Username.ToLower().Trim(), request.Password);
 
+                // Mobile clients get tokens in the response body (Bearer auth)
+                if (request.IsMobile)
+                {
+                    return Ok(new LoginUserResponseDto
+                    {
+                        AccessToken = loginData.AccessToken,
+                        RefreshToken = loginData.RefreshToken
+                    });
+                }
+
+                // Web clients get cookies for session-based auth
                 Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
                 {
                     HttpOnly = false,
@@ -67,6 +79,25 @@ namespace RetroTrack.Api.Controllers
             {
                 Response.Cookies.Delete("accessToken");
                 Response.Cookies.Delete("refreshToken");
+                return Unauthorized(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefreshAppToken([FromBody] RefreshAppTokenRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return Unauthorized("No refresh token provided");
+            }
+
+            try
+            {
+                var result = await authDataService.RefreshAppToken(request.RefreshToken);
+                return Ok(result);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
+            {
                 return Unauthorized(ex.Message);
             }
         }

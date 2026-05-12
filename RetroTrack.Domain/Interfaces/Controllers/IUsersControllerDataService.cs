@@ -7,6 +7,7 @@ namespace RetroTrack.Domain.Interfaces.Controllers
     {
         Task<bool> CheckUserUpdateCompleted(int userId);
         Task<GetUserProfileResponse> GetUserProfile(string username);
+        Task<GetMobileHomeDataResponse> GetMobileHomeData(int userId);
         Task<RequestUserGameUpdateResponse> RequestUserGameUpdate(int userId);
         Task SaveUserGameWallPositions(int userId, SaveUserGameWallPositionsRequest request);
     }
