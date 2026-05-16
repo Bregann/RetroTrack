@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/authContext';
 import { authStyles } from '@/styles/auth';
+import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -16,6 +17,7 @@ export default function LoginScreen() {
   const { attemptLogin } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -58,16 +60,31 @@ export default function LoginScreen() {
           editable={!loading}
         />
 
-        <TextInput
-          style={authStyles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          editable={!loading}
-          onSubmitEditing={handleLogin}
-        />
+        <View style={authStyles.passwordContainer}>
+          <TextInput
+            style={authStyles.passwordInput}
+            placeholder="Password"
+            placeholderTextColor="#888"
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+            onSubmitEditing={handleLogin}
+          />
+          <TouchableOpacity
+            style={authStyles.eyeButton}
+            onPress={() => setShowPassword(!showPassword)}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={[authStyles.button, loading && authStyles.buttonDisabled]}
@@ -84,7 +101,7 @@ export default function LoginScreen() {
 
         <Link href="/(auth)/register" asChild>
           <TouchableOpacity style={authStyles.linkButton}>
-            <Text style={authStyles.linkText}>Don't have an account? Register</Text>
+            <Text style={authStyles.linkText}>Don&apos;t have an account? Register</Text>
           </TouchableOpacity>
         </Link>
       </View>

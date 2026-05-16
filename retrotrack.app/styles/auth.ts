@@ -67,6 +67,28 @@ export const authStyles = StyleSheet.create({
     color: '#c1c2c5',
     marginBottom: 12,
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#25262b',
+    borderWidth: 1,
+    borderColor: '#373A40',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#c1c2c5',
+  },
+  eyeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   button: {
     backgroundColor: '#1976d2',
     borderRadius: 8,
