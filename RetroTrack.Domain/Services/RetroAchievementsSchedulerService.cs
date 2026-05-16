@@ -68,7 +68,7 @@ namespace RetroTrack.Domain.Services
         /// <returns></returns>
         public async Task GetGamesFromConsoleIds()
         {
-            var consoleIds = await context.GameConsoles.Where(x => x.GameCount != 0).Select(x => x.ConsoleId).ToArrayAsync();
+            var consoleIds = await context.GameConsoles.Where(x => x.DisplayOnSite).Select(x => x.ConsoleId).ToArrayAsync();
 
             if (consoleIds.Length == 0)
             {
