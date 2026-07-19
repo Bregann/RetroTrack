@@ -18,9 +18,18 @@ type MigrationFn = (db: Database.Database) => void;
 const MIGRATIONS: MigrationFn[] = [
   // 0 → 1: initial schema (tables created via CREATE TABLE IF NOT EXISTS below)
   () => {},
-  // 1 → 2: add is_tracked column to tracked_games
+  // 1 → 2: add is_tracked column to tracked_games.
+  // Guarded because fresh installs create tracked_games from the latest schema
+  // (which already includes is_tracked) before migrations run.
   (database) => {
-    database.exec(`ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`);
+    const hasColumn = (database.pragma('table_info(tracked_games)') as Array<{
+      name: string;
+    }>).some((col) => col.name === 'is_tracked');
+    if (!hasColumn) {
+      database.exec(
+        `ALTER TABLE tracked_games ADD COLUMN is_tracked INTEGER NOT NULL DEFAULT 1`,
+      );
+    }
   },
 ];
 

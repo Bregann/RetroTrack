@@ -12,7 +12,16 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
+    "rootDir": ".",
     "outDir": ".erb/dll"
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "ignoreDeprecations": "6.0"
+    }
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }
