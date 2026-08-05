@@ -84,7 +84,7 @@ const columns: Column<LoggedInGame>[] = [
     render: (item) => {
       switch (item.highestAward) {
         case HighestAwardKind.BeatenSoftcore:
-          return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
+          return <Badge color="teal" variant="light">Beaten (Casual)</Badge>
         case HighestAwardKind.BeatenHardcore:
           return <Badge color="cyan" variant="light">Beaten (Hardcore)</Badge>
         case HighestAwardKind.Completed:

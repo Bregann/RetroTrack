@@ -32,7 +32,7 @@ export function ProfileHeader({ username, profileImageUrl, hardcorePoints, softc
         </View>
         {softcorePoints > 0 && softcorePoints !== hardcorePoints ? (
           <View style={profileStyles.pointsItem}>
-            <Text style={profileStyles.pointsLabel}>Softcore</Text>
+            <Text style={profileStyles.pointsLabel}>Casual</Text>
             <Text style={[profileStyles.pointsValue, c && profileCompact.pointsValue]}>
               {softcorePoints.toLocaleString()}
             </Text>

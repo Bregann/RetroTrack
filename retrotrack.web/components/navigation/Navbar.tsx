@@ -346,7 +346,7 @@ export function Navbar(props: NavbarProps) {
                               <Text size="sm">{navItem.gamesBeatenHardcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenHardcore}%)</Text>
                             </Group>}
                             {navItem.gamesBeatenSoftcore !== 0 && <Group gap="xs">
-                              <Badge color="cyan" variant="light" size="sm">softcore</Badge>
+                              <Badge color="cyan" variant="light" size="sm">casual</Badge>
                               <Text size="sm">{navItem.gamesBeatenSoftcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenSoftcore}%)</Text>
                             </Group>}
                             {navItem.gamesCompleted !== 0 && <Group gap="xs">
@@ -355,7 +355,7 @@ export function Navbar(props: NavbarProps) {
                             </Group>}
                             {navItem.gamesMastered !== 0 && <Group gap="xs">
                               <Badge color="yellow" variant="light" size="sm">mastered</Badge>
-                              <Text size="sm">{navItem.gamesMastered}/{navItem.totalGamesInConsole} ({navItem.gamesMastered}%)</Text>
+                              <Text size="sm">{navItem.gamesMastered}/{navItem.totalGamesInConsole} ({navItem.percentageMastered}%)</Text>
                             </Group>}
                           </Stack>
                         }
@@ -388,13 +388,13 @@ export function Navbar(props: NavbarProps) {
             </Group>
 
             <Stack gap={4} mb="xs">
-              {loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (SC): {loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (Casual): {loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (HC): {loggedInNavigationData.gamesBeatenHardcore.toLocaleString()}</Text>}
               {loggedInNavigationData.totalAchievementsSoftcore !== loggedInNavigationData.totalAchievementsHardcore && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore - loggedInNavigationData.totalAchievementsSoftcore}</Text>}
               {loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
-              {loggedInNavigationData.totalPointsSoftcore !== 0 && <Text size="xs" c="dimmed">Total Points (SC): {loggedInNavigationData.totalPointsSoftcore.toLocaleString()}</Text>}
+              {loggedInNavigationData.totalPointsSoftcore !== 0 && <Text size="xs" c="dimmed">Total Points (Casual): {loggedInNavigationData.totalPointsSoftcore.toLocaleString()}</Text>}
               {loggedInNavigationData.totalPointsHardcore !== 0 && <Text size="xs" c="dimmed">Total Points (HC): {loggedInNavigationData.totalPointsHardcore.toLocaleString()}</Text>}
             </Stack>
 

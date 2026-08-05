@@ -90,7 +90,7 @@ const baseColumns: Column<LoggedInGame>[] = [
     render: (item: LoggedInGame) => {
       switch (item.highestAward) {
         case HighestAwardKind.BeatenSoftcore:
-          return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
+          return <Badge color="teal" variant="light">Beaten (Casual)</Badge>
         case HighestAwardKind.BeatenHardcore:
           return <Badge color="cyan" variant="light">Beaten (Hardcore)</Badge>
         case HighestAwardKind.Completed:
@@ -322,8 +322,8 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               {data.totalGamesBeatenSoftcore !== 0 && data.totalGamesBeatenHardcore !== data.totalGamesBeatenSoftcore && (
                 <Text size="xs" c="dimmed" mt="xs">
                   {data.totalGamesBeatenHardcore === 0
-                    ? `SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`
-                    : `HC: ${data.totalGamesBeatenHardcore.toLocaleString()} | SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`}
+                    ? `Casual: ${data.totalGamesBeatenSoftcore.toLocaleString()}`
+                    : `Hardcore: ${data.totalGamesBeatenHardcore.toLocaleString()} | Casual: ${data.totalGamesBeatenSoftcore.toLocaleString()}`}
                 </Text>
               )}
             </Card>

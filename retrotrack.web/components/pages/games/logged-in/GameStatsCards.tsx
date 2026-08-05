@@ -46,7 +46,7 @@ export function GameStatsCards({ gameId }: GameStatsCardsProps) {
               {((data.achievementsAwardedTotal / data.achievementCount) * 100).toFixed(2)}% complete
             </Text>
             {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && (
-              <Text size="sm" c="cyan">SC: {data.achievementsAwardedSoftcore}</Text>
+              <Text size="sm" c="cyan">Casual: {data.achievementsAwardedSoftcore}</Text>
             )}
             {data.achievementsAwardedHardcore !== 0 && (
               <Text size="sm" c="orange">HC: {data.achievementsAwardedHardcore}</Text>

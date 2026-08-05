@@ -73,7 +73,7 @@ export function SubsetAchievementSet({
                 color="cyan"
               >
                 <Progress.Label>
-                  Softcore ({softcoreOnlyCount})
+                  Casual ({softcoreOnlyCount})
                 </Progress.Label>
               </Progress.Section>
             )}

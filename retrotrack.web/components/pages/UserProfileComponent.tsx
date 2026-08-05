@@ -210,7 +210,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
                   <Stack gap={2}>
                     {data.softcorePoints !== data.hardcorePoints && data.softcorePoints !== 0 && (
                       <Text size="lg">
-                        Softcore Points: <Text component="span" fw={700} c="blue">{data.softcorePoints.toLocaleString()}</Text>
+                        Casual Points: <Text component="span" fw={700} c="blue">{data.softcorePoints.toLocaleString()}</Text>
                       </Text>
                     )}
                     {data.hardcorePoints !== 0 && (
@@ -435,7 +435,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
                                     {consoleData.gamesBeatenSoftcore !== 0 &&
                                       <>
                                         <Divider />
-                                        <Text size="sm" c="dimmed">Softcore Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
+                                        <Text size="sm" c="dimmed">Casual Beaten: <Text component="span" c="blue" fw={600}>{consoleData.gamesBeatenSoftcore.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageBeatenSoftcore}%)</Text></Text>
                                         <Progress value={consoleData.percentageBeatenSoftcore} size="xs" color="blue" />
                                       </>
                                     }
@@ -450,7 +450,7 @@ export default function UserProfileComponent(props: UserProfileComponentProps) {
 
                                     {consoleData.gamesCompleted !== 0 &&
                                       <>
-                                        <Text size="sm" c="dimmed">Softcore Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageCompleted}%)</Text></Text>
+                                        <Text size="sm" c="dimmed">Casual Completed: <Text component="span" c="teal" fw={600}>{consoleData.gamesCompleted.toLocaleString()}/{consoleData.totalGamesInConsole.toLocaleString()} ({consoleData.percentageCompleted}%)</Text></Text>
                                         <Progress value={consoleData.percentageCompleted} size="xs" color="teal" />
                                       </>
                                     }

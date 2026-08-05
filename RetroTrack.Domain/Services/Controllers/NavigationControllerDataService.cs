@@ -41,8 +41,8 @@ namespace RetroTrack.Domain.Services.Controllers
                             GamesBeatenSoftcore = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.Completed),
                             GamesMastered = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered),
                             GamesCompleted = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Completed),
-                            PercentageBeatenSoftcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind != HighestAwardKind.BeatenSoftcore) / gc.GameCount * 100, 2) : 0,
-                            PercentageBeatenHardcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind != HighestAwardKind.BeatenHardcore) / gc.GameCount * 100, 2) : 0,
+                            PercentageBeatenSoftcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0,
+                            PercentageBeatenHardcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenHardcore || x.HighestAwardKind == HighestAwardKind.Mastered) / gc.GameCount * 100, 2) : 0,
                             PercentageCompleted = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0,
                             PercentageMastered = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered) / gc.GameCount * 100, 2) : 0
                         };

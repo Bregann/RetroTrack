@@ -85,7 +85,7 @@ function getAwardLabel(award?: HighestAwardKind): string {
     case HighestAwardKind.Mastered: return 'Mastered'
     case HighestAwardKind.Completed: return 'Completed'
     case HighestAwardKind.BeatenHardcore: return 'Beaten (Hardcore)'
-    case HighestAwardKind.BeatenSoftcore: return 'Beaten (Softcore)'
+    case HighestAwardKind.BeatenSoftcore: return 'Beaten (Casual)'
     default: return 'Not Started'
   }
 }

@@ -76,7 +76,7 @@ export function MainAchievementSet({
             )}
             {data.achievementsAwardedSoftcore !== data.achievementsAwardedHardcore && (
               <Progress.Section value={data.achievementsAwardedSoftcore} color="cyan">
-                <Progress.Label>Softcore ({data.achievementsAwardedSoftcore})</Progress.Label>
+                <Progress.Label>Casual ({data.achievementsAwardedSoftcore})</Progress.Label>
               </Progress.Section>
             )}
             <Progress.Section value={data.achievementCount - data.achievementsAwardedTotal} color="grey">

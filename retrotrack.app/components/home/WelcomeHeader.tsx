@@ -17,7 +17,7 @@ export function WelcomeHeader({ username, trackedGamesCount, hardcorePoints, sof
     <View style={[homeStyles.welcomeSection, isCompact && homeCompact.welcomeSection]}>
       <Text style={[homeStyles.welcomeText, isCompact && homeCompact.welcomeText]}>Welcome back, {username}!</Text>
       <Text style={[homeStyles.welcomeSubtext, isCompact && homeCompact.welcomeSubtext]}>
-        {trackedGamesCount} tracked · {hardcorePoints.toLocaleString()} HC · {softcorePoints.toLocaleString()} SC
+        {trackedGamesCount} tracked · {hardcorePoints.toLocaleString()} HC · {softcorePoints.toLocaleString()} Casual
       </Text>
     </View>
   );
