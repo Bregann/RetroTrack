@@ -7,6 +7,7 @@ import { GetLoggedInPlaylistDataResponse } from '@/interfaces/api/playlists/GetL
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import { absoluteUrl, SITE_NAME } from '@/helpers/seo'
 
 export async function generateMetadata({
   params,
@@ -14,6 +15,7 @@ export async function generateMetadata({
   params: Promise<{ playlistId: string }>
 }): Promise<Metadata> {
   const { playlistId } = await params
+  const canonical = `/playlist/${playlistId}`
 
   try {
     // Try to fetch playlist data for metadata
@@ -22,9 +24,27 @@ export async function generateMetadata({
       { next: { revalidate: 3600 } } // Cache for 1 hour
     )
 
+    const title = `${playlistData.name} - ${playlistData.numberOfGames} Game Playlist`
+    const description = `"${playlistData.name}" is a RetroAchievements playlist by ${playlistData.createdBy} containing ${playlistData.numberOfGames} games. Track your progress through it on ${SITE_NAME}.`
+
     return {
-      title: `RetroTrack - ${playlistData.name}`,
-      description: `View detailed information about the "${playlistData.name}" playlist by ${playlistData.createdBy}, containing ${playlistData.numberOfGames} games on RetroTrack`,
+      title,
+      description,
+      alternates: {
+        canonical
+      },
+      openGraph: {
+        type: 'article',
+        siteName: SITE_NAME,
+        url: absoluteUrl(canonical),
+        title,
+        description
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description
+      },
       icons: {
         icon: '/favicon.ico'
       }
@@ -32,8 +52,11 @@ export async function generateMetadata({
   } catch {
     // Fallback metadata if playlist data fetch fails
     return {
-      title: 'RetroTrack - Playlist',
+      title: 'Playlist',
       description: 'View detailed information about this gaming playlist on RetroTrack',
+      alternates: {
+        canonical
+      },
       icons: {
         icon: '/favicon.ico'
       }

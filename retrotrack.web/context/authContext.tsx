@@ -24,22 +24,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
 
   useEffect(() => {
-    const tokenRow = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('accessToken='))
-    const token = tokenRow !== undefined ? tokenRow.split('=')[1] : undefined
+    try {
+      const tokenRow = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+      const token = tokenRow !== undefined ? tokenRow.split('=')[1] : undefined
 
-    if (token !== undefined) {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      const username = payload[
-        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
-      ]
-      const user = {
-        username,
+      // A malformed or truncated cookie must not take the app down: atob and
+      // JSON.parse both throw on bad input, and an uncaught throw here would
+      // leave `loading` true forever, rendering nothing at all
+      if (token !== undefined) {
+        const segment = token.split('.')[1]
+
+        if (segment !== undefined) {
+          const payload = JSON.parse(atob(segment))
+          const username = payload[
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+          ]
+
+          if (typeof username === 'string' && username !== '') {
+            setUser({ username })
+          }
+        }
       }
-      setUser(user)
+    } catch {
+      // Treat an unreadable token as logged out; the refresh flow in
+      // middleware.ts will issue a new one on the next request
+      setUser(null)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   const login = async (username: string, password: string) => {

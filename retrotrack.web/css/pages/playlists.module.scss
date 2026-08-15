@@ -157,12 +157,37 @@
   border: 1px solid light-dark(#1976d2, #339af0);
 }
 
+// Slimmer sign-in strip below the games table on the public playlist page
+.signInFooter {
+  background: light-dark(#f8f9fa, rgba(255, 255, 255, 0.02));
+  border: 1px solid light-dark(#e9ecef, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+}
+
 .createIcon {
   color: light-dark(#6c757d, #909296);
 }
 
 .loginIcon {
   color: light-dark(#1976d2, #339af0);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &:hover {
+    transform: translateX(-4px);
+    opacity: 0.8;
+  }
+}
+
+// Respect a reduced-motion preference; the opacity shift still signals hover
+@media (prefers-reduced-motion: reduce) {
+  .loginIcon {
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      transform: none;
+    }
+  }
 }
 
 .loginButton {

@@ -15,17 +15,16 @@ import {
   Badge,
   Stack,
   Box,
-  Modal,
-  Accordion,
-  List,
   Tooltip,
 } from '@mantine/core'
-import { IconBrandGithub, IconCheck, IconChevronRight, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh, IconSearch } from '@tabler/icons-react'
+import { IconBrandGithub, IconCheck, IconCrossFilled, IconDeviceGamepad3, IconHome2, IconMoonStars, IconPin, IconPlaylist, IconProgress, IconRefresh, IconSearch } from '@tabler/icons-react'
 import Link from 'next/link'
 import styles from '@/css/components/navbar.module.scss'
 import { ConsoleType } from '@/enums/consoleType'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
+import { UpdateInfoModal } from './UpdateInfoModal'
+import { LATEST_VERSION } from './releaseNotes'
 import { useAuth } from '@/context/authContext'
 import Image from 'next/image'
 import notificationHelper from '@/helpers/notificationHelper'
@@ -91,7 +90,15 @@ export function Navbar(props: NavbarProps) {
         gameUpdateInterval.current = null
       }
     }
-  }, [queryClient, router, userUpdateRequested])
+
+    // Stop polling on unmount too, not just when userUpdateRequested flips false
+    return () => {
+      if (gameUpdateInterval.current !== null) {
+        clearInterval(gameUpdateInterval.current)
+        gameUpdateInterval.current = null
+      }
+    }
+  }, [queryClient, userUpdateRequested])
 
   const requestGamesUpdate = async (): Promise<void> => {
     setUpdateGamesButtonLoading(true)
@@ -155,7 +162,8 @@ export function Navbar(props: NavbarProps) {
           </Link>
 
           <Group gap="xs">
-            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>v7.3 Update + Support Info</Button>
+            {/* Label follows LATEST_VERSION so a release only needs updating in releaseNotes */}
+            <Button variant="subtle" onClick={() => { setShowUpdateInfoModal(true) }} visibleFrom='sm'>{LATEST_VERSION} Update + Support Info</Button>
 
             {auth.user === null &&
               <>
@@ -341,12 +349,13 @@ export function Navbar(props: NavbarProps) {
                         description={
                           <Stack gap="xs" >
                             <Text size="sm" c="dimmed">{navItem.totalGamesInConsole} games</Text>
+                            {/* Colours match awardHelper: cyan for hardcore, teal for casual */}
                             {navItem.gamesBeatenHardcore !== 0 && <Group gap="xs">
-                              <Badge color="teal" variant="light" size="sm">beaten</Badge>
+                              <Badge color="cyan" variant="light" size="sm">beaten (hc)</Badge>
                               <Text size="sm">{navItem.gamesBeatenHardcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenHardcore}%)</Text>
                             </Group>}
                             {navItem.gamesBeatenSoftcore !== 0 && <Group gap="xs">
-                              <Badge color="cyan" variant="light" size="sm">casual</Badge>
+                              <Badge color="teal" variant="light" size="sm">beaten (casual)</Badge>
                               <Text size="sm">{navItem.gamesBeatenSoftcore}/{navItem.totalGamesInConsole} ({navItem.percentageBeatenSoftcore}%)</Text>
                             </Group>}
                             {navItem.gamesCompleted !== 0 && <Group gap="xs">
@@ -390,7 +399,7 @@ export function Navbar(props: NavbarProps) {
             <Stack gap={4} mb="xs">
               {loggedInNavigationData.gamesBeatenSoftcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (Casual): {loggedInNavigationData.gamesBeatenSoftcore.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesBeatenHardcore !== 0 && <Text size="xs" c="dimmed">Games Beaten (HC): {loggedInNavigationData.gamesBeatenHardcore.toLocaleString()}</Text>}
-              {loggedInNavigationData.totalAchievementsSoftcore !== loggedInNavigationData.totalAchievementsHardcore && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore - loggedInNavigationData.totalAchievementsSoftcore}</Text>}
+              {loggedInNavigationData.totalAchievementsSoftcore !== loggedInNavigationData.totalAchievementsHardcore && loggedInNavigationData.totalAchievementsSoftcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (Casual): {loggedInNavigationData.totalAchievementsSoftcore.toLocaleString()}</Text>}
               {loggedInNavigationData.totalAchievementsHardcore !== 0 && <Text size="xs" c="dimmed">Total Achievements (HC): {loggedInNavigationData.totalAchievementsHardcore.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesCompleted !== 0 && <Text size="xs" c="dimmed">Completed: {loggedInNavigationData.gamesCompleted.toLocaleString()}</Text>}
               {loggedInNavigationData.gamesMastered !== 0 && <Text size="xs" c="dimmed">Mastered: {loggedInNavigationData.gamesMastered.toLocaleString()}</Text>}
@@ -428,157 +437,10 @@ export function Navbar(props: NavbarProps) {
           }}
         />
 
-        <Modal opened={showUpdateInfoModal} onClose={() => setShowUpdateInfoModal(false)} title="RetroTrack Updates">
-          <Accordion
-            multiple
-            variant="contained"
-            radius="md"
-            defaultValue={['v7.3']}
-            chevron={<IconChevronRight size={16} />}
-          >
-            <Accordion.Item value="v7.3">
-              <Accordion.Control>RetroTrack v7.3 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Subset support - Games with achievement subsets now display them in an accordion format on game pages and modals</List.Item>
-                  <List.Item>Median Time to Beat and Median Time to Master statistics - Now visible on game pages, modals, and in game tables</List.Item>
-                  <List.Item>Major code refactoring - Game components have been reorganized into smaller, more maintainable pieces</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v7.2.1">
-              <Accordion.Control>RetroTrack v7.2.1 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the improvements:</Text>
-                <List withPadding>
-                  <List.Item>Improved visibility of unlocked achievements - they now have a distinct background colour and appear first in the list</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v7.2">
-              <Accordion.Control>RetroTrack v7.2 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Added stat cards to game pages</List.Item>
-                  <List.Item>Fixes to the search page and other minor improvements</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v7.1">
-              <Accordion.Control>RetroTrack v7.1 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Search page! You can now search for specific games and achievements by keyword. This will look in both the achievement name and description</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v7">
-              <Accordion.Control>RetroTrack v7.0 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Game playlists! Create your own playlists of games for easy tracking of games you want to play. You can also make them public too to share with everybody!</List.Item>
-                  <List.Item>Some more UI design tweaks</List.Item>
-                  <List.Item>The ability to click a game genre to automatically filter by it</List.Item>
-                  <List.Item>Total points in the navigation stats</List.Item>
-                  <List.Item>Various code improvements</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v6.1">
-              <Accordion.Control>RetroTrack v6.1 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Tables now have x amount per page options</List.Item>
-                  <List.Item>Tables now display better on mobile & smaller screens</List.Item>
-                  <List.Item>Various minor bug fixes from v6.0  release</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v6.0">
-              <Accordion.Control>RetroTrack v6.0 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Dedicated game pages! You now have the choice between the game modal and a dedicated game page which includes more information</List.Item>
-                  <List.Item>Ability to add notes to games. Easily keep track of information</List.Item>
-                  <List.Item>Various UI design updates</List.Item>
-                  <List.Item>Various code improvements</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v5.2">
-              <Accordion.Control>RetroTrack v5.2 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Logged in users have the ability to customise the order of the beaten and mastery wall</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item value="v5.1">
-              <Accordion.Control>RetroTrack v5.1 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Mobile layout fixes</List.Item>
-                  <List.Item>Logged out user profiles</List.Item>
-                </List>
-                <Text mt="md">
-                  You can now access the user profile of any registered user on RetroAchievements. You can access their profile by going to https://retroachievements.org/profile/{'<username>'} where <b>{'<username>'}</b> is the username of the user you want to view.
-                  All logged out users data is cached for 30 minutes so there will be a slight delay in seeing the latest data.
-                </Text>
-                <Text mt="md">Plans for v5.2</Text>
-                <List withPadding>
-                  <List.Item>Customise the order of the beaten and mastery wall</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-
-            <Accordion.Item value="v5">
-              <Accordion.Control>RetroTrack v5.0 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>Bug fixes and improvements</List.Item>
-                  <List.Item>User Profiles!</List.Item>
-                </List>
-                <Text mt="md">
-                  You can now access your user profile by clicking the profile button in the navigation. You can share your
-                  profile link to show off your RetroAchievements progress to anyone!
-                </Text>
-                <Text mt="md">It currently only supports users registered to RetroTrack.</Text>
-
-                <Text mt="md">Plans for v5.1</Text>
-                <List withPadding>
-                  <List.Item>Support profile page for logged-out users</List.Item>
-                </List>
-              </Accordion.Panel>
-            </Accordion.Item>
-
-            <Accordion.Item value="v4">
-              <Accordion.Control>RetroTrack v4.0 Released</Accordion.Control>
-              <Accordion.Panel>
-                <Text mb="sm">Here are some of the new features:</Text>
-                <List withPadding>
-                  <List.Item>New user interface with a fresh design</List.Item>
-                  <List.Item>Bug fixes and performance improvements</List.Item>
-                </List>
-                <Text mt="md">Thank you for using RetroTrack!</Text>
-                <Text mt="md">
-                  If you are having issues with the new version, please try clearing your browser cache and cookies.
-                </Text>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
-
-          <Text fw={'bold'} mt="md" size='xl'>Need help?</Text>
-          <Text mt="xs">If you have any feedback or suggestions or bug reports, please let me know on either Discord (my username is <b>guinea.</b>), GitHub <a href='https://github.com/Bregann/RetroTrack' target='_blank'>here</a> or on RetroAchievements <a href='https://retroachievements.org/user/guinea' target='_blank'>here</a>!</Text>
-        </Modal>
+        <UpdateInfoModal
+          opened={showUpdateInfoModal}
+          onClose={() => setShowUpdateInfoModal(false)}
+        />
       </AppShell.Main>
     </AppShell>
   )
