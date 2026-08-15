@@ -3,35 +3,23 @@
 import {
   Container,
   Group,
-  Stack,
   Text,
-  Card,
-  Image,
-  SimpleGrid,
   Button,
-  Box,
   Title,
-  Badge,
-  TextInput,
   Loader,
   Center,
-  Select,
-  ActionIcon
+  SimpleGrid
 } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
   IconTrophy,
   IconDeviceGamepad,
-  IconHeart,
   IconArrowLeft,
-  IconSearch,
   IconMedal,
-  IconTargetArrow,
-  IconX
+  IconTargetArrow
 } from '@tabler/icons-react'
 import pageStyles from '@/css/pages/gamePage.module.scss'
 import playlistStyles from '@/css/pages/playlists.module.scss'
-import tableStyles from '@/css/components/publicGamesTable.module.scss'
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import PaginatedTable from '@/components/shared/PaginatedTable'
@@ -39,10 +27,15 @@ import { useGameModal } from '@/context/gameModalContext'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetPublicPlaylistDataResponse, PlaylistGameItem } from '@/interfaces/api/playlists/GetPublicPlaylistDataResponse'
-import type { Column, SortOption } from '@/components/shared/PaginatedTable'
+import type { SortOption } from '@/components/shared/PaginatedTable'
 import Link from 'next/link'
 import LoginModal from '@/components/navigation/LoginModal'
 import RegisterModal from '@/components/navigation/RegisterModal'
+import { PlaylistHeaderCard } from './shared/PlaylistHeaderCard'
+import { PlaylistSearchBar } from './shared/PlaylistSearchBar'
+import { PlaylistSummaryCard } from './shared/PlaylistSummaryCard'
+import { SignInPrompt } from './shared/SignInPrompt'
+import { getPublicPlaylistColumns } from './shared/playlistColumns'
 
 interface PublicPlaylistPageProps {
   playlistId: string
@@ -94,116 +87,25 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     return query
   }, [page, pageSize, playlistId, searchTerm, searchDropdownValue, sortOption.direction, sortOption.key])
 
-  const { data: playlistData, isLoading: isLoadingPlaylistData, isError: isErrorPlaylistData } = useQuery<GetPublicPlaylistDataResponse>({
+  const { data: playlistData, isError: isErrorPlaylistData } = useQuery<GetPublicPlaylistDataResponse>({
     queryKey: [queryString.concat('-public')],
     queryFn: async () => await doQueryGet<GetPublicPlaylistDataResponse>('/api/playlists/GetPublicPlaylistData?'.concat(queryString)),
     staleTime: 60000
   })
 
-  const columns: Column<PlaylistGameItem>[] = [
-    {
-      title: '',
-      key: 'gameIconUrl',
-      render: (game) => (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
-          <Image
-            src={`https://media.retroachievements.org${game.gameIconUrl}`}
-            alt={game.title}
-            width={64}
-            height={64}
-            className={tableStyles.roundedImage}
-          />
-        </div>
-      )
-    },
-    {
-      title: '#',
-      key: 'orderIndex',
-      sortable: true,
-      render: (game) => (
-        <Text fw={600} size="sm" c="dimmed" style={{ textAlign: 'center', minWidth: '40px' }}>
-          {game.orderIndex}
-        </Text>
-      )
-    },
-    {
-      title: 'Game Title',
-      key: 'title',
-      sortable: true,
-      render: (game) => (
-        <Text fw={500}>{game.title}</Text>
-      )
-    },
-    {
-      title: 'Console',
-      key: 'consoleName',
-      sortable: true
-    },
-    {
-      title: 'Genre',
-      key: 'genre',
-      sortable: true,
-      render: (game) => {
-        const genres = game.genre.split(',').map(g => g.trim()).filter(g => g.length > 0)
-        return (
-          <div style={{ minWidth: '140px', maxWidth: '200px' }}>
-            <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              {genres.map((genre, index) => (
-                <Badge
-                  key={index}
-                  color="blue"
-                  variant="light"
-                  size="sm"
-                  style={{ cursor: 'pointer' }}
-                  onClick={(e) => {
-                    e.stopPropagation() // Prevent row click
-                    setSearchDropdownValue('1') // Set to Genre
-                    setSearchTerm(genre)
-                    setSearchInput(genre)
-                    setPage(1) // Reset to first page
-                  }}
-                >
-                  {genre}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        )
+  // Column definitions live in ./shared/playlistColumns; memoised so the table
+  // does not receive a new array identity on every render
+  const columns = useMemo(
+    () => getPublicPlaylistColumns({
+      onGenreClick: (genre) => {
+        setSearchDropdownValue('1') // Set to Genre
+        setSearchTerm(genre)
+        setSearchInput(genre)
+        setPage(1) // Reset to first page
       }
-    },
-    {
-      title: 'Achievements',
-      key: 'achievementCount',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Points',
-      key: 'points',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Players',
-      key: 'players',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Time to Beat',
-      key: 'medianTimeToBeatHardcoreSeconds',
-      sortable: true,
-      toggleDescFirst: true,
-      render: (game) => game.medianTimeToBeatHardcoreFormatted ?? 'N/A'
-    },
-    {
-      title: 'Time to Master',
-      key: 'medianTimeToMasterSeconds',
-      sortable: true,
-      toggleDescFirst: true,
-      render: (game) => game.medianTimeToMasterFormatted ?? 'N/A'
-    }
-  ]
+    }),
+    []
+  )
 
   if (isErrorPlaylistData && playlistData === undefined) {
     return (
@@ -217,7 +119,9 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     )
   }
 
-  if (isLoadingPlaylistData && playlistData === undefined) {
+  // Covers the initial load and any later undefined state, so everything below
+  // can treat playlistData as present rather than optional-chaining every field
+  if (playlistData === undefined) {
     return (
       <Center style={{ height: '60vh' }}>
         <Loader size="xl" variant="dots" />
@@ -231,215 +135,55 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
       <Group align="center" gap="md" mb="xl">
         <IconArrowLeft
           size={24}
-          style={{
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
           onClick={() => router.back()}
           className={playlistStyles.loginIcon}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateX(-4px)'
-            e.currentTarget.style.opacity = '0.8'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateX(0px)'
-            e.currentTarget.style.opacity = '1'
-          }}
         />
-        <Card radius="md" p="md" className={playlistStyles.infoBanner} style={{ flex: 1 }}>
-          <Group justify="space-between" align="center">
-            <Group gap="md">
-              <div>
-                <Text fw={500} mb="xs">
-                  Sign in to track your progress on these games!
-                </Text>
-                <Text size="sm" c="dimmed">
-                  See your achievements, completion status, and personal stats for each game in this playlist.
-                </Text>
-              </div>
-            </Group>
-            <Button variant="filled" color="blue" onClick={() => setLoginModalOpen(true)}>
-              Sign In
-            </Button>
-          </Group>
-        </Card>
+        <SignInPrompt onSignIn={() => setLoginModalOpen(true)} />
       </Group>
 
-      {/* Playlist Header */}
-      <Card radius="md" p="lg" mb="xl" className={playlistStyles.playlistHeaderCard}>
-        <Group align="flex-start" wrap="nowrap" gap="lg">
-          {/* Playlist Cover */}
-          <Box className={playlistStyles.playlistCover}>
-            <div className={playlistStyles.gameIconsGrid}>
-              {playlistData?.icons.slice(0, 4).map((icon, index) => (
-                <div key={index} className={playlistStyles.gameIconWrapper}>
-                  <Image
-                    src={`https://media.retroachievements.org/${icon}`}
-                    alt={`Game ${index + 1}`}
-                    width={80}
-                    height={80}
-                    className={playlistStyles.gameIcon}
-                  />
-                </div>
-              ))}
-            </div>
-          </Box>
+      <PlaylistHeaderCard playlist={playlistData} />
 
-          {/* Playlist Info */}
-          <Stack style={{ flex: 1 }} gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <div>
-                <Title order={1} size="2rem" mb="xs">
-                  {playlistData?.name}
-                </Title>
-                <Group gap="md" align="center" mb="sm">
-                  <Text size="lg" c="dimmed">@{playlistData?.createdBy}</Text>
-                  <Badge color="green" variant="light">
-                    Public Playlist
-                  </Badge>
-                </Group>
-              </div>
-
-              {/* Action Buttons */}
-              <Group gap="xs">
-                <Button
-                  leftSection={<IconHeart size={16} />}
-                  variant="light"
-                  color="red"
-                >
-                  {playlistData?.numberOfLikes} Likes
-                </Button>
-              </Group>
-            </Group>
-
-            {playlistData?.description?.trim() !== '' && (
-              <Text size="md" c="dimmed" mb="md">
-                {playlistData?.description}
-              </Text>
-            )}
-
-            <Group gap="lg">
-              <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfGames}</strong> games
-              </Text>
-              <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfConsoles}</strong> consoles
-              </Text>
-              <Text size="sm" c="dimmed">
-                Created {new Date(playlistData?.createdAt ?? new Date()).toLocaleDateString()}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Updated {new Date(playlistData?.updatedAt ?? new Date()).toLocaleDateString()}
-              </Text>
-            </Group>
-          </Stack>
-        </Group>
-      </Card>
-
-      {/* Basic Stats */}
       <SimpleGrid cols={isMobile ? 2 : 4} mb="xl" spacing="md">
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Total Games</Text>
-            <IconDeviceGamepad size={16} />
-          </Group>
-          <Text size="xl" fw={700}>{playlistData?.numberOfGames}</Text>
-          <Text size="xs" c="dimmed">In this playlist</Text>
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Total Points</Text>
-            <IconTrophy size={16} color="orange" />
-          </Group>
-          <Text size="xl" fw={700}>{playlistData?.totalPointsToEarn}</Text>
-          <Text size="xs" c="dimmed">Available to earn</Text>
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Achievements</Text>
-            <IconMedal size={16} color="blue" />
-          </Group>
-          <Text size="xl" fw={700}>{playlistData?.totalAchievementsToEarn}</Text>
-          <Text size="xs" c="dimmed">Total available</Text>
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Consoles</Text>
-            <IconTargetArrow size={16} color="green" />
-          </Group>
-          <Text size="xl" fw={700}>{playlistData?.numberOfConsoles}</Text>
-          <Text size="xs" c="dimmed">Different systems</Text>
-        </Card>
+        <PlaylistSummaryCard
+          label="Total Games"
+          icon={<IconDeviceGamepad size={16} />}
+          value={playlistData.numberOfGames}
+          caption="In this playlist"
+        />
+        <PlaylistSummaryCard
+          label="Total Points"
+          icon={<IconTrophy size={16} color="orange" />}
+          value={playlistData.totalPointsToEarn}
+          caption="Available to earn"
+        />
+        <PlaylistSummaryCard
+          label="Achievements"
+          icon={<IconMedal size={16} color="blue" />}
+          value={playlistData.totalAchievementsToEarn}
+          caption="Total available"
+        />
+        <PlaylistSummaryCard
+          label="Consoles"
+          icon={<IconTargetArrow size={16} color="green" />}
+          value={playlistData.numberOfConsoles}
+          caption="Different systems"
+        />
       </SimpleGrid>
 
-      {/* Search and Filters */}
-      <Group mb="md" className={playlistStyles.searchContainer}>
-        <Group style={{ flex: 1, maxWidth: 600 }} gap="xs">
-          <TextInput
-            placeholder="Search games..."
-            leftSection={<IconSearch size={16} />}
-            value={searchInput}
-            onChange={(e) => {
-              const value = e.currentTarget.value
-              setSearchInput(value)
-              if (value.trim() === '') {
-                setSearchTerm(null)
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && searchInput.trim() !== '') {
-                setSearchTerm(searchInput.trim())
-              }
-            }}
-            className={playlistStyles.searchInput}
-            style={{ flex: 1, minWidth: 200 }}
-            rightSection={
-              searchInput !== '' ? (
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
-                  onClick={() => {
-                    setSearchInput('')
-                    setSearchTerm(null)
-                  }}
-                >
-                  <IconX size={16} />
-                </ActionIcon>
-              ) : null
-            }
-          />
-          <Select
-            data={[
-              { value: '0', label: 'Game Title' },
-              { value: '1', label: 'Genre' }
-            ]}
-            value={searchDropdownValue}
-            onChange={(value) => setSearchDropdownValue(value ?? '0')}
-            style={{ minWidth: 120 }}
-            clearable
-          />
-          <Button
-            variant="filled"
-            color="blue"
-            leftSection={<IconSearch size={16} />}
-            className={playlistStyles.searchButton}
-            onClick={() => setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null)}
-            disabled={searchInput.trim() === ''}
-          >
-            Search
-          </Button>
-        </Group>
-      </Group>
+      <PlaylistSearchBar
+        searchInput={searchInput}
+        onSearchInputChange={setSearchInput}
+        searchType={searchDropdownValue}
+        onSearchTypeChange={setSearchDropdownValue}
+        onSearch={setSearchTerm}
+      />
 
       {/* Games Table */}
       <PaginatedTable
-        data={playlistData?.games ?? []}
+        data={playlistData.games}
         columns={columns}
         page={page}
-        total={Math.ceil((playlistData?.numberOfGames ?? 0) / pageSize)}
+        total={Math.ceil(playlistData.numberOfGames / pageSize)}
         onPageChange={(newPage) => setPage(newPage)}
         onRowClick={(game) => gameModal.showModal(game.gameId)}
         pageSize={pageSize}
@@ -468,24 +212,11 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
         ]}
       />
 
-      {/* Call to action for better experience */}
-      <Group justify="space-between" align="center" mt="md" p="sm" style={{
-        background: 'light-dark(#f8f9fa, rgba(255, 255, 255, 0.02))',
-        borderRadius: 8,
-        border: '1px solid light-dark(#e9ecef, rgba(255, 255, 255, 0.1))'
-      }}>
-        <Text size="sm" c="dimmed">
-          Sign in to track your progress on these games
-        </Text>
-        <Group gap="xs">
-          <Button variant="filled" color="blue" size="xs" onClick={() => setLoginModalOpen(true)}>
-            Sign In
-          </Button>
-          <Button variant="outline" color="blue" size="xs" onClick={() => setRegisterModalOpen(true)}>
-            Create Account
-          </Button>
-        </Group>
-      </Group>
+      <SignInPrompt
+        variant="footer"
+        onSignIn={() => setLoginModalOpen(true)}
+        onRegister={() => setRegisterModalOpen(true)}
+      />
 
       {/* Modals */}
       <LoginModal

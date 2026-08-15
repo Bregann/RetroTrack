@@ -11,7 +11,7 @@ const AWARD_LABELS: Record<number, { text: string; color: string }> = {
   [HighestAwardKind.Mastered]: { text: 'Mastered', color: '#fab005' },
   [HighestAwardKind.Completed]: { text: 'Completed', color: '#fd7e14' },
   [HighestAwardKind.BeatenHardcore]: { text: 'Beaten HC', color: '#15aabf' },
-  [HighestAwardKind.BeatenSoftcore]: { text: 'Beaten SC', color: '#12b886' },
+  [HighestAwardKind.BeatenSoftcore]: { text: 'Beaten Casual', color: '#12b886' },
 };
 
 type Props = {

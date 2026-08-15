@@ -8,8 +8,13 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'RetroTrack - In Progress Games',
+  title: 'In Progress Games',
   description: 'View all games you are currently playing on RetroTrack. Track your progress and achievements for each game.',
+  // Per-user page behind a login - nothing here for a crawler to index
+  robots: {
+    index: false,
+    follow: true
+  },
   icons: {
     icon: '/favicon.ico'
   }

@@ -5,8 +5,11 @@ import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'RetroTrack - Home',
-  description: 'RetroTrack is a feature-rich achievement tracker for RetroAchievements!',
+  title: 'Recently Added & Updated Games',
+  description: 'See the newest RetroAchievements sets and the games updated most recently, across every supported console on RetroTrack.',
+  alternates: {
+    canonical: '/home'
+  },
   icons: {
     icon: '/favicon.ico'
   }

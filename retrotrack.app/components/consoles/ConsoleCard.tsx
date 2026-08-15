@@ -12,7 +12,7 @@ type Props = {
 const PROGRESS_ITEMS: { key: keyof ConsoleProgressData; label: string; color: string }[] = [
   { key: 'gamesBeatenHardcore', label: 'Beaten HC', color: '#15aabf' },
   { key: 'gamesMastered', label: 'Mastered', color: '#fab005' },
-  { key: 'gamesBeatenSoftcore', label: 'Beaten SC', color: '#12b886' },
+  { key: 'gamesBeatenSoftcore', label: 'Beaten Casual', color: '#12b886' },
   { key: 'gamesCompleted', label: 'Completed', color: '#fd7e14' },
 ];
 

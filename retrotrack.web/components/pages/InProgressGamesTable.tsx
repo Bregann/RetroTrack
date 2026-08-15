@@ -2,14 +2,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Badge, Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
+import { Button, Center, Checkbox, Container, Group, Input, Loader, Paper, Select, Text, Title } from '@mantine/core'
 import PaginatedTable, { Column, SortOption } from '../shared/PaginatedTable'
 import Image from 'next/image'
 import styles from '@/css/components/publicGamesTable.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useDebouncedState, useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
-import { HighestAwardKind } from '@/enums/highestAwardKind'
+import awardHelper from '@/helpers/awardHelper'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
@@ -81,22 +81,7 @@ const columns: Column<LoggedInGame>[] = [
   {
     title: 'Award',
     key: 'highestAward',
-    render: (item) => {
-      switch (item.highestAward) {
-        case HighestAwardKind.BeatenSoftcore:
-          return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
-        case HighestAwardKind.BeatenHardcore:
-          return <Badge color="cyan" variant="light">Beaten (Hardcore)</Badge>
-        case HighestAwardKind.Completed:
-          return <Badge color="orange" variant="light">Completed</Badge>
-        case HighestAwardKind.Mastered:
-          return <Badge color="yellow" variant="filled" style={{ whiteSpace: 'normal', overflow: 'visible' }}>Mastered</Badge>
-        case HighestAwardKind.Unknown:
-          return ''
-        default:
-          return ''
-      }
-    }
+    render: (item) => awardHelper.getAwardBadge(item.highestAward)
   },
   {
     title: 'Time to Beat',

@@ -8,8 +8,11 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'RetroTrack - All Games',
-  description: 'View all games across all consoles on RetroTrack. Track your progress and achievements for each game.',
+  title: 'All RetroAchievements Games',
+  description: 'Browse every game with RetroAchievements across all supported consoles. Sort by achievements, players and completion time, and track your progress on RetroTrack.',
+  alternates: {
+    canonical: '/console/allgames'
+  },
   icons: {
     icon: '/favicon.ico'
   }

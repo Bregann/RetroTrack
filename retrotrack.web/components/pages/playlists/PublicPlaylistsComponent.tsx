@@ -63,7 +63,9 @@ export default function LoggedOutPlaylistsComponent() {
       })
     }
 
-    const sorted = playlists.sort((a, b) => {
+    // Sort a copy: `playlists` is only a shallow copy of the cached array when the
+    // filter branch above ran, so sorting in place can reorder React Query's cache
+    const sorted = [...playlists].sort((a, b) => {
       switch (sortBy) {
         case 'likes':
           return b.numberOfLikes - a.numberOfLikes

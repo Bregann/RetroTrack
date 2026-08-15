@@ -75,6 +75,16 @@ export function LoggedInGameModal(props: LoggedInGameModalProps) {
       gameAutoUpdateTimerRef.current = null
       notificationHelper.showSuccessNotification('Disabled', 'Achievement auto updates disabled', 3000, <IconCheck />)
     }
+
+    // Without this, closing the modal while auto update is on leaves the interval
+    // refetching forever. Only the timer is cleared here - the "Disabled" toast
+    // belongs to the toggle above, not to unmounting.
+    return () => {
+      if (gameAutoUpdateTimerRef.current !== null) {
+        clearInterval(gameAutoUpdateTimerRef.current)
+        gameAutoUpdateTimerRef.current = null
+      }
+    }
   }, [autoUpdateChecked, refetch])
 
   return (

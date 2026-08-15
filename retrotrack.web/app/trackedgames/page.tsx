@@ -6,8 +6,13 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'RetroTrack - Tracked Games',
+  title: 'Tracked Games',
   description: 'View and manage your tracked games on RetroTrack. Keep track of your progress and achievements.',
+  // Per-user page behind a login - nothing here for a crawler to index
+  robots: {
+    index: false,
+    follow: true
+  },
   icons: {
     icon: '/favicon.ico'
   }

@@ -3,49 +3,20 @@
 import {
   Container,
   Group,
-  Stack,
-  Text,
-  Card,
-  Image,
-  SimpleGrid,
   Button,
-  Progress,
-  Box,
-  ActionIcon,
   Title,
-  Badge,
-  TextInput,
+  Text,
   Loader,
-  Center,
-  Select
+  Center
 } from '@mantine/core'
-import { useMediaQuery } from '@mantine/hooks'
-import {
-  IconTrophy,
-  IconDeviceGamepad,
-  IconHeart,
-  IconArrowLeft,
-  IconSearch,
-  IconPlayerPlay,
-  IconCrown,
-  IconMedal,
-  IconTargetArrow,
-  IconEdit,
-  IconTrash,
-  IconList,
-  IconPlus,
-  IconX
-} from '@tabler/icons-react'
+import { IconArrowLeft, IconHeart } from '@tabler/icons-react'
 import pageStyles from '@/css/pages/gamePage.module.scss'
-import playlistStyles from '@/css/pages/playlists.module.scss'
-import tableStyles from '@/css/components/publicGamesTable.module.scss'
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import PaginatedTable from '@/components/shared/PaginatedTable'
-import type { Column, SortOption } from '@/components/shared/PaginatedTable'
+import type { SortOption } from '@/components/shared/PaginatedTable'
 import { useGameModal } from '@/context/gameModalContext'
 import { GetLoggedInPlaylistDataResponse, LoggedInGameItem } from '@/interfaces/api/playlists/GetLoggedInPlaylistDataResponse'
-import { HighestAwardKind } from '@/enums/highestAwardKind'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { useMutationApiData } from '@/helpers/mutations/useMutationApiData'
@@ -55,44 +26,17 @@ import EditPlaylistDetailsModal from '@/components/playlists/EditPlaylistDetails
 import DeletePlaylistGamesModal from '@/components/playlists/DeletePlaylistGamesModal'
 import ManageGameOrderModal from '@/components/playlists/ManageGameOrderModal'
 import AddGamesToPlaylistModal from '@/components/playlists/AddGamesToPlaylistModal'
+import { PlaylistHeaderCard } from './shared/PlaylistHeaderCard'
+import { PlaylistStatsGrid } from './shared/PlaylistStatsGrid'
+import { PlaylistSearchBar } from './shared/PlaylistSearchBar'
+import { getLoggedInPlaylistColumns } from './shared/loggedInPlaylistColumns'
 
 interface LoggedInPlaylistPageProps {
   playlistId: string
 }
 
-function getAwardColor(award?: HighestAwardKind): string {
-  switch (award) {
-    case HighestAwardKind.Mastered: return 'yellow'
-    case HighestAwardKind.Completed: return 'blue'
-    case HighestAwardKind.BeatenHardcore: return 'red'
-    case HighestAwardKind.BeatenSoftcore: return 'orange'
-    default: return 'gray'
-  }
-}
-
-function getAwardIcon(award?: HighestAwardKind) {
-  switch (award) {
-    case HighestAwardKind.Mastered: return <IconCrown size={16} />
-    case HighestAwardKind.Completed: return <IconMedal size={16} />
-    case HighestAwardKind.BeatenHardcore: return <IconTargetArrow size={16} />
-    case HighestAwardKind.BeatenSoftcore: return <IconPlayerPlay size={16} />
-    default: return <IconDeviceGamepad size={16} />
-  }
-}
-
-function getAwardLabel(award?: HighestAwardKind): string {
-  switch (award) {
-    case HighestAwardKind.Mastered: return 'Mastered'
-    case HighestAwardKind.Completed: return 'Completed'
-    case HighestAwardKind.BeatenHardcore: return 'Beaten (Hardcore)'
-    case HighestAwardKind.BeatenSoftcore: return 'Beaten (Softcore)'
-    default: return 'Not Started'
-  }
-}
-
 export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 768px)')
   const gameModal = useGameModal()
   const queryClient = useQueryClient()
 
@@ -185,156 +129,19 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     }
   })
 
-  // Table columns configuration
-  const columns: Column<LoggedInGameItem>[] = [
-    {
-      title: '',
-      key: 'gameIconUrl',
-      render: (game) => (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '64px' }}>
-          <Image
-            src={`https://media.retroachievements.org${game.gameIconUrl}`}
-            alt={game.title}
-            width={64}
-            height={64}
-            className={tableStyles.roundedImage}
-          />
-        </div>
-      )
-    },
-    {
-      title: '#',
-      key: 'orderIndex',
-      sortable: true,
-      render: (game) => (
-        <Text fw={600} size="sm" c="dimmed" style={{ textAlign: 'center', minWidth: '40px' }}>
-          {game.orderIndex}
-        </Text>
-      )
-    },
-    {
-      title: 'Game Title',
-      key: 'title',
-      sortable: true,
-      render: (game) => (
-        <Text fw={500}>{game.title}</Text>
-      )
-    },
-    {
-      title: 'Console',
-      key: 'consoleName',
-      sortable: true
-    },
-    {
-      title: 'Genre',
-      key: 'genre',
-      sortable: true,
-      render: (game) => {
-        const genres = game.genre.split(',').map(g => g.trim()).filter(g => g.length > 0)
-        return (
-          <div style={{ minWidth: '140px', maxWidth: '200px' }}>
-            <Group gap="xs" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              {genres.map((genre, index) => (
-                <Badge
-                  key={index}
-                  color="blue"
-                  variant="light"
-                  size="sm"
-                  style={{ cursor: 'pointer' }}
-                  onClick={(e) => {
-                    e.stopPropagation() // Prevent row click
-                    setSearchDropdownValue('1') // Set to Genre
-                    setSearchTerm(genre)
-                    setSearchInput(genre)
-                    setPage(1) // Reset to first page
-                  }}
-                >
-                  {genre}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        )
+  // Column definitions live in ./shared/loggedInPlaylistColumns; memoised so the
+  // table does not receive a new array identity on every render
+  const columns = useMemo(
+    () => getLoggedInPlaylistColumns({
+      onGenreClick: (genre) => {
+        setSearchDropdownValue('1') // Set to Genre
+        setSearchTerm(genre)
+        setSearchInput(genre)
+        setPage(1) // Reset to first page
       }
-    },
-    {
-      title: 'Status',
-      key: 'highestAward',
-      sortable: true,
-      render: (game) => {
-        const hasStarted = game.achievementsEarnedSoftcore > 0 || game.achievementsEarnedHardcore > 0
-        const isNotStartedButHasProgress = !game.highestAward && hasStarted
-
-        return (
-          <div style={{ minWidth: '165px' }}>
-            <Badge
-              color={isNotStartedButHasProgress ? 'cyan' : getAwardColor(game.highestAward)}
-              variant="light"
-              leftSection={getAwardIcon(game.highestAward)}
-            >
-              {isNotStartedButHasProgress ? 'Started' : getAwardLabel(game.highestAward)}
-            </Badge>
-          </div>
-        )
-      }
-    },
-    {
-      title: 'Achievements',
-      key: 'achievementCount',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Progress',
-      key: 'achievementsEarnedHardcore',
-      sortable: true,
-      toggleDescFirst: true,
-      render: (game) => {
-        const totalEarned = Math.max(game.achievementsEarnedSoftcore, game.achievementsEarnedHardcore)
-        const achievementPercentage = game.achievementCount > 0 ? (totalEarned / game.achievementCount) * 100 : 0
-        const isHardcore = game.achievementsEarnedHardcore > game.achievementsEarnedSoftcore
-        return (
-          <div style={{ minWidth: '120px' }}>
-            <Progress
-              value={achievementPercentage}
-              size="sm"
-              mb="xs"
-              color={isHardcore ? 'yellow' : 'blue'}
-            />
-            <Text size="xs" c="dimmed" ta="center">
-              {totalEarned} / {game.achievementCount}
-            </Text>
-          </div>
-        )
-      }
-    },
-    {
-      title: 'Points',
-      key: 'points',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Players',
-      key: 'players',
-      sortable: true,
-      toggleDescFirst: true
-    },
-    {
-      title: 'Time to Beat',
-      key: 'medianTimeToBeatHardcoreSeconds',
-      sortable: true,
-      toggleDescFirst: true,
-      render: (game) => game.medianTimeToBeatHardcoreFormatted ?? 'N/A'
-    },
-    {
-      title: 'Time to Master',
-      key: 'medianTimeToMasterSeconds',
-      sortable: true,
-      toggleDescFirst: true,
-      render: (game) => game.medianTimeToMasterFormatted ?? 'N/A'
-    }
-  ]
+    }),
+    []
+  )
 
   if (isErrorPlaylistData && playlistData === undefined) {
     return (
@@ -348,7 +155,9 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     )
   }
 
-  if (isLoadingPlaylistData && playlistData === undefined) {
+  // Covers the initial load and any later undefined state, so everything below
+  // can treat playlistData as present rather than optional-chaining every field
+  if (playlistData === undefined) {
     return (
       <Center style={{ height: '60vh' }}>
         <Loader size="xl" variant="dots" />
@@ -369,265 +178,26 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         </Button>
       </Group>
 
-      {/* Playlist Header */}
-      <Card radius="md" p="lg" mb="xl" className={playlistStyles.playlistHeaderCard}>
-        <Group align="flex-start" wrap="nowrap" gap="lg">
-          {/* Playlist Cover */}
-          <Box className={playlistStyles.playlistCover}>
-            <div className={playlistStyles.gameIconsGrid}>
-              {playlistData?.icons.slice(0, 4).map((icon, index) => (
-                <div key={index} className={playlistStyles.gameIconWrapper}>
-                  <Image
-                    src={`https://media.retroachievements.org/${icon}`}
-                    alt={`Game ${index + 1}`}
-                    width={80}
-                    height={80}
-                    className={playlistStyles.gameIcon}
-                  />
-                </div>
-              ))}
-            </div>
-          </Box>
+      <PlaylistHeaderCard
+        playlist={playlistData}
+        onEdit={() => setEditModalOpened(true)}
+        onToggleLike={async () => { await toggleLikeMutation.mutateAsync(null) }}
+        likePending={toggleLikeMutation.isPending}
+      />
 
-          {/* Playlist Info */}
-          <Stack style={{ flex: 1 }} gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <div>
-                <Group gap="xs" mb="xs" align="center">
-                  <Title order={1} size="2rem">
-                    {playlistData?.name}
-                  </Title>
-                  <ActionIcon
-                    variant="subtle"
-                    color="blue"
-                    size="sm"
-                    onClick={() => setEditModalOpened(true)}
-                    title="Edit playlist details"
-                  >
-                    <IconEdit size={16} />
-                  </ActionIcon>
-                </Group>
-                <Group gap="md" align="center" mb="sm">
-                  <Text size="lg" c="dimmed">@{playlistData?.createdBy}</Text>
-                  {playlistData !== undefined ? (
-                    playlistData.isPlaylistOwner ? (
-                      <Badge color={playlistData.isPublic ? 'green' : 'red'} variant="light">
-                        My Playlist - {playlistData.isPublic ? 'Public' : 'Private'}
-                      </Badge>
-                    ) : (
-                      <Badge color={playlistData.isPublic ? 'blue' : 'gray'} variant="light">
-                        {playlistData.isPublic ? 'Public Playlist' : 'Private Playlist'}
-                      </Badge>
-                    )
-                  ) : null}
-                </Group>
-              </div>
+      <PlaylistStatsGrid playlist={playlistData} />
 
-              {/* Action Buttons */}
-              <Group gap="xs">
-                <Button
-                  leftSection={<IconHeart size={16} fill={playlistData?.isLiked === true ? 'currentColor' : 'none'} />}
-                  variant={playlistData?.isLiked === true ? 'filled' : 'light'}
-                  color="red"
-                  onClick={async () => { await toggleLikeMutation.mutateAsync(null) }}
-                  loading={toggleLikeMutation.isPending}
-                  disabled={toggleLikeMutation.isPending}
-                >
-                  {playlistData?.numberOfLikes?.toLocaleString()} {playlistData?.isLiked === true ? 'Liked' : 'Likes'}
-                </Button>
-              </Group>
-            </Group>
+      <PlaylistSearchBar
+        searchInput={searchInput}
+        onSearchInputChange={setSearchInput}
+        searchType={searchDropdownValue}
+        onSearchTypeChange={setSearchDropdownValue}
+        onSearch={setSearchTerm}
+        onAddGames={() => setAddGamesModalOpened(true)}
+        onManageOrder={() => setOrderModalOpened(true)}
+        onDeleteGames={() => setManageGamesModalOpened(true)}
+      />
 
-            {playlistData?.description?.trim() !== '' && (
-              <Text size="md" c="dimmed" mb="md">
-                {playlistData?.description}
-              </Text>
-            )}
-
-            <Group gap="lg">
-              <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfGames?.toLocaleString()}</strong> games
-              </Text>
-              <Text size="sm" c="dimmed">
-                <strong>{playlistData?.numberOfConsoles?.toLocaleString()}</strong> consoles
-              </Text>
-              <Text size="sm" c="dimmed">
-                Created {new Date(playlistData?.createdAt ?? new Date()).toLocaleDateString()}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Updated {new Date(playlistData?.updatedAt ?? new Date()).toLocaleDateString()}
-              </Text>
-            </Group>
-          </Stack>
-        </Group>
-      </Card>
-
-      {/* Progress Stats */}
-      <SimpleGrid cols={isMobile ? 2 : 4} mb="xl" spacing="md">
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Beaten</Text>
-            <Group gap={4}>
-              <IconPlayerPlay size={16} color="orange" />
-            </Group>
-          </Group>
-          <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{((playlistData?.totalGamesBeatenHardcore ?? 0) + (playlistData?.totalGamesBeatenSoftcore ?? 0)).toLocaleString()}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist?.toLocaleString()}</Text>
-          </Group>
-          <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageBeaten}%</Text>
-          <Progress value={playlistData?.percentageBeaten ?? 0} size="xs" color="orange" />
-          {playlistData?.totalGamesBeatenSoftcore !== 0 && playlistData?.totalGamesBeatenHardcore !== playlistData?.totalGamesBeatenSoftcore && (
-            <Text size="xs" c="dimmed" mt="xs">
-              {playlistData?.totalGamesBeatenHardcore === 0
-                ? `SC: ${playlistData?.totalGamesBeatenSoftcore?.toLocaleString()}`
-                : `HC: ${playlistData?.totalGamesBeatenHardcore?.toLocaleString()} | SC: ${playlistData?.totalGamesBeatenSoftcore?.toLocaleString()}`}
-            </Text>
-          )}
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Completed / Mastered</Text>
-            <Group gap={4}>
-              <IconMedal size={16} color="blue" />
-            </Group>
-          </Group>
-          <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{((playlistData?.totalGamesCompletedSoftcore ?? 0) + (playlistData?.totalGamesMasteredHardcore ?? 0)).toLocaleString()}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalGamesInPlaylist?.toLocaleString()}</Text>
-          </Group>
-          <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageMastered}%</Text>
-          <Progress value={playlistData?.percentageMastered ?? 0} size="xs" color="blue" />
-          {playlistData?.totalGamesCompletedSoftcore !== 0 && playlistData?.totalGamesMasteredHardcore !== playlistData?.totalGamesCompletedSoftcore && (
-            <Text size="xs" c="dimmed" mt="xs">
-              {playlistData?.totalGamesMasteredHardcore === 0
-                ? `SC: ${playlistData?.totalGamesCompletedSoftcore?.toLocaleString()}`
-                : `HC: ${playlistData?.totalGamesMasteredHardcore?.toLocaleString()} | SC: ${playlistData?.totalGamesCompletedSoftcore?.toLocaleString()}`}
-            </Text>
-          )}
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Points</Text>
-            <IconTrophy size={16} color="orange" />
-          </Group>
-          <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{playlistData?.totalPointsToEarn?.toLocaleString()}</Text>
-          </Group>
-        </Card>
-
-        <Card radius="md" p="md" className={playlistStyles.statCard}>
-          <Group justify="space-between" mb="xs">
-            <Text size="sm" c="dimmed">Achievements</Text>
-            <IconMedal size={16} color="blue" />
-          </Group>
-          <Group align="baseline" gap={4}>
-            <Text size="xl" fw={700}>{(Math.max(playlistData?.totalAchievementsEarnedSoftcore ?? 0, playlistData?.totalAchievementsEarnedHardcore ?? 0)).toLocaleString()}</Text>
-            <Text size="sm" c="dimmed">/{playlistData?.totalAchievementsToEarn?.toLocaleString()}</Text>
-          </Group>
-          <Text size="xs" c="dimmed" mb="xs">{playlistData?.percentageAchievementsGained}%</Text>
-          <Progress value={playlistData?.percentageAchievementsGained ?? 0} size="xs" color="green" />
-          {playlistData?.totalAchievementsEarnedSoftcore !== 0 && playlistData?.totalAchievementsEarnedHardcore !== playlistData?.totalAchievementsEarnedSoftcore && (
-            <Text size="xs" c="dimmed" mt="xs">
-              {playlistData?.totalAchievementsEarnedHardcore === 0
-                ? `SC: ${playlistData?.totalAchievementsEarnedSoftcore?.toLocaleString()}`
-                : `HC: ${playlistData?.totalAchievementsEarnedHardcore?.toLocaleString()} | SC: ${playlistData?.totalAchievementsEarnedSoftcore?.toLocaleString()}`}
-            </Text>
-          )}
-        </Card>
-      </SimpleGrid>
-
-      {/* Search and Filters */}
-      <Group mb="md" className={playlistStyles.searchContainer} justify="space-between">
-        <Group style={{ flex: 1, maxWidth: 600 }} gap="xs">
-          <TextInput
-            placeholder="Search games..."
-            leftSection={<IconSearch size={16} />}
-            value={searchInput}
-            onChange={(e) => {
-              const value = e.currentTarget.value
-              setSearchInput(value)
-              if (value.trim() === '') {
-                setSearchTerm(null)
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && searchInput.trim() !== '') {
-                setSearchTerm(searchInput.trim())
-              }
-            }}
-            className={playlistStyles.searchInput}
-            style={{ flex: 1, minWidth: 200 }}
-            rightSection={
-              searchInput !== '' ? (
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
-                  onClick={() => {
-                    setSearchInput('')
-                    setSearchTerm(null)
-                  }}
-                >
-                  <IconX size={16} />
-                </ActionIcon>
-              ) : null
-            }
-          />
-          <Select
-            data={[
-              { value: '0', label: 'Game Title' },
-              { value: '1', label: 'Genre' }
-            ]}
-            value={searchDropdownValue}
-            onChange={(value) => setSearchDropdownValue(value ?? '0')}
-            style={{ minWidth: 120 }}
-            clearable
-          />
-          <Button
-            variant="filled"
-            color="blue"
-            leftSection={<IconSearch size={16} />}
-            className={playlistStyles.searchButton}
-            onClick={() => setSearchTerm(searchInput.trim() !== '' ? searchInput.trim() : null)}
-            disabled={searchInput.trim() === ''}
-          >
-            Search
-          </Button>
-        </Group>
-
-        {/* Playlist Management Actions */}
-        <Group gap="xs">
-          <ActionIcon
-            variant="light"
-            color="blue"
-            size="lg"
-            title="Add games to playlist"
-            onClick={() => setAddGamesModalOpened(true)}
-          >
-            <IconPlus size={20} />
-          </ActionIcon>
-          <ActionIcon
-            variant="light"
-            color="green"
-            size="lg"
-            onClick={() => setOrderModalOpened(true)}
-            title="Manage game order"
-          >
-            <IconList size={20} />
-          </ActionIcon>
-          <ActionIcon
-            variant="light"
-            color="red"
-            size="lg"
-            onClick={() => setManageGamesModalOpened(true)}
-            title="Delete games from playlist"
-          >
-            <IconTrash size={20} />
-          </ActionIcon>
-        </Group>
-      </Group>
 
       {/* Games Table */}
       <PaginatedTable

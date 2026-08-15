@@ -9,7 +9,7 @@ import playlistStyles from '@/css/pages/playlists.module.scss'
 import type { LoggedInGame, GetUserProgressForConsoleResponse } from '@/interfaces/api/games/GetUserProgressForConsoleResponse'
 import { useMediaQuery } from '@mantine/hooks'
 import { useGameModal } from '@/context/gameModalContext'
-import { HighestAwardKind } from '@/enums/highestAwardKind'
+import awardHelper from '@/helpers/awardHelper'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import Loading from '@/app/loading'
@@ -87,22 +87,7 @@ const baseColumns: Column<LoggedInGame>[] = [
   {
     title: 'Award',
     key: 'highestAward',
-    render: (item: LoggedInGame) => {
-      switch (item.highestAward) {
-        case HighestAwardKind.BeatenSoftcore:
-          return <Badge color="teal" variant="light">Beaten (Softcore)</Badge>
-        case HighestAwardKind.BeatenHardcore:
-          return <Badge color="cyan" variant="light">Beaten (Hardcore)</Badge>
-        case HighestAwardKind.Completed:
-          return <Badge color="orange" variant="light">Completed</Badge>
-        case HighestAwardKind.Mastered:
-          return <Badge color="yellow" variant="filled" style={{ whiteSpace: 'normal', overflow: 'visible' }}>Mastered</Badge>
-        case HighestAwardKind.Unknown:
-          return ''
-        default:
-          return ''
-      }
-    }
+    render: (item: LoggedInGame) => awardHelper.getAwardBadge(item.highestAward)
   },
   {
     title: 'Time to Beat',
@@ -322,8 +307,8 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               {data.totalGamesBeatenSoftcore !== 0 && data.totalGamesBeatenHardcore !== data.totalGamesBeatenSoftcore && (
                 <Text size="xs" c="dimmed" mt="xs">
                   {data.totalGamesBeatenHardcore === 0
-                    ? `SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`
-                    : `HC: ${data.totalGamesBeatenHardcore.toLocaleString()} | SC: ${data.totalGamesBeatenSoftcore.toLocaleString()}`}
+                    ? `Casual: ${data.totalGamesBeatenSoftcore.toLocaleString()}`
+                    : `Hardcore: ${data.totalGamesBeatenHardcore.toLocaleString()} | Casual: ${data.totalGamesBeatenSoftcore.toLocaleString()}`}
                 </Text>
               )}
             </Card>
@@ -350,8 +335,8 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               {data.totalGamesCompletedSoftcore !== 0 && data.totalGamesMasteredHardcore !== data.totalGamesCompletedSoftcore && (
                 <Text size="xs" c="dimmed" mt="xs">
                   {data.totalGamesMasteredHardcore === 0
-                    ? `SC: ${data.totalGamesCompletedSoftcore.toLocaleString()}`
-                    : `HC: ${data.totalGamesMasteredHardcore.toLocaleString()} | SC: ${data.totalGamesCompletedSoftcore.toLocaleString()}`}
+                    ? `Casual: ${data.totalGamesCompletedSoftcore.toLocaleString()}`
+                    : `Hardcore: ${data.totalGamesMasteredHardcore.toLocaleString()} | Casual: ${data.totalGamesCompletedSoftcore.toLocaleString()}`}
                 </Text>
               )}
             </Card>
@@ -386,8 +371,8 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
               {data.totalAchievementsEarnedSoftcore !== 0 && data.totalAchievementsEarnedHardcore !== data.totalAchievementsEarnedSoftcore && (
                 <Text size="xs" c="dimmed" mt="xs">
                   {data.totalAchievementsEarnedHardcore === 0
-                    ? `SC: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`
-                    : `HC: ${data.totalAchievementsEarnedHardcore.toLocaleString()} | SC: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`}
+                    ? `Casual: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`
+                    : `Hardcore: ${data.totalAchievementsEarnedHardcore.toLocaleString()} | Casual: ${data.totalAchievementsEarnedSoftcore.toLocaleString()}`}
                 </Text>
               )}
             </Card>

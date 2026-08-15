@@ -1,13 +1,14 @@
 import { MetadataRoute } from 'next'
 import { doGet } from '@/helpers/apiClient'
 import { GetGameIdsResponse } from '@/interfaces/sitemap/GetGameIdsResponse'
+import { absoluteUrl } from '@/helpers/seo'
 
 const URLS_PER_SITEMAP = 45000 // Using 45k to be safe
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapEntries: MetadataRoute.Sitemap = [
     {
-      url: 'https://retrotrack.bregan.me/sitemap-static',
+      url: absoluteUrl('/sitemap-static'),
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1.0
@@ -24,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Add entries for each game sitemap chunk
       for (let i = 0; i < numberOfSitemaps; i++) {
         sitemapEntries.push({
-          url: `https://retrotrack.bregan.me/sitemap-games/${i}/sitemap.xml`,
+          url: absoluteUrl(`/sitemap-games/${i}/sitemap.xml`),
           lastModified: new Date(),
           changeFrequency: 'daily' as const,
           priority: 0.8

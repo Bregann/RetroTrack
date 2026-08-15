@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { doGet } from '@/helpers/apiClient'
 import { GetGameIdsResponse } from '@/interfaces/sitemap/GetGameIdsResponse'
+import { absoluteUrl } from '@/helpers/seo'
 
 const URLS_PER_SITEMAP = 45000
 
@@ -34,7 +35,7 @@ export async function GET(
 
     // Pre-process the data to avoid doing date operations in template literal
     const urlEntries = gamesForThisSitemap.map((game) => ({
-      loc: `https://retrotrack.bregan.me/game/${game.id}`,
+      loc: absoluteUrl(`/game/${game.id}`),
       // Use the current date as a fallback if lastUpdated is null or undefined
       lastmod: new Date(game.lastUpdated ?? Date.now()).toISOString(),
       changefreq: 'daily',

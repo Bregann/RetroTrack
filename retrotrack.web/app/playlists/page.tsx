@@ -8,8 +8,11 @@ import { cookies } from 'next/headers'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'RetroTrack - Playlists',
-    description: 'Discover and manage game playlists on RetroTrack. Create custom playlists, explore community playlists, and track your gaming progress.',
+    title: 'Community Game Playlists',
+    description: 'Discover community-made RetroAchievements playlists on RetroTrack. Browse curated game collections, create your own playlists and track your progress through them.',
+    alternates: {
+      canonical: '/playlists'
+    },
     icons: {
       icon: '/favicon.ico'
     }

@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
+import reactHooks from 'eslint-plugin-react-hooks'
 
 const eslintConfig = [
   {
@@ -45,6 +46,7 @@ const eslintConfig = [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
+      'react-hooks': reactHooks,
     },
     rules: {
       'no-trailing-spaces': ['error'],
@@ -71,6 +73,12 @@ const eslintConfig = [
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/strict-boolean-expressions': 'off',
+      // Catches the class of bug the formatting rules above cannot: hooks called
+      // conditionally, and effects with missing cleanups or stale dependencies.
+      // rules-of-hooks is an error because a violation is always a real bug;
+      // exhaustive-deps is a warning so it can be triaged rather than blocking.
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     }
   }
 ]

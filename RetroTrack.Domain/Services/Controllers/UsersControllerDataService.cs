@@ -140,8 +140,8 @@ namespace RetroTrack.Domain.Services.Controllers
                         GamesBeatenSoftcore = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenSoftcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed),
                         GamesMastered = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered),
                         GamesCompleted = group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed),
-                        PercentageBeatenSoftcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) != HighestAwardKind.BeatenSoftcore) / group.Count() * 100, 2) : 0,
-                        PercentageBeatenHardcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) != HighestAwardKind.BeatenHardcore) / group.Count() * 100, 2) : 0,
+                        PercentageBeatenSoftcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenSoftcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed) / group.Count() * 100, 2) : 0,
+                        PercentageBeatenHardcore = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.BeatenHardcore || RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered) / group.Count() * 100, 2) : 0,
                         PercentageCompleted = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Completed) / group.Count() * 100, 2) : 0,
                         PercentageMastered = group.Count() != 0 ? Math.Round((double)group.Count(x => RetroAchievementsHelper.ConvertHighestAwardKind(x.HighestAwardKind) == HighestAwardKind.Mastered) / group.Count() * 100, 2) : 0
                     })
@@ -247,8 +247,8 @@ namespace RetroTrack.Domain.Services.Controllers
                                 GamesBeatenSoftcore = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.Completed),
                                 GamesMastered = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered),
                                 GamesCompleted = grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Completed),
-                                PercentageBeatenSoftcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind != HighestAwardKind.BeatenSoftcore) / gc.GameCount * 100, 2) : 0,
-                                PercentageBeatenHardcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind != HighestAwardKind.BeatenHardcore) / gc.GameCount * 100, 2) : 0,
+                                PercentageBeatenSoftcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenSoftcore || x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0,
+                                PercentageBeatenHardcore = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.BeatenHardcore || x.HighestAwardKind == HighestAwardKind.Mastered) / gc.GameCount * 100, 2) : 0,
                                 PercentageCompleted = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Completed) / gc.GameCount * 100, 2) : 0,
                                 PercentageMastered = gc.GameCount != 0 ? Math.Round((double)grouping.Count(x => x.HighestAwardKind == HighestAwardKind.Mastered) / gc.GameCount * 100, 2) : 0
                             };
