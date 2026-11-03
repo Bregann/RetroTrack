@@ -64,9 +64,8 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - name: Check packages match the Expo SDK
-        # TODO: the app is behind SDK 58 (gesture-handler, reanimated, screens, safe-area-context,
-        # worklets, eslint-config-expo). Run `npx expo install --fix`, test on a device, then
-        # delete continue-on-error so this step blocks merges.
+        # Advisory only: flags when the app is behind its Expo SDK's expected versions.
+        # Renovate leaves Expo packages alone, so fix with `npx expo install --fix` and test on a device.
         continue-on-error: true
         run: npx expo install --check
 
