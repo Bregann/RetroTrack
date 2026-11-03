@@ -1,0 +1,87 @@
+# Runs on every pull request (including Renovate's) and on pushes to master.
+# Renovate only auto-merges an update once every job here passes.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: .NET API (format, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore RetroTrack.sln
+      - name: Check formatting
+        run: dotnet format RetroTrack.sln --verify-no-changes --no-restore
+      - run: dotnet build RetroTrack.sln --no-restore -c Release
+
+  web:
+    name: Next.js site (lint, type-check, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: retrotrack.web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retrotrack.web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+  app:
+    name: Expo app (type-check, SDK versions)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: retrotrack.app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retrotrack.app/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - name: Check packages match the Expo SDK
+        # TODO: the app is behind SDK 58 (gesture-handler, reanimated, screens, safe-area-context,
+        # worklets, eslint-config-expo). Run `npx expo install --fix`, test on a device, then
+        # delete continue-on-error so this step blocks merges.
+        continue-on-error: true
+        run: npx expo install --check
+
+  rom-manager:
+    name: Electron ROM manager (lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: retrotrack.rommanager
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retrotrack.rommanager/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
