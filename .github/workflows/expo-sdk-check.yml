@@ -1,0 +1,93 @@
+# Weekly check of the Expo app's SDK. Renovate deliberately leaves Expo packages alone,
+# so this opens (or updates) a GitHub issue when the app needs updating and closes it
+# once everything is current. A new issue sends you a GitHub notification.
+name: Expo SDK check
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: retrotrack.app
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LABEL: expo-updates
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retrotrack.app/package-lock.json
+      - run: npm ci
+
+      - name: Check Expo SDK and package versions
+        id: check
+        run: |
+          set +e
+          check=$(npx expo install --check 2>&1); rc=$?
+          set -e
+          current=$(node -p "require('expo/package.json').version")
+          latest=$(npm view expo version)
+          cur_major=${current%%.*}; latest_major=${latest%%.*}
+
+          body="$RUNNER_TEMP/body.md"
+          needed=false
+          {
+            echo "Weekly Expo check for \`retrotrack.app\` (installed: \`expo@$current\`)."
+            echo
+            if [ "$latest_major" -gt "$cur_major" ]; then
+              needed=true
+              echo "## New Expo SDK available: SDK $latest_major"
+              echo
+              echo "You're on SDK $cur_major. Read the upgrade guide first: https://expo.dev/changelog"
+              echo
+              echo '```bash'
+              echo "cd retrotrack.app"
+              echo "npx expo install expo@^$latest_major.0.0"
+              echo "npx expo install --fix"
+              echo '```'
+              echo
+            fi
+            if [ $rc -ne 0 ]; then
+              needed=true
+              echo "## Packages behind SDK $cur_major"
+              echo
+              echo '```'
+              echo "$check" | grep -E ' - expected version' || echo "$check" | tail -20
+              echo '```'
+              echo
+              echo "Fix with:"
+              echo
+              echo '```bash'
+              echo "cd retrotrack.app && npx expo install --fix"
+              echo '```'
+              echo
+            fi
+            echo "Test on a device and make a new build after updating. This issue closes itself once the app is up to date."
+          } > "$body"
+          echo "needed=$needed" >> "$GITHUB_OUTPUT"
+          cat "$body"
+
+      - name: Open, update or close the issue
+        run: |
+          gh label create "$LABEL" --color 4630EB --description "Expo SDK updates needed" --force
+          issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ "${{ steps.check.outputs.needed }}" = "true" ]; then
+            if [ -n "$issue" ]; then
+              gh issue edit "$issue" --body-file "$RUNNER_TEMP/body.md"
+            else
+              gh issue create --title "Expo updates needed for retrotrack.app" --label "$LABEL" --body-file "$RUNNER_TEMP/body.md"
+            fi
+          elif [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "All Expo packages are up to date 🎉"
+          fi
