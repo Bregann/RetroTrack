@@ -1,0 +1,118 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "timezone": "Europe/London",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "minimumReleaseAge": "3 days",
+  "labels": [
+    "dependencies"
+  ],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ],
+    "schedule": [
+      "at any time"
+    ],
+    "minimumReleaseAge": null,
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "description": "Bundle every minor and patch update into one weekly PR, auto-merged when CI passes",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true
+    },
+    {
+      "description": "Major updates get their own PR and always wait for review",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": ".NET major versions (SDK images, Microsoft.* packages) need manual review",
+      "matchPackageNames": [
+        "mcr.microsoft.com/dotnet/**",
+        "Microsoft.**",
+        "System.**",
+        "Npgsql.**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": ".NET major upgrade",
+      "automerge": false
+    },
+    {
+      "description": "Next.js minor releases can change behaviour, so review them",
+      "matchPackageNames": [
+        "next",
+        "eslint-config-next",
+        "@next/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "major"
+      ],
+      "groupName": "Next.js",
+      "automerge": false
+    },
+    {
+      "description": "Electron and its build tooling: review and test the ROM manager by hand",
+      "matchPackageNames": [
+        "electron",
+        "electron-builder",
+        "electron-updater",
+        "electron-*"
+      ],
+      "groupName": "Electron",
+      "automerge": false
+    },
+    {
+      "description": "Expo app: non-SDK packages get a grouped PR but are not auto-merged (the app is not auto-deployed)",
+      "matchFileNames": [
+        "retrotrack.app/**"
+      ],
+      "groupName": "mobile app dependencies",
+      "groupSlug": "mobile-app",
+      "automerge": false
+    },
+    {
+      "description": "Expo app: SDK-managed packages are upgraded with `npx expo install expo@latest && npx expo install --fix`, never by Renovate",
+      "matchFileNames": [
+        "retrotrack.app/**"
+      ],
+      "matchPackageNames": [
+        "expo",
+        "expo-*",
+        "@expo/**",
+        "react",
+        "react-dom",
+        "react-native",
+        "react-native-*",
+        "@react-native/**",
+        "@react-native-community/**",
+        "@react-navigation/**",
+        "@shopify/react-native-*",
+        "typescript",
+        "@types/react",
+        "jest-expo",
+        "eslint-config-expo"
+      ],
+      "enabled": false
+    }
+  ]
+}

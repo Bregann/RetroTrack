@@ -20,7 +20,7 @@ export function TrackedGamesFilterBar({
   hideCompleted,
 }: Props) {
   const [searchText, setSearchText] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { isCompact } = useResponsive();
   const c = isCompact;
 

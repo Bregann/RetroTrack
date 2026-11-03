@@ -10,7 +10,7 @@ type UpdateState = 'idle' | 'requesting' | 'processing' | 'done';
 export function useProfileUpdate() {
   const [state, setState] = useState<UpdateState>('idle');
   const queryClient = useQueryClient();
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   const cleanup = () => {
     if (intervalRef.current) {
