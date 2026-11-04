@@ -91,7 +91,7 @@
       "automerge": false
     },
     {
-      "description": "Expo app: SDK-managed packages are upgraded with `npx expo install expo@latest && npx expo install --fix`, never by Renovate",
+      "description": "Expo app: SDK-managed packages are listed on the Dependency Dashboard but get no PR unless you tick them. Prefer `npx expo install --fix` (see the expo-updates issue).",
       "matchFileNames": [
         "retrotrack.app/**"
       ],
@@ -112,7 +112,44 @@
         "jest-expo",
         "eslint-config-expo"
       ],
-      "enabled": false
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "Expo SDK packages (same SDK)",
+      "groupSlug": "expo-sdk-patches",
+      "dependencyDashboardApproval": true,
+      "automerge": false
+    },
+    {
+      "description": "Expo app: a new Expo SDK. Upgrade with `npx expo install expo@^<sdk>.0.0 && npx expo install --fix`, not by merging a Renovate PR.",
+      "matchFileNames": [
+        "retrotrack.app/**"
+      ],
+      "matchPackageNames": [
+        "expo",
+        "expo-*",
+        "@expo/**",
+        "react",
+        "react-dom",
+        "react-native",
+        "react-native-*",
+        "@react-native/**",
+        "@react-native-community/**",
+        "@react-navigation/**",
+        "@shopify/react-native-*",
+        "typescript",
+        "@types/react",
+        "jest-expo",
+        "eslint-config-expo"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Expo SDK upgrade",
+      "groupSlug": "expo-sdk-upgrade",
+      "dependencyDashboardApproval": true,
+      "automerge": false
     }
   ]
 }
