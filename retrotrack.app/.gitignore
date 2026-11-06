@@ -41,3 +41,8 @@ app-example
 # generated native folders
 /ios
 /android
+
+# EAS local credentials: keystore and its passwords. Never commit these.
+credentials.json
+credentials/
+*.keystore
