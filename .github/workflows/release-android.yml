@@ -77,6 +77,25 @@ jobs:
       - name: Generate the Android project
         run: npx expo prebuild --platform android --clean --no-install
 
+      - name: Use a long-path-aware CMake
+        # The SDK's default CMake 3.22.1 ships a ninja that fails on Windows' 260-character
+        # path limit. CMake 3.30+ ships one that handles long paths (when Windows allows them).
+        run: |
+          $longPaths = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -ErrorAction SilentlyContinue).LongPathsEnabled
+          if ($longPaths -ne 1) {
+            Write-Output "::error::Windows long paths are off. In an admin PowerShell run: Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' LongPathsEnabled 1"
+            exit 1
+          }
+          $cmake = Get-ChildItem "$env:ANDROID_HOME\cmake" -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '^\d+\.\d+(\.\d+)?$' -and [version]$_.Name -ge [version]'3.30' -and [version]$_.Name -lt [version]'4.0' } |
+            Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          if (-not $cmake) {
+            Write-Output "::error::Install CMake 3.30 or newer (3.x): Android Studio > Settings > Android SDK > SDK Tools > Show Package Details > CMake."
+            exit 1
+          }
+          Add-Content -Path android\local.properties -Value ("cmake.dir=" + ($cmake.FullName -replace '\\', '/'))
+          Write-Output "Using CMake $($cmake.Name) from $($cmake.FullName)"
+
       - name: Use the upload keystore for release builds
         run: node ..\.github\scripts\android-release-signing.mjs android\app\build.gradle
 
