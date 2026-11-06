@@ -1,7 +1,8 @@
 # Click-to-release: Actions tab → "Release Android (RetroTrack)" → Run workflow.
 # Builds a signed .aab on your main PC (TILLYTILLYCAT, the only Windows runner)
-# and uploads it to Google Play's internal testing track. Promote to production
-# yourself in the Play Console.
+# and uploads it to Google Play. Promote to production yourself in the Play Console.
+# Steps use Windows PowerShell, which every Windows machine has, so the PC needs
+# no bash/WSL.
 name: Release Android (RetroTrack)
 
 on:
@@ -25,7 +26,6 @@ permissions:
   contents: read
 
 env:
-  APP_DIR: retrotrack.app
   PACKAGE_NAME: com.bregan.retrotrack.app
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 60
     defaults:
       run:
-        shell: bash
+        shell: powershell
         working-directory: retrotrack.app
     steps:
       - uses: actions/checkout@v7
@@ -50,12 +50,12 @@ jobs:
 
       - name: Check the Android SDK is installed
         run: |
-          sdk="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          if [ -z "$sdk" ] || [ ! -d "$sdk" ]; then
-            echo "::error::ANDROID_HOME is not set on this runner. Install the Android SDK (e.g. via Android Studio) and set ANDROID_HOME for the runner service."
+          $sdk = if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { $env:ANDROID_SDK_ROOT }
+          if (-not $sdk -or -not (Test-Path $sdk)) {
+            Write-Output "::error::ANDROID_HOME is not set for the runner. Install the Android SDK (via Android Studio), set ANDROID_HOME as a SYSTEM environment variable, then restart the runner service."
             exit 1
-          fi
-          echo "Android SDK: $sdk"
+          }
+          Write-Output "Android SDK: $sdk"
 
       - run: npm ci
 
@@ -64,44 +64,64 @@ jobs:
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          code=$(node ../.github/scripts/play-next-version-code.mjs "$PACKAGE_NAME")
-          echo "versionCode=$code" >> "$GITHUB_OUTPUT"
-          echo "Next versionCode: $code"
+          $code = node ..\.github\scripts\play-next-version-code.mjs $env:PACKAGE_NAME
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "versionCode=$code"
+          Write-Output "Next versionCode: $code"
 
       - name: Set versionCode for this build (not committed)
-        run: |
-          node -e '
-            const fs = require("fs");
-            const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
-            app.expo.android = { ...app.expo.android, versionCode: Number(process.argv[1]) };
-            fs.writeFileSync("app.json", JSON.stringify(app, null, 2));
-          ' "${{ steps.version.outputs.versionCode }}"
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.versionCode }}
+        run: node -e "const fs=require('fs');const a=JSON.parse(fs.readFileSync('app.json','utf8'));a.expo.android={...a.expo.android,versionCode:Number(process.env.VERSION_CODE)};fs.writeFileSync('app.json',JSON.stringify(a,null,2));"
 
       - name: Generate the Android project
         run: npx expo prebuild --platform android --clean --no-install
 
+      - name: Use a long-path-aware CMake
+        # The SDK's default CMake 3.22.1 ships a ninja that fails on Windows' 260-character
+        # path limit. CMake 3.30+ ships one that handles long paths (when Windows allows them).
+        run: |
+          $longPaths = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -ErrorAction SilentlyContinue).LongPathsEnabled
+          if ($longPaths -ne 1) {
+            Write-Output "::error::Windows long paths are off. In an admin PowerShell run: Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' LongPathsEnabled 1"
+            exit 1
+          }
+          $cmake = Get-ChildItem "$env:ANDROID_HOME\cmake" -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '^\d+\.\d+(\.\d+)?$' -and [version]$_.Name -ge [version]'3.30' -and [version]$_.Name -lt [version]'4.0' } |
+            Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          if (-not $cmake) {
+            Write-Output "::error::Install CMake 3.30 or newer (3.x): Android Studio > Settings > Android SDK > SDK Tools > Show Package Details > CMake."
+            exit 1
+          }
+          Add-Content -Path android\local.properties -Value ("cmake.dir=" + ($cmake.FullName -replace '\\', '/'))
+          Write-Output "Using CMake $($cmake.Name) from $($cmake.FullName)"
+
       - name: Use the upload keystore for release builds
-        run: node ../.github/scripts/android-release-signing.mjs android/app/build.gradle
+        run: node ..\.github\scripts\android-release-signing.mjs android\app\build.gradle
 
       - name: Write keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+        run: |
+          $bytes = [Convert]::FromBase64String(($env:ANDROID_KEYSTORE_BASE64 -replace '\s', ''))
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\upload.jks", $bytes)
 
       - name: Build signed app bundle
         working-directory: retrotrack.app/android
         env:
-          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}\upload.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease --no-daemon
+        run: .\gradlew.bat bundleRelease --no-daemon
 
       - name: Release notes
         if: inputs.release_notes != ''
         env:
           NOTES: ${{ inputs.release_notes }}
-        run: mkdir -p "$RUNNER_TEMP/whatsnew" && printf '%s' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-GB"
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\whatsnew" | Out-Null
+          [IO.File]::WriteAllText("$env:RUNNER_TEMP\whatsnew\whatsnew-en-GB", $env:NOTES)
 
       - name: Upload to Google Play (${{ inputs.track }})
         uses: r0adkll/upload-google-play@v1
@@ -110,7 +130,7 @@ jobs:
           packageName: com.bregan.retrotrack.app
           releaseFiles: retrotrack.app/android/app/build/outputs/bundle/release/app-release.aab
           releaseName: ${{ steps.version.outputs.versionCode }}
-          track: ${{ inputs.track }}
+          tracks: ${{ inputs.track }}
           status: completed
           whatsNewDirectory: ${{ inputs.release_notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
 
@@ -122,4 +142,4 @@ jobs:
 
       - name: Remove keystore
         if: always()
-        run: rm -f "$RUNNER_TEMP/upload.jks"
+        run: Remove-Item -Force -ErrorAction SilentlyContinue "$env:RUNNER_TEMP\upload.jks"
