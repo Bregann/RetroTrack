@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { GameList } from '@/components/game-list/GameList';
 import { TrackedGamesFilterBar } from '@/components/game-list/TrackedGamesFilterBar';

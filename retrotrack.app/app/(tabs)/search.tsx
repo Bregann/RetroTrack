@@ -30,6 +30,38 @@ const ORDER_OPTIONS = [
 
 const PAGE_SIZE = 25;
 
+type DropdownPickerProps = {
+  options: { label: string; value: number }[];
+  selectedValue: number;
+  onSelect: (v: number) => void;
+  visible: boolean;
+  onClose: () => void;
+};
+
+function DropdownPicker({ options, selectedValue, onSelect, visible, onClose }: DropdownPickerProps) {
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <TouchableOpacity style={searchStyles.dropdownOverlay} activeOpacity={1} onPress={onClose}>
+        <View style={searchStyles.dropdownList}>
+          <ScrollView>
+            {options.map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={searchStyles.dropdownItem}
+                onPress={() => { onSelect(opt.value); onClose(); }}
+              >
+                <Text style={[searchStyles.dropdownItemText, opt.value === selectedValue && searchStyles.dropdownItemActive]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+}
+
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const { isCompact } = useResponsive();
@@ -74,36 +106,6 @@ export default function SearchScreen() {
 
   const selectedConsole = consolesData?.consoles.find((c) => c.id === consoleId);
   const selectedOrder = ORDER_OPTIONS.find((o) => o.value === orderBy);
-
-  // ---- Dropdown helper ----
-  const DropdownPicker = ({ title, value, options, onSelect, visible, onClose }: {
-    title: string;
-    value: string;
-    options: { label: string; value: number }[];
-    onSelect: (v: number) => void;
-    visible: boolean;
-    onClose: () => void;
-  }) => (
-    <Modal visible={visible} transparent animationType="fade">
-      <TouchableOpacity style={searchStyles.dropdownOverlay} activeOpacity={1} onPress={onClose}>
-        <View style={searchStyles.dropdownList}>
-          <ScrollView>
-            {options.map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={searchStyles.dropdownItem}
-                onPress={() => { onSelect(opt.value); onClose(); }}
-              >
-                <Text style={[searchStyles.dropdownItemText, opt.value === (options === ORDER_OPTIONS ? orderBy : consoleId) && searchStyles.dropdownItemActive]}>
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
 
   // ---- Header ----
   const header = (
@@ -164,7 +166,7 @@ export default function SearchScreen() {
         <Text style={searchStyles.pageButtonText}>Next</Text>
       </TouchableOpacity>
     </View>
-  ) : null;
+  ) : undefined;
 
   return (
     <ThemedView style={searchStyles.container}>
@@ -225,22 +227,20 @@ export default function SearchScreen() {
             <View style={searchStyles.empty}>
               <Text style={searchStyles.emptyText}>Search for games and achievements</Text>
             </View>
-          ) : null
+          ) : undefined
         }
       />
 
       {/* Dropdown pickers */}
       <DropdownPicker
-        title="Console"
-        value={selectedConsole?.name ?? 'All Consoles'}
+        selectedValue={consoleId}
         options={consolesData?.consoles.map(c => ({ label: c.name, value: c.id })) ?? []}
         onSelect={(v) => { setConsoleId(v); setPage(1); }}
         visible={showConsolePicker}
         onClose={() => setShowConsolePicker(false)}
       />
       <DropdownPicker
-        title="Sort"
-        value={selectedOrder?.label ?? 'A–Z'}
+        selectedValue={orderBy}
         options={ORDER_OPTIONS}
         onSelect={(v) => { setOrderBy(v); setPage(1); }}
         visible={showOrderPicker}

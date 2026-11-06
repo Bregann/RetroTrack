@@ -46,7 +46,15 @@
       "reactCompiler": true
     },
     "extra": {
-      "ApiUrl": "https://rtapi.bregan.me"
+      "ApiUrl": "https://rtapi.bregan.me",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "1e1df73e-d136-4eea-96fe-895a09612e39"
+      }
     }
   }
 }
