@@ -130,7 +130,7 @@ jobs:
           packageName: com.bregan.retrotrack.app
           releaseFiles: retrotrack.app/android/app/build/outputs/bundle/release/app-release.aab
           releaseName: ${{ steps.version.outputs.versionCode }}
-          track: ${{ inputs.track }}
+          tracks: ${{ inputs.track }}
           status: completed
           whatsNewDirectory: ${{ inputs.release_notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
 
