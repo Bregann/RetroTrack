@@ -16,7 +16,7 @@ type Props = {
   onPageChange: (page: number) => void;
   refreshing?: boolean;
   onRefresh?: () => void;
-  ListHeaderComponent?: React.ReactElement | null;
+  ListHeaderComponent?: React.ReactElement;
 };
 
 export function GameList({
@@ -77,7 +77,7 @@ export function GameList({
                 <Text style={[gameListStyles.pageButtonText, c && gameListCompact.pageButtonText]}>Next</Text>
               </TouchableOpacity>
             </View>
-          ) : null
+          ) : undefined
         }
         ListEmptyComponent={
           <View style={gameListStyles.empty}>

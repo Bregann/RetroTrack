@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,15 +36,14 @@ export default function ConsolesScreen() {
     staleTime: 60_000,
   });
 
-  const groups = useMemo(() => {
-    if (!data?.consoleProgressData) return [];
-    return COMPANY_GROUPS
+  const groups = data?.consoleProgressData
+    ? COMPANY_GROUPS
       .map((group) => ({
         ...group,
         consoles: data.consoleProgressData.filter((c) => c.consoleType === group.type),
       }))
-      .filter((g) => g.consoles.length > 0);
-  }, [data?.consoleProgressData]);
+      .filter((g) => g.consoles.length > 0)
+    : [];
 
   if (isLoading) {
     return (

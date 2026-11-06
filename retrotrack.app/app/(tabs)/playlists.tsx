@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -55,17 +55,17 @@ export default function PlaylistsScreen() {
   const activeQuery = tab === 'mine' ? mineQuery : tab === 'public' ? publicQuery : likedQuery;
   const { data, isLoading, isError } = activeQuery;
 
-  const filteredPlaylists = useMemo(() => {
-    if (!data?.playlists) return [];
-    if (!activeSearch.trim()) return data.playlists;
-    const q = activeSearch.toLowerCase();
-    return data.playlists.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.createdBy.toLowerCase().includes(q) ||
-        (p.description && p.description.toLowerCase().includes(q)),
-    );
-  }, [data?.playlists, activeSearch]);
+  const q = activeSearch.trim().toLowerCase();
+  const filteredPlaylists = !data?.playlists
+    ? []
+    : !q
+      ? data.playlists
+      : data.playlists.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.createdBy.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q)),
+      );
 
   const c = isCompact;
 

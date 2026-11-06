@@ -118,7 +118,7 @@ export default function GamePage() {
         contentContainerStyle={[gamePageStyles.scrollContent, { paddingTop: insets.top + 8 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={false} onRefresh={refetch} tintColor="#1976d2" />
+          <RefreshControl refreshing={false} onRefresh={() => { refetch(); }} tintColor="#1976d2" />
         }
       >
         <GameHeroSection
