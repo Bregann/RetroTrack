@@ -38,6 +38,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Add in our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
+builder.Services.AddHttpClient<IProjectMonitorClient, ProjectMonitorClient>(c => c.Timeout = TimeSpan.FromSeconds(10));
 
 // Add in the auth
 builder.Services.AddAuthorization();
