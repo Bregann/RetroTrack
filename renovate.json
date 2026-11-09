@@ -160,6 +160,19 @@
         "retrotrack.app/**"
       ],
       "commitMessageAction": "Refresh mobile app package-lock.json"
+    },
+    {
+      "description": "Never offer .NET major versions for the Docker base images: they must change together with TargetFramework in the .csproj files, as a planned upgrade",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "mcr.microsoft.com/dotnet/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ],
   "lockFileMaintenance": {
