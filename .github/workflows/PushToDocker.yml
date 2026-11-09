@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-publish:
-    runs-on: [self-hosted, unraid]
+    runs-on: [self-hosted, Windows]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
