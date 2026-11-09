@@ -172,7 +172,7 @@
     "generateUpdatesFilesForAllChannels": false
   },
   "overrides": {
-    "node-gyp": "^12.0.0"
+    "node-gyp": "^13.0.0"
   },
   "devEngines": {
     "runtime": {
