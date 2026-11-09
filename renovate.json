@@ -150,6 +150,16 @@
       "groupSlug": "expo-sdk-upgrade",
       "dependencyDashboardApproval": true,
       "automerge": false
+    },
+    {
+      "description": "Name the app lockfile refresh separately from the web/server one",
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "matchFileNames": [
+        "retrotrack.app/**"
+      ],
+      "commitMessageAction": "Refresh mobile app package-lock.json"
     }
   ],
   "lockFileMaintenance": {
@@ -158,9 +168,11 @@
       "before 6am on monday"
     ],
     "automerge": false,
-    "commitMessageAction": "Refresh",
+    "commitMessageAction": "Refresh package-lock.json",
     "prBodyNotes": [
       "Regenerates package-lock.json so dependencies-of-dependencies (where most npm vulnerabilities hide) get updated. If CI fails or the app misbehaves, just close this PR; next week's refresh will try again."
     ]
-  }
+  },
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 20
 }
