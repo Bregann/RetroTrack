@@ -7,7 +7,8 @@ on:
 
 jobs:
   build-and-publish:
-    runs-on: [self-hosted, Windows]
+    # Any self-hosted runner: the PC or Unraid, whichever is free
+    runs-on: self-hosted
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
