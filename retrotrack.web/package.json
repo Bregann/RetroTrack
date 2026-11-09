@@ -20,7 +20,7 @@
     "@tabler/icons-react": "^3.49.0",
     "@tanstack/react-query": "^5.104.5",
     "@typescript-eslint/eslint-plugin": "^8.72.0",
-    "next": "16.4.2",
+    "next": "16.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
@@ -30,7 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "16.4.5",
     "postcss": "^8.5.31",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
