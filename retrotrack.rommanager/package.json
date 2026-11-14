@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^4.2.1",
+    "@eslint/js": "^10.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@svgr/webpack": "^8.1.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
@@ -82,6 +83,7 @@
     "electronmon": "^2.0.4",
     "eslint": "^10.0.0",
     "file-loader": "^6.2.0",
+    "globals": "^17.14.0",
     "html-webpack-plugin": "^5.6.8",
     "mini-css-extract-plugin": "^2.10.2",
     "prettier": "^3.9.10",
