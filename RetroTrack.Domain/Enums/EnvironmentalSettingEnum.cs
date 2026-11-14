@@ -5,6 +5,9 @@
         HangfireUsername,
         HangfirePassword,
         RetroAchievementsUsername,
-        RetroAchievementsApiKey
+        RetroAchievementsApiKey,
+
+        // Key for reporting to Project Monitor (copy it from its Manage projects page)
+        ProjectMonitorApiKey
     }
 }

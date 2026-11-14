@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using RetroTrack.Domain.Interfaces;
+using RetroTrack.Domain.Interfaces.Helpers;
 using Serilog;
 
 namespace RetroTrack.Domain.Helpers
@@ -12,6 +13,8 @@ namespace RetroTrack.Domain.Helpers
 
             Log.Information("[Hangfire] Jobs have been registered successfully in DEBUG mode.");
 #else
+            RecurringJob.AddOrUpdate<IProjectMonitorClient>("ProjectMonitorHeartbeat", client => client.SendHeartbeat(), Cron.Minutely);
+
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("QueueUnscheduledJobs", service => service.QueueUnscheduledJobs(), "*/15 * * * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpCompletedJobs", service => service.CleanUpCompletedJobs(), "0 0 * * *");
             RecurringJob.AddOrUpdate<IRetroAchievementsJobManagerService>("CleanUpStuckJobs", service => service.RequeueErroredJobs(), "* */1 * * *");
