@@ -173,6 +173,23 @@
         "major"
       ],
       "enabled": false
+    },
+    {
+      "description": "Hold TypeScript below 7 until typescript-eslint supports the TS 7 API (https://github.com/typescript-eslint/typescript-eslint/issues/10940). Remove this rule then.",
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "allowedVersions": "<7"
+    },
+    {
+      "description": "Expo app: hold ESLint below 10 until eslint-config-expo supports it (its bundled eslint-plugin-react crashes on ESLint 10). Remove this rule then.",
+      "matchFileNames": [
+        "retrotrack.app/**"
+      ],
+      "matchPackageNames": [
+        "eslint"
+      ],
+      "allowedVersions": "<10"
     }
   ],
   "lockFileMaintenance": {
