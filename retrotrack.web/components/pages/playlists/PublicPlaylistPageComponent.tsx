@@ -176,6 +176,14 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
         searchType={searchDropdownValue}
         onSearchTypeChange={setSearchDropdownValue}
         onSearch={setSearchTerm}
+        getRandomGameId={async () => {
+          // Playlist games are paged server-side; pick a position across the whole playlist
+          const total = playlistData?.numberOfGames ?? 0
+          if (total === 0) return undefined
+          const index = Math.floor(Math.random() * total)
+          const res = await doQueryGet<GetPublicPlaylistDataResponse>(`/api/playlists/GetPublicPlaylistData?PlaylistId=${playlistId}&SortByIndex=true&Skip=${index}&Take=1`)
+          return res.games[0]?.gameId
+        }}
       />
 
       {/* Games Table */}

@@ -193,6 +193,14 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         searchType={searchDropdownValue}
         onSearchTypeChange={setSearchDropdownValue}
         onSearch={setSearchTerm}
+        getRandomGameId={async () => {
+          // Playlist games are paged server-side; pick a position across the whole playlist
+          const total = playlistData?.totalGamesInPlaylist ?? 0
+          if (total === 0) return undefined
+          const index = Math.floor(Math.random() * total)
+          const res = await doQueryGet<GetLoggedInPlaylistDataResponse>(`/api/playlists/GetLoggedInPlaylistData?PlaylistId=${props.playlistId}&SortByIndex=true&Skip=${index}&Take=1`)
+          return res.games[0]?.gameId
+        }}
         onAddGames={() => setAddGamesModalOpened(true)}
         onManageOrder={() => setOrderModalOpened(true)}
         onDeleteGames={() => setManageGamesModalOpened(true)}

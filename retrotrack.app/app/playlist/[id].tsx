@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
@@ -35,6 +35,7 @@ function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
 export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [hideInProgress, setHideInProgress] = useState(false);
   const [hideBeaten, setHideBeaten] = useState(false);
@@ -118,6 +119,15 @@ export default function PlaylistDetailScreen() {
 
       {/* Filter bar */}
       <TrackedGamesFilterBar
+        onRandomGame={
+          filteredGames.length > 0
+            ? () => {
+                // Picks from the games currently shown, so search and filters apply
+                const game = filteredGames[Math.floor(Math.random() * filteredGames.length)];
+                router.navigate(('/game/' + game.gameId) as any);
+              }
+            : undefined
+        }
         onSearch={setSearchTerm}
         onToggleFilter={(f) => {
           if (f === 'inProgress') setHideInProgress((v) => !v);

@@ -3,6 +3,7 @@
 import { ActionIcon, Button, Group, Select, TextInput } from '@mantine/core'
 import { IconList, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react'
 import playlistStyles from '@/css/pages/playlists.module.scss'
+import { RandomGameButton } from '@/components/shared/RandomGameButton'
 
 interface PlaylistSearchBarProps {
   searchInput: string
@@ -14,6 +15,8 @@ interface PlaylistSearchBarProps {
   onAddGames?: () => void
   onManageOrder?: () => void
   onDeleteGames?: () => void
+  /** Resolves to a random game id from the playlist; omit to hide the Random Game button */
+  getRandomGameId?: () => Promise<number | undefined>
 }
 
 /** Search field, search-type selector and the playlist management actions. */
@@ -25,14 +28,16 @@ export function PlaylistSearchBar({
   onSearch,
   onAddGames,
   onManageOrder,
-  onDeleteGames
+  onDeleteGames,
+  getRandomGameId
 }: PlaylistSearchBarProps) {
   const submitSearch = () => {
     const trimmed = searchInput.trim()
     onSearch(trimmed !== '' ? trimmed : null)
   }
 
-  const showActions = onAddGames !== undefined
+  const showActions = getRandomGameId !== undefined
+    || onAddGames !== undefined
     || onManageOrder !== undefined
     || onDeleteGames !== undefined
 
@@ -97,6 +102,9 @@ export function PlaylistSearchBar({
 
       {showActions && (
         <Group gap="xs">
+          {getRandomGameId !== undefined && (
+            <RandomGameButton getRandomGameId={getRandomGameId} size="sm" />
+          )}
           {onAddGames !== undefined && (
             <ActionIcon
               variant="light"
