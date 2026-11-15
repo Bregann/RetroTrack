@@ -3,7 +3,7 @@
     "name": "retrotrack.app",
     "slug": "retrotrackapp",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "retrotrackapp",
     "userInterfaceStyle": "automatic",
