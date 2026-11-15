@@ -60,6 +60,110 @@ export const gamePageStyles = StyleSheet.create({
     color: '#fff',
   },
 
+  // ── Game actions (track / playlists) ──
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  actionButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#25262b',
+    borderWidth: 1,
+    borderColor: '#373A40',
+  },
+  actionButtonActive: {
+    backgroundColor: '#1976d2',
+    borderColor: '#1976d2',
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    backgroundColor: '#1A1B1E',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#373A40',
+    marginBottom: 12,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#c1c2c5',
+  },
+  sheetSubtitle: {
+    fontSize: 13,
+    color: '#909296',
+    marginBottom: 12,
+  },
+  sheetEmpty: {
+    fontSize: 14,
+    color: '#909296',
+    marginVertical: 24,
+    textAlign: 'center',
+  },
+  sheetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#25262b',
+  },
+  sheetRowTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#c1c2c5',
+  },
+  sheetRowMeta: {
+    fontSize: 12,
+    color: '#909296',
+  },
+  sheetCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#373A40',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetCheckActive: {
+    backgroundColor: '#1976d2',
+    borderColor: '#1976d2',
+  },
+  sheetCheckText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  sheetDone: {
+    marginTop: 12,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#1976d2',
+  },
+
   // ── Screenshots ──
   screenshotsRow: {
     flexDirection: 'row',

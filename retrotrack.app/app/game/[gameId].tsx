@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AchievementCard } from '@/components/game/AchievementCard';
 import { AchievementFilters } from '@/components/game/AchievementFilters';
+import { GameActions } from '@/components/game/GameActions';
 import { GameHeroSection } from '@/components/game/GameHeroSection';
 import { GameInfoSection } from '@/components/game/GameInfoSection';
 import { GameScreenshots } from '@/components/game/GameScreenshots';
@@ -135,6 +136,12 @@ export default function GamePage() {
           title={data.title}
           consoleName={data.consoleName}
           consoleId={data.consoleId}
+        />
+
+        <GameActions
+          gameId={data.gameId}
+          gameTracked={data.gameTracked}
+          playlistsWithoutGame={data.playlists ?? []}
         />
 
         <GameScreenshots imageInGame={data.imageInGame} imageTitle={data.imageTitle} />

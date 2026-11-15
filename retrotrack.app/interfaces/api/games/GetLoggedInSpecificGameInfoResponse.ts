@@ -57,7 +57,8 @@ export interface SubsetGame {
   achievements: UserAchievement[];
 }
 
+/** One of the user's own playlists that does NOT already contain this game */
 export interface UserPlaylist {
-  playlistId: string;
+  id: string;
   name: string;
 }
