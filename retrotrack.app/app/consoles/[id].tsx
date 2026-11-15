@@ -4,6 +4,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { GameList } from '@/components/game-list/GameList';
 import { TrackedGamesFilterBar } from '@/components/game-list/TrackedGamesFilterBar';
+import { HighestAwardKind } from '@/interfaces/api/enums/HighestAwardKind';
 import { useQueryGet } from '@/helpers/mutations/useQueryGet';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { LoggedInGame } from '@/interfaces/api/trackedGames/GetUserTrackedGamesResponse';
@@ -24,7 +25,7 @@ function toLoggedInGame(g: LoggedInConsoleGame): LoggedInGame {
     gameImageUrl: g.gameImageUrl,
     points: g.points,
     consoleName: g.consoleName,
-    highestAward: g.highestAward ?? 0,
+    highestAward: g.highestAward ?? HighestAwardKind.Unknown,
     medianTimeToBeatHardcoreSeconds: g.medianTimeToBeatHardcoreSeconds,
     medianTimeToBeatHardcoreFormatted: g.medianTimeToBeatHardcoreFormatted,
     medianTimeToMasterSeconds: g.medianTimeToMasterSeconds,

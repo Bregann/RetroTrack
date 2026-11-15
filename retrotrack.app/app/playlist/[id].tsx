@@ -4,6 +4,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 
 import { GameList } from '@/components/game-list/GameList';
 import { TrackedGamesFilterBar } from '@/components/game-list/TrackedGamesFilterBar';
+import { HighestAwardKind } from '@/interfaces/api/enums/HighestAwardKind';
 import { useQueryGet } from '@/helpers/mutations/useQueryGet';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetLoggedInPlaylistDataResponse, PlaylistGameItem } from '@/interfaces/api/playlists/GetLoggedInPlaylistDataResponse';
@@ -23,7 +24,7 @@ function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
     gameImageUrl: item.gameIconUrl,
     points: item.points,
     consoleName: item.consoleName,
-    highestAward: item.highestAward ?? 0,
+    highestAward: item.highestAward ?? HighestAwardKind.Unknown,
     medianTimeToBeatHardcoreSeconds: item.medianTimeToBeatHardcoreSeconds,
     medianTimeToBeatHardcoreFormatted: item.medianTimeToBeatHardcoreFormatted,
     medianTimeToMasterSeconds: item.medianTimeToMasterSeconds,
@@ -61,16 +62,19 @@ export default function PlaylistDetailScreen() {
       result = result.filter((g) => {
         const earned = Math.max(g.achievementsEarnedSoftcore, g.achievementsEarnedHardcore);
         // hide games that ARE in progress (earned > 0 but no award)
-        return !(earned > 0 && !g.highestAward);
+        const hasAward = g.highestAward != null && g.highestAward !== HighestAwardKind.Unknown;
+        return !(earned > 0 && !hasAward);
       });
     }
     if (hideBeaten) {
-      // hide games with BeatenSoftcore(1) or BeatenHardcore(2)
-      result = result.filter((g) => g.highestAward !== 1 && g.highestAward !== 2);
+      result = result.filter(
+        (g) => g.highestAward !== HighestAwardKind.BeatenSoftcore && g.highestAward !== HighestAwardKind.BeatenHardcore,
+      );
     }
     if (hideCompleted) {
-      // hide games with Completed(3) or Mastered(4)
-      result = result.filter((g) => g.highestAward !== 3 && g.highestAward !== 4);
+      result = result.filter(
+        (g) => g.highestAward !== HighestAwardKind.Completed && g.highestAward !== HighestAwardKind.Mastered,
+      );
     }
     return result.map(mapToLoggedInGame);
   }, [data?.games, searchTerm, hideInProgress, hideBeaten, hideCompleted]);
