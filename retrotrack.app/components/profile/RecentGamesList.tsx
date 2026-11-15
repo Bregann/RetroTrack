@@ -22,7 +22,7 @@ export function RecentGamesList({ title, games }: Props) {
     <View style={[profileStyles.section, c && profileCompact.section]}>
       <Text style={[profileStyles.sectionTitle, c && profileCompact.sectionTitle]}>{title}</Text>
       {games.map((game) => {
-        const earned = game.achievementsUnlockedHardcore + game.achievementsUnlockedSoftcore;
+        const earned = Math.max(game.achievementsUnlockedHardcore, game.achievementsUnlockedSoftcore);
         return (
           <TouchableOpacity
             key={game.gameId}

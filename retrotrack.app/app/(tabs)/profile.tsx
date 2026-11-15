@@ -65,7 +65,7 @@ export default function ProfileScreen() {
     {
       icon: '🎖',
       label: 'Achievements',
-      value: data.achievementsEarnedHardcore + data.achievementsEarnedSoftcore,
+      value: Math.max(data.achievementsEarnedHardcore, data.achievementsEarnedSoftcore),
     },
     {
       icon: '🎯',

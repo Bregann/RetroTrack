@@ -43,11 +43,18 @@ export default function GamePage() {
 
   const filteredAchievements = useMemo(
     () =>
-      data?.achievements.filter((a) => {
-        if (hideUnlocked && (a.dateEarnedHardcore || a.dateEarnedSoftcore)) return false;
-        if (showProgressionOnly && a.type !== 1) return false;
-        return true;
-      }) ?? [],
+      (data?.achievements ?? [])
+        .filter((a) => {
+          if (hideUnlocked && (a.dateEarnedHardcore || a.dateEarnedSoftcore)) return false;
+          if (showProgressionOnly && a.type !== 1) return false;
+          return true;
+        })
+        .sort((a, b) => {
+          // Use the set's display order; fall back to id when no order is set (0)
+          const aSort = a.achievementOrder !== 0 ? a.achievementOrder : a.id;
+          const bSort = b.achievementOrder !== 0 ? b.achievementOrder : b.id;
+          return aSort - bSort;
+        }),
     [data?.achievements, hideUnlocked, showProgressionOnly],
   );
 

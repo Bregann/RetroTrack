@@ -11,7 +11,7 @@ import { LoggedInGame } from '@/interfaces/api/trackedGames/GetUserTrackedGamesR
 import { gameListStyles } from '@/styles/gameList';
 
 function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
-  const earned = item.achievementsEarnedSoftcore + item.achievementsEarnedHardcore;
+  const earned = Math.max(item.achievementsEarnedSoftcore, item.achievementsEarnedHardcore);
   return {
     gameId: item.gameId,
     gameTitle: item.title,
@@ -59,7 +59,7 @@ export default function PlaylistDetailScreen() {
     }
     if (hideInProgress) {
       result = result.filter((g) => {
-        const earned = g.achievementsEarnedSoftcore + g.achievementsEarnedHardcore;
+        const earned = Math.max(g.achievementsEarnedSoftcore, g.achievementsEarnedHardcore);
         // hide games that ARE in progress (earned > 0 but no award)
         return !(earned > 0 && !g.highestAward);
       });
@@ -91,7 +91,7 @@ export default function PlaylistDetailScreen() {
     );
   }
 
-  const totalEarned = data.totalAchievementsEarnedSoftcore + data.totalAchievementsEarnedHardcore;
+  const totalEarned = Math.max(data.totalAchievementsEarnedSoftcore, data.totalAchievementsEarnedHardcore);
 
   const header = (
     <View style={{ paddingHorizontal: 12, gap: 6 }}>
