@@ -46,7 +46,8 @@ export default function GamePage() {
       (data?.achievements ?? [])
         .filter((a) => {
           if (hideUnlocked && (a.dateEarnedHardcore || a.dateEarnedSoftcore)) return false;
-          if (showProgressionOnly && a.type !== 1) return false;
+          // 1 = Progression, 2 = Win Condition (matches the website filter)
+          if (showProgressionOnly && a.type !== 1 && a.type !== 2) return false;
           return true;
         })
         .sort((a, b) => {

@@ -177,9 +177,21 @@ export const gamePageStyles = StyleSheet.create({
   },
   achievementMeta: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 8,
+    columnGap: 8,
+    rowGap: 4,
     marginTop: 3,
+  },
+  achievementTypeTag: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  achievementTypeTagText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
   },
   achievementDate: {
     fontSize: 12,
@@ -189,7 +201,7 @@ export const gamePageStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#1976d2',
-    minWidth: 48,
+    minWidth: 28,
     textAlign: 'right',
   },
 
