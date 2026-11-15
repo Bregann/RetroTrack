@@ -165,6 +165,23 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
     )
   }
 
+
+  // Playlist games are paged server-side, so pick a random position across the
+  // whole playlist and fetch just that one game
+  const getRandomGameId = async () => {
+    const totalGames = playlistData?.totalGamesInPlaylist ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const url = `/api/playlists/GetLoggedInPlaylistData?PlaylistId=${props.playlistId}&SortByIndex=true&Skip=${randomIndex}&Take=1`
+    const res = await doQueryGet<GetLoggedInPlaylistDataResponse>(url)
+
+    return res.games[0]?.gameId
+  }
+
   return (
     <Container size="95%" px="md" py="xl" className={pageStyles.pageContainer}>
       {/* Header with back button */}
@@ -193,6 +210,7 @@ export function LoggedInPlaylistPage(props: LoggedInPlaylistPageProps) {
         searchType={searchDropdownValue}
         onSearchTypeChange={setSearchDropdownValue}
         onSearch={setSearchTerm}
+        getRandomGameId={getRandomGameId}
         onAddGames={() => setAddGamesModalOpened(true)}
         onManageOrder={() => setOrderModalOpened(true)}
         onDeleteGames={() => setManageGamesModalOpened(true)}

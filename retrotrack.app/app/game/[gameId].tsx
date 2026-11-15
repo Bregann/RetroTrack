@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AchievementCard } from '@/components/game/AchievementCard';
 import { AchievementFilters } from '@/components/game/AchievementFilters';
+import { GameActions } from '@/components/game/GameActions';
 import { GameHeroSection } from '@/components/game/GameHeroSection';
 import { GameInfoSection } from '@/components/game/GameInfoSection';
 import { GameScreenshots } from '@/components/game/GameScreenshots';
@@ -20,8 +21,17 @@ import { ThemedView } from '@/components/themed-view';
 import { useQueryGet } from '@/helpers/mutations/useQueryGet';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { useResponsive } from '@/hooks/useResponsive';
-import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse';
+import { GetLoggedInSpecificGameInfoResponse, UserAchievement } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse';
 import { gamePageCompact, gamePageStyles } from '@/styles/gamePage';
+
+// Use the set's display order; fall back to the id when no order is set (0)
+function getSortPosition(achievement: UserAchievement) {
+  if (achievement.achievementOrder !== 0) {
+    return achievement.achievementOrder;
+  }
+
+  return achievement.id;
+}
 
 export default function GamePage() {
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
@@ -41,15 +51,28 @@ export default function GamePage() {
     if (data?.title) navigation.setOptions({ title: data.title });
   }, [data?.title, navigation]);
 
-  const filteredAchievements = useMemo(
-    () =>
-      data?.achievements.filter((a) => {
-        if (hideUnlocked && (a.dateEarnedHardcore || a.dateEarnedSoftcore)) return false;
-        if (showProgressionOnly && a.type !== 1) return false;
-        return true;
-      }) ?? [],
-    [data?.achievements, hideUnlocked, showProgressionOnly],
-  );
+  const filteredAchievements = useMemo(() => {
+    const achievements = data?.achievements ?? [];
+
+    const visibleAchievements = achievements.filter((achievement) => {
+      const isUnlocked = !!achievement.dateEarnedHardcore || !!achievement.dateEarnedSoftcore;
+
+      if (hideUnlocked && isUnlocked) {
+        return false;
+      }
+
+      // Progression Only shows progression (1) and win condition (2), matching the website
+      const isProgression = achievement.type === 1 || achievement.type === 2;
+
+      if (showProgressionOnly && !isProgression) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return visibleAchievements.sort((a, b) => getSortPosition(a) - getSortPosition(b));
+  }, [data?.achievements, hideUnlocked, showProgressionOnly]);
 
   // ---- Loading / Error ----
   if (isLoading) {
@@ -127,6 +150,12 @@ export default function GamePage() {
           title={data.title}
           consoleName={data.consoleName}
           consoleId={data.consoleId}
+        />
+
+        <GameActions
+          gameId={data.gameId}
+          gameTracked={data.gameTracked}
+          playlistsWithoutGame={data.playlists ?? []}
         />
 
         <GameScreenshots imageInGame={data.imageInGame} imageTitle={data.imageTitle} />

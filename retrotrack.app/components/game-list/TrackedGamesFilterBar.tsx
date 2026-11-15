@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
 import { gameListCompact, gameListStyles } from '@/styles/gameList';
@@ -10,6 +10,9 @@ type Props = {
   hideInProgress: boolean;
   hideBeaten: boolean;
   hideCompleted: boolean;
+  /** When provided, shows a "Random Game" chip that calls this */
+  onRandomGame?: () => void;
+  randomGameLoading?: boolean;
 };
 
 export function TrackedGamesFilterBar({
@@ -18,6 +21,8 @@ export function TrackedGamesFilterBar({
   hideInProgress,
   hideBeaten,
   hideCompleted,
+  onRandomGame,
+  randomGameLoading = false,
 }: Props) {
   const [searchText, setSearchText] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -69,6 +74,21 @@ export function TrackedGamesFilterBar({
             Hide Completed
           </Text>
         </TouchableOpacity>
+        {onRandomGame && (
+          <TouchableOpacity
+            style={[gameListStyles.filterChip, c && gameListCompact.filterChip, gameListStyles.randomChip]}
+            onPress={onRandomGame}
+            disabled={randomGameLoading}
+          >
+            {randomGameLoading && <ActivityIndicator size="small" color="#fff" />}
+
+            {!randomGameLoading && (
+              <Text style={[gameListStyles.filterChipText, c && gameListCompact.filterChipText, gameListStyles.filterChipTextActive]}>
+                🎲 Random Game
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

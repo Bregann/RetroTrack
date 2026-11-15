@@ -1,4 +1,5 @@
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GameWall } from '@/components/profile/GameWall';
@@ -21,19 +22,30 @@ export default function ProfileScreen() {
   const { requestUpdate, isUpdating, isProcessing } = useProfileUpdate();
 
   // Step 1: get username from home data
-  const { data: homeData } = useQueryGet<GetMobileHomeDataResponse>({
+  const { data: homeData, refetch: refetchHome } = useQueryGet<GetMobileHomeDataResponse>({
     url: '/api/Users/GetMobileHomeData',
     queryKey: [QueryKeys.MobileHomeData],
     staleTime: 60_000,
   });
 
   // Step 2: fetch profile using username
-  const { data, isLoading, isError } = useQueryGet<GetUserProfileResponse>({
+  const { data, isLoading, isError, refetch } = useQueryGet<GetUserProfileResponse>({
     url: `/api/users/GetUserProfile/${homeData?.username ?? ''}`,
     queryKey: [QueryKeys.UserProfile, homeData?.username ?? ''],
     staleTime: 60_000,
     enabled: !!homeData?.username,
   });
+
+  // Pull down: reload the profile and request a profile update from RetroAchievements
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (!isUpdating) {
+      requestUpdate();
+    }
+    await Promise.all([refetchHome(), refetch()]);
+    setRefreshing(false);
+  };
 
   if (isLoading || !data) {
     return (
@@ -65,7 +77,7 @@ export default function ProfileScreen() {
     {
       icon: '🎖',
       label: 'Achievements',
-      value: data.achievementsEarnedHardcore + data.achievementsEarnedSoftcore,
+      value: Math.max(data.achievementsEarnedHardcore, data.achievementsEarnedSoftcore),
     },
     {
       icon: '🎯',
@@ -83,6 +95,15 @@ export default function ProfileScreen() {
           { paddingTop: insets.top + 8 },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1976d2"
+            colors={['#1976d2']}
+            progressViewOffset={insets.top}
+          />
+        }
       >
         <ProfileHeader
           username={data.raUsername}

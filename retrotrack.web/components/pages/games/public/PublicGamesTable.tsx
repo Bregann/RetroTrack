@@ -16,6 +16,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
+import { RandomGameButton } from '@/components/shared/RandomGameButton'
 import { IconX, IconTrophy, IconDeviceGamepad, IconMedal, IconTargetArrow } from '@tabler/icons-react'
 
 interface PublicGamesTableProps {
@@ -200,6 +201,22 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   })
 
   const gameModal = useGameModal()
+
+  // totalCount here is the whole console (it isn't narrowed by search), so the
+  // random pick is taken from every game on the console
+  const getRandomGameId = async () => {
+    const totalGames = data?.totalCount ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const url = `/api/games/getGamesForConsole?ConsoleId=${props.consoleId}&Skip=${randomIndex}&Take=1&SortByName=true`
+    const res = await doQueryGet<GetGamesForConsoleResponse>(url)
+
+    return res.games[0]?.gameId
+  }
   const router = useRouter()
 
   const searchDropdownOptions = [
@@ -342,6 +359,11 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
               >
                 {isMobile ? 'Go' : 'Search'}
               </Button>
+              <RandomGameButton
+                getRandomGameId={getRandomGameId}
+                disabled={data.totalCount === 0}
+                size={isMobile ? 'sm' : 'md'}
+              />
             </Group>
 
             {isLoading ? (

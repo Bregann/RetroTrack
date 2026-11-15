@@ -131,6 +131,12 @@ export const gameListStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#373A40',
   },
+  randomChip: {
+    backgroundColor: '#1976d2',
+    borderColor: '#1976d2',
+    minWidth: 110,
+    alignItems: 'center',
+  },
   filterChipActive: {
     backgroundColor: '#1976d2',
     borderColor: '#1976d2',

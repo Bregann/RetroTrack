@@ -1,7 +1,8 @@
+// Must match RetroTrack.Domain.Enums.HighestAwardKind on the backend
 export enum HighestAwardKind {
-  None = 0,
-  BeatenSoftcore = 1,
-  BeatenHardcore = 2,
-  Completed = 3,
-  Mastered = 4,
+  BeatenSoftcore = 0,
+  BeatenHardcore = 1,
+  Completed = 2,
+  Mastered = 3,
+  Unknown = 4,
 }

@@ -1,9 +1,10 @@
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { GameList } from '@/components/game-list/GameList';
 import { TrackedGamesFilterBar } from '@/components/game-list/TrackedGamesFilterBar';
+import { HighestAwardKind } from '@/interfaces/api/enums/HighestAwardKind';
 import { useQueryGet } from '@/helpers/mutations/useQueryGet';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetLoggedInPlaylistDataResponse, PlaylistGameItem } from '@/interfaces/api/playlists/GetLoggedInPlaylistDataResponse';
@@ -11,7 +12,7 @@ import { LoggedInGame } from '@/interfaces/api/trackedGames/GetUserTrackedGamesR
 import { gameListStyles } from '@/styles/gameList';
 
 function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
-  const earned = item.achievementsEarnedSoftcore + item.achievementsEarnedHardcore;
+  const earned = Math.max(item.achievementsEarnedSoftcore, item.achievementsEarnedHardcore);
   return {
     gameId: item.gameId,
     gameTitle: item.title,
@@ -23,7 +24,7 @@ function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
     gameImageUrl: item.gameIconUrl,
     points: item.points,
     consoleName: item.consoleName,
-    highestAward: item.highestAward ?? 0,
+    highestAward: item.highestAward ?? HighestAwardKind.Unknown,
     medianTimeToBeatHardcoreSeconds: item.medianTimeToBeatHardcoreSeconds,
     medianTimeToBeatHardcoreFormatted: item.medianTimeToBeatHardcoreFormatted,
     medianTimeToMasterSeconds: item.medianTimeToMasterSeconds,
@@ -34,6 +35,7 @@ function mapToLoggedInGame(item: PlaylistGameItem): LoggedInGame {
 export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [hideInProgress, setHideInProgress] = useState(false);
   const [hideBeaten, setHideBeaten] = useState(false);
@@ -59,18 +61,21 @@ export default function PlaylistDetailScreen() {
     }
     if (hideInProgress) {
       result = result.filter((g) => {
-        const earned = g.achievementsEarnedSoftcore + g.achievementsEarnedHardcore;
+        const earned = Math.max(g.achievementsEarnedSoftcore, g.achievementsEarnedHardcore);
         // hide games that ARE in progress (earned > 0 but no award)
-        return !(earned > 0 && !g.highestAward);
+        const hasAward = g.highestAward != null && g.highestAward !== HighestAwardKind.Unknown;
+        return !(earned > 0 && !hasAward);
       });
     }
     if (hideBeaten) {
-      // hide games with BeatenSoftcore(1) or BeatenHardcore(2)
-      result = result.filter((g) => g.highestAward !== 1 && g.highestAward !== 2);
+      result = result.filter(
+        (g) => g.highestAward !== HighestAwardKind.BeatenSoftcore && g.highestAward !== HighestAwardKind.BeatenHardcore,
+      );
     }
     if (hideCompleted) {
-      // hide games with Completed(3) or Mastered(4)
-      result = result.filter((g) => g.highestAward !== 3 && g.highestAward !== 4);
+      result = result.filter(
+        (g) => g.highestAward !== HighestAwardKind.Completed && g.highestAward !== HighestAwardKind.Mastered,
+      );
     }
     return result.map(mapToLoggedInGame);
   }, [data?.games, searchTerm, hideInProgress, hideBeaten, hideCompleted]);
@@ -91,7 +96,29 @@ export default function PlaylistDetailScreen() {
     );
   }
 
-  const totalEarned = data.totalAchievementsEarnedSoftcore + data.totalAchievementsEarnedHardcore;
+  const totalEarned = Math.max(data.totalAchievementsEarnedSoftcore, data.totalAchievementsEarnedHardcore);
+
+  // Picks from the games currently shown, so search and filters apply
+  const openRandomGame = () => {
+    const randomIndex = Math.floor(Math.random() * filteredGames.length);
+    const game = filteredGames[randomIndex];
+
+    router.navigate(('/game/' + game.gameId) as any);
+  };
+
+  const toggleFilter = (filter: 'inProgress' | 'beaten' | 'completed') => {
+    if (filter === 'inProgress') {
+      setHideInProgress((value) => !value);
+    }
+
+    if (filter === 'beaten') {
+      setHideBeaten((value) => !value);
+    }
+
+    if (filter === 'completed') {
+      setHideCompleted((value) => !value);
+    }
+  };
 
   const header = (
     <View style={{ paddingHorizontal: 12, gap: 6 }}>
@@ -114,12 +141,9 @@ export default function PlaylistDetailScreen() {
 
       {/* Filter bar */}
       <TrackedGamesFilterBar
+        onRandomGame={filteredGames.length > 0 ? openRandomGame : undefined}
         onSearch={setSearchTerm}
-        onToggleFilter={(f) => {
-          if (f === 'inProgress') setHideInProgress((v) => !v);
-          if (f === 'beaten') setHideBeaten((v) => !v);
-          if (f === 'completed') setHideCompleted((v) => !v);
-        }}
+        onToggleFilter={toggleFilter}
         hideInProgress={hideInProgress}
         hideBeaten={hideBeaten}
         hideCompleted={hideCompleted}

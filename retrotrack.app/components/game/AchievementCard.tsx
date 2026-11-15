@@ -1,4 +1,4 @@
-import { Image, Text, View } from 'react-native';
+import { Image, Linking, Text, TouchableOpacity, View } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
 import { UserAchievement } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse';
@@ -8,50 +8,85 @@ type Props = {
   achievement: UserAchievement;
 };
 
-const ACHIEVEMENT_TYPE_LABELS: Record<number, string> = {
-  0: 'Missable',
-  1: 'Progression',
-  2: 'Win Condition',
+// Matches RetroTrack.Domain.Enums.AchievementType
+const ACHIEVEMENT_TYPES: Record<number, { label: string; icon: string; color: string }> = {
+  0: { label: 'Missable', icon: '!', color: '#fd7e14' },
+  1: { label: 'Progression', icon: '✓', color: '#15aabf' },
+  2: { label: 'Win Condition', icon: '★', color: '#40c057' },
 };
+
+function getUnlockText(achievement: UserAchievement) {
+  if (achievement.dateEarnedHardcore) {
+    return `🏆 HC ${achievement.dateEarnedHardcore}`;
+  }
+
+  if (achievement.dateEarnedSoftcore) {
+    return `🥈 SC ${achievement.dateEarnedSoftcore}`;
+  }
+
+  return 'Locked';
+}
 
 export function AchievementCard({ achievement }: Props) {
   const isUnlocked = !!achievement.dateEarnedHardcore || !!achievement.dateEarnedSoftcore;
-  const earnedDate = achievement.dateEarnedHardcore || achievement.dateEarnedSoftcore;
   const badgeUrl = `https://media.retroachievements.org/Badge/${achievement.badgeName}`;
   const { isCompact } = useResponsive();
+
+  let typeInfo: (typeof ACHIEVEMENT_TYPES)[number] | undefined;
+
+  if (achievement.type !== null) {
+    typeInfo = ACHIEVEMENT_TYPES[achievement.type];
+  }
+
   const c = isCompact;
 
+  const openOnRetroAchievements = async () => {
+    try {
+      await Linking.openURL(`https://retroachievements.org/achievement/${achievement.id}`);
+    } catch {
+      // Nothing can handle the link; leave the user where they are
+    }
+  };
+
   return (
-    <View style={[gamePageStyles.achievementCard, !isUnlocked && gamePageStyles.achievementLocked, c && gamePageCompact.achievementCard]}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={openOnRetroAchievements}
+      style={[
+        gamePageStyles.achievementCard,
+        typeInfo && { borderColor: typeInfo.color, borderWidth: 2 },
+        c && gamePageCompact.achievementCard,
+      ]}
+    >
       <Image
         source={{ uri: badgeUrl }}
         style={[gamePageStyles.achievementIcon, !isUnlocked && gamePageStyles.achievementIconLocked, c && gamePageCompact.achievementIcon]}
       />
-      <View style={gamePageStyles.achievementInfo}>
-        <Text style={[gamePageStyles.achievementTitle, c && gamePageCompact.achievementTitle]} numberOfLines={1}>
+      <View style={[gamePageStyles.achievementInfo, !isUnlocked && gamePageStyles.achievementLocked]}>
+        <Text style={[gamePageStyles.achievementTitle, c && gamePageCompact.achievementTitle]} numberOfLines={2}>
           {achievement.title}
         </Text>
-        {achievement.description ? (
-          <Text style={[gamePageStyles.achievementDesc, c && gamePageCompact.achievementDesc]} numberOfLines={2}>
+        {!!achievement.description && (
+          <Text style={[gamePageStyles.achievementDesc, c && gamePageCompact.achievementDesc]} numberOfLines={3}>
             {achievement.description}
           </Text>
-        ) : null}
+        )}
+
         <View style={gamePageStyles.achievementMeta}>
-          {earnedDate ? (
-            <Text style={[gamePageStyles.achievementDate, c && gamePageCompact.achievementDate]}>
-              {achievement.dateEarnedHardcore ? '🏆 HC' : '🥈 SC'} {earnedDate}
-            </Text>
-          ) : (
-            <Text style={[gamePageStyles.achievementDate, c && gamePageCompact.achievementDate]}>Locked</Text>
+          <Text style={[gamePageStyles.achievementDate, c && gamePageCompact.achievementDate]}>
+            {getUnlockText(achievement)}
+          </Text>
+
+          {typeInfo && (
+            <View style={[gamePageStyles.achievementTypeTag, { backgroundColor: typeInfo.color }]}>
+              <Text style={gamePageStyles.achievementTypeTagText}>
+                {typeInfo.icon} {typeInfo.label}
+              </Text>
+            </View>
           )}
-          {achievement.type !== null && ACHIEVEMENT_TYPE_LABELS[achievement.type] ? (
-            <Text style={[gamePageStyles.achievementDate, c && gamePageCompact.achievementDate]}>
-              · {ACHIEVEMENT_TYPE_LABELS[achievement.type]}
-            </Text>
-          ) : null}
         </View>
       </View>
       <Text style={[gamePageStyles.achievementPoints, c && gamePageCompact.achievementPoints]}>{achievement.points}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }

@@ -129,6 +129,22 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
     )
   }
 
+  // Playlist games are paged server-side, so pick a random position across the
+  // whole playlist and fetch just that one game
+  const getRandomGameId = async () => {
+    const totalGames = playlistData?.numberOfGames ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const url = `/api/playlists/GetPublicPlaylistData?PlaylistId=${playlistId}&SortByIndex=true&Skip=${randomIndex}&Take=1`
+    const res = await doQueryGet<GetPublicPlaylistDataResponse>(url)
+
+    return res.games[0]?.gameId
+  }
+
   return (
     <Container size="95%" px="md" py="xl" className={pageStyles.pageContainer}>
       {/* Login prompt banner with back arrow */}
@@ -176,6 +192,7 @@ export function PublicPlaylistPage({ playlistId }: PublicPlaylistPageProps) {
         searchType={searchDropdownValue}
         onSearchTypeChange={setSearchDropdownValue}
         onSearch={setSearchTerm}
+        getRandomGameId={getRandomGameId}
       />
 
       {/* Games Table */}

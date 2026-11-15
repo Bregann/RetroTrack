@@ -16,6 +16,7 @@ import Loading from '@/app/loading'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pressStart2P } from '@/font/pressStart2P'
+import { RandomGameButton } from '@/components/shared/RandomGameButton'
 import { IconX, IconTrophy, IconPlayerPlay, IconMedal, IconColumns } from '@tabler/icons-react'
 
 interface LoggedInGamesTableProps {
@@ -250,6 +251,23 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   const gameModal = useGameModal()
   const router = useRouter()
 
+  // Games are paged server-side, so pick a random position within the current
+  // filtered/searched results and fetch just that one game
+  const getRandomGameId = async () => {
+    const totalGames = data?.totalCount ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    // Reuse the current search/filter/sort params, swapping the page for a single random game
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const randomQuery = queryString.replace(/Skip=\d+&Take=\d+/, `Skip=${randomIndex}&Take=1`)
+    const res = await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/getUserProgressForConsole?'.concat(randomQuery))
+
+    return res.games[0]?.gameId
+  }
+
   const searchDropdownOptions = [
     { value: '0', label: 'Game Title' },
     { value: '1', label: 'Genre' },
@@ -453,26 +471,34 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
                     </Button>
                   </Group>
 
-                  {/* Column Visibility Toggle */}
-                  <Menu shadow="md" width={200}>
-                    <Menu.Target>
-                      <Button variant="light" leftSection={<IconColumns size={16} />} size={isMobile ? 'sm' : 'md'}>
+                  <Group gap={isMobile ? 'xs' : 'md'}>
+                    <RandomGameButton
+                      getRandomGameId={getRandomGameId}
+                      disabled={data.totalCount === 0}
+                      size={isMobile ? 'sm' : 'md'}
+                    />
+
+                    {/* Column Visibility Toggle */}
+                    <Menu shadow="md" width={200}>
+                      <Menu.Target>
+                        <Button variant="light" leftSection={<IconColumns size={16} />} size={isMobile ? 'sm' : 'md'}>
                         Columns
-                      </Button>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Label>Toggle Columns</Menu.Label>
-                      {baseColumns.filter(col => col.key && col.key !== 'gameImageUrl' && col.key !== 'gameTitle').map(col => (
-                        <Menu.Item
-                          key={col.key as string}
-                          onClick={() => toggleColumn(col.key as string)}
-                          rightSection={visibleColumns.has(col.key as string) ? '✓' : ''}
-                        >
-                          {col.title}
-                        </Menu.Item>
-                      ))}
-                    </Menu.Dropdown>
-                  </Menu>
+                        </Button>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Label>Toggle Columns</Menu.Label>
+                        {baseColumns.filter(col => col.key && col.key !== 'gameImageUrl' && col.key !== 'gameTitle').map(col => (
+                          <Menu.Item
+                            key={col.key as string}
+                            onClick={() => toggleColumn(col.key as string)}
+                            rightSection={visibleColumns.has(col.key as string) ? '✓' : ''}
+                          >
+                            {col.title}
+                          </Menu.Item>
+                        ))}
+                      </Menu.Dropdown>
+                    </Menu>
+                  </Group>
                 </Group>
                 <Group ml={20} mb={15}>
                   <Checkbox checked={hideInProgressGames} label="Hide In-Progress Games" onChange={() => { setHideInProgressGames(!hideInProgressGames) }} />
