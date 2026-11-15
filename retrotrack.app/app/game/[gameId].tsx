@@ -21,8 +21,17 @@ import { ThemedView } from '@/components/themed-view';
 import { useQueryGet } from '@/helpers/mutations/useQueryGet';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { useResponsive } from '@/hooks/useResponsive';
-import { GetLoggedInSpecificGameInfoResponse } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse';
+import { GetLoggedInSpecificGameInfoResponse, UserAchievement } from '@/interfaces/api/games/GetLoggedInSpecificGameInfoResponse';
 import { gamePageCompact, gamePageStyles } from '@/styles/gamePage';
+
+// Use the set's display order; fall back to the id when no order is set (0)
+function getSortPosition(achievement: UserAchievement) {
+  if (achievement.achievementOrder !== 0) {
+    return achievement.achievementOrder;
+  }
+
+  return achievement.id;
+}
 
 export default function GamePage() {
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
@@ -42,23 +51,28 @@ export default function GamePage() {
     if (data?.title) navigation.setOptions({ title: data.title });
   }, [data?.title, navigation]);
 
-  const filteredAchievements = useMemo(
-    () =>
-      (data?.achievements ?? [])
-        .filter((a) => {
-          if (hideUnlocked && (a.dateEarnedHardcore || a.dateEarnedSoftcore)) return false;
-          // 1 = Progression, 2 = Win Condition (matches the website filter)
-          if (showProgressionOnly && a.type !== 1 && a.type !== 2) return false;
-          return true;
-        })
-        .sort((a, b) => {
-          // Use the set's display order; fall back to id when no order is set (0)
-          const aSort = a.achievementOrder !== 0 ? a.achievementOrder : a.id;
-          const bSort = b.achievementOrder !== 0 ? b.achievementOrder : b.id;
-          return aSort - bSort;
-        }),
-    [data?.achievements, hideUnlocked, showProgressionOnly],
-  );
+  const filteredAchievements = useMemo(() => {
+    const achievements = data?.achievements ?? [];
+
+    const visibleAchievements = achievements.filter((achievement) => {
+      const isUnlocked = !!achievement.dateEarnedHardcore || !!achievement.dateEarnedSoftcore;
+
+      if (hideUnlocked && isUnlocked) {
+        return false;
+      }
+
+      // Progression Only shows progression (1) and win condition (2), matching the website
+      const isProgression = achievement.type === 1 || achievement.type === 2;
+
+      if (showProgressionOnly && !isProgression) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return visibleAchievements.sort((a, b) => getSortPosition(a) - getSortPosition(b));
+  }, [data?.achievements, hideUnlocked, showProgressionOnly]);
 
   // ---- Loading / Error ----
   if (isLoading) {

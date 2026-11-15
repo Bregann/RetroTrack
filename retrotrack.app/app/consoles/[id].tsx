@@ -46,9 +46,18 @@ export default function ConsoleDetailScreen() {
   const [hideCompleted, setHideCompleted] = useState(false);
 
   const toggleFilter = (filter: 'inProgress' | 'beaten' | 'completed') => {
-    if (filter === 'inProgress') setHideInProgress((v) => !v);
-    if (filter === 'beaten') setHideBeaten((v) => !v);
-    if (filter === 'completed') setHideCompleted((v) => !v);
+    if (filter === 'inProgress') {
+      setHideInProgress((value) => !value);
+    }
+
+    if (filter === 'beaten') {
+      setHideBeaten((value) => !value);
+    }
+
+    if (filter === 'completed') {
+      setHideCompleted((value) => !value);
+    }
+
     setPage(1);
   };
 
@@ -57,11 +66,25 @@ export default function ConsoleDetailScreen() {
     setPage(1);
   };
 
+  // Search, filter and sort params shared by the page query and the random game lookup
   let filterQuery = `ConsoleId=${id}&SortByName=true`;
-  if (searchTerm.trim()) filterQuery += `&SearchType=0&SearchTerm=${encodeURIComponent(searchTerm.trim())}`;
-  if (hideInProgress) filterQuery += '&HideInProgressGames=true';
-  if (hideBeaten) filterQuery += '&HideBeatenGames=true';
-  if (hideCompleted) filterQuery += '&HideCompletedGames=true';
+  const trimmedSearch = searchTerm.trim();
+
+  if (trimmedSearch) {
+    filterQuery += `&SearchType=0&SearchTerm=${encodeURIComponent(trimmedSearch)}`;
+  }
+
+  if (hideInProgress) {
+    filterQuery += '&HideInProgressGames=true';
+  }
+
+  if (hideBeaten) {
+    filterQuery += '&HideBeatenGames=true';
+  }
+
+  if (hideCompleted) {
+    filterQuery += '&HideCompletedGames=true';
+  }
 
   const skip = (page - 1) * PAGE_SIZE;
   const queryString = `${filterQuery}&Skip=${skip}&Take=${PAGE_SIZE}`;
@@ -84,25 +107,33 @@ export default function ConsoleDetailScreen() {
   // Games are paged server-side, so pick a random position within the
   // filtered results and fetch just that one game
   const openRandomGame = async () => {
-    const total = data?.totalCount ?? 0;
-    if (total === 0 || randomGameLoading) return;
+    const totalGames = data?.totalCount ?? 0;
+
+    if (totalGames === 0 || randomGameLoading) {
+      return;
+    }
 
     setRandomGameLoading(true);
+
     try {
-      const index = Math.floor(Math.random() * total);
-      const res = await authApiClient.get<GetUserProgressForConsoleResponse>(
-        `/api/games/GetUserProgressForConsole?${filterQuery}&Skip=${index}&Take=1`,
-      );
-      const game = res.data?.games?.[0];
-      if (game) router.navigate(('/game/' + game.gameId) as any);
+      const randomIndex = Math.floor(Math.random() * totalGames);
+      const url = `/api/games/GetUserProgressForConsole?${filterQuery}&Skip=${randomIndex}&Take=1`;
+      const res = await authApiClient.get<GetUserProgressForConsoleResponse>(url);
+      const randomGame = res.data?.games?.[0];
+
+      if (randomGame) {
+        router.navigate(('/game/' + randomGame.gameId) as any);
+      }
     } finally {
       setRandomGameLoading(false);
     }
   };
 
+  const hasGames = (data?.totalCount ?? 0) > 0;
+
   const header = (
     <TrackedGamesFilterBar
-      onRandomGame={(data?.totalCount ?? 0) > 0 ? openRandomGame : undefined}
+      onRandomGame={hasGames ? openRandomGame : undefined}
       randomGameLoading={randomGameLoading}
       onSearch={handleSearch}
       onToggleFilter={toggleFilter}

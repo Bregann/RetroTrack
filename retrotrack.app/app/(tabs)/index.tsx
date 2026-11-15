@@ -31,7 +31,9 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
     setRefreshing(true);
-    if (!isUpdating) requestUpdate();
+    if (!isUpdating) {
+      requestUpdate();
+    }
     await refetch();
     setRefreshing(false);
   };

@@ -80,9 +80,9 @@ export function TrackedGamesFilterBar({
             onPress={onRandomGame}
             disabled={randomGameLoading}
           >
-            {randomGameLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
+            {randomGameLoading && <ActivityIndicator size="small" color="#fff" />}
+
+            {!randomGameLoading && (
               <Text style={[gameListStyles.filterChipText, c && gameListCompact.filterChipText, gameListStyles.filterChipTextActive]}>
                 🎲 Random Game
               </Text>

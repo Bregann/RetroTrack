@@ -98,6 +98,28 @@ export default function PlaylistDetailScreen() {
 
   const totalEarned = Math.max(data.totalAchievementsEarnedSoftcore, data.totalAchievementsEarnedHardcore);
 
+  // Picks from the games currently shown, so search and filters apply
+  const openRandomGame = () => {
+    const randomIndex = Math.floor(Math.random() * filteredGames.length);
+    const game = filteredGames[randomIndex];
+
+    router.navigate(('/game/' + game.gameId) as any);
+  };
+
+  const toggleFilter = (filter: 'inProgress' | 'beaten' | 'completed') => {
+    if (filter === 'inProgress') {
+      setHideInProgress((value) => !value);
+    }
+
+    if (filter === 'beaten') {
+      setHideBeaten((value) => !value);
+    }
+
+    if (filter === 'completed') {
+      setHideCompleted((value) => !value);
+    }
+  };
+
   const header = (
     <View style={{ paddingHorizontal: 12, gap: 6 }}>
       {/* Stats bar */}
@@ -119,21 +141,9 @@ export default function PlaylistDetailScreen() {
 
       {/* Filter bar */}
       <TrackedGamesFilterBar
-        onRandomGame={
-          filteredGames.length > 0
-            ? () => {
-                // Picks from the games currently shown, so search and filters apply
-                const game = filteredGames[Math.floor(Math.random() * filteredGames.length)];
-                router.navigate(('/game/' + game.gameId) as any);
-              }
-            : undefined
-        }
+        onRandomGame={filteredGames.length > 0 ? openRandomGame : undefined}
         onSearch={setSearchTerm}
-        onToggleFilter={(f) => {
-          if (f === 'inProgress') setHideInProgress((v) => !v);
-          if (f === 'beaten') setHideBeaten((v) => !v);
-          if (f === 'completed') setHideCompleted((v) => !v);
-        }}
+        onToggleFilter={toggleFilter}
         hideInProgress={hideInProgress}
         hideBeaten={hideBeaten}
         hideCompleted={hideCompleted}

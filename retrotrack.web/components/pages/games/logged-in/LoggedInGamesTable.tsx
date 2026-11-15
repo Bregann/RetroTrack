@@ -254,11 +254,17 @@ export default function LoggedInGamesTable(props: LoggedInGamesTableProps) {
   // Games are paged server-side, so pick a random position within the current
   // filtered/searched results and fetch just that one game
   const getRandomGameId = async () => {
-    const total = data?.totalCount ?? 0
-    if (total === 0) return undefined
-    const index = Math.floor(Math.random() * total)
-    const randomQuery = queryString.replace(/Skip=\d+&Take=\d+/, `Skip=${index}&Take=1`)
+    const totalGames = data?.totalCount ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    // Reuse the current search/filter/sort params, swapping the page for a single random game
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const randomQuery = queryString.replace(/Skip=\d+&Take=\d+/, `Skip=${randomIndex}&Take=1`)
     const res = await doQueryGet<GetUserProgressForConsoleResponse>('/api/games/getUserProgressForConsole?'.concat(randomQuery))
+
     return res.games[0]?.gameId
   }
 

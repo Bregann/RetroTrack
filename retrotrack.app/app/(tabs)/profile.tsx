@@ -40,7 +40,9 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
     setRefreshing(true);
-    if (!isUpdating) requestUpdate();
+    if (!isUpdating) {
+      requestUpdate();
+    }
     await Promise.all([refetchHome(), refetch()]);
     setRefreshing(false);
   };

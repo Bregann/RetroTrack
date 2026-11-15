@@ -205,10 +205,16 @@ export default function PublicGamesTable(props: PublicGamesTableProps) {
   // totalCount here is the whole console (it isn't narrowed by search), so the
   // random pick is taken from every game on the console
   const getRandomGameId = async () => {
-    const total = data?.totalCount ?? 0
-    if (total === 0) return undefined
-    const index = Math.floor(Math.random() * total)
-    const res = await doQueryGet<GetGamesForConsoleResponse>(`/api/games/getGamesForConsole?ConsoleId=${props.consoleId}&Skip=${index}&Take=1&SortByName=true`)
+    const totalGames = data?.totalCount ?? 0
+
+    if (totalGames === 0) {
+      return undefined
+    }
+
+    const randomIndex = Math.floor(Math.random() * totalGames)
+    const url = `/api/games/getGamesForConsole?ConsoleId=${props.consoleId}&Skip=${randomIndex}&Take=1&SortByName=true`
+    const res = await doQueryGet<GetGamesForConsoleResponse>(url)
+
     return res.games[0]?.gameId
   }
   const router = useRouter()
