@@ -1,4 +1,5 @@
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DaySection } from '@/components/home/DaySection';
@@ -20,17 +21,35 @@ export default function HomeScreen() {
   const sx = (key: keyof typeof homeCompact): any =>
     isCompact && key in homeCompact ? [homeStyles[key], homeCompact[key]] : homeStyles[key];
 
-  const { data, isLoading, isError } = useQueryGet<GetMobileHomeDataResponse>({
+  const { data, isLoading, isError, refetch } = useQueryGet<GetMobileHomeDataResponse>({
     url: '/api/Users/GetMobileHomeData',
     queryKey: [QueryKeys.MobileHomeData],
     staleTime: 60_000,
   });
+
+  // Pull down: reload the page data and request a profile update from RetroAchievements
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (!isUpdating) requestUpdate();
+    await refetch();
+    setRefreshing(false);
+  };
 
   return (
     <ThemedView style={homeStyles.container}>
       <ScrollView
         contentContainerStyle={[sx('scrollContent'), { paddingTop: insets.top + 8 }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1976d2"
+            colors={['#1976d2']}
+            progressViewOffset={insets.top}
+          />
+        }
       >
         {isLoading && (
           <View style={homeStyles.loadingContainer}>
