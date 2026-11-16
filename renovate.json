@@ -190,6 +190,29 @@
         "eslint"
       ],
       "allowedVersions": "<10"
+    },
+    {
+      "description": "Hold EF Core on 10.x until Npgsql's EF Core provider has a stable 11.x (it only has release candidates). When the Npgsql 11 PR appears, delete this rule in that PR so EF Core moves with it",
+      "matchPackageNames": [
+        "Microsoft.EntityFrameworkCore*",
+        "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore",
+        "dotnet-ef"
+      ],
+      "allowedVersions": "<11.0.0"
+    },
+    {
+      "description": "Npgsql's EF Core provider majors track EF Core, so flag that EF Core must move in the same PR",
+      "matchPackageNames": [
+        "Npgsql.EntityFrameworkCore.PostgreSQL"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Npgsql and EF Core major upgrade",
+      "automerge": false,
+      "prBodyNotes": [
+        "EF Core is held on 10.x by a rule in renovate.json. Delete that rule in this PR and bump every Microsoft.EntityFrameworkCore* package (and dotnet-ef) to the same major, or the build will fail."
+      ]
     }
   ],
   "lockFileMaintenance": {
