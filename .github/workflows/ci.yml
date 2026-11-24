@@ -49,7 +49,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
 
   app:
-    name: Expo app (type-check, SDK versions)
+    name: Expo app (lint, type-check, SDK versions)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -62,6 +62,8 @@ jobs:
           cache: npm
           cache-dependency-path: retrotrack.app/package-lock.json
       - run: npm ci
+      - name: Lint (warnings fail too)
+        run: npx expo lint -- --max-warnings 0
       - run: npx tsc --noEmit
       - name: Check packages match the Expo SDK
         # Advisory only: flags when the app is behind its Expo SDK's expected versions.
